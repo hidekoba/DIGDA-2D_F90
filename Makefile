@@ -8,10 +8,9 @@ PROGS=a.out
 # SRC
 ##############################
 
-SRC=io_netcdf.f90 netcdf_utilities.f90 sdmain_ionc.F90 sdclay.F90 sdpom.F90 sdcaco3.F90 sdopal.F90 sdchemeq.F90 sdsolid.F90 sdliquid.F90
-#SRC=netcdf_utilities.f90 sdmain_ionc.f90 io_netcdf.f90
+SRC=sddim.F90 zcfile.F90 zchem.F90 zcphys.F90 sdclay.F90 sdpom.F90 sdcaco3.F90 sdopal.F90 sdchemeq.F90 sdsolid.F90 sdliquid.F90 sdmain_ionc.F90 netcdf_utilities.f90 io_netcdf.f90
 
-OBJS=sdclay.o sdpom.o sdcaco3.o sdopal.o sdchemeq.o sdsolid.o sdliquid.o sdmain_ionc.o netcdf_utilities.o io_netcdf.o
+OBJS=sddim.o zcfile.o zchem.o zcphys.o sdclay.o sdpom.o sdcaco3.o sdopal.o sdchemeq.o sdsolid.o sdliquid.o sdmain_ionc.o netcdf_utilities.o io_netcdf.o
 
 #OBJS=$(SRC:.f90=.o)
 #OBJS=$(SRC:.F=.o) $(SRC:.f90=.o)
@@ -57,7 +56,7 @@ $(PROGS): $(OBJS)
 %.o: %.f90
 	$(FC) $(FFLAGS) -c $<
 %.o: %.F90
-	$(FC) $(FFLAGS) -c $<
+	$(FC) $(FFLAGS) -cpp -c $<
 
 # .f90 file dependencies
 io_netcdf.o: netcdf_utilities.o

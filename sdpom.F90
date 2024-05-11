@@ -1,11 +1,4 @@
 !######################################################################
-module sdpom_module
-      implicit none
-contains
-
-      SUBROUTINE SDPOMSET
-
-      IMPLICIT NONE
 
 ! --- information -----------------------------------------------------
 !
@@ -16,9 +9,10 @@ contains
 !
 ! ---------------------------------------------------------------------
 
-#include "zcfile.F"
-
-#include "sddim.F"
+module globals_sdpom
+      use zcfile_module
+      use sddim_module
+      implicit none
 
       REAL*8 SPOM(NXY, SDZDIM)
       REAL*8 CDO2(NXY, SDZDIM)
@@ -28,7 +22,7 @@ contains
       REAL*8 KOX, KAX
       SAVE   KOX, KAX
       NAMELIST /NMSDPM/ KOX, KAX
-      DATA   KOX, KAX
+      DATA   KOX, KAX &
      &    / 2.00D-9, 7.90D-11 /
           !! 2.0*10-9, 7.9*10-11 [/s]
 
@@ -38,6 +32,17 @@ contains
 
       INTEGER IJ, K
 
+end module globals_sdpom
+
+! =====================================================================
+
+module sdpom_module
+      use globals_sdpom
+      implicit none
+contains
+
+      SUBROUTINE SDPOMSET
+
       WRITE(NFSTDO, *) '*** Carbon : SDPOMSET ***'
       REWIND(NFPARM)
       READ (NFPARM, NMSDPM, END=99)
@@ -45,10 +50,15 @@ contains
 
       END SUBROUTINE SDPOMSET
 
-! =====================================================================
-      SUBROUTINE DISPOM(
-     I      SPOM, CDO2, CP, OP, PHI,
-     O      RPOM )
+      SUBROUTINE DISPOM( &
+     &      SPOM, CDO2, CP, OP, PHI, &
+     &      RPOM )
+
+      double precision, intent(in) :: SPOM(NXY, SDZDIM)
+      double precision, intent(in) :: CDO2(NXY, SDZDIM)
+      double precision, intent(in) :: CP, OP
+      double precision, intent(in) :: PHI(SDZDIM)
+      double precision, intent(out) :: RPOM(NXY, SDZDIM)
 
       DO K = SKST, SKEN
       DO IJ = IJTSTR, IJTEND
@@ -58,7 +68,7 @@ contains
             ELSEIF ( CDO2(IJ, K) == 0.0D0 ) THEN
                RPOM(IJ, K) = KAX
             ENDIF
-            RPOMMAX = ( PHI(K) / ( 1.0D0 - PHI(K) ) )
+            RPOMMAX = ( PHI(K) / ( 1.0D0 - PHI(K) ) ) &
      &              * ( CP / OP ) * CDO2(IJ, K) / SPOM(IJ, K) / TS
             RPOM(IJ, K) = MAX( MIN( RPOM(IJ, K), RPOMMAX ), KAX )
          ELSE

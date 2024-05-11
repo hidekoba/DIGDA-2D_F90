@@ -1,9 +1,4 @@
 !######################################################################
-module sdmain_module
-      implicit none
-contains
-
-      SUBROUTINE SD
 
 ! --- information -----------------------------------------------------
 !
@@ -14,14 +9,15 @@ contains
 !
 ! ---------------------------------------------------------------------
 
+module globals_sdmain
+      use zcfile_module
+      use sddim_module
+      implicit none
+
 #include "parallel_config.h"
 #ifdef PARALLEL
 #include "mpif.h"
 #endif
-
-#include "zcfile.F90"
-
-#include "sddim.F90"
 
 ! ==================================================
 !   Time
@@ -434,9 +430,24 @@ contains
       SAVE     TFTERM
       DATA     TFTERM / 100 /
 
-
       CHARACTER CFILE*128, CTITLE*128, CUNIT*128
 
+end module globals_sdmain
+
+! =====================================================================
+
+module sdmain_module
+      use globals_sdmain
+      use sdclay_module
+      use sdpom_module
+      use sdcaco3_module
+      use sdopal_module
+      use sdsolid_module
+      use sdliquid_module
+      implicit none
+contains
+
+      SUBROUTINE SD
 !-- SEDIMENT TRACERS : setup --
 
 #ifdef PARALLEL
@@ -449,8 +460,6 @@ contains
             PRINT *, '=== ERROR ==='
             CALL MPI_FINALIZE(IERR)
             STOP
-         ENDIF
-      ENDIF
 
       DO IRANK = 0, NPROCS-1
          CALL PARA_RANGE( &
@@ -1955,26 +1964,19 @@ end module sdmain_module
 
       END SUBROUTINE FILEOUT
 
-! =====================================================================
-#ifdef PARALLEL
-      SUBROUTINE PARA_RANGE( N1, N2, NPROCS, IRANK, IST, IEN )
-
-      IMPLICIT NONE
-
-#include "sddim.F90"
+      SUBROUTINE PARA_RANGE( N1, N2, NPR, IRA, IST, IEN )
 
       INTEGER N1, N2
+      INTEGER NPR, IRA
       INTEGER IST, IEN
       INTEGER IWORK1, IWORK2
 
-      IWORK1 = ( N2 - N1 + 1 ) / NPROCS
-      IWORK2 = MOD( N2 - N1 + 1, NPROCS )
-      IST = IRANK*IWORK1 + N1 + MIN( IRANK, IWORK2 )
+      IWORK1 = ( N2 - N1 + 1 ) / NPR
+      IWORK2 = MOD( N2 - N1 + 1, NPR )
+      IST = IRA*IWORK1 + N1 + MIN( IRA, IWORK2 )
       IEN = IST + IWORK1 - 1
-      IF ( IWORK2 > IRANK ) THEN
+      IF ( IWORK2 > IRA ) THEN
         IEN = IEN + 1
       ENDIF
 
-
       END SUBROUTINE PARA_RANGE
-#endif

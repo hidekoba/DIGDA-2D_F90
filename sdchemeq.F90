@@ -1,11 +1,4 @@
 !######################################################################
-module sdchemeq_module
-    implicit none
-contains
-
-      SUBROUTINE SDCHEMEQSET
-
-      IMPLICIT NONE
 
 ! --- information -----------------------------------------------------
 !
@@ -17,11 +10,12 @@ contains
 !
 ! ---------------------------------------------------------------------
 
-#include "zcfile.F"
-#include "zcphys.F"
-#include "zchem.F"
-
-#include "sddim.F"
+module globals_sdchemeq
+      use zcfile_module
+      use zcphys_module
+      use sddim_module
+      use zchem_module
+      implicit none
 
       REAL*8  CTIN(NXY, SDZDIM) !! Total carbon [mMol/m^3] (input)
       REAL*8  ATIN(NXY, SDZDIM) !! Alkalinity [mMol/m^3] (input)
@@ -62,7 +56,6 @@ contains
       INTEGER ITRMAX
       SAVE ITRMAX, DPH, DPHINI, ALKERR
 
-
       NAMELIST /NMSDCHEM/ PHINI, DPHINI, DPH, ALKERR, ITRMAX, ROCN
 
       DATA PHINI   / 8.0 /
@@ -72,6 +65,17 @@ contains
       DATA ITRMAX  / 10000 /
 
       DATA ROCN / 1.0245 /  !! ocean density [kg/L]
+
+end module globals_sdchemeq
+
+! =====================================================================
+
+module sdchemeq_module
+    use globals_sdchemeq
+    implicit none
+contains
+
+      SUBROUTINE SDCHEMEQSET
 
       WRITE(NFSTDO, *) '*** Carbon : SDCHEMEQSET ***'
       REWIND(NFPARM)
@@ -95,10 +99,19 @@ contains
       END SUBROUTINE SDCHEMEQSET
 
 ! =====================================================================
-      SUBROUTINE SDCHEMEQ(
-     I     TEM, SAL, CTIN, ATIN,
-     I     SITIN, PTIN,
-     O     CO32 )
+
+      SUBROUTINE SDCHEMEQ( &
+     &     TEM, SAL, CTIN, ATIN, &
+     &     SITIN, PTIN, &
+     &     CO32 )
+
+      double precision, intent(in)  :: TEM(NXY)
+      double precision, intent(in)  :: SAL(NXY)
+      double precision, intent(in)  :: CTIN(NXY, SDZDIM)
+      double precision, intent(in)  :: ATIN(NXY, SDZDIM)
+      double precision, intent(in)  :: SITIN(NXY)
+      double precision, intent(in)  :: PTIN(NXY)
+      double precision, intent(out) :: CO32(NXY, SDZDIM)
 
       DO IJ = IJTSTR, IJTEND
 !        -- [mMol/m^3]-->[Mol/kg] --
@@ -154,18 +167,18 @@ contains
 !           IF ( AMSKT(IJ, KSTR). EQ. 0.0D0 ) GOTO 999
             IF ( TEM(IJ) .EQ. 0.0D0 .and. SAL(IJ) .EQ. 0.0D0 ) GOTO 999
 
-            F  = FALK(
-     I           H,
-     I           K1(IJ),  K2(IJ),
-     I           KB(IJ),  KW(IJ),
-     I           K1P(IJ), K2P(IJ),  K3P(IJ),
-     I           KSI(IJ), KSO4(IJ), KF(IJ),
-     I           CT(IJ, K),  BT(IJ),   PT(IJ),
-     I           SIT(IJ), SO4T(IJ), FLT(IJ) )
+            F  = FALK( &
+     &           H, &
+     &           K1(IJ),  K2(IJ), &
+     &           KB(IJ),  KW(IJ), &
+     &           K1P(IJ), K2P(IJ),  K3P(IJ), &
+     &           KSI(IJ), KSO4(IJ), KF(IJ), &
+     &           CT(IJ, K),  BT(IJ),   PT(IJ), &
+     &           SIT(IJ), SO4T(IJ), FLT(IJ) )
 
             IF ( ABS(F-AT(IJ, K)).LT.ALKERR ) GOTO 999
 
-            IF ( ( F - AT(IJ, K) ). GT. 0.D0 ) THEN
+            IF ( ( F - AT(IJ, K) ).GT.0.D0 ) THEN
                XHI = X
             ELSE
                XLW = X
@@ -186,28 +199,28 @@ contains
          WRITE(NFSTDO,*) '    TEM = ', TEM(IJ)
          WRITE(NFSTDO,*) '    SAL = ', SAL(IJ)
          WRITE(NFSTDO,*) '    DIC = ', CTIN(IJ, K)
-!C
+
          XLW = PH(IJ, K) - DELT
          XHI = PH(IJ, K) + DELT
          DO ITR = 1, ITRMAX
             X = 0.5D0 * ( XLW + XHI )
             H = 10.0D0 ** ( - X )
-            F  = FALK(
-     I           H,
-     I           K1(IJ),  K2(IJ),
-     I           KB(IJ),  KW(IJ),
-     I           K1P(IJ), K2P(IJ),  K3P(IJ),
-     I           KSI(IJ), KSO4(IJ), KF(IJ),
-     I           CT(IJ, K),  BT(IJ),   PT(IJ),
-     I           SIT(IJ), SO4T(IJ), FLT(IJ) )
+            F  = FALK( &
+     &           H, &
+     &           K1(IJ),  K2(IJ), &
+     &           KB(IJ),  KW(IJ), &
+     &           K1P(IJ), K2P(IJ),  K3P(IJ), &
+     &           KSI(IJ), KSO4(IJ), KF(IJ), &
+     &           CT(IJ, K),  BT(IJ),   PT(IJ), &
+     &           SIT(IJ), SO4T(IJ), FLT(IJ) )
             IF ( ABS(F-AT(IJ, K)).LT.ALKERR ) GOTO 999
-            IF ( ( F - AT(IJ, K) ). GT. 0.D0 ) THEN
+            IF ( ( F - AT(IJ, K) ).GT.0.D0 ) THEN
                XHI = X
             ELSE
                XLW = X
             ENDIF
          ENDDO
-!C
+
 !        STOP
 
  999     CONTINUE
@@ -221,13 +234,13 @@ contains
       DO IJ = IJTSTR, IJTEND
       IF ( TEM(IJ) /= 0.0D0 .and. SAL(IJ) /= 0.0D0 ) THEN
          X = 10.D0 ** ( - PH(IJ, K) )
-!        PCO2O(IJ) = CT(IJ) *X*X
-!    &               / ( X*X + X*K1(IJ) + K1(IJ)*K2(IJ) )
-!    &               / K0(IJ)
+!        PCO2O(IJ) = CT(IJ) *X*X &
+!    &               / ( X*X + X*K1(IJ) + K1(IJ)*K2(IJ) ) &
+!    &               / K0(IJ) &
 !    &               * PM      !! [atm]-->[ppmv]
 !        ALP(IJ) = K0(IJ)      !! [Mol/kg/atm] = [mMol/m^3/ppmv]
 !        -- CO2 --
-         CO2(IJ, K)  = CT(IJ, K) *X*X
+         CO2(IJ, K)  = CT(IJ, K) *X*X &
      &               / ( X*X + X*K1(IJ) + K1(IJ)*K2(IJ) ) / CU
 !        -- BI-CARBONATE ION --
          HCO3(IJ, K) = K1(IJ) * CO2(IJ, K) / X

@@ -1,11 +1,4 @@
 !######################################################################
-module sdclay_module
-      implicit none
-contains
-
-      SUBROUTINE SDCLAYSET
-
-      IMPLICIT NONE
 
 ! --- information -----------------------------------------------------
 !
@@ -16,19 +9,36 @@ contains
 !
 ! ---------------------------------------------------------------------
 
-#include "zcfile.F"
+module globals_sdclay
+      use zcfile_module
+      use sddim_module
+      implicit none
 
-#include "sddim.F"
+      REAL*8 SCLA(NXY, SDZDIM)
+      REAL*8 RCLA(NXY, SDZDIM)
 
+      INTEGER IJ, K
+
+end module globals_sdclay
+
+! =====================================================================
+
+module sdclay_module
+      use globals_sdclay
+      implicit none
+contains
+
+      SUBROUTINE SDCLAYSET
 
       WRITE(NFSTDO, *) '*** Carbon : SDCLAYSET ***'
 
       END SUBROUTINE SDCLAYSET
+      SUBROUTINE DISCLA( &
+     &      SCLA, &
+     &      RCLA )
 
-! =====================================================================
-      SUBROUTINE DISCLA(
-     I      SCLA,
-     O      RCLA )
+      double precision, intent(in) :: SCLA(NXY, SDZDIM)
+      double precision, intent(out) :: RCLA(NXY, SDZDIM)
 
       DO K = SKST, SKEN
          DO IJ = IJTSTR, IJTEND

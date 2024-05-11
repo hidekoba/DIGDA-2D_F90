@@ -1,11 +1,4 @@
 !######################################################################
-module sdopal_module
-      implicit none
-contains
-
-      SUBROUTINE SDOPALSET
-
-      IMPLICIT NONE
 
 ! --- information -----------------------------------------------------
 !
@@ -16,9 +9,10 @@ contains
 !
 ! ---------------------------------------------------------------------
 
-#include "zcfile.F"
-
-#include "sddim.F"
+module globals_sdopal
+      use zcfile_module
+      use sddim_module
+      implicit none
 
       REAL*8 SOPA(NXY, SDZDIM)
       REAL*8 PCLA(NXY, SDZDIM)
@@ -36,7 +30,7 @@ contains
       REAL*8 RCOPA
       SAVE   RCOPA
       NAMELIST /NMSDOP/ RCOPA, ROPRID, ROPARC
-      DATA   RCOPA
+      DATA   RCOPA &
      &    / 5.00D-3 /
           !! 5.0*10-3 [cm3/mol/s]
 
@@ -47,6 +41,17 @@ contains
 
       INTEGER IJ, K
 
+end module globals_sdopal
+
+! =====================================================================
+
+module sdopal_module
+      use globals_sdopal
+      implicit none
+contains
+
+      SUBROUTINE SDOPALSET
+
       WRITE(NFSTDO, *) '*** Carbon : SDOPALSET ***'
       REWIND(NFPARM)
       READ (NFPARM, NMSDOP, END=99)
@@ -56,10 +61,17 @@ contains
 
       END SUBROUTINE SDOPALSET
 
-! =====================================================================
-      SUBROUTINE DISOPA(
-     I      SOPA, CSIL, PCLA, POPA, TEM,
-     O      ROPA, SATSIL )
+      SUBROUTINE DISOPA( &
+     &      SOPA, CSIL, PCLA, POPA, TEM, &
+     &      ROPA, SATSIL )
+
+      double precision, intent(in) :: SOPA(NXY, SDZDIM)
+      double precision, intent(in) :: CSIL(NXY, SDZDIM)
+      double precision, intent(in) :: PCLA(NXY, SDZDIM)
+      double precision, intent(in) :: POPA(NXY, SDZDIM)
+      double precision, intent(in) :: TEM(NXY)
+      double precision, intent(out) :: ROPA(NXY, SDZDIM)
+      double precision, intent(out) :: SATSIL(NXY, SDZDIM)
 
       DO K = SKST, SKEN
       DO IJ = IJTSTR, IJTEND
@@ -70,34 +82,34 @@ contains
             IF ( PCO(IJ, K) > 1.5D+1 ) THEN
                GAMMAL(IJ, K) = 0.2D0
             ELSE
-               GAMMAL(IJ, K) = 1.0D0 - ( ( 4.5D-2 * PCO(IJ, K) )
+               GAMMAL(IJ, K) = 1.0D0 - ( ( 4.5D-2 * PCO(IJ, K) ) &
      &                       ** 5.8D-1 )
             ENDIF
          ENDIF
-         SATSIL(IJ, K) = ( GAMMAL(IJ, K) * 1.0D+1
+         SATSIL(IJ, K) = ( GAMMAL(IJ, K) * 1.0D+1 &
      &      ** ( 6.44D0 - ( 9.68D+2 / ( 2.7315D+2 + TEM(IJ) ) ) ) )
       ENDDO
       ENDDO
 
       DO K = SKST, SKEN
       DO IJ = IJTSTR, IJTEND
-         IF ( SOPA(IJ, K) /= 0.0D0 .and.
+         IF ( SOPA(IJ, K) /= 0.0D0 .and. &
      &        CSIL(IJ, K) < SATSIL(IJ, K) ) THEN
             IF (ROPRID) THEN
                UO(IJ, K)   = 1.0D0 - ( CSIL(IJ, K) / SATSIL(IJ, K) )
-               ETA1(IJ, K) = 2.25D-1 * ( 1.0D0 + ( TEM(IJ) / 1.5D+1 ) )
-     &                     * UO(IJ, K) +  7.75D-1
-     &                     * ( ( ( ( 1.0D0 + ( TEM(IJ) / 4.0D+2 ) )
+               ETA1(IJ, K) = 2.25D-1 * ( 1.0D0 + ( TEM(IJ) / 1.5D+1 ) ) &
+     &                     * UO(IJ, K) +  7.75D-1 &
+     &                     * ( ( ( ( 1.0D0 + ( TEM(IJ) / 4.0D+2 ) ) &
      &                     ** 4.0D0 ) * UO(IJ, K) ) ** 9.25D0 )
-               ETA2(IJ, K) = 2.6D-1 + 7.4D-1
+               ETA2(IJ, K) = 2.6D-1 + 7.4D-1 &
      &                     * EXP( - LZ(K) / 7.0D-2 )
-               KO(IJ, K)   = 5.0D-2 + 5.5D-2
-     &                     * ( ( 1.64D-2 + PCO(IJ, K) )
+               KO(IJ, K)   = 5.0D-2 + 5.5D-2 &
+     &                     * ( ( 1.64D-2 + PCO(IJ, K) ) &
      &                     ** ( - 7.5D-1 ) )
-               ROPA(IJ, K) = ETA1(IJ, K) * ETA2(IJ, K) * KO(IJ, K)
+               ROPA(IJ, K) = ETA1(IJ, K) * ETA2(IJ, K) * KO(IJ, K) &
      &                     / 3.1536D+7
             ELSEIF (ROPARC) THEN
-               ROPA(IJ, K) = RCOPA
+               ROPA(IJ, K) = RCOPA &
      &             * ( SATSIL(IJ, K) - CSIL(IJ, K) )
             ENDIF
          ELSE

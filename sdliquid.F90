@@ -1,11 +1,4 @@
 !######################################################################
-module sdliquid_module
-      implicit none
-contains
-
-      SUBROUTINE SDLIQUIDSET
-
-      IMPLICIT NONE
 
 ! --- information -----------------------------------------------------
 !
@@ -16,9 +9,10 @@ contains
 !
 ! ---------------------------------------------------------------------
 
-#include "zcfile.F"
-
-#include "sddim.F"
+module globals_sdliquid
+      use zcfile_module
+      use sddim_module
+      implicit none
 
       REAL*8 C(NXY,SDZDIM)
       REAL*8 CN(NXY,SDZDIM)
@@ -43,6 +37,17 @@ contains
       DATA CDIC  / .FALSE. / !! Crank nicolson ?
       DATA CDII  / .TRUE.  / !! Implicit ?
 
+end module globals_sdliquid
+
+! =====================================================================
+
+module sdliquid_module
+      use globals_sdliquid
+      implicit none
+contains
+
+      SUBROUTINE SDLIQUIDSET
+
       WRITE(NFSTDO, *) '*** Carbon : SDLIQUIDSET ***'
       REWIND(NFPARM)
       READ (NFPARM, NMSDLI, END=99)
@@ -61,9 +66,18 @@ contains
       END SUBROUTINE SDLIQUIDSET
 
 ! =====================================================================
-      SUBROUTINE LIQUID(
-     I      BW, RLT, PHI, PHII, DEI, C,
-     O      CN )
+
+      SUBROUTINE LIQUID( &
+     &      BW, RLT, PHI, PHII, DEI, C, &
+     &      CN )
+
+      double precision, intent(in)  :: BW(NXY)
+      double precision, intent(in)  :: RLT(NXY,SDZDIM)
+      double precision, intent(in)  :: PHI(SDZDIM)
+      double precision, intent(in)  :: PHII(SDZDIM+1)
+      double precision, intent(in)  :: DEI(SDZDIM+1)
+      double precision, intent(in)  :: C(NXY,SDZDIM)
+      double precision, intent(out) :: CN(NXY,SDZDIM)
 
 !     -- Diffusion : Crank nicolson --
 
@@ -71,9 +85,9 @@ contains
 
       DO K = SKST, SKEN
          EAL(K) = ( PHI(K) / TS )
-         EBE(K) = ( ( PHII(K)   * DEI(K)   )
+         EBE(K) = ( ( PHII(K)   * DEI(K)   ) &
      &            / ( 2.0D0 * DLZ(K) * DLZI(K)   ) )
-         EGA(K) = ( ( PHII(K+1) * DEI(K+1) )
+         EGA(K) = ( ( PHII(K+1) * DEI(K+1) ) &
      &            / ( 2.0D0 * DLZ(K) * DLZI(K+1) ) )
       ENDDO
 
@@ -90,33 +104,33 @@ contains
          EA(SKEN)      = - EBE(SKEN)
          EC(SKEN)      = - EGA(SKEN)
       DO IJ = IJTSTR, IJTEND
-         EB(IJ, SKST)  = EAL(SKST) + EGA(SKST)
+         EB(IJ, SKST)  = EAL(SKST) + EGA(SKST) &
      &   + ( PHII(SKST) * DEI(SKST) / DLZI(SKST) / DLZI(SKST) )
          EB(IJ, SKEN)  = EAL(SKEN) + EBE(SKEN)
       ENDDO
 
       DO IJ = IJTSTR, IJTEND
-         ED(IJ, SKST) =
-     &      + ( EAL(SKST) - EGA(SKST) ) * C(IJ, SKST)
-     &      + EGA(SKST) * C(IJ, SKST+1)
-     &      + RLT(IJ, SKST)
+         ED(IJ, SKST) = &
+     &      + ( EAL(SKST) - EGA(SKST) ) * C(IJ, SKST) &
+     &      + EGA(SKST) * C(IJ, SKST+1) &
+     &      + RLT(IJ, SKST) &
      &   + ( PHII(SKST) * DEI(SKST) * BW(IJ) / DLZI(SKST) / DLZI(SKST) )
       ENDDO
 
       DO K = SKST+1, SKEN-1
       DO IJ = IJTSTR, IJTEND
-         ED(IJ, K) =
-     &      + EBE(K) * C(IJ, K-1)
-     &      + ( EAL(K) - EBE(K) - EGA(K) ) * C(IJ, K)
-     &      + EGA(K) * C(IJ, K+1)
+         ED(IJ, K) = &
+     &      + EBE(K) * C(IJ, K-1) &
+     &      + ( EAL(K) - EBE(K) - EGA(K) ) * C(IJ, K) &
+     &      + EGA(K) * C(IJ, K+1) &
      &      + RLT(IJ, K)
       ENDDO
       ENDDO
 
       DO IJ = IJTSTR, IJTEND
-         ED(IJ, SKEN) =
-     &      + EBE(SKEN) * C(IJ, SKEN-1)
-     &      + ( EAL(SKEN) - EGA(SKEN) ) * C(IJ, SKEN)
+         ED(IJ, SKEN) = &
+     &      + EBE(SKEN) * C(IJ, SKEN-1) &
+     &      + ( EAL(SKEN) - EGA(SKEN) ) * C(IJ, SKEN) &
      &      + RLT(IJ, SKEN)
       ENDDO
 
@@ -130,9 +144,9 @@ contains
 
       DO K = SKST, SKEN
          EAL(K) = ( PHI(K) / TS )
-         EBE(K) = ( ( PHII(K)   * DEI(K)   )
+         EBE(K) = ( ( PHII(K)   * DEI(K)   ) &
      &            / ( DLZ(K) * DLZI(K)   ) )
-         EGA(K) = ( ( PHII(K+1) * DEI(K+1) )
+         EGA(K) = ( ( PHII(K+1) * DEI(K+1) ) &
      &            / ( DLZ(K) * DLZI(K+1) ) )
       ENDDO
 
@@ -149,21 +163,21 @@ contains
          EA(SKEN)      = - EBE(SKEN)
          EC(SKEN)      = - EGA(SKEN)
       DO IJ = IJTSTR, IJTEND
-         EB(IJ, SKST)  = EAL(SKST) + EGA(SKST)
+         EB(IJ, SKST)  = EAL(SKST) + EGA(SKST) &
      &   + ( PHII(SKST) * DEI(SKST) / DLZI(SKST) / DLZI(SKST) )
          EB(IJ, SKEN)  = EAL(SKEN) + EBE(SKEN)
       ENDDO
 
       DO K = SKST, SKEN
       DO IJ = IJTSTR, IJTEND
-         ED(IJ, K) =
-     &      + EAL(K) * C(IJ, K)
+         ED(IJ, K) = &
+     &      + EAL(K) * C(IJ, K) &
      &      + RLT(IJ, K)
       ENDDO
       ENDDO
 
       DO IJ = IJTSTR, IJTEND
-         ED(IJ, SKST) = ED(IJ, SKST)
+         ED(IJ, SKST) = ED(IJ, SKST) &
      &   + ( PHII(SKST) * DEI(SKST) * BW(IJ) / DLZI(SKST) / DLZI(SKST) )
       ENDDO
 
@@ -183,9 +197,19 @@ contains
       END SUBROUTINE LIQUID
 
 ! =====================================================================
-      SUBROUTINE LIQUID_O2(
-     I      BW, RLT, PHI, PHII, DEI, C,
-     O      CN )
+
+      SUBROUTINE LIQUID_O2( &
+     &      BW, RLT, PHI, PHII, DEI, C, &
+     &      CN )
+
+      double precision, intent(in)  :: BW(NXY)
+      double precision, intent(inout) :: RLT(NXY,SDZDIM)
+      double precision, intent(in)  :: PHI(SDZDIM)
+      double precision, intent(in)  :: PHII(SDZDIM+1)
+      double precision, intent(in)  :: DEI(SDZDIM+1)
+      double precision, intent(in)  :: C(NXY,SDZDIM)
+      double precision, intent(out) :: CN(NXY,SDZDIM)
+
 
       DO K = SKST, SKEN
       DO IJ = IJTSTR, IJTEND
@@ -203,9 +227,9 @@ contains
 
       DO K = SKST, SKEN
          EAL(K) = ( PHI(K) / TS )
-         EBE(K) = ( ( PHII(K)   * DEI(K)   )
+         EBE(K) = ( ( PHII(K)   * DEI(K)   ) &
      &            / ( 2.0D0 * DLZ(K) * DLZI(K)   ) )
-         EGA(K) = ( ( PHII(K+1) * DEI(K+1) )
+         EGA(K) = ( ( PHII(K+1) * DEI(K+1) ) &
      &            / ( 2.0D0 * DLZ(K) * DLZI(K+1) ) )
       DO IJ = IJTSTR, IJTEND
          EEP(IJ, K) = - 0.50D0 * RLT(IJ, K)
@@ -225,33 +249,33 @@ contains
          EA(SKEN)      = - EBE(SKEN)
          EC(SKEN)      = - EGA(SKEN)
       DO IJ = IJTSTR, IJTEND
-         EB(IJ, SKST)  = EAL(SKST) + EGA(SKST) + EEP(IJ, SKST)
+         EB(IJ, SKST)  = EAL(SKST) + EGA(SKST) + EEP(IJ, SKST) &
      &   + ( PHII(SKST) * DEI(SKST) / DLZI(SKST) / DLZI(SKST) )
          EB(IJ, SKEN)  = EAL(SKEN) + EBE(SKEN) + EEP(IJ, SKEN)
       ENDDO
 
       DO IJ = IJTSTR, IJTEND
-         ED(IJ, SKST) =
-     &      + ( EAL(SKST) - EGA(SKST) ) * C(IJ, SKST)
-     &      + EGA(SKST) * C(IJ, SKST+1)
-     &      + 0.50D0 * RLT(IJ, SKST) * C(IJ, SKST)
+         ED(IJ, SKST) = &
+     &      + ( EAL(SKST) - EGA(SKST) ) * C(IJ, SKST) &
+     &      + EGA(SKST) * C(IJ, SKST+1) &
+     &      + 0.50D0 * RLT(IJ, SKST) * C(IJ, SKST) &
      &   + ( PHII(SKST) * DEI(SKST) * BW(IJ) / DLZI(SKST) / DLZI(SKST) )
       ENDDO
 
       DO K = SKST+1, SKEN-1
       DO IJ = IJTSTR, IJTEND
-         ED(IJ, K) =
-     &      + EBE(K) * C(IJ, K-1)
-     &      + ( EAL(K) - EBE(K) - EGA(K) ) * C(IJ, K)
-     &      + EGA(K) * C(IJ, K+1)
+         ED(IJ, K) = &
+     &      + EBE(K) * C(IJ, K-1) &
+     &      + ( EAL(K) - EBE(K) - EGA(K) ) * C(IJ, K) &
+     &      + EGA(K) * C(IJ, K+1) &
      &      + 0.50D0 * RLT(IJ, K) * C(IJ, K)
       ENDDO
       ENDDO
 
       DO IJ = IJTSTR, IJTEND
-         ED(IJ, SKEN) =
-     &      + EBE(SKEN) * C(IJ, SKEN-1)
-     &      + ( EAL(SKEN) - EGA(SKEN) ) * C(IJ, SKEN)
+         ED(IJ, SKEN) = &
+     &      + EBE(SKEN) * C(IJ, SKEN-1) &
+     &      + ( EAL(SKEN) - EGA(SKEN) ) * C(IJ, SKEN) &
      &      + 0.50D0 * RLT(IJ, SKEN) * C(IJ, SKEN)
       ENDDO
 
@@ -265,9 +289,9 @@ contains
 
       DO K = SKST, SKEN
          EAL(K) = ( PHI(K) / TS )
-         EBE(K) = ( ( PHII(K)   * DEI(K)   )
+         EBE(K) = ( ( PHII(K)   * DEI(K)   ) &
      &            / ( DLZ(K) * DLZI(K)   ) )
-         EGA(K) = ( ( PHII(K+1) * DEI(K+1) )
+         EGA(K) = ( ( PHII(K+1) * DEI(K+1) ) &
      &            / ( DLZ(K) * DLZI(K+1) ) )
       DO IJ = IJTSTR, IJTEND
          EEP(IJ, K) = - RLT(IJ, K)
@@ -287,20 +311,20 @@ contains
          EA(SKEN)      = - EBE(SKEN)
          EC(SKEN)      = - EGA(SKEN)
       DO IJ = IJTSTR, IJTEND
-         EB(IJ, SKST)  = EAL(SKST) + EGA(SKST) + EEP(IJ, SKST)
+         EB(IJ, SKST)  = EAL(SKST) + EGA(SKST) + EEP(IJ, SKST) &
      &   + ( PHII(SKST) * DEI(SKST) / DLZI(SKST) / DLZI(SKST) )
          EB(IJ, SKEN)  = EAL(SKEN) + EBE(SKEN) + EEP(IJ, SKEN)
       ENDDO
 
       DO K = SKST, SKEN
       DO IJ = IJTSTR, IJTEND
-         ED(IJ, K) =
+         ED(IJ, K) = &
      &      + EAL(K) * C(IJ, K)
       ENDDO
       ENDDO
 
       DO IJ = IJTSTR, IJTEND
-         ED(IJ, SKST) = ED(IJ, SKST)
+         ED(IJ, SKST) = ED(IJ, SKST) &
      &   + ( PHII(SKST) * DEI(SKST) * BW(IJ) / DLZI(SKST) / DLZI(SKST) )
       ENDDO
 
@@ -320,18 +344,17 @@ contains
       END SUBROUTINE LIQUID_O2
 
 ! =====================================================================
+
       SUBROUTINE LTRIDAG( EA, EB, EC, ED, EX )
 
-      IMPLICIT NONE
+      double precision, intent(in)  :: EA(SDZDIM), EB(NXY,SDZDIM), EC(SDZDIM)
+      double precision, intent(in)  :: ED(NXY,SDZDIM)
+      double precision, intent(out) :: EX(NXY,SDZDIM)
 
-#include "sddim.F"
+      double precision :: EW(NXY,SDZDIM)
+      double precision :: BET(NXY)
 
-      REAL*8  EA(SDZDIM), EB(NXY,SDZDIM), EC(SDZDIM)
-      REAL*8  ED(NXY,SDZDIM)
-      REAL*8  EX(NXY,SDZDIM)
-      REAL*8  EW(NXY,SDZDIM)
-      REAL*8  BET(NXY)
-      INTEGER IJ, K
+      integer :: IJ, K
 
       DO IJ = IJTSTR, IJTEND
          BET(IJ)      = EB(IJ, SKST)
