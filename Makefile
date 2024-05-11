@@ -8,14 +8,10 @@ PROGS=a.out
 # SRC
 ##############################
 
-#SRC=sdmain.F sdclay.o sdpom.o sdcaco3.o sdopal.o sdchemeq.o sdsolid.o sdliquid.o sdfile.o
-#SRC=sdmain.F sdclay.o sdpom.o sdcaco3.o sdopal.o sdchemeq.o sdsolid.o sdliquid.o
-#SRC=sdclay.o sdpom.o sdcaco3.o sdopal.o sdchemeq.o sdsolid.o sdliquid.o
-#SRC=io_netcdf.f90 netcdf_utilities.f90 sdmain_ionc.F sdclay.F sdpom.F sdcaco3.F sdopal.F sdchemeq.F sdsolid.F sdliquid.F
-SRC=io_netcdf.f90 netcdf_utilities.f90 sdmain_ionc.F
+SRC=io_netcdf.f90 netcdf_utilities.f90 sdmain_ionc.F90 sdclay.F90 sdpom.F90 sdcaco3.F90 sdopal.F90 sdchemeq.F90 sdsolid.F90 sdliquid.F90
 #SRC=netcdf_utilities.f90 sdmain_ionc.f90 io_netcdf.f90
 
-OBJS=netcdf_utilities.o sdmain_ionc.o io_netcdf.o
+OBJS=sdclay.o sdpom.o sdcaco3.o sdopal.o sdchemeq.o sdsolid.o sdliquid.o sdmain_ionc.o netcdf_utilities.o io_netcdf.o
 
 #OBJS=$(SRC:.f90=.o)
 #OBJS=$(SRC:.F=.o) $(SRC:.f90=.o)
@@ -49,7 +45,7 @@ LDFLAGS=-L/home/hidekoba/local/netcdf4-intel-fortran/4.6.0/lib -lnetcdff -L/home
 # Suffixes
 ##############################
 
-.SUFFIXES: .f90 .F
+.SUFFIXES: .f90 .F90
 
 all:$(PROGS)
 
@@ -60,7 +56,7 @@ $(PROGS): $(OBJS)
 # General rules for source files to object files
 %.o: %.f90
 	$(FC) $(FFLAGS) -c $<
-%.o: %.F
+%.o: %.F90
 	$(FC) $(FFLAGS) -c $<
 
 # .f90 file dependencies
