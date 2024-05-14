@@ -146,7 +146,8 @@ contains
       END DO
 
       DO IJ = IJTSTR, IJTEND
-      IF ( TEM(IJ) /= 0.0D0 .and. SAL(IJ) /= 0.0D0 ) THEN
+     !IF ( TEM(IJ) /= 0.0D0 .and. SAL(IJ) /= 0.0D0 ) THEN
+      IF ( TEM(IJ) /= 999.0D0 .and. SAL(IJ) /= 999.0D0 ) THEN
 !        -- Chemical equilibrium constant --
          K0(IJ)   = FK0( TEM(IJ)+kelvin, SAL(IJ) )
          K1(IJ)   = FK1( TEM(IJ)+kelvin, SAL(IJ) )
@@ -175,7 +176,8 @@ contains
 
       DO K = SKST, SKEN
       DO IJ = IJTSTR, IJTEND
-      IF ( TEM(IJ) /= 0.0D0 .and. SAL(IJ) /= 0.0D0 ) THEN
+     !IF ( TEM(IJ) /= 0.0D0 .and. SAL(IJ) /= 0.0D0 ) THEN
+      IF ( TEM(IJ) /= 999.0D0 .and. SAL(IJ) /= 999.0D0 ) THEN
 
          XLW = PH(IJ, K) - DELT
          XHI = PH(IJ, K) + DELT
@@ -187,7 +189,8 @@ contains
             H = 10.0D0 ** ( - X )
 
 !           IF ( AMSKT(IJ, KSTR). EQ. 0.0D0 ) GOTO 999
-            IF ( TEM(IJ) .EQ. 0.0D0 .and. SAL(IJ) .EQ. 0.0D0 ) GOTO 999
+           !IF ( TEM(IJ) .EQ. 0.0D0 .and. SAL(IJ) .EQ. 0.0D0 ) GOTO 999
+            IF ( TEM(IJ) .EQ. 999.0D0 .and. SAL(IJ) .EQ. 999.0D0 ) GOTO 999
 
             F  = FALK( &
      &           H, &
@@ -254,7 +257,8 @@ contains
 
       DO K = SKST, SKEN
       DO IJ = IJTSTR, IJTEND
-      IF ( TEM(IJ) /= 0.0D0 .and. SAL(IJ) /= 0.0D0 ) THEN
+     !IF ( TEM(IJ) /= 0.0D0 .and. SAL(IJ) /= 0.0D0 ) THEN
+      IF ( TEM(IJ) /= 999.0D0 .and. SAL(IJ) /= 999.0D0 ) THEN
          X = 10.D0 ** ( - PH(IJ, K) )
 !        PCO2O(IJ) = CT(IJ) *X*X &
 !    &               / ( X*X + X*K1(IJ) + K1(IJ)*K2(IJ) ) &

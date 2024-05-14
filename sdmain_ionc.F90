@@ -156,15 +156,15 @@ module globals_sdmain
       REAL*8 BWSIL(NXY)
       REAL*8 BW13DIC(NXY)
       REAL*8 BW14DIC(NXY)
-      REAL*8 BWTEMG(NXYDIM)
-      REAL*8 BWSALG(NXYDIM)
-      REAL*8 BWNITG(NXYDIM)
-      REAL*8 BWDICG(NXYDIM)
-      REAL*8 BWALKG(NXYDIM)
-      REAL*8 BWDO2G(NXYDIM)
-      REAL*8 BWSILG(NXYDIM)
-      REAL*8 BW13DICG(NXYDIM)
-      REAL*8 BW14DICG(NXYDIM)
+!     REAL*8 BWTEMG(NXYDIM)
+!     REAL*8 BWSALG(NXYDIM)
+!     REAL*8 BWNITG(NXYDIM)
+!     REAL*8 BWDICG(NXYDIM)
+!     REAL*8 BWALKG(NXYDIM)
+!     REAL*8 BWDO2G(NXYDIM)
+!     REAL*8 BWSILG(NXYDIM)
+!     REAL*8 BW13DICG(NXYDIM)
+!     REAL*8 BW14DICG(NXYDIM)
 
 !-- Concentration (total) :
 !      total phosphorous [mMol/m^3], total silicon [mMol/m^3]
@@ -191,10 +191,21 @@ module globals_sdmain
       REAL*8 FI14POM(NXY), FO14POM(NXY)
       REAL*8 FI13CAR(NXY), FO13CAR(NXY)
       REAL*8 FI14CAR(NXY), FO14CAR(NXY)
-      REAL*8 FICLAG(NXYDIM), FOCLAG(NXYDIM)
-      REAL*8 FIPOMG(NXYDIM), FOPOMG(NXYDIM)
-      REAL*8 FICARG(NXYDIM), FOCARG(NXYDIM)
-      REAL*8 FIOPAG(NXYDIM), FOOPAG(NXYDIM)
+
+!     REAL*8 FICLAG(NXYDIM), FOCLAG(NXYDIM)
+!     REAL*8 FIPOMG(NXYDIM), FOPOMG(NXYDIM)
+!     REAL*8 FICARG(NXYDIM), FOCARG(NXYDIM)
+!     REAL*8 FIOPAG(NXYDIM), FOOPAG(NXYDIM)
+!     REAL*8 FIAGEG(NXYDIM), FOAGEG(NXYDIM)
+!     REAL*8 FI13POMG(NXYDIM), FO13POMG(NXYDIM)
+!     REAL*8 FI14POMG(NXYDIM), FO14POMG(NXYDIM)
+!     REAL*8 FI13CARG(NXYDIM), FO13CARG(NXYDIM)
+!     REAL*8 FI14CARG(NXYDIM), FO14CARG(NXYDIM)
+
+      REAL*8                 FOCLAG(NXYDIM)
+      REAL*8                 FOPOMG(NXYDIM)
+      REAL*8                 FOCARG(NXYDIM)
+      REAL*8                 FOOPAG(NXYDIM)
       REAL*8 FIAGEG(NXYDIM), FOAGEG(NXYDIM)
       REAL*8 FI13POMG(NXYDIM), FO13POMG(NXYDIM)
       REAL*8 FI14POMG(NXYDIM), FO14POMG(NXYDIM)
@@ -341,8 +352,10 @@ module globals_sdmain
 !-- MASK :
       REAL*8 ZW(NZ)
       SAVE ZW
-      REAL*8 BDEP(NXY), BDEPG(NXYDIM) !! ocean depth [m]
-      SAVE BDEP, BDEPG
+!     REAL*8 BDEP(NXY), BDEPG(NXYDIM) !! ocean depth [m]
+!     SAVE BDEP, BDEPG
+      REAL*8 BDEP(NXY)                !! ocean depth [m]
+!     SAVE BDEP
 
 !-- Parallel computing :
       INTEGER, ALLOCATABLE :: NRCVC1(:),  NDISP1(:)
@@ -414,7 +427,50 @@ module sdmain_module
       implicit none
 contains
 
-      SUBROUTINE SD
+!     SUBROUTINE SD
+      SUBROUTINE SD( &
+     &     bdepg, &
+     &     ficlag, fipomg, ficarg, fiopag, fiageg, &
+     &     bwtemg, bwsalg, bwnitg, bwdicg, bwalkg, bwsilg, bwdo2g, &
+     &     bw13dicg, bw14dicg )
+
+!     double precision, intent(in) :: BDEPG(NXYDIM)
+!     double precision, intent(in) :: FICLAG(NXYDIM)
+!     double precision, intent(in) :: FIPOMG(NXYDIM)
+!     double precision, intent(in) :: FICARG(NXYDIM)
+!     double precision, intent(in) :: FIOPAG(NXYDIM)
+!     double precision, intent(in) :: FIAGEG(NXYDIM)
+
+!     double precision, intent(in) :: BWTEMG(NXYDIM)
+!     double precision, intent(in) :: BWSALG(NXYDIM)
+!     double precision, intent(in) :: BWNITG(NXYDIM)
+!     double precision, intent(in) :: BWDICG(NXYDIM)
+!     double precision, intent(in) :: BWALKG(NXYDIM)
+!     double precision, intent(in) :: BWDO2G(NXYDIM)
+!     double precision, intent(in) :: BWSILG(NXYDIM)
+!     double precision, intent(in) :: BW13DICG(NXYDIM)
+!     double precision, intent(in) :: BW14DICG(NXYDIM)
+
+      double precision             :: BDEPG(NXYDIM)
+      double precision             :: FICLAG(NXYDIM)
+      double precision             :: FIPOMG(NXYDIM)
+      double precision             :: FICARG(NXYDIM)
+      double precision             :: FIOPAG(NXYDIM)
+      double precision             :: FIAGEG(NXYDIM)
+
+      double precision             :: BWTEMG(NXYDIM)
+      double precision             :: BWSALG(NXYDIM)
+      double precision             :: BWNITG(NXYDIM)
+      double precision             :: BWDICG(NXYDIM)
+      double precision             :: BWALKG(NXYDIM)
+      double precision             :: BWDO2G(NXYDIM)
+      double precision             :: BWSILG(NXYDIM)
+      double precision             :: BW13DICG(NXYDIM)
+      double precision             :: BW14DICG(NXYDIM)
+
+     do i = 1, nxydim
+     write(*,*) i, bwtemg(i)
+     end do
 
 !-- SEDIMENT TRACERS : setup --
 
@@ -483,8 +539,8 @@ contains
 !-- SEDIMENT TRACERS : setup (end) --
 
 !     -- Ocean depth --
-      CFILE="bound/bdep"
-      CALL RDFILE(  BDEPG, NXYDIM,  CFILE )
+!     CFILE="bound/bdep"
+!     CALL RDFILE(  BDEPG, NXYDIM,  CFILE )
 #ifdef PARALLEL
       DO IJ = 1, NXY
          BDEP(IJ) = MAX( BDEPG(MYRANK*NXY+IJ), 0.0D0 )
@@ -588,14 +644,14 @@ contains
 
 !     -- Set boundary conditions --
 
-      CFILE="bound/ficla"
-      CALL RDFILE( FICLAG, NXYDIM,  CFILE )
-      CFILE="bound/fipom"
-      CALL RDFILE( FIPOMG, NXYDIM,  CFILE )
-      CFILE="bound/ficar"
-      CALL RDFILE( FICARG, NXYDIM,  CFILE )
-      CFILE="bound/fiopa"
-      CALL RDFILE( FIOPAG, NXYDIM,  CFILE )
+!     CFILE="bound/ficla"
+!     CALL RDFILE( FICLAG, NXYDIM,  CFILE )
+!     CFILE="bound/fipom"
+!     CALL RDFILE( FIPOMG, NXYDIM,  CFILE )
+!     CFILE="bound/ficar"
+!     CALL RDFILE( FICARG, NXYDIM,  CFILE )
+!     CFILE="bound/fiopa"
+!     CALL RDFILE( FIOPAG, NXYDIM,  CFILE )
 #ifdef PARALLEL
       DO IJ = 1, NXY
          FICLA(IJ) = MAX( FICLAG(MYRANK*NXY+IJ), 0.0D0 )
@@ -613,20 +669,20 @@ contains
          FIAGE(IJ) = 0.0D0
       END DO
 #endif
-      CFILE="bound/btem"
-      CALL RDFILE( BWTEMG, NXYDIM,  CFILE )
-      CFILE="bound/bsal"
-      CALL RDFILE( BWSALG, NXYDIM,  CFILE )
-      CFILE="bound/bnit"
-      CALL RDFILE( BWNITG, NXYDIM,  CFILE )
-      CFILE="bound/bdic"
-      CALL RDFILE( BWDICG, NXYDIM,  CFILE )
-      CFILE="bound/balk"
-      CALL RDFILE( BWALKG, NXYDIM,  CFILE )
-      CFILE="bound/bdo2"
-      CALL RDFILE( BWDO2G, NXYDIM,  CFILE )
-      CFILE="bound/bsil"
-      CALL RDFILE( BWSILG, NXYDIM,  CFILE )
+!     CFILE="bound/btem"
+!     CALL RDFILE( BWTEMG, NXYDIM,  CFILE )
+!     CFILE="bound/bsal"
+!     CALL RDFILE( BWSALG, NXYDIM,  CFILE )
+!     CFILE="bound/bnit"
+!     CALL RDFILE( BWNITG, NXYDIM,  CFILE )
+!     CFILE="bound/bdic"
+!     CALL RDFILE( BWDICG, NXYDIM,  CFILE )
+!     CFILE="bound/balk"
+!     CALL RDFILE( BWALKG, NXYDIM,  CFILE )
+!     CFILE="bound/bdo2"
+!     CALL RDFILE( BWDO2G, NXYDIM,  CFILE )
+!     CFILE="bound/bsil"
+!     CALL RDFILE( BWSILG, NXYDIM,  CFILE )
 #ifdef PARALLEL
       DO IJ = 1, NXY
          BWTEM(IJ)   = BWTEMG(MYRANK*NXY+IJ)
@@ -654,8 +710,8 @@ contains
          FI13POM(IJ) = FEOPH * PDB  * FIPOM(IJ)
          FI13CAR(IJ) = FEOSH * PDB  * FICAR(IJ)
       END DO
-      CFILE="bound/bc13"
-      CALL RDFILE(  BW13DICG, NXYDIM,  CFILE )
+!     CFILE="bound/bc13"
+!     CALL RDFILE(  BW13DICG, NXYDIM,  CFILE )
 #ifdef PARALLEL
       DO IJ = 1, NXY
          BW13DIC(IJ) = MAX( BW13DICG(MYRANK*NXY+IJ), 0.0D0 )
@@ -672,8 +728,8 @@ contains
          FI14POM(IJ) = FEOPH * DSTD * FIPOM(IJ)
          FI14CAR(IJ) = FEOSH * DSTD * FICAR(IJ)
       END DO
-      CFILE="bound/bc14"
-      CALL RDFILE(  BW14DICG, NXYDIM,  CFILE )
+!     CFILE="bound/bc14"
+!     CALL RDFILE(  BW14DICG, NXYDIM,  CFILE )
 #ifdef PARALLEL
       DO IJ = 1, NXY
          BW14DIC(IJ) = MAX( BW14DICG(MYRANK*NXY+IJ), 0.0D0 )
@@ -1500,10 +1556,10 @@ contains
             END DO
             DO IJ = JJSTR(IRANK), JJEND(IRANK)
                SATCO32G(IJ) = DUMMY22(IJ)
-               FICLAG(IJ)   = DUMMY31(IJ)
-               FIPOMG(IJ)   = DUMMY32(IJ)
-               FICARG(IJ)   = DUMMY33(IJ)
-               FIOPAG(IJ)   = DUMMY34(IJ)
+              !FICLAG(IJ)   = DUMMY31(IJ)
+              !FIPOMG(IJ)   = DUMMY32(IJ)
+              !FICARG(IJ)   = DUMMY33(IJ)
+              !FIOPAG(IJ)   = DUMMY34(IJ)
                FOCLAG(IJ)   = DUMMY41(IJ)
                FOPOMG(IJ)   = DUMMY42(IJ)
                FOCARG(IJ)   = DUMMY43(IJ)

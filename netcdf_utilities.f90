@@ -7,7 +7,7 @@ contains
         implicit none
 
         character(len=*), intent(in) :: filename, varname
-        real(kind=4), dimension(:,:), allocatable, intent(out) :: var
+        real(kind=8), dimension(:,:), allocatable, intent(out) :: var
 
         integer(kind=4) :: ncid, varid, retval
         integer(kind=4) :: lonid, lonsize
@@ -21,7 +21,8 @@ contains
         ! Open the netCDF file
         retval = nf90_open(filename, nf90_nowrite, ncid)
         if (retval /= nf90_noerr) then
-            print *, 'Failed to open file.'
+            print *, 'Failed to open file: ', trim(filename)
+            print *, 'Error: ', nf90_strerror(retval)
             stop
         endif
 
@@ -32,6 +33,7 @@ contains
             retval = nf90_inquire_dimension(ncid, lonid, len=lonsize)
         else if (retval /= nf90_noerr) then
             print *, 'Failed to get ID and length of longitude dimension.'
+            print *, 'Error: ', nf90_strerror(retval)
             lonsize = 1
         endif
         print *, 'Longitude size = ', lonsize
@@ -42,6 +44,7 @@ contains
             retval = nf90_inquire_dimension(ncid, latid, len=latsize)
         else if (retval /= nf90_noerr) then
             print *, 'Failed to get ID and length of latitude dimension.'
+            print *, 'Error: ', nf90_strerror(retval)
             latsize = 1
         endif
         print *, 'Latitude size = ', latsize
@@ -57,11 +60,13 @@ contains
         retval = nf90_inq_varid(ncid, varname, varid)
         if (retval /= nf90_noerr) then
             print *, 'Failed to retrieve variable ID for ', varname, '.'
+            print *, 'Error: ', nf90_strerror(retval)
             stop
         endif
         retval = nf90_get_var(ncid, varid, var)
         if (retval /= nf90_noerr) then
             print *, 'Failed to read data for variable ', varname, '.'
+            print *, 'Error: ', nf90_strerror(retval)
             stop
         endif
 
@@ -94,7 +99,8 @@ contains
         ! Open the netCDF file
         retval = nf90_open(filename, nf90_nowrite, ncid)
         if (retval /= nf90_noerr) then
-            print *, 'Failed to open file.'
+            print *, 'Failed to open file: ', trim(filename)
+            print *, 'Error: ', nf90_strerror(retval)
             stop
         endif
 
@@ -105,6 +111,7 @@ contains
             retval = nf90_inquire_dimension(ncid, lonid, len=lonsize)
         else if (retval /= nf90_noerr) then
             print *, 'Failed to get ID and length of longitude dimension.'
+            print *, 'Error: ', nf90_strerror(retval)
             lonsize = 1
         endif
         print *, 'Longitude size = ', lonsize
@@ -115,6 +122,7 @@ contains
             retval = nf90_inquire_dimension(ncid, latid, len=latsize)
         else if (retval /= nf90_noerr) then
             print *, 'Failed to get ID and length of latitude dimension.'
+            print *, 'Error: ', nf90_strerror(retval)
             latsize = 1
         endif
         print *, 'Latitude size = ', latsize
@@ -125,6 +133,7 @@ contains
             retval = nf90_inquire_dimension(ncid, depid, len=depsize)
         else if (retval /= nf90_noerr) then
             print *, 'Failed to get ID and length of depth dimension.'
+            print *, 'Error: ', nf90_strerror(retval)
             depsize = 1
         endif
         print *, 'Depth size = ', depsize
@@ -140,11 +149,13 @@ contains
         retval = nf90_inq_varid(ncid, varname, varid)
         if (retval /= nf90_noerr) then
             print *, 'Failed to retrieve variable ID for ', varname, '.'
+            print *, 'Error: ', nf90_strerror(retval)
             stop
         endif
         retval = nf90_get_var(ncid, varid, var)
         if (retval /= nf90_noerr) then
             print *, 'Failed to read data for variable ', varname, '.'
+            print *, 'Error: ', nf90_strerror(retval)
             stop
         endif
 
@@ -161,7 +172,7 @@ contains
         implicit none
 
         character(len=*), intent(in) :: filename, varname
-        real(kind=4), dimension(:,:), intent(in) :: var
+        real(kind=8), dimension(:,:), intent(in) :: var
 
         integer(kind=4) :: ncid, varid, retval
         integer(kind=4) :: lonid, lonsize
@@ -178,6 +189,7 @@ contains
         retval = nf90_create(filename, nf90_clobber, ncid)
         if (retval /= nf90_noerr) then
             print *, 'Failed to create file.'
+            print *, 'Error: ', nf90_strerror(retval)
             stop
         endif
 
@@ -195,6 +207,7 @@ contains
         retval = nf90_put_var(ncid, varid, var)
         if (retval /= nf90_noerr) then
             print *, 'Failed to write data for variable ', varname, '.'
+            print *, 'Error: ', nf90_strerror(retval)
             stop
         endif
 
@@ -211,7 +224,7 @@ contains
         implicit none
 
         character(len=*), intent(in) :: filename, varname
-        real(kind=4), dimension(:,:,:), intent(in) :: var
+        real(kind=8), dimension(:,:,:), intent(in) :: var
 
         integer(kind=4) :: ncid, varid, retval
         integer(kind=4) :: lonid, lonsize
@@ -231,6 +244,7 @@ contains
         retval = nf90_create(filename, nf90_clobber, ncid)
         if (retval /= nf90_noerr) then
             print *, 'Failed to create file.'
+            print *, 'Error: ', nf90_strerror(retval)
             stop
         endif
 
@@ -249,6 +263,7 @@ contains
         retval = nf90_put_var(ncid, varid, var)
         if (retval /= nf90_noerr) then
             print *, 'Failed to write data for variable ', varname, '.'
+            print *, 'Error: ', nf90_strerror(retval)
             stop
         endif
 
