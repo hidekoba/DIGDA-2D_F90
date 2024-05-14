@@ -20,21 +20,19 @@ module globals_sdliquid
       REAL*8 DFLX(NXY,SDZDIM+1)
       REAL*8 RLT(NXY,SDZDIM)
 
-      REAL*8 PHI(SDZDIM)
-      REAL*8 PHII(SDZDIM+1)
-      REAL*8 DEI(SDZDIM+1)
+!     REAL*8 PHI(SDZDIM)
+!     REAL*8 PHII(SDZDIM+1)
+!     REAL*8 DEI(SDZDIM+1)
 
       REAL*8 EA(SDZDIM), EB(NXY, SDZDIM), EC(SDZDIM)
       REAL*8 EAL(SDZDIM), EBE(SDZDIM), EGA(SDZDIM), EEP(NXY,SDZDIM)
       REAL*8 ED(NXY,SDZDIM),  EX(NXY,SDZDIM)
 
-      INTEGER IJ, K
-
-      LOGICAL CDIC, CDII
-      SAVE CDIC, CDII
-      NAMELIST /NMSDLI/ CDIC, CDII
+      LOGICAL CDCN, CDII
+      SAVE CDCN, CDII
+      NAMELIST /NMSDLI/ CDCN, CDII
 !     -- Diffusion choice --
-      DATA CDIC  / .FALSE. / !! Crank nicolson ?
+      DATA CDCN  / .FALSE. / !! Crank nicolson ?
       DATA CDII  / .TRUE.  / !! Implicit ?
 
 end module globals_sdliquid
@@ -48,6 +46,8 @@ contains
 
       SUBROUTINE SDLIQUIDSET
 
+      integer :: IJ, K
+
       WRITE(NFSTDO, *) '*** Carbon : SDLIQUIDSET ***'
       REWIND(NFPARM)
       READ (NFPARM, NMSDLI, END=99)
@@ -57,11 +57,11 @@ contains
       DO K = SKST, SKEN
          LZ(K)   = LZ(K)   * 1.0D+2            !! [m] --> [cm]
          DLZ(K)  = DLZ(K)  * 1.0D+2            !! [m] --> [cm]
-      ENDDO
+      END DO
       DO K = SKST, SKEN+1
          LZI(K)  = LZI(K)  * 1.0D+2            !! [m] --> [cm]
          DLZI(K) = DLZI(K) * 1.0D+2            !! [m] --> [cm]
-      ENDDO
+      END DO
 
       END SUBROUTINE SDLIQUIDSET
 
@@ -79,9 +79,11 @@ contains
       double precision, intent(in)  :: C(NXY,SDZDIM)
       double precision, intent(out) :: CN(NXY,SDZDIM)
 
+      integer :: IJ, K
+
 !     -- Diffusion : Crank nicolson --
 
-      IF (CDIC) THEN
+      IF (CDCN) THEN
 
       DO K = SKST, SKEN
          EAL(K) = ( PHI(K) / TS )
@@ -89,15 +91,15 @@ contains
      &            / ( 2.0D0 * DLZ(K) * DLZI(K)   ) )
          EGA(K) = ( ( PHII(K+1) * DEI(K+1) ) &
      &            / ( 2.0D0 * DLZ(K) * DLZI(K+1) ) )
-      ENDDO
+      END DO
 
       DO K = SKST+1, SKEN-1
          EA(K)         = - EBE(K)
          EC(K)         = - EGA(K)
       DO IJ = IJTSTR, IJTEND
          EB(IJ, K)     = EAL(K) + EBE(K) + EGA(K)
-      ENDDO
-      ENDDO
+      END DO
+      END DO
 
          EA(SKST)      = - EBE(SKST)
          EC(SKST)      = - EGA(SKST)
@@ -107,7 +109,7 @@ contains
          EB(IJ, SKST)  = EAL(SKST) + EGA(SKST) &
      &   + ( PHII(SKST) * DEI(SKST) / DLZI(SKST) / DLZI(SKST) )
          EB(IJ, SKEN)  = EAL(SKEN) + EBE(SKEN)
-      ENDDO
+      END DO
 
       DO IJ = IJTSTR, IJTEND
          ED(IJ, SKST) = &
@@ -115,7 +117,7 @@ contains
      &      + EGA(SKST) * C(IJ, SKST+1) &
      &      + RLT(IJ, SKST) &
      &   + ( PHII(SKST) * DEI(SKST) * BW(IJ) / DLZI(SKST) / DLZI(SKST) )
-      ENDDO
+      END DO
 
       DO K = SKST+1, SKEN-1
       DO IJ = IJTSTR, IJTEND
@@ -124,19 +126,19 @@ contains
      &      + ( EAL(K) - EBE(K) - EGA(K) ) * C(IJ, K) &
      &      + EGA(K) * C(IJ, K+1) &
      &      + RLT(IJ, K)
-      ENDDO
-      ENDDO
+      END DO
+      END DO
 
       DO IJ = IJTSTR, IJTEND
          ED(IJ, SKEN) = &
      &      + EBE(SKEN) * C(IJ, SKEN-1) &
      &      + ( EAL(SKEN) - EGA(SKEN) ) * C(IJ, SKEN) &
      &      + RLT(IJ, SKEN)
-      ENDDO
+      END DO
 
       CALL LTRIDAG( EA, EB, EC, ED, EX )
 
-      ENDIF
+      END IF
 
 !     -- Diffusion : Implicit --
 
@@ -148,15 +150,15 @@ contains
      &            / ( DLZ(K) * DLZI(K)   ) )
          EGA(K) = ( ( PHII(K+1) * DEI(K+1) ) &
      &            / ( DLZ(K) * DLZI(K+1) ) )
-      ENDDO
+      END DO
 
       DO K = SKST+1, SKEN-1
          EA(K)         = - EBE(K)
          EC(K)         = - EGA(K)
       DO IJ = IJTSTR, IJTEND
          EB(IJ, K)     = EAL(K) + EBE(K) + EGA(K)
-      ENDDO
-      ENDDO
+      END DO
+      END DO
 
          EA(SKST)      = - EBE(SKST)
          EC(SKST)      = - EGA(SKST)
@@ -166,24 +168,24 @@ contains
          EB(IJ, SKST)  = EAL(SKST) + EGA(SKST) &
      &   + ( PHII(SKST) * DEI(SKST) / DLZI(SKST) / DLZI(SKST) )
          EB(IJ, SKEN)  = EAL(SKEN) + EBE(SKEN)
-      ENDDO
+      END DO
 
       DO K = SKST, SKEN
       DO IJ = IJTSTR, IJTEND
          ED(IJ, K) = &
      &      + EAL(K) * C(IJ, K) &
      &      + RLT(IJ, K)
-      ENDDO
-      ENDDO
+      END DO
+      END DO
 
       DO IJ = IJTSTR, IJTEND
          ED(IJ, SKST) = ED(IJ, SKST) &
      &   + ( PHII(SKST) * DEI(SKST) * BW(IJ) / DLZI(SKST) / DLZI(SKST) )
-      ENDDO
+      END DO
 
       CALL LTRIDAG( EA, EB, EC, ED, EX )
 
-      ENDIF
+      END IF
 
 !     -- t = t + dt --
 
@@ -191,8 +193,8 @@ contains
       DO IJ = IJTSTR, IJTEND
          CN(IJ, K) = MAX( EX(IJ, K), 0.0D0 )
          EX(IJ, K) = 0.0D0
-      ENDDO
-      ENDDO
+      END DO
+      END DO
 
       END SUBROUTINE LIQUID
 
@@ -210,6 +212,7 @@ contains
       double precision, intent(in)  :: C(NXY,SDZDIM)
       double precision, intent(out) :: CN(NXY,SDZDIM)
 
+      integer :: IJ, K
 
       DO K = SKST, SKEN
       DO IJ = IJTSTR, IJTEND
@@ -217,13 +220,13 @@ contains
             RLT(IJ, K) = RLT(IJ, K) / C(IJ, K)
          ELSE
             RLT(IJ, K) = 0.0D0
-         ENDIF
-      ENDDO
-      ENDDO
+         END IF
+      END DO
+      END DO
 
 !     -- Diffusion : Crank nicolson --
 
-      IF (CDIC) THEN
+      IF (CDCN) THEN
 
       DO K = SKST, SKEN
          EAL(K) = ( PHI(K) / TS )
@@ -233,16 +236,16 @@ contains
      &            / ( 2.0D0 * DLZ(K) * DLZI(K+1) ) )
       DO IJ = IJTSTR, IJTEND
          EEP(IJ, K) = - 0.50D0 * RLT(IJ, K)
-      ENDDO
-      ENDDO
+      END DO
+      END DO
 
       DO K = SKST+1, SKEN-1
          EA(K)         = - EBE(K)
          EC(K)         = - EGA(K)
       DO IJ = IJTSTR, IJTEND
          EB(IJ, K)     = EAL(K) + EBE(K) + EGA(K) + EEP(IJ, K)
-      ENDDO
-      ENDDO
+      END DO
+      END DO
 
          EA(SKST)      = - EBE(SKST)
          EC(SKST)      = - EGA(SKST)
@@ -252,7 +255,7 @@ contains
          EB(IJ, SKST)  = EAL(SKST) + EGA(SKST) + EEP(IJ, SKST) &
      &   + ( PHII(SKST) * DEI(SKST) / DLZI(SKST) / DLZI(SKST) )
          EB(IJ, SKEN)  = EAL(SKEN) + EBE(SKEN) + EEP(IJ, SKEN)
-      ENDDO
+      END DO
 
       DO IJ = IJTSTR, IJTEND
          ED(IJ, SKST) = &
@@ -260,7 +263,7 @@ contains
      &      + EGA(SKST) * C(IJ, SKST+1) &
      &      + 0.50D0 * RLT(IJ, SKST) * C(IJ, SKST) &
      &   + ( PHII(SKST) * DEI(SKST) * BW(IJ) / DLZI(SKST) / DLZI(SKST) )
-      ENDDO
+      END DO
 
       DO K = SKST+1, SKEN-1
       DO IJ = IJTSTR, IJTEND
@@ -269,19 +272,19 @@ contains
      &      + ( EAL(K) - EBE(K) - EGA(K) ) * C(IJ, K) &
      &      + EGA(K) * C(IJ, K+1) &
      &      + 0.50D0 * RLT(IJ, K) * C(IJ, K)
-      ENDDO
-      ENDDO
+      END DO
+      END DO
 
       DO IJ = IJTSTR, IJTEND
          ED(IJ, SKEN) = &
      &      + EBE(SKEN) * C(IJ, SKEN-1) &
      &      + ( EAL(SKEN) - EGA(SKEN) ) * C(IJ, SKEN) &
      &      + 0.50D0 * RLT(IJ, SKEN) * C(IJ, SKEN)
-      ENDDO
+      END DO
 
       CALL LTRIDAG( EA, EB, EC, ED, EX )
 
-      ENDIF
+      END IF
 
 !     -- Diffusion : Implicit --
 
@@ -295,16 +298,16 @@ contains
      &            / ( DLZ(K) * DLZI(K+1) ) )
       DO IJ = IJTSTR, IJTEND
          EEP(IJ, K) = - RLT(IJ, K)
-      ENDDO
-      ENDDO
+      END DO
+      END DO
 
       DO K = SKST+1, SKEN-1
          EA(K)         = - EBE(K)
          EC(K)         = - EGA(K)
       DO IJ = IJTSTR, IJTEND
          EB(IJ, K)     = EAL(K) + EBE(K) + EGA(K) + EEP(IJ, K)
-      ENDDO
-      ENDDO
+      END DO
+      END DO
 
          EA(SKST)      = - EBE(SKST)
          EC(SKST)      = - EGA(SKST)
@@ -314,23 +317,23 @@ contains
          EB(IJ, SKST)  = EAL(SKST) + EGA(SKST) + EEP(IJ, SKST) &
      &   + ( PHII(SKST) * DEI(SKST) / DLZI(SKST) / DLZI(SKST) )
          EB(IJ, SKEN)  = EAL(SKEN) + EBE(SKEN) + EEP(IJ, SKEN)
-      ENDDO
+      END DO
 
       DO K = SKST, SKEN
       DO IJ = IJTSTR, IJTEND
          ED(IJ, K) = &
      &      + EAL(K) * C(IJ, K)
-      ENDDO
-      ENDDO
+      END DO
+      END DO
 
       DO IJ = IJTSTR, IJTEND
          ED(IJ, SKST) = ED(IJ, SKST) &
      &   + ( PHII(SKST) * DEI(SKST) * BW(IJ) / DLZI(SKST) / DLZI(SKST) )
-      ENDDO
+      END DO
 
       CALL LTRIDAG( EA, EB, EC, ED, EX )
 
-      ENDIF
+      END IF
 
 !     -- t = t + dt --
 
@@ -338,8 +341,8 @@ contains
       DO IJ = IJTSTR, IJTEND
          CN(IJ, K) = MAX( EX(IJ, K), 0.0D0 )
          EX(IJ, K) = 0.0D0
-      ENDDO
-      ENDDO
+      END DO
+      END DO
 
       END SUBROUTINE LIQUID_O2
 
@@ -359,21 +362,21 @@ contains
       DO IJ = IJTSTR, IJTEND
          BET(IJ)      = EB(IJ, SKST)
          EX(IJ, SKST) = ED(IJ, SKST) / BET(IJ)
-      ENDDO
+      END DO
 
       DO K = SKST+1, SKEN
       DO IJ = IJTSTR, IJTEND
          EW(IJ, K) = EC(K-1) / BET(IJ)
          BET(IJ)   = EB(IJ, K) - EA(K) * EW(IJ, K)
          EX(IJ, K) = (ED(IJ, K) - EA(K) * EX(IJ, K-1) ) / BET(IJ)
-      ENDDO
-      ENDDO
+      END DO
+      END DO
 
       DO K = SKEN-1, SKST, -1
       DO IJ = IJTSTR, IJTEND
          EX(IJ, K) = EX(IJ, K) - EW(IJ, K+1) * EX(IJ, K+1)
-      ENDDO
-      ENDDO
+      END DO
+      END DO
 
       END SUBROUTINE LTRIDAG
 

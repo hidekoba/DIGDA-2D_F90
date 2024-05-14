@@ -88,8 +88,8 @@ module sddim_module
      &              1.250D-2, 1.750D-2, 2.250D-2, 3.000D-2, 3.750D-2, &
      &              4.500D-2, 4.500D-2, 4.500D-2, 1.250D-1, 2.250D-1, &
      &              2.500D-1, 2.500D-1 /
-#endif &
-#ifdef ZGRID_HEINZE &
+#endif
+#ifdef ZGRID_HEINZE
 !     Heinze et al. (1999) &
       DATA   LZ   / 1.500D-3, 4.500D-3, 8.500D-3, 1.350D-2, 1.850D-2, &
      &              2.600D-2, 3.600D-2, 4.600D-2, 6.325D-2, 8.775D-2 /

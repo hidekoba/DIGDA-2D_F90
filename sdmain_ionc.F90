@@ -396,39 +396,39 @@ module globals_sdmain
       INTEGER     NFSOTS
       PARAMETER ( NFSOTS = 999 )
 
-      LOGICAL  EXEWOI
-      SAVE     EXEWOI
-      DATA     EXEWOI / .TRUE. /  !! execute writeout ?
-      LOGICAL  WOITEA
-      INTEGER  WOISTR
-      SAVE     WOITEA, WOISTR
-      DATA     WOITEA / .FALSE. /
-      !! writeout all the years ? or the last N years ?
-      INTEGER  TITERM
-      SAVE     TITERM
-      DATA     TITERM / 100 /
-      LOGICAL  WOIINA
-      SAVE     WOIINA
-      DATA     WOIINA / .TRUE. /
-      !! writeout all the years ? or N-year intervals ?
-      INTEGER  TIINTE, CIINTE
-      SAVE     TIINTE, CIINTE
-      DATA     TIINTE / 100 /
-      INTEGER  UNITIN, UNIT
-      SAVE     UNITIN
-      DATA     UNITIN / 0 /
-      INTEGER  TIUINT, CIUINT
-      SAVE     TIUINT, CIUINT
-      DATA     TIUINT / 10000 /
+!     LOGICAL  EXEWOI
+!     SAVE     EXEWOI
+!     DATA     EXEWOI / .TRUE. /  !! execute writeout ?
+!     LOGICAL  WOITEA
+!     INTEGER  WOISTR
+!     SAVE     WOITEA, WOISTR
+!     DATA     WOITEA / .FALSE. /
+!     !! writeout all the years ? or the last N years ?
+!     INTEGER  TITERM
+!     SAVE     TITERM
+!     DATA     TITERM / 100 /
+!     LOGICAL  WOIINA
+!     SAVE     WOIINA
+!     DATA     WOIINA / .TRUE. /
+!     !! writeout all the years ? or N-year intervals ?
+!     INTEGER  TIINTE, CIINTE
+!     SAVE     TIINTE, CIINTE
+!     DATA     TIINTE / 100 /
+!     INTEGER  UNITIN, UNIT
+!     SAVE     UNITIN
+!     DATA     UNITIN / 0 /
+!     INTEGER  TIUINT, CIUINT
+!     SAVE     TIUINT, CIUINT
+!     DATA     TIUINT, CIUINT / 10000 /
 
-      LOGICAL  EXEWOF
-      SAVE     EXEWOF
-      DATA     EXEWOF / .TRUE. /  !! execute writeout ?
-      INTEGER  WOFSTR
-      SAVE     WOFSTR
-      INTEGER  TFTERM
-      SAVE     TFTERM
-      DATA     TFTERM / 100 /
+!     LOGICAL  EXEWOF
+!     SAVE     EXEWOF
+!     DATA     EXEWOF / .TRUE. /  !! execute writeout ?
+!     INTEGER  WOFSTR
+!     SAVE     WOFSTR
+!     INTEGER  TFTERM
+!     SAVE     TFTERM
+!     DATA     TFTERM / 100 /
 
       CHARACTER CFILE*128, CTITLE*128, CUNIT*128
 
@@ -444,10 +444,12 @@ module sdmain_module
       use sdopal_module
       use sdsolid_module
       use sdliquid_module
+      use sdchemeq_module
       implicit none
 contains
 
       SUBROUTINE SD
+
 !-- SEDIMENT TRACERS : setup --
 
 #ifdef PARALLEL
@@ -460,13 +462,15 @@ contains
             PRINT *, '=== ERROR ==='
             CALL MPI_FINALIZE(IERR)
             STOP
+         END IF
+      END IF
 
       DO IRANK = 0, NPROCS-1
          CALL PARA_RANGE( &
      &                    1, NXYDIM, NPROCS, IRANK, &
      &                    JJSTR(IRANK), JJEND(IRANK) &
      &                  )
-      ENDDO
+      END DO
 #endif
 
       OPEN(NFPARM, file="PARAMET")
@@ -518,11 +522,11 @@ contains
 #ifdef PARALLEL
       DO IJ = 1, NXY
          BDEP(IJ) = MAX( BDEPG(MYRANK*NXY+IJ), 0.0D0 )
-      ENDDO
+      END DO
 #else
       DO IJ = 1, NXY
          BDEP(IJ) = MAX( BDEPG(IJ), 0.0D0 )
-      ENDDO
+      END DO
 #endif
 
 !     -- Convert unit --
@@ -535,11 +539,11 @@ contains
       DO K = SKST, SKEN
          LZ(K)   = LZ(K)   * 1.0D+2            !! [m] --> [cm]
          DLZ(K)  = DLZ(K)  * 1.0D+2            !! [m] --> [cm]
-      ENDDO
+      END DO
       DO K = SKST, SKEN+1
          LZI(K)  = LZI(K)  * 1.0D+2            !! [m] --> [cm]
          DLZI(K) = DLZI(K) * 1.0D+2            !! [m] --> [cm]
-      ENDDO
+      END DO
 
       DSWNIT   = DSWNIT   * 1.0D+4             !! [m^2/s] --> [cm^2/s]
       DSWDIC   = DSWDIC   * 1.0D+4             !! [m^2/s] --> [cm^2/s]
@@ -548,10 +552,10 @@ contains
       DSWSIL   = DSWSIL   * 1.0D+4             !! [m^2/s] --> [cm^2/s]
       IF ( CALC13 ) THEN
       DSW13DIC = DSW13DIC * 1.0D+4             !! [m^2/s] --> [cm^2/s]
-      ENDIF
+      END IF
       IF ( CALC14 ) THEN
       DSW14DIC = DSW14DIC * 1.0D+4             !! [m^2/s] --> [cm^2/s]
-      ENDIF
+      END IF
       DSW    = DSW        * 1.0D+4             !! [m^2/s] --> [cm^2/s]
 
       MCLA   = 1.0D-6 /  RHOCLA                !! [m^3/g]
@@ -561,32 +565,32 @@ contains
       IF ( CALC13 ) THEN
       M13POM = 1.0D-9 / ( RHOPOM / MOL13POM )  !! [m^3/mMol]
       M13CAR = 1.0D-9 / ( RHOCAR / MOL13CAR )  !! [m^3/mMol]
-      ENDIF
+      END IF
       IF ( CALC14 ) THEN
       M14POM = 1.0D-9 / ( RHOPOM / MOL14POM )  !! [m^3/mMol]
       M14CAR = 1.0D-9 / ( RHOCAR / MOL14CAR )  !! [m^3/mMol]
       THALF  = THALF * 3.1536D+7               !! [yr] --> [s]
       ADCAY  = LOG( 2.0D0 ) / THALF / 365.0D0 / 8.64D4
-      ENDIF
+      END IF
       IF ( CALC13 .or. CALC14 ) THEN
       FEOPH  = 1.0D0 + EOPH * 1.0D-3
       FEOSH  = 1.0D0 + EOSH * 1.0D-3
-      ENDIF
+      END IF
 
       DO IJ = 1, NXY
          BDEP(IJ) = BDEP(IJ) * 1.0D+2          !! [m] --> [cm]
-      ENDDO
+      END DO
 
 !     -- Porosity, Diffusivity --
 
       DO K = SKST, SKEN
          PHI(K) = PHI0 * EXP( - LZ(K)  / Z0 )
-      ENDDO
+      END DO
 
       DO K = SKST, SKEN+1
          PHII(K) = PHI0 * EXP( - LZI(K) / Z0 )
          DBI(K)  = ( DB0 / ( 1.0D0 + EXP( 2.0D0 * ( LZI(K) - ZB ) ) ) )
-      ENDDO
+      END DO
 
       DO K = SKST, SKEN+1
          IF (DEIARC) THEN
@@ -597,10 +601,10 @@ contains
             DEISIL(K)   = DSWSIL   * ( PHII(K) ** 3.0D0 )
             IF ( CALC13 ) THEN
             DEI13DIC(K) = DSW13DIC * ( PHII(K) ** 3.0D0 )
-            ENDIF
+            END IF
             IF ( CALC14 ) THEN
             DEI14DIC(K) = DSW14DIC * ( PHII(K) ** 3.0D0 )
-            ENDIF
+            END IF
          ELSE
             DEINIT(K)   = ( PHII(K) ** ( NOPA - 1.0D0 ) ) * DSW
             DEIDIC(K)   = ( PHII(K) ** ( NOPA - 1.0D0 ) ) * DSW
@@ -609,12 +613,12 @@ contains
             DEISIL(K)   = ( PHII(K) ** ( NOPA - 1.0D0 ) ) * DSW
             IF ( CALC13 ) THEN
             DEI13DIC(K) = ( PHII(K) ** ( NOPA - 1.0D0 ) ) * DSW
-            ENDIF
+            END IF
             IF ( CALC14 ) THEN
             DEI14DIC(K) = ( PHII(K) ** ( NOPA - 1.0D0 ) ) * DSW
-            ENDIF
-         ENDIF
-      ENDDO
+            END IF
+         END IF
+      END DO
 
 !     -- Set boundary conditions --
 
@@ -633,7 +637,7 @@ contains
          FICAR(IJ) = MAX( FICARG(MYRANK*NXY+IJ), 0.0D0 )
          FIOPA(IJ) = MAX( FIOPAG(MYRANK*NXY+IJ), 0.0D0 )
          FIAGE(IJ) = 0.0D0
-      ENDDO
+      END DO
 #else
       DO IJ = 1, NXY
          FICLA(IJ) = MAX( FICLAG(IJ), 0.0D0 )
@@ -641,7 +645,7 @@ contains
          FICAR(IJ) = MAX( FICARG(IJ), 0.0D0 )
          FIOPA(IJ) = MAX( FIOPAG(IJ), 0.0D0 )
          FIAGE(IJ) = 0.0D0
-      ENDDO
+      END DO
 #endif
       CFILE="bound/btem"
       CALL RDFILE( BWTEMG, NXYDIM,  CFILE )
@@ -666,7 +670,7 @@ contains
          BWALK(IJ)   = MAX( BWALKG(MYRANK*NXY+IJ), 0.0D0 )
          BWDO2(IJ)   = MAX( BWDO2G(MYRANK*NXY+IJ), 0.0D0 )
          BWSIL(IJ)   = MAX( BWSILG(MYRANK*NXY+IJ), 0.0D0 )
-      ENDDO
+      END DO
 #else
       DO IJ = 1, NXY
          BWTEM(IJ)   = BWTEMG(IJ)
@@ -676,49 +680,49 @@ contains
          BWALK(IJ)   = MAX( BWALKG(IJ), 0.0D0 )
          BWDO2(IJ)   = MAX( BWDO2G(IJ), 0.0D0 )
          BWSIL(IJ)   = MAX( BWSILG(IJ), 0.0D0 )
-      ENDDO
+      END DO
 #endif
 
       IF ( CALC13 ) THEN
       DO IJ = IJTSTR, IJTEND
          FI13POM(IJ) = FEOPH * PDB  * FIPOM(IJ)
          FI13CAR(IJ) = FEOSH * PDB  * FICAR(IJ)
-      ENDDO
+      END DO
       CFILE="bound/bc13"
       CALL RDFILE(  BW13DICG, NXYDIM,  CFILE )
 #ifdef PARALLEL
       DO IJ = 1, NXY
          BW13DIC(IJ) = MAX( BW13DICG(MYRANK*NXY+IJ), 0.0D0 )
-      ENDDO
+      END DO
 #else
       DO IJ = 1, NXY
          BW13DIC(IJ) = MAX( BW13DICG(IJ), 0.0D0 )
-      ENDDO
+      END DO
 #endif
-      ENDIF
+      END IF
 
       IF ( CALC14 ) THEN
       DO IJ = IJTSTR, IJTEND
          FI14POM(IJ) = FEOPH * DSTD * FIPOM(IJ)
          FI14CAR(IJ) = FEOSH * DSTD * FICAR(IJ)
-      ENDDO
+      END DO
       CFILE="bound/bc14"
       CALL RDFILE(  BW14DICG, NXYDIM,  CFILE )
 #ifdef PARALLEL
       DO IJ = 1, NXY
          BW14DIC(IJ) = MAX( BW14DICG(MYRANK*NXY+IJ), 0.0D0 )
-      ENDDO
+      END DO
 #else
       DO IJ = 1, NXY
          BW14DIC(IJ) = MAX( BW14DICG(IJ), 0.0D0 )
-      ENDDO
+      END DO
 #endif
-      ENDIF
+      END IF
 
       DO IJ = 1, NXY
          SIT(IJ) = 0.51D0
          PT(IJ)  = 7.70D0
-      ENDDO
+      END DO
 
 !     DO L = 1, SEDTDM
 !        DO K = 1, SDZDIM
@@ -726,50 +730,50 @@ contains
 !              DO I = 1, NXDIM
 !                 IJ = I + (J - 1) * NXDIM
 !                 SDTXBUF(I, J, K, L) = SDTX(IJ, K, L)
-!              ENDDO
-!           ENDDO
-!        ENDDO
-!     ENDDO
+!              END DO
+!           END DO
+!        END DO
+!     END DO
 !     DO L = 1, SEDTDM
 !        DO K = SKST, SKEN
 !           DO J = JSTR, JEND
 !              DO I = 1, ISTR-1
 !                 SDTXBUF(I, J, K, L) = SDTXBUF(IEND-ISTR+1+I, J, K, L)
-!              ENDDO
+!              END DO
 !              DO I = IEND+1, NXDIM
 !                 SDTXBUF(I, J, K, L) = SDTXBUF(ISTR-1+I-IEND, J, K, L)
-!              ENDDO
-!           ENDDO
-!        ENDDO
-!     ENDDO
+!              END DO
+!           END DO
+!        END DO
+!     END DO
 !     DO L = 1, SEDTDM
 !        DO K = 1, SDZDIM
 !           DO J = 1, NYDIM
 !              DO I = 1, NXDIM
 !                 IJ = I + (J - 1) * NXDIM
 !                 SDTX(IJ, K, L) = SDTXBUF(I, J, K, L)
-!              ENDDO
-!           ENDDO
-!        ENDDO
-!     ENDDO
+!              END DO
+!           END DO
+!        END DO
+!     END DO
 !     DO L = 1, SEDTDM
 !        DO K = 1, SKST-1
 !           DO IJ = 1, NXY
 !              SDTX(IJ, K, L) = SDTX(IJ, SKST, L)
-!           ENDDO
-!        ENDDO
-!     ENDDO
+!           END DO
+!        END DO
+!     END DO
 
 !     -- Time Integration --
 
       DO TT = TSTR, TEND
 
          YY = INT( TSYR * TT )
-         IF ( EXEWOI ) THEN
-         IF ( MOD( TT-1,   CIUINT ) == 0 ) THEN
-            UNIT = UNITIN + INT( TT /  CIUINT )
-         ENDIF
-         ENDIF
+!        IF ( EXEWOI ) THEN
+!        IF ( MOD( TT-1,   CIUINT ) == 0 ) THEN
+!           UNIT = UNITIN + INT( TT /  CIUINT )
+!        END IF
+!        END IF
 
       IF (SDFIRST) THEN
          DO K = SKST, SKEN
@@ -788,18 +792,18 @@ contains
                S13POM(IJ, K) = 0.0D0
                S13CAR(IJ, K) = 0.0D0
                C13DIC(IJ, K) = BW13DIC(IJ)
-               ENDIF
+               END IF
                IF ( CALC14 ) THEN
                S14POM(IJ, K) = 0.0D0
                S14CAR(IJ, K) = 0.0D0
                C14DIC(IJ, K) = BW14DIC(IJ)
-               ENDIF
+               END IF
                PCLA(IJ, K) = 1.00+2
                PPOM(IJ, K) = 0.0D0
                PCAR(IJ, K) = 0.0D0
                POPA(IJ, K) = 0.0D0
-            ENDDO
-         ENDDO
+            END DO
+         END DO
          SDFIRST = .FALSE.
       ELSE
 #ifdef PARALLEL
@@ -815,26 +819,26 @@ contains
                CALK(IJ, K) = SDTX(MYRANK*NXY+IJ, K,  8)
                CSIL(IJ, K) = SDTX(MYRANK*NXY+IJ, K,  9)
                CDO2(IJ, K) = SDTX(MYRANK*NXY+IJ, K, 10)
-            ENDDO
-         ENDDO
+            END DO
+         END DO
          IF ( CALC13 ) THEN
          DO K = SKST, SKEN
             DO IJ = 1, NXY
                S13POM(IJ, K) = SDTX(MYRANK*NXY+IJ, K, 11)
                S13CAR(IJ, K) = SDTX(MYRANK*NXY+IJ, K, 12)
                C13DIC(IJ, K) = SDTX(MYRANK*NXY+IJ, K, 13)
-            ENDDO
-         ENDDO
-         ENDIF
+            END DO
+         END DO
+         END IF
          IF ( CALC14 ) THEN
          DO K = SKST, SKEN
             DO IJ = 1, NXY
                S14POM(IJ, K) = SDTX(MYRANK*NXY+IJ, K, 14)
                S14CAR(IJ, K) = SDTX(MYRANK*NXY+IJ, K, 15)
                C14DIC(IJ, K) = SDTX(MYRANK*NXY+IJ, K, 16)
-            ENDDO
-         ENDDO
-         ENDIF
+            END DO
+         END DO
+         END IF
 #else
          DO K = SKST, SKEN
             DO IJ = 1, NXY
@@ -848,28 +852,28 @@ contains
                CALK(IJ, K) = SDTX(IJ, K,  8)
                CSIL(IJ, K) = SDTX(IJ, K,  9)
                CDO2(IJ, K) = SDTX(IJ, K, 10)
-            ENDDO
-         ENDDO
+            END DO
+         END DO
          IF ( CALC13 ) THEN
          DO K = SKST, SKEN
             DO IJ = 1, NXY
                S13POM(IJ, K) = SDTX(IJ, K, 11)
                S13CAR(IJ, K) = SDTX(IJ, K, 12)
                C13DIC(IJ, K) = SDTX(IJ, K, 13)
-            ENDDO
-         ENDDO
-         ENDIF
+            END DO
+         END DO
+         END IF
          IF ( CALC14 ) THEN
          DO K = SKST, SKEN
             DO IJ = 1, NXY
                S14POM(IJ, K) = SDTX(IJ, K, 14)
                S14CAR(IJ, K) = SDTX(IJ, K, 15)
                C14DIC(IJ, K) = SDTX(IJ, K, 16)
-            ENDDO
-         ENDDO
-         ENDIF
+            END DO
+         END DO
+         END IF
 #endif
-      ENDIF
+      END IF
 
 !     -- Saturated carbonate ion concentration --
 
@@ -913,8 +917,8 @@ contains
      &                     * SCAR(IJ, K)
             TROPA(IJ, K)   = ( 1.0D0 - PHI(K) ) * ROPA(IJ, K) &
      &                     * SOPA(IJ, K)
-         ENDDO
-      ENDDO
+         END DO
+      END DO
 
       IF ( CALC13 ) THEN
       DO K = SKST, SKEN
@@ -923,9 +927,9 @@ contains
      &                     * S13POM(IJ, K)
             TR13CAR(IJ, K) = ( 1.0D0 - PHI(K) ) * RCAR(IJ, K) &
      &                     * S13CAR(IJ, K)
-         ENDDO
-      ENDDO
-      ENDIF
+         END DO
+      END DO
+      END IF
 
       IF ( CALC14 ) THEN
       DO K = SKST, SKEN
@@ -934,9 +938,9 @@ contains
      &                     * S14POM(IJ, K)
             TR14CAR(IJ, K) = ( 1.0D0 - PHI(K) ) * RCAR(IJ, K) &
      &                     * S14CAR(IJ, K)
-         ENDDO
-      ENDDO
-      ENDIF
+         END DO
+      END DO
+      END IF
 
 !     -- Sedimentation rate --
 
@@ -953,8 +957,8 @@ contains
      &                              + ( TRCAR(IJ, K) * MCAR ) &
      &                              + ( TROPA(IJ, K) * MOPA ) ) &
      &                   / ( 1.0D0 - PHII(K+1) ) )
-         ENDDO
-      ENDDO
+         END DO
+      END DO
 
 !     -- Particles (t --> t+dt) --
 !        Clay, POM, CaCO3, Opal
@@ -987,7 +991,7 @@ contains
       CALL SOLID( &
      &    FI13CAR, TR13CAR, W, PHI, PHII, DBI, S13CAR, &
      &    SN13CAR, BF13CAR )
-      ENDIF
+      END IF
 
       IF ( CALC14 ) THEN
       CALL SOLID( &
@@ -1003,9 +1007,9 @@ contains
      &                     - ADCAY * TS * S14POM(IJ, K)
             SN14CAR(IJ, K) = SN14CAR(IJ, K) &
      &                     - ADCAY * TS * S14CAR(IJ, K)
-         ENDDO
-      ENDDO
-      ENDIF
+         END DO
+      END DO
+      END IF
 
 !     -- Dissolution rate --
 !        NIT, DIC, ALK, DO2, SIL
@@ -1019,26 +1023,26 @@ contains
             TRDO2(IJ, K)   = - ( ( OP / CP ) * TRPOM(IJ, K) )
             IF ( CDO2(IJ, K) <= 0.0D0 ) THEN
                TRDO2(IJ, K) = 0.0D0
-            ENDIF
+            END IF
             TRSIL(IJ, K)   = TROPA(IJ, K)
-         ENDDO
-      ENDDO
+         END DO
+      END DO
 
       IF ( CALC13 ) THEN
       DO K = SKST, SKEN
          DO IJ = IJTSTR, IJTEND
             TR13DIC(IJ, K) = ( TR13POM(IJ, K) + TR13CAR(IJ, K) )
-         ENDDO
-      ENDDO
-      ENDIF
+         END DO
+      END DO
+      END IF
 
       IF ( CALC14 ) THEN
       DO K = SKST, SKEN
          DO IJ = IJTSTR, IJTEND
             TR14DIC(IJ, K) = ( TR14POM(IJ, K) + TR14CAR(IJ, K) )
-         ENDDO
-      ENDDO
-      ENDIF
+         END DO
+      END DO
+      END IF
 
 !     -- Dissolved material (t --> t+dt) --
 !        NIT, DIC, ALK, DO2, SIL
@@ -1067,19 +1071,19 @@ contains
       CALL LIQUID( &
      &    BW13DIC, TR13DIC, PHI, PHII, DEI13DIC, C13DIC, &
      &    CN13DIC )
-      ENDIF
+      END IF
 
       IF ( CALC14 ) THEN
       CALL LIQUID( &
      &    BW14DIC, TR14DIC, PHI, PHII, DEI14DIC, C14DIC, &
      &    CN14DIC )
-      ENDIF
+      END IF
       DO K = SKST, SKEN
          DO IJ = IJTSTR, IJTEND
             CN14DIC(IJ, K) = CN14DIC(IJ, K) &
      &                     - ADCAY * TS * C14DIC(IJ, K)
-         ENDDO
-      ENDDO
+         END DO
+      END DO
 
 !     -- Particles weight percent --
 
@@ -1107,9 +1111,9 @@ contains
                POPA(IJ, K) = &
      &            ( SNOPA(IJ, K) * MOLOPA * 1.0D-3 / WT(IJ, K) ) &
      &            * 1.0D+2
-            ENDIF
-         ENDDO
-      ENDDO
+            END IF
+         END DO
+      END DO
 
 !     -- Isotopic fractionation --
 
@@ -1123,10 +1127,10 @@ contains
      &              * R13 / ( 1.0D0 - R13 ) - 1.0D0 ) * 1.0D3
             ELSE
                CDC13(IJ, K) = 0.0D0
-            ENDIF
-         ENDDO
-      ENDDO
-      ENDIF
+            END IF
+         END DO
+      END DO
+      END IF
 
       IF ( CALC14 ) THEN
       DO K = SKST, SKEN
@@ -1138,9 +1142,9 @@ contains
      &              * R14 / ( 1.0D0 - R14 ) - 1.0D0 ) * 1.0D3
             ELSE
                CDC14(IJ, K) = 0.0D0
-            ENDIF
-         ENDDO
-      ENDDO
+            END IF
+         END DO
+      END DO
       DO K = SKST, SKEN
          DO IJ = IJTSTR, IJTEND
             DLTC13 = CDC13(IJ, K) * 1.0D-3  !! [permil]
@@ -1149,9 +1153,9 @@ contains
      &         ( DLTC14 - 2.0D0 * ( DLTC13 + 0.025D0 ) &
      &                          * ( 1.0D0 + DLTC14 ) &
      &         ) * 1.0D+3   !! [permil]
-         ENDDO
-      ENDDO
-      ENDIF
+         END DO
+      END DO
+      END IF
 
 !     -- Sea-bottom flux --
 
@@ -1175,13 +1179,13 @@ contains
          FO13DIC(IJ) = - ( PHII(SKST) * DEI13DIC(SKST) &
      &      * ( BW13DIC(IJ) - CN13DIC(IJ, SKST) ) / DLZI(SKST) )
          FI13DIC(IJ)  = FI13POM(IJ) + FI13CAR(IJ)
-         ENDIF
+         END IF
          IF ( CALC14 ) THEN
          FO14DIC(IJ) = - ( PHII(SKST) * DEI14DIC(SKST) &
      &      * ( BW14DIC(IJ) - CN14DIC(IJ, SKST) ) / DLZI(SKST) )
          FI14DIC(IJ)  = FI14POM(IJ) + FI14CAR(IJ)
-         ENDIF
-      ENDDO
+         END IF
+      END DO
 
       DO IJ = IJTSTR, IJTEND
          FOPOM(IJ) = CP * FONIT(IJ)
@@ -1191,7 +1195,7 @@ contains
 !         FOCAR(IJ) = ( CP / ( NP + 2.0D0 * CP ) ) &
 !     &      * ( ( NP / CP ) * FODIC(IJ) + FOALK(IJ) )
          FOOPA(IJ) = FOSIL(IJ)
-      ENDDO
+      END DO
 
 !     -- OUTPUT --
 #ifdef PARALLEL
@@ -1207,26 +1211,26 @@ contains
             SDTX(MYRANK*NXY+IJ, K,  8) = CNALK(IJ, K)
             SDTX(MYRANK*NXY+IJ, K,  9) = CNSIL(IJ, K)
             SDTX(MYRANK*NXY+IJ, K, 10) = CNDO2(IJ, K)
-         ENDDO
-      ENDDO
+         END DO
+      END DO
       IF ( CALC13 ) THEN
       DO K = SKST, SKEN
          DO IJ = 1, NXY
             SDTX(MYRANK*NXY+IJ, K, 11) = SN13POM(IJ, K)
             SDTX(MYRANK*NXY+IJ, K, 12) = SN13CAR(IJ, K)
             SDTX(MYRANK*NXY+IJ, K, 13) = CN13DIC(IJ, K)
-         ENDDO
-      ENDDO
-      ENDIF
+         END DO
+      END DO
+      END IF
       IF ( CALC14 ) THEN
       DO K = SKST, SKEN
          DO IJ = 1, NXY
             SDTX(MYRANK*NXY+IJ, K, 14) = SN14POM(IJ, K)
             SDTX(MYRANK*NXY+IJ, K, 15) = SN14CAR(IJ, K)
             SDTX(MYRANK*NXY+IJ, K, 16) = CN14DIC(IJ, K)
-         ENDDO
-      ENDDO
-      ENDIF
+         END DO
+      END DO
+      END IF
 #else
       DO K = SKST, SKEN
          DO IJ = 1, NXY
@@ -1240,32 +1244,32 @@ contains
             SDTX(IJ, K,  8) = CNALK(IJ, K)
             SDTX(IJ, K,  9) = CNSIL(IJ, K)
             SDTX(IJ, K, 10) = CNDO2(IJ, K)
-         ENDDO
-      ENDDO
+         END DO
+      END DO
       IF ( CALC13 ) THEN
       DO K = SKST, SKEN
          DO IJ = 1, NXY
             SDTX(IJ, K, 11) = SN13POM(IJ, K)
             SDTX(IJ, K, 12) = SN13CAR(IJ, K)
             SDTX(IJ, K, 13) = CN13DIC(IJ, K)
-         ENDDO
-      ENDDO
-      ENDIF
+         END DO
+      END DO
+      END IF
       IF ( CALC14 ) THEN
       DO K = SKST, SKEN
          DO IJ = 1, NXY
             SDTX(IJ, K, 14) = SN14POM(IJ, K)
             SDTX(IJ, K, 15) = SN14CAR(IJ, K)
             SDTX(IJ, K, 16) = CN14DIC(IJ, K)
-         ENDDO
-      ENDDO
-      ENDIF
+         END DO
+      END DO
+      END IF
 #endif
 
 !     -- Time step --
       IF ( WOTSTP ) THEN
          WRITE(NFSOTS, *), 'Time Step :', TT, 'step', YY, 'year'
-      ENDIF
+      END IF
 
 !     -- Conclude --
 
@@ -1319,7 +1323,7 @@ contains
       ALLOCATE(DUMMY47(NXYDIM+NPROCS))
       ALLOCATE(DUMMY55(NXYDIM+NPROCS))
       ALLOCATE(DUMMY57(NXYDIM+NPROCS))
-      ENDIF
+      END IF
       IF ( CALC14 ) THEN
       ALLOCATE(DUMMY07(NXYZDM+NPROCS))
       ALLOCATE(DUMMY09(NXYZDM+NPROCS))
@@ -1331,26 +1335,26 @@ contains
       ALLOCATE(DUMMY48(NXYDIM+NPROCS))
       ALLOCATE(DUMMY56(NXYDIM+NPROCS))
       ALLOCATE(DUMMY58(NXYDIM+NPROCS))
-      ENDIF
+      END IF
 
       ISIZE1 = NXY
       DO IRANK = 0, NPROCS-1
          NRCVC1(IRANK) = NXY
          NDISP1(IRANK) = NXY * IRANK
-      ENDDO
+      END DO
       ISIZE2 = NXYZ
       DO IRANK = 0, NPROCS-1
          NRCVC2(IRANK) = NXYZ
          NDISP2(IRANK) = NXYZ * IRANK
-      ENDDO
+      END DO
       ISIZE3 = ( NXYZ + NXY )
       DO IRANK = 0, NPROCS-1
          NRCVC3(IRANK) = ( NXYZ + NXY )
          NDISP3(IRANK) = ( NXYZ + NXY ) * IRANK
-      ENDDO
+      END DO
 
       SDOFIRST = .FALSE.
-      ENDIF
+      END IF
 
       CALL MPI_GATHERV( SCLA,    ISIZE2,         MPI_REAL8, &
      &                  DUMMY01, NRCVC2, NDISP2, MPI_REAL8, &
@@ -1462,7 +1466,7 @@ contains
       CALL MPI_GATHERV( BF13CAR, ISIZE1,         MPI_REAL8, &
      &                  DUMMY57, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      ENDIF
+      END IF
 
       IF ( CALC14 ) THEN
       CALL MPI_GATHERV( S14POM,  ISIZE2,         MPI_REAL8, &
@@ -1492,7 +1496,7 @@ contains
       CALL MPI_GATHERV( BF14CAR, ISIZE1,         MPI_REAL8, &
      &                  DUMMY58, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      ENDIF
+      END IF
 
       IF ( MYRANK .EQ. IROOT ) THEN
          DO IRANK = 0, NPROCS-1
@@ -1516,23 +1520,23 @@ contains
                   S13CARG(IJ, K) = DUMMY08(IJKG)
                   C13DICG(IJ, K) = DUMMY17(IJKG)
                   CDC13G(IJ, K)  = DUMMY19(IJKG)
-               ENDIF
+               END IF
                IF ( CALC14 ) THEN
                   S14POMG(IJ, K) = DUMMY07(IJKG)
                   S14CARG(IJ, K) = DUMMY09(IJKG)
                   C14DICG(IJ, K) = DUMMY18(IJKG)
                   CDC14G(IJ, K)  = DUMMY20(IJKG)
-               ENDIF
+               END IF
                   SATSILG(IJ, K) = DUMMY21(IJKG)
-               ENDDO
-            ENDDO
+               END DO
+            END DO
             IJKG = NDISP3(IRANK)
             DO K = SKST, SKEN+1
                DO IJ = JJSTR(IRANK), JJEND(IRANK)
                   IJKG = IJKG + 1
                   WG(IJ, K)      = DUMMY23(IJKG)
-               ENDDO
-            ENDDO
+               END DO
+            END DO
             DO IJ = JJSTR(IRANK), JJEND(IRANK)
                SATCO32G(IJ) = DUMMY22(IJ)
                FICLAG(IJ)   = DUMMY31(IJ)
@@ -1554,7 +1558,7 @@ contains
                FO13CARG(IJ) = DUMMY47(IJ)
                BF13POMG(IJ) = DUMMY55(IJ)
                BF13CARG(IJ) = DUMMY57(IJ)
-               ENDIF
+               END IF
                IF ( CALC14 ) THEN
                FI14POMG(IJ) = DUMMY36(IJ)
                FI14CARG(IJ) = DUMMY38(IJ)
@@ -1562,9 +1566,9 @@ contains
                FO14CARG(IJ) = DUMMY48(IJ)
                BF14POMG(IJ) = DUMMY56(IJ)
                BF14CARG(IJ) = DUMMY58(IJ)
-               ENDIF
-            ENDDO
-         ENDDO
+               END IF
+            END DO
+         END DO
 
          DO K = SKST, SKEN
             DO IJ = 1, NXYDIM
@@ -1580,10 +1584,10 @@ contains
      &                      / WTG(IJ, K) * 1.0D+2
                POPAG(IJ, K) = SOPAG(IJ, K) * MOLOPA * 1.0D-3 &
      &                      / WTG(IJ, K) * 1.0D+2
-            ENDDO
-         ENDDO
+            END DO
+         END DO
 
-      ENDIF
+      END IF
       CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 
 #else
@@ -1595,8 +1599,8 @@ contains
                SCARG(IJ, K) = SCAR(IJ, K)
                SOPAG(IJ, K) = SOPA(IJ, K)
                SAGEG(IJ, K) = SAGE(IJ, K)
-            ENDDO
-         ENDDO
+            END DO
+         END DO
 
          DO K = SKST, SKEN
             DO IJ = 1, NXYDIM
@@ -1604,8 +1608,8 @@ contains
                PPOMG(IJ, K) = PPOM(IJ, K)
                PCARG(IJ, K) = PCAR(IJ, K)
                POPAG(IJ, K) = POPA(IJ, K)
-            ENDDO
-         ENDDO
+            END DO
+         END DO
 
          DO K = SKST, SKEN
             DO IJ = 1, NXYDIM
@@ -1615,24 +1619,24 @@ contains
                 CDO2G(IJ, K)   = CDO2(IJ, K)
                 CSILG(IJ, K)   = CSIL(IJ, K)
                 CCO32G(IJ, K)  = CCO32(IJ, K)
-            ENDDO
-         ENDDO
+            END DO
+         END DO
 
          DO K = SKST, SKEN
             DO IJ = 1, NXYDIM
                 SATSILG(IJ, K) = SATSIL(IJ, K)
-            ENDDO
-         ENDDO
+            END DO
+         END DO
 
          DO IJ = 1, NXYDIM
             SATCO32G(IJ) = SATCO32(IJ)
-         ENDDO
+         END DO
 
          DO K = SKST, SKEN
             DO IJ = 1, NXYDIM
                 WG(IJ, K) = W(IJ, K)
-            ENDDO
-         ENDDO
+            END DO
+         END DO
 
          IF ( CALC13 ) THEN
          DO K = SKST, SKEN
@@ -1641,9 +1645,9 @@ contains
                 S13CARG(IJ, K) = S13CAR(IJ, K)
                 C13DICG(IJ, K) = C13DIC(IJ, K)
                 CDC13G(IJ, K)  = CDC13(IJ, K)
-            ENDDO
-         ENDDO
-         ENDIF
+            END DO
+         END DO
+         END IF
 
          IF ( CALC14 ) THEN
          DO K = SKST, SKEN
@@ -1652,9 +1656,9 @@ contains
                 S14CARG(IJ, K) = S14CAR(IJ, K)
                 C14DICG(IJ, K) = C14DIC(IJ, K)
                 CDC14G(IJ, K)  = CDC14(IJ, K)
-            ENDDO
-         ENDDO
-         ENDIF
+            END DO
+         END DO
+         END IF
 
          DO IJ = 1, NXYDIM
             FICLAG(IJ)     = FICLA(IJ)
@@ -1669,7 +1673,7 @@ contains
             BFPOMG(IJ)     = BFPOM(IJ)
             BFCARG(IJ)     = BFCAR(IJ)
             BFOPAG(IJ)     = BFOPA(IJ)
-         ENDDO
+         END DO
 
          IF ( CALC13 ) THEN
          DO IJ = 1, NXYDIM
@@ -1679,8 +1683,8 @@ contains
             FO13CARG(IJ)   = FO13CAR(IJ)
             BF13POMG(IJ)   = BF13POM(IJ)
             BF13CARG(IJ)   = BF13CAR(IJ)
-         ENDDO
-         ENDIF
+         END DO
+         END IF
 
          IF ( CALC14 ) THEN
          DO IJ = 1, NXYDIM
@@ -1690,8 +1694,8 @@ contains
             FO14CARG(IJ)   = FO14CAR(IJ)
             BF14POMG(IJ)   = BF14POM(IJ)
             BF14CARG(IJ)   = BF14CAR(IJ)
-         ENDDO
-         ENDIF
+         END DO
+         END IF
 
 #endif
 
@@ -1819,17 +1823,17 @@ contains
          CALL FILEOUT(      YY,  CDC14G,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,  SDZDIM  )
 #ifdef PARALLEL
-      ENDIF
+      END IF
       CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 #endif
 
-      ENDIF
+      END IF
 
 !     CALL SDFILEOUT(
 !    I     SEDTNM,
 !    I     SDTX )
 
-      ENDDO ! -- End of Time integration
+      END DO ! -- End of Time integration
 
       END SUBROUTINE SD
 
@@ -1977,6 +1981,6 @@ end module sdmain_module
       IEN = IST + IWORK1 - 1
       IF ( IWORK2 > IRA ) THEN
         IEN = IEN + 1
-      ENDIF
+      END IF
 
       END SUBROUTINE PARA_RANGE

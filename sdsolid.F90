@@ -23,13 +23,13 @@ module globals_sdsolid
       REAL*8 C1(NXY,SDZDIM+1)
       REAL*8 C2(NXY,SDZDIM+1)
       REAL*8 FLX(NXY,SDZDIM+1), DFLX(NXY,SDZDIM+1)
-      REAL*8 W(NXY,SDZDIM+1)
+!     REAL*8 W(NXY,SDZDIM+1)
       REAL*8 RST(NXY,SDZDIM)
 
-      REAL*8 PHI(SDZDIM)
-      REAL*8 PHII(SDZDIM+1)
-      REAL*8 DBI(SDZDIM+1)
-      REAL*8 RHOCLA
+!     REAL*8 PHI(SDZDIM)
+!     REAL*8 PHII(SDZDIM+1)
+!     REAL*8 DBI(SDZDIM+1)
+!     REAL*8 RHOCLA
 
       REAL*8 EA(SDZDIM), EB(SDZDIM), EC(SDZDIM)
       REAL*8 EAL(SDZDIM), EBE(SDZDIM), EGA(SDZDIM), EEP(NXY,SDZDIM)
@@ -40,8 +40,6 @@ module globals_sdsolid
       DATA    IUNIT / 1 /
       REAL*8  AUNIT
       SAVE    AUNIT
-
-      INTEGER IJ, K
 
       LOGICAL SADU, SADQ, SADQF, SDIC, SDII
       SAVE SADU, SADQ, SADQF, SDIC, SDII
@@ -65,6 +63,8 @@ contains
 
       SUBROUTINE SDSOLIDSET
 
+      integer IJ, K
+
       WRITE(NFSTDO, *) '*** Carbon : SDSOLIDSET ***'
       REWIND(NFPARM)
       READ (NFPARM, NMSDSO, END=99)
@@ -84,17 +84,17 @@ contains
          AUNIT = 1.0D0
       ELSE
          AUNIT = 0.0D0
-      ENDIF
+      END IF
 
 !     -- Convert unit --
       DO K = SKST, SKEN
          LZ(K)   = LZ(K)   * 1.0D+2            !! [m] --> [cm]
          DLZ(K)  = DLZ(K)  * 1.0D+2            !! [m] --> [cm]
-      ENDDO
+      END DO
       DO K = SKST, SKEN+1
          LZI(K)  = LZI(K)  * 1.0D+2            !! [m] --> [cm]
          DLZI(K) = DLZI(K) * 1.0D+2            !! [m] --> [cm]
-      ENDDO
+      END DO
 
       END SUBROUTINE SDSOLIDSET
 
@@ -114,9 +114,11 @@ contains
       double precision, intent(out) :: SN(NXY,SDZDIM)
       double precision, intent(out) :: BFZ(NXY)
 
+      integer IJ, K
+
       DO IJ = IJTSTR, IJTEND
          FLX(IJ, SKST) = FF(IJ)
-      ENDDO
+      END DO
 
 !     -- Advection : Upwind --
 
@@ -128,22 +130,22 @@ contains
             SI(IJ, K) = S(IJ, K-1)
          ELSE IF ( W(IJ, K) < 0.0D0 ) THEN
             SI(IJ, K) = S(IJ, K)
-         ENDIF
+         END IF
          FLX(IJ, K)   = ( 1.0D0 - PHII(K) ) * W(IJ, K) * SI(IJ, K)
-      ENDDO
-      ENDDO
+      END DO
+      END DO
 
       DO IJ = IJTSTR, IJTEND
       IF ( W(IJ, SKEN+1) >= 0.0D0 ) THEN
          SI(IJ, SKEN+1) = S(IJ, SKEN)
       ELSE IF ( W(IJ, SKEN+1) < 0.0D0 ) THEN
          SI(IJ, SKEN+1) = 0.0D0
-      ENDIF
+      END IF
          FLX(IJ, SKEN+1) = ( 1.0D0 - PHII(SKEN+1) ) &
      &                   * W(IJ, SKEN+1) * SI(IJ, SKEN+1)
-      ENDDO
+      END DO
 
-      ENDIF
+      END IF
 
 !     -- Advection : Quickest --
 
@@ -159,14 +161,14 @@ contains
             C2(IJ, K) = ( 1.0D0 / ( DLZI(K) + DLZI(K+1) ) ) &
      &         * ( ( ( S(IJ, K-1) - S(IJ, K) ) / DLZI(K)   ) &
      &           - ( ( S(IJ, K) - S(IJ, K+1) ) / DLZI(K+1) ) )
-         ENDIF
+         END IF
             C1(IJ, K) = ( ( S(IJ, K) - S(IJ, K-1) ) / DLZI(K) ) &
      &         + ( ( ( DLZ(K-1) - DLZ(K) ) / 2.0D0 ) * C2(IJ, K) )
             C0(IJ, K) = ( ( DLZ(K) * S(IJ, K-1) + DLZ(K-1) * S(IJ, K) ) &
      &                / ( 2.0D0 * DLZI(K) ) ) &
      &         - ( ( ( DLZ(K-1) * DLZ(K) ) / 4.0D0 ) * C2(IJ, K) )
-      ENDDO
-      ENDDO
+      END DO
+      END DO
 
       DO IJ = IJTSTR, IJTEND
       IF ( W(IJ, SKST+1) >= 0.0D0 ) THEN
@@ -177,7 +179,7 @@ contains
          C2(IJ, SKST+1) = ( 1.0D0 / ( DLZI(SKST+1) + DLZI(SKST+2) ) ) &
      &      * ( ( ( S(IJ, SKST)   - S(IJ, SKST+1) ) / DLZI(SKST+1) ) &
      &        - ( ( S(IJ, SKST+1) - S(IJ, SKST+2) ) / DLZI(SKST+2) ) )
-      ENDIF
+      END IF
          C1(IJ, SKST+1) = ( ( S(IJ, SKST+1) - S(IJ, SKST) ) &
      &                      / DLZI(SKST+1) ) &
      &      + ( ( ( DLZ(SKST) - DLZ(SKST+1) ) / 2.0D0 ) &
@@ -187,7 +189,7 @@ contains
      &                  / ( 2.0D0 * DLZI(SKST+1) ) ) &
      &      - ( ( ( DLZ(SKST) * DLZ(SKST+1) ) / 4.0D0 ) &
      &          * C2(IJ, SKST+1) )
-      ENDDO
+      END DO
 
       DO IJ = IJTSTR, IJTEND
       IF ( W(IJ, SKEN) >= 0.0D0 ) THEN
@@ -198,7 +200,7 @@ contains
          C2(IJ, SKEN) = ( 1.0D0 / ( DLZI(SKEN) + DLZI(SKEN+1) ) ) &
      &      * ( ( ( S(IJ, SKEN-1) - S(IJ, SKEN) ) / DLZI(SKEN)   ) &
      &        - ( ( S(IJ, SKEN)   - 0.0D0       ) / DLZI(SKEN+1) ) )
-      ENDIF
+      END IF
          C1(IJ, SKEN) = ( ( S(IJ, SKEN) - S(IJ, SKEN-1) ) / DLZI(SKEN) ) &
      &      + ( ( ( DLZ(SKEN-1) - DLZ(SKEN) ) / 2.0D0 ) &
      &          * C2(IJ, SKEN) )
@@ -207,7 +209,7 @@ contains
      &                / ( 2.0D0 * DLZI(SKEN) ) ) &
      &      - ( ( ( DLZ(SKEN-1) * DLZ(SKEN) ) / 4.0D0 ) &
      &          * C2(IJ, SKEN) )
-      ENDDO
+      END DO
 
       DO IJ = IJTSTR, IJTEND
       IF ( W(IJ, SKEN+1) >= 0.0D0 ) THEN
@@ -218,7 +220,7 @@ contains
          C2(IJ, SKEN) = ( 1.0D0 / ( DLZI(SKEN+1) + DLZI(SKEN+1) ) ) &
      &      * ( ( ( S(IJ, SKEN) - 0.0D0 ) / DLZI(SKEN+1) ) &
      &        - ( ( 0.0D0       - 0.0D0 ) / DLZI(SKEN+1) ) )
-      ENDIF
+      END IF
       IF ( W(IJ, SKEN+1) >= 0.0D0 ) THEN
          C1(IJ, SKEN+1) = ( ( S(IJ, SKEN) - S(IJ, SKEN) ) &
      &                    / DLZI(SKEN+1) )
@@ -235,8 +237,8 @@ contains
      &                  / ( 2.0D0 * DLZI(SKEN+1) ) ) &
      &      - ( ( ( DLZ(SKEN) * DLZ(SKEN) ) / 4.0D0 ) &
      &          * C2(IJ, SKEN+1) )
-      ENDIF
-      ENDDO
+      END IF
+      END DO
 
       DO K = SKST+1, SKEN+1
       DO IJ = IJTSTR, IJTEND
@@ -244,8 +246,8 @@ contains
      &   - ( C1(IJ, K) * ( ( W(IJ, K) * TS ) / 2.0D0 ) ) &
      &   + ( C2(IJ, K) * ( ( ( ( W(IJ, K) * TS ) ** 2.0D0 ) / 3.0D0 ) &
      &             - ( ( ( DLZI(K) ** 2.0D0 ) / 12.0D0 ) ) ) )
-      ENDDO
-      ENDDO
+      END DO
+      END DO
 
 !     -- Advection : Quickest Flux limiter --
 
@@ -272,7 +274,7 @@ contains
          SI(IJ, SKST+1) = &
      &      MAX( SI(IJ, SKST+1), MAX( FLTMP, S(IJ, SKST+1) ) )
          SI(IJ, SKST+1) = MIN( SI(IJ, SKST+1), S(IJ, SKST) )
-      ENDIF
+      END IF
       ELSEIF ( W(IJ, SKST+1) < 0.0D0 ) THEN
       FLDEL(SKST+1) = S(IJ, SKST) - S(IJ, SKST+2)
       FLGAM(SKST+1) = ( ( S(IJ, SKST)   - S(IJ, SKST+1) ) &
@@ -294,9 +296,9 @@ contains
          SI(IJ, SKST+1) = &
      &      MAX( SI(IJ, SKST+1), MAX( FLTMP, S(IJ, SKST) ) )
          SI(IJ, SKST+1) = MIN( SI(IJ, SKST+1), S(IJ, SKST+1) )
-      ENDIF
-      ENDIF
-      ENDDO
+      END IF
+      END IF
+      END DO
 
       DO K = SKST+2, SKEN-1
       DO IJ = IJTSTR, IJTEND
@@ -318,7 +320,7 @@ contains
             SI(IJ, K) = &
      &         MAX( SI(IJ, K), MAX( FLTMP, S(IJ, K) ) )
             SI(IJ, K) = MIN( SI(IJ, K), S(IJ, K-1) )
-         ENDIF
+         END IF
       ELSEIF ( W(IJ, K) < 0.0D0 ) THEN
          FLDEL(K) = S(IJ, K-1) - S(IJ, K+1)
          FLGAM(K) = ( ( S(IJ, K-1) - S(IJ, K)   ) / DLZI(K)   ) &
@@ -337,10 +339,10 @@ contains
             SI(IJ, K) = &
      &         MAX( SI(IJ, K), MAX( FLTMP, S(IJ, K-1) ) )
             SI(IJ, K) = MIN( SI(IJ, K), S(IJ, K) )
-         ENDIF
-      ENDIF
-      ENDDO
-      ENDDO
+         END IF
+      END IF
+      END DO
+      END DO
 
       DO IJ = IJTSTR, IJTEND
       IF ( W(IJ, SKEN) >= 0.0D0 ) THEN
@@ -361,7 +363,7 @@ contains
          SI(IJ, SKEN) = &
      &      MAX( SI(IJ, SKEN), MAX( FLTMP, S(IJ, SKEN) ) )
          SI(IJ, SKEN) = MIN( SI(IJ, SKEN), S(IJ, SKEN-1) )
-      ENDIF
+      END IF
       ELSEIF ( W(IJ, SKEN) < 0.0D0 ) THEN
       FLDEL(SKEN) = S(IJ, SKEN-1) - 0.0D0
       FLGAM(SKEN) = ( ( S(IJ, SKEN-1) - S(IJ, SKEN) ) / DLZI(SKEN)   ) &
@@ -380,9 +382,9 @@ contains
          SI(IJ, SKEN) = &
      &      MAX( SI(IJ, SKEN), MAX( FLTMP, S(IJ, SKEN-1) ) )
          SI(IJ, SKEN) = MIN( SI(IJ, SKEN), S(IJ, SKEN) )
-      ENDIF
-      ENDIF
-      ENDDO
+      END IF
+      END IF
+      END DO
 
       DO IJ = IJTSTR, IJTEND
       IF ( W(IJ, SKEN+1) >= 0.0D0 ) THEN
@@ -403,7 +405,7 @@ contains
          SI(IJ, SKEN+1) = &
      &      MAX( SI(IJ, SKEN+1), MAX( FLTMP, S(IJ, SKEN) ) )
          SI(IJ, SKEN+1) = MIN( SI(IJ, SKEN+1), S(IJ, SKEN) )
-      ENDIF
+      END IF
       ELSEIF ( W(IJ, SKEN+1) < 0.0D0 ) THEN
       FLDEL(SKEN+1) = S(IJ, SKEN) - 0.0D0
       FLGAM(SKEN+1) = ( ( S(IJ, SKEN) - 0.0D0 ) / DLZI(SKEN+1) ) &
@@ -422,19 +424,19 @@ contains
          SI(IJ, SKEN+1) = &
      &      MAX( SI(IJ, SKEN+1), MAX( FLTMP, S(IJ, SKEN) ) )
          SI(IJ, SKEN+1) = MIN( SI(IJ, SKEN+1), 0.0D0 )
-      ENDIF
-      ENDIF
-      ENDDO
+      END IF
+      END IF
+      END DO
 
-      ENDIF
+      END IF
 
       DO K = SKST+1, SKEN+1
       DO IJ = IJTSTR, IJTEND
          FLX(IJ, K) = ( 1.0D0 - PHII(K) ) * W(IJ, K) * SI(IJ, K)
-      ENDDO
-      ENDDO
+      END DO
+      END DO
 
-      ENDIF
+      END IF
 
 !     -- Diffusion : Crank nicolson
 
@@ -446,13 +448,13 @@ contains
      &            / ( 2.0D0 * DLZ(K) * DLZI(K)   ) )
          EGA(K) = ( ( ( 1.0D0 - PHII(K+1) ) * DBI(K+1) ) &
      &            / ( 2.0D0 * DLZ(K) * DLZI(K+1) ) )
-      ENDDO
+      END DO
 
       DO K = SKST+1, SKEN-1
          EA(K)     = - EBE(K)
          EB(K)     = EAL(K) + EBE(K) + EGA(K)
          EC(K)     = - EGA(K)
-      ENDDO
+      END DO
 
          EA(SKST)  = - EBE(SKST)
          EB(SKST)  = EAL(SKST) + EGA(SKST)
@@ -467,7 +469,7 @@ contains
      &      + EGA(SKST) * S(IJ, SKST+1) &
      &      + ( ( FLX(IJ, SKST) - FLX(IJ, SKST+1) ) / DLZ(SKST) ) &
      &      - RST(IJ, SKST)
-      ENDDO
+      END DO
 
       DO K = SKST+1, SKEN-1
       DO IJ = IJTSTR, IJTEND
@@ -477,8 +479,8 @@ contains
      &      + EGA(K) * S(IJ, K+1) &
      &      + ( ( FLX(IJ, K) - FLX(IJ, K+1) ) / DLZ(K) ) &
      &      - RST(IJ, K)
-      ENDDO
-      ENDDO
+      END DO
+      END DO
 
       DO IJ = IJTSTR, IJTEND
          ED(IJ, SKEN) = &
@@ -486,11 +488,11 @@ contains
      &      + ( EAL(SKEN) - EBE(SKEN) ) * S(IJ, SKEN) &
      &      + ( ( FLX(IJ, SKEN) - FLX(IJ, SKEN+1) ) / DLZ(SKEN) ) &
      &      - RST(IJ, SKEN)
-      ENDDO
+      END DO
 
       CALL STRIDAG( EA, EB, EC, ED, EX )
 
-      ENDIF
+      END IF
 
 !     -- Diffusion : Implicit
 
@@ -502,13 +504,13 @@ contains
      &            / ( DLZ(K) * DLZI(K)   ) )
          EGA(K) = ( ( ( 1.0D0 - PHII(K+1) ) * DBI(K+1) ) &
      &            / ( DLZ(K) * DLZI(K+1) ) )
-      ENDDO
+      END DO
 
       DO K = SKST+1, SKEN-1
          EA(K)     = - EBE(K)
          EB(K)     = EAL(K) + EBE(K) + EGA(K)
          EC(K)     = - EGA(K)
-      ENDDO
+      END DO
 
          EA(SKST)  = - EBE(SKST)
          EB(SKST)  = EAL(SKST) + EGA(SKST)
@@ -523,12 +525,12 @@ contains
      &      + EAL(K) * S(IJ, K) &
      &      + ( ( FLX(IJ, K) - FLX(IJ, K+1) ) / DLZ(K) ) &
      &      - RST(IJ, K)
-      ENDDO
-      ENDDO
+      END DO
+      END DO
 
       CALL STRIDAG( EA, EB, EC, ED, EX )
 
-      ENDIF
+      END IF
 
 !     -- t = t + dt --
 
@@ -536,12 +538,12 @@ contains
       DO IJ = IJTSTR, IJTEND
          SN(IJ, K) = MAX( EX(IJ, K), 0.0D0 )
          EX(IJ, K) = 0.0D0
-      ENDDO
-      ENDDO
+      END DO
+      END DO
 
       DO IJ = IJTSTR, IJTEND
          BFZ(IJ) = FLX(IJ, SKEN+1)
-      ENDDO
+      END DO
 
       END SUBROUTINE SOLID
 
@@ -562,9 +564,11 @@ contains
       double precision, intent(out) :: SN(NXY,SDZDIM)
       double precision, intent(out) :: BFZ(NXY)
 
+      integer IJ, K
+
       DO IJ = IJTSTR, IJTEND
          FLX(IJ, SKST) = FF(IJ)
-      ENDDO
+      END DO
 
 !     -- Advection : Upwind --
 
@@ -576,22 +580,22 @@ contains
             SI(IJ, K) = S(IJ, K-1)
          ELSE IF ( W(IJ, K) < 0.0D0 ) THEN
             SI(IJ, K) = S(IJ, K)
-         ENDIF
+         END IF
          FLX(IJ, K)   = ( 1.0D0 - PHII(K) ) * W(IJ, K) * SI(IJ, K)
-      ENDDO
-      ENDDO
+      END DO
+      END DO
 
       DO IJ = IJTSTR, IJTEND
       IF ( W(IJ, SKEN+1) >= 0.0D0 ) THEN
          SI(IJ, SKEN+1) = S(IJ, SKEN)
       ELSE IF ( W(IJ, SKEN+1) < 0.0D0 ) THEN
          SI(IJ, SKEN+1) = 1.0D+6 * RHOCLA
-      ENDIF
+      END IF
          FLX(IJ, SKEN+1) = ( 1.0D0 - PHII(SKEN+1) ) &
      &                   * W(IJ, SKEN+1) * SI(IJ, SKEN+1)
-      ENDDO
+      END DO
 
-      ENDIF
+      END IF
 
 !     -- Advection : Quickest --
 
@@ -607,14 +611,14 @@ contains
             C2(IJ, K) = ( 1.0D0 / ( DLZI(K) + DLZI(K+1) ) ) &
      &         * ( ( ( S(IJ, K-1) - S(IJ, K) ) / DLZI(K)   ) &
      &           - ( ( S(IJ, K) - S(IJ, K+1) ) / DLZI(K+1) ) )
-         ENDIF
+         END IF
             C1(IJ, K) = ( ( S(IJ, K) - S(IJ, K-1) ) / DLZI(K) ) &
      &         + ( ( ( DLZ(K-1) - DLZ(K) ) / 2.0D0 ) * C2(IJ, K) )
             C0(IJ, K) = ( ( DLZ(K) * S(IJ, K-1) + DLZ(K-1) * S(IJ, K) ) &
      &                / ( 2.0D0 * DLZI(K) ) ) &
      &         - ( ( ( DLZ(K-1) * DLZ(K) ) / 4.0D0 ) * C2(IJ, K) )
-      ENDDO
-      ENDDO
+      END DO
+      END DO
 
       DO IJ = IJTSTR, IJTEND
       IF ( W(IJ, SKST+1) >= 0.0D0 ) THEN
@@ -625,7 +629,7 @@ contains
          C2(IJ, SKST+1) = ( 1.0D0 / ( DLZI(SKST+1) + DLZI(SKST+2) ) ) &
      &      * ( ( ( S(IJ, SKST)   - S(IJ, SKST+1) ) / DLZI(SKST+1) ) &
      &        - ( ( S(IJ, SKST+1) - S(IJ, SKST+2) ) / DLZI(SKST+2) ) )
-      ENDIF
+      END IF
          C1(IJ, SKST+1) = ( ( S(IJ, SKST+1) - S(IJ, SKST) ) &
      &                      / DLZI(SKST+1) ) &
      &      + ( ( ( DLZ(SKST) - DLZ(SKST+1) ) / 2.0D0 ) &
@@ -635,7 +639,7 @@ contains
      &                  / ( 2.0D0 * DLZI(SKST+1) ) ) &
      &      - ( ( ( DLZ(SKST) * DLZ(SKST+1) ) / 4.0D0 ) &
      &          * C2(IJ, SKST+1) )
-      ENDDO
+      END DO
 
       DO IJ = IJTSTR, IJTEND
       IF ( W(IJ, SKEN) >= 0.0D0 ) THEN
@@ -646,7 +650,7 @@ contains
          C2(IJ, SKEN) = ( 1.0D0 / ( DLZI(SKEN) + DLZI(SKEN+1) ) ) &
      &      * ( ( ( S(IJ, SKEN-1) - S(IJ, SKEN) ) / DLZI(SKEN)   ) &
      &        - ( ( S(IJ, SKEN)   - 1.0D+6 * RHOCLA ) / DLZI(SKEN+1) ) )
-      ENDIF
+      END IF
          C1(IJ, SKEN) = ( ( S(IJ, SKEN) - S(IJ, SKEN-1) ) / DLZI(SKEN) ) &
      &      + ( ( ( DLZ(SKEN-1) - DLZ(SKEN) ) / 2.0D0 ) &
      &          * C2(IJ, SKEN) )
@@ -655,7 +659,7 @@ contains
      &                / ( 2.0D0 * DLZI(SKEN) ) ) &
      &      - ( ( ( DLZ(SKEN-1) * DLZ(SKEN) ) / 4.0D0 ) &
      &          * C2(IJ, SKEN) )
-      ENDDO
+      END DO
 
       DO IJ = IJTSTR, IJTEND
       IF ( W(IJ, SKEN+1) >= 0.0D0 ) THEN
@@ -666,7 +670,7 @@ contains
          C2(IJ, SKEN) = ( 1.0D0 / ( DLZI(SKEN+1) + DLZI(SKEN+1) ) ) &
      &      * ( ( ( S(IJ, SKEN) - 1.0D+6 * RHOCLA ) / DLZI(SKEN+1) ) &
      &    - ( ( 1.0D+6 * RHOCLA - 1.0D+6 * RHOCLA ) / DLZI(SKEN+1) ) )
-      ENDIF
+      END IF
       IF ( W(IJ, SKEN+1) >= 0.0D0 ) THEN
          C1(IJ, SKEN+1) = ( ( S(IJ, SKEN) - S(IJ, SKEN) ) &
      &                    / DLZI(SKEN+1) )
@@ -683,8 +687,8 @@ contains
      &                  / ( 2.0D0 * DLZI(SKEN+1) ) ) &
      &      - ( ( ( DLZ(SKEN) * DLZ(SKEN) ) / 4.0D0 ) &
      &          * C2(IJ, SKEN+1) )
-      ENDIF
-      ENDDO
+      END IF
+      END DO
 
       DO K = SKST+1, SKEN+1
       DO IJ = IJTSTR, IJTEND
@@ -692,8 +696,8 @@ contains
      &   - ( C1(IJ, K) * ( ( W(IJ, K) * TS ) / 2.0D0 ) ) &
      &   + ( C2(IJ, K) * ( ( ( ( W(IJ, K) * TS ) ** 2.0D0 ) / 3.0D0 ) &
      &             - ( ( ( DLZI(K) ** 2.0D0 ) / 12.0D0 ) ) ) )
-      ENDDO
-      ENDDO
+      END DO
+      END DO
 
 !     -- Advection : Quickest Flux limiter --
 
@@ -720,7 +724,7 @@ contains
          SI(IJ, SKST+1) = &
      &      MAX( SI(IJ, SKST+1), MAX( FLTMP, S(IJ, SKST+1) ) )
          SI(IJ, SKST+1) = MIN( SI(IJ, SKST+1), S(IJ, SKST) )
-      ENDIF
+      END IF
       ELSEIF ( W(IJ, SKST+1) < 0.0D0 ) THEN
       FLDEL(SKST+1) = S(IJ, SKST) - S(IJ, SKST+2)
       FLGAM(SKST+1) = ( ( S(IJ, SKST)   - S(IJ, SKST+1) ) &
@@ -742,9 +746,9 @@ contains
          SI(IJ, SKST+1) = &
      &      MAX( SI(IJ, SKST+1), MAX( FLTMP, S(IJ, SKST) ) )
          SI(IJ, SKST+1) = MIN( SI(IJ, SKST+1), S(IJ, SKST+1) )
-      ENDIF
-      ENDIF
-      ENDDO
+      END IF
+      END IF
+      END DO
 
       DO K = SKST+2, SKEN-1
       DO IJ = IJTSTR, IJTEND
@@ -766,7 +770,7 @@ contains
             SI(IJ, K) = &
      &         MAX( SI(IJ, K), MAX( FLTMP, S(IJ, K) ) )
             SI(IJ, K) = MIN( SI(IJ, K), S(IJ, K-1) )
-         ENDIF
+         END IF
       ELSEIF ( W(IJ, K) < 0.0D0 ) THEN
          FLDEL(K) = S(IJ, K-1) - S(IJ, K+1)
          FLGAM(K) = ( ( S(IJ, K-1) - S(IJ, K)   ) / DLZI(K)   ) &
@@ -785,10 +789,10 @@ contains
             SI(IJ, K) = &
      &         MAX( SI(IJ, K), MAX( FLTMP, S(IJ, K-1) ) )
             SI(IJ, K) = MIN( SI(IJ, K), S(IJ, K) )
-         ENDIF
-      ENDIF
-      ENDDO
-      ENDDO
+         END IF
+      END IF
+      END DO
+      END DO
 
       DO IJ = IJTSTR, IJTEND
       IF ( W(IJ, SKEN) >= 0.0D0 ) THEN
@@ -809,7 +813,7 @@ contains
          SI(IJ, SKEN) = &
      &      MAX( SI(IJ, SKEN), MAX( FLTMP, S(IJ, SKEN) ) )
          SI(IJ, SKEN) = MIN( SI(IJ, SKEN), S(IJ, SKEN-1) )
-      ENDIF
+      END IF
       ELSEIF ( W(IJ, SKEN) < 0.0D0 ) THEN
       FLDEL(SKEN) = S(IJ, SKEN-1) - 1.0D+6 * RHOCLA
       FLGAM(SKEN) = ( ( S(IJ, SKEN-1) - S(IJ, SKEN) ) / DLZI(SKEN)   ) &
@@ -828,9 +832,9 @@ contains
          SI(IJ, SKEN) = &
      &      MAX( SI(IJ, SKEN), MAX( FLTMP, S(IJ, SKEN-1) ) )
          SI(IJ, SKEN) = MIN( SI(IJ, SKEN), S(IJ, SKEN) )
-      ENDIF
-      ENDIF
-      ENDDO
+      END IF
+      END IF
+      END DO
 
       DO IJ = IJTSTR, IJTEND
       IF ( W(IJ, SKEN+1) >= 0.0D0 ) THEN
@@ -851,7 +855,7 @@ contains
          SI(IJ, SKEN+1) = &
      &      MAX( SI(IJ, SKEN+1), MAX( FLTMP, S(IJ, SKEN) ) )
          SI(IJ, SKEN+1) = MIN( SI(IJ, SKEN+1), S(IJ, SKEN) )
-      ENDIF
+      END IF
       ELSEIF ( W(IJ, SKEN+1) < 0.0D0 ) THEN
       FLDEL(SKEN+1) = S(IJ, SKEN) - 1.0D+6 * RHOCLA
       FLGAM(SKEN+1) &
@@ -873,19 +877,19 @@ contains
          SI(IJ, SKEN+1) = &
      &      MAX( SI(IJ, SKEN+1), MAX( FLTMP, S(IJ, SKEN) ) )
          SI(IJ, SKEN+1) = MIN( SI(IJ, SKEN+1), 1.0D+6 * RHOCLA )
-      ENDIF
-      ENDIF
-      ENDDO
+      END IF
+      END IF
+      END DO
 
-      ENDIF
+      END IF
 
       DO K = SKST+1, SKEN+1
       DO IJ = IJTSTR, IJTEND
          FLX(IJ, K) = ( 1.0D0 - PHII(K) ) * W(IJ, K) * SI(IJ, K)
-      ENDDO
-      ENDDO
+      END DO
+      END DO
 
-      ENDIF
+      END IF
 
 !     -- Diffusion : Crank nicolson
 
@@ -897,13 +901,13 @@ contains
      &            / ( 2.0D0 * DLZ(K) * DLZI(K)   ) )
          EGA(K) = ( ( ( 1.0D0 - PHII(K+1) ) * DBI(K+1) ) &
      &            / ( 2.0D0 * DLZ(K) * DLZI(K+1) ) )
-      ENDDO
+      END DO
 
       DO K = SKST+1, SKEN-1
          EA(K)     = - EBE(K)
          EB(K)     = EAL(K) + EBE(K) + EGA(K)
          EC(K)     = - EGA(K)
-      ENDDO
+      END DO
 
          EA(SKST)  = - EBE(SKST)
          EB(SKST)  = EAL(SKST) + EGA(SKST)
@@ -918,7 +922,7 @@ contains
      &      + EGA(SKST) * S(IJ, SKST+1) &
      &      + ( ( FLX(IJ, SKST) - FLX(IJ, SKST+1) ) / DLZ(SKST) ) &
      &      - RST(IJ, SKST)
-      ENDDO
+      END DO
 
       DO K = SKST+1, SKEN-1
       DO IJ = IJTSTR, IJTEND
@@ -928,8 +932,8 @@ contains
      &      + EGA(K) * S(IJ, K+1) &
      &      + ( ( FLX(IJ, K) - FLX(IJ, K+1) ) / DLZ(K) ) &
      &      - RST(IJ, K)
-      ENDDO
-      ENDDO
+      END DO
+      END DO
 
       DO IJ = IJTSTR, IJTEND
          ED(IJ, SKEN) = &
@@ -937,11 +941,11 @@ contains
      &      + ( EAL(SKEN) - EBE(SKEN) ) * S(IJ, SKEN) &
      &      + ( ( FLX(IJ, SKEN) - FLX(IJ, SKEN+1) ) / DLZ(SKEN) ) &
      &      - RST(IJ, SKEN)
-      ENDDO
+      END DO
 
       CALL STRIDAG( EA, EB, EC, ED, EX )
 
-      ENDIF
+      END IF
 
 !     -- Diffusion : Implicit
 
@@ -953,13 +957,13 @@ contains
      &            / ( DLZ(K) * DLZI(K)   ) )
          EGA(K) = ( ( ( 1.0D0 - PHII(K+1) ) * DBI(K+1) ) &
      &            / ( DLZ(K) * DLZI(K+1) ) )
-      ENDDO
+      END DO
 
       DO K = SKST+1, SKEN-1
          EA(K)     = - EBE(K)
          EB(K)     = EAL(K) + EBE(K) + EGA(K)
          EC(K)     = - EGA(K)
-      ENDDO
+      END DO
 
          EA(SKST)  = - EBE(SKST)
          EB(SKST)  = EAL(SKST) + EGA(SKST)
@@ -974,12 +978,12 @@ contains
      &      + EAL(K) * S(IJ, K) &
      &      + ( ( FLX(IJ, K) - FLX(IJ, K+1) ) / DLZ(K) ) &
      &      - RST(IJ, K)
-      ENDDO
-      ENDDO
+      END DO
+      END DO
 
       CALL STRIDAG( EA, EB, EC, ED, EX )
 
-      ENDIF
+      END IF
 
 !     -- t = t + dt --
 
@@ -987,12 +991,12 @@ contains
       DO IJ = IJTSTR, IJTEND
          SN(IJ, K) = MAX( EX(IJ, K), 0.0D0 )
          EX(IJ, K) = 0.0D0
-      ENDDO
-      ENDDO
+      END DO
+      END DO
 
       DO IJ = IJTSTR, IJTEND
          BFZ(IJ) = FLX(IJ, SKEN+1)
-      ENDDO
+      END DO
 
       END SUBROUTINE SOLID_CLAY
 
@@ -1009,9 +1013,11 @@ contains
       double precision, intent(in)  :: S(NXY,SDZDIM)
       double precision, intent(out) :: SN(NXY,SDZDIM)
 
+      integer IJ, K
+
       DO IJ = IJTSTR, IJTEND
          FLX(IJ, SKST) = FF(IJ)
-      ENDDO
+      END DO
 
 !     -- Advection : Upwind --
 
@@ -1023,22 +1029,22 @@ contains
             SI(IJ, K) = S(IJ, K-1)
          ELSE IF ( W(IJ, K) < 0.0D0 ) THEN
             SI(IJ, K) = S(IJ, K)
-         ENDIF
+         END IF
          FLX(IJ, K)   = ( 1.0D0 - PHII(K) ) * W(IJ, K) * SI(IJ, K)
-      ENDDO
-      ENDDO
+      END DO
+      END DO
 
       DO IJ = IJTSTR, IJTEND
       IF ( W(IJ, SKEN+1) >= 0.0D0 ) THEN
          SI(IJ, SKEN+1) = S(IJ, SKEN)
       ELSE IF ( W(IJ, SKEN+1) < 0.0D0 ) THEN
          SI(IJ, SKEN+1) = 0.0D0
-      ENDIF
+      END IF
          FLX(IJ, SKEN+1) = ( 1.0D0 - PHII(SKEN+1) ) &
      &                   * W(IJ, SKEN+1) * SI(IJ, SKEN+1)
-      ENDDO
+      END DO
 
-      ENDIF
+      END IF
 
 !     -- Advection : Quickest --
 
@@ -1054,14 +1060,14 @@ contains
             C2(IJ, K) = ( 1.0D0 / ( DLZI(K) + DLZI(K+1) ) ) &
      &         * ( ( ( S(IJ, K-1) - S(IJ, K) ) / DLZI(K)   ) &
      &           - ( ( S(IJ, K) - S(IJ, K+1) ) / DLZI(K+1) ) )
-         ENDIF
+         END IF
             C1(IJ, K) = ( ( S(IJ, K) - S(IJ, K-1) ) / DLZI(K) ) &
      &         + ( ( ( DLZ(K-1) - DLZ(K) ) / 2.0D0 ) * C2(IJ, K) )
             C0(IJ, K) = ( ( DLZ(K) * S(IJ, K-1) + DLZ(K-1) * S(IJ, K) ) &
      &                / ( 2.0D0 * DLZI(K) ) ) &
      &         - ( ( ( DLZ(K-1) * DLZ(K) ) / 4.0D0 ) * C2(IJ, K) )
-      ENDDO
-      ENDDO
+      END DO
+      END DO
 
       DO IJ = IJTSTR, IJTEND
       IF ( W(IJ, SKST+1) >= 0.0D0 ) THEN
@@ -1072,7 +1078,7 @@ contains
          C2(IJ, SKST+1) = ( 1.0D0 / ( DLZI(SKST+1) + DLZI(SKST+2) ) ) &
      &      * ( ( ( S(IJ, SKST)   - S(IJ, SKST+1) ) / DLZI(SKST+1) ) &
      &        - ( ( S(IJ, SKST+1) - S(IJ, SKST+2) ) / DLZI(SKST+2) ) )
-      ENDIF
+      END IF
          C1(IJ, SKST+1) = ( ( S(IJ, SKST+1) - S(IJ, SKST) ) &
      &                      / DLZI(SKST+1) ) &
      &      + ( ( ( DLZ(SKST) - DLZ(SKST+1) ) / 2.0D0 ) &
@@ -1082,7 +1088,7 @@ contains
      &                  / ( 2.0D0 * DLZI(SKST+1) ) ) &
      &      - ( ( ( DLZ(SKST) * DLZ(SKST+1) ) / 4.0D0 ) &
      &          * C2(IJ, SKST+1) )
-      ENDDO
+      END DO
 
       DO IJ = IJTSTR, IJTEND
       IF ( W(IJ, SKEN) >= 0.0D0 ) THEN
@@ -1093,7 +1099,7 @@ contains
          C2(IJ, SKEN) = ( 1.0D0 / ( DLZI(SKEN) + DLZI(SKEN+1) ) ) &
      &      * ( ( ( S(IJ, SKEN-1) - S(IJ, SKEN) ) / DLZI(SKEN)   ) &
      &        - ( ( S(IJ, SKEN)   - 0.0D0       ) / DLZI(SKEN+1) ) )
-      ENDIF
+      END IF
          C1(IJ, SKEN) = ( ( S(IJ, SKEN) - S(IJ, SKEN-1) ) / DLZI(SKEN) ) &
      &      + ( ( ( DLZ(SKEN-1) - DLZ(SKEN) ) / 2.0D0 ) &
      &          * C2(IJ, SKEN) )
@@ -1102,7 +1108,7 @@ contains
      &                / ( 2.0D0 * DLZI(SKEN) ) ) &
      &      - ( ( ( DLZ(SKEN-1) * DLZ(SKEN) ) / 4.0D0 ) &
      &          * C2(IJ, SKEN) )
-      ENDDO
+      END DO
 
       DO IJ = IJTSTR, IJTEND
       IF ( W(IJ, SKEN+1) >= 0.0D0 ) THEN
@@ -1113,7 +1119,7 @@ contains
          C2(IJ, SKEN) = ( 1.0D0 / ( DLZI(SKEN+1) + DLZI(SKEN+1) ) ) &
      &      * ( ( ( S(IJ, SKEN) - 0.0D0 ) / DLZI(SKEN+1) ) &
      &        - ( ( 0.0D0       - 0.0D0 ) / DLZI(SKEN+1) ) )
-      ENDIF
+      END IF
       IF ( W(IJ, SKEN+1) >= 0.0D0 ) THEN
          C1(IJ, SKEN+1) = ( ( S(IJ, SKEN) - S(IJ, SKEN) ) &
      &                    / DLZI(SKEN+1) )
@@ -1130,8 +1136,8 @@ contains
      &                  / ( 2.0D0 * DLZI(SKEN+1) ) ) &
      &      - ( ( ( DLZ(SKEN) * DLZ(SKEN) ) / 4.0D0 ) &
      &          * C2(IJ, SKEN+1) )
-      ENDIF
-      ENDDO
+      END IF
+      END DO
 
       DO K = SKST+1, SKEN+1
       DO IJ = IJTSTR, IJTEND
@@ -1139,8 +1145,8 @@ contains
      &   - ( C1(IJ, K) * ( ( W(IJ, K) * TS ) / 2.0D0 ) ) &
      &   + ( C2(IJ, K) * ( ( ( ( W(IJ, K) * TS ) ** 2.0D0 ) / 3.0D0 ) &
      &             - ( ( ( DLZI(K) ** 2.0D0 ) / 12.0D0 ) ) ) )
-      ENDDO
-      ENDDO
+      END DO
+      END DO
 
 !     -- Advection : Quickest Flux limiter --
 
@@ -1167,7 +1173,7 @@ contains
          SI(IJ, SKST+1) = &
      &      MAX( SI(IJ, SKST+1), MAX( FLTMP, S(IJ, SKST+1) ) )
          SI(IJ, SKST+1) = MIN( SI(IJ, SKST+1), S(IJ, SKST) )
-      ENDIF
+      END IF
       ELSEIF ( W(IJ, SKST+1) < 0.0D0 ) THEN
       FLDEL(SKST+1) = S(IJ, SKST) - S(IJ, SKST+2)
       FLGAM(SKST+1) = ( ( S(IJ, SKST)   - S(IJ, SKST+1) ) &
@@ -1189,9 +1195,9 @@ contains
          SI(IJ, SKST+1) = &
      &      MAX( SI(IJ, SKST+1), MAX( FLTMP, S(IJ, SKST) ) )
          SI(IJ, SKST+1) = MIN( SI(IJ, SKST+1), S(IJ, SKST+1) )
-      ENDIF
-      ENDIF
-      ENDDO
+      END IF
+      END IF
+      END DO
 
       DO K = SKST+2, SKEN-1
       DO IJ = IJTSTR, IJTEND
@@ -1213,7 +1219,7 @@ contains
             SI(IJ, K) = &
      &         MAX( SI(IJ, K), MAX( FLTMP, S(IJ, K) ) )
             SI(IJ, K) = MIN( SI(IJ, K), S(IJ, K-1) )
-         ENDIF
+         END IF
       ELSEIF ( W(IJ, K) < 0.0D0 ) THEN
          FLDEL(K) = S(IJ, K-1) - S(IJ, K+1)
          FLGAM(K) = ( ( S(IJ, K-1) - S(IJ, K)   ) / DLZI(K)   ) &
@@ -1232,10 +1238,10 @@ contains
             SI(IJ, K) = &
      &         MAX( SI(IJ, K), MAX( FLTMP, S(IJ, K-1) ) )
             SI(IJ, K) = MIN( SI(IJ, K), S(IJ, K) )
-         ENDIF
-      ENDIF
-      ENDDO
-      ENDDO
+         END IF
+      END IF
+      END DO
+      END DO
 
       DO IJ = IJTSTR, IJTEND
       IF ( W(IJ, SKEN) >= 0.0D0 ) THEN
@@ -1256,7 +1262,7 @@ contains
          SI(IJ, SKEN) = &
      &      MAX( SI(IJ, SKEN), MAX( FLTMP, S(IJ, SKEN) ) )
          SI(IJ, SKEN) = MIN( SI(IJ, SKEN), S(IJ, SKEN-1) )
-      ENDIF
+      END IF
       ELSEIF ( W(IJ, SKEN) < 0.0D0 ) THEN
       FLDEL(SKEN) = S(IJ, SKEN-1) - 0.0D0
       FLGAM(SKEN) = ( ( S(IJ, SKEN-1) - S(IJ, SKEN) ) / DLZI(SKEN)   ) &
@@ -1275,9 +1281,9 @@ contains
          SI(IJ, SKEN) = &
      &      MAX( SI(IJ, SKEN), MAX( FLTMP, S(IJ, SKEN-1) ) )
          SI(IJ, SKEN) = MIN( SI(IJ, SKEN), S(IJ, SKEN) )
-      ENDIF
-      ENDIF
-      ENDDO
+      END IF
+      END IF
+      END DO
 
       DO IJ = IJTSTR, IJTEND
       IF ( W(IJ, SKEN+1) >= 0.0D0 ) THEN
@@ -1298,7 +1304,7 @@ contains
          SI(IJ, SKEN+1) = &
      &      MAX( SI(IJ, SKEN+1), MAX( FLTMP, S(IJ, SKEN) ) )
          SI(IJ, SKEN+1) = MIN( SI(IJ, SKEN+1), S(IJ, SKEN) )
-      ENDIF
+      END IF
       ELSEIF ( W(IJ, SKEN+1) < 0.0D0 ) THEN
       FLDEL(SKEN+1) = S(IJ, SKEN) - 0.0D0
       FLGAM(SKEN+1) = ( ( S(IJ, SKEN) - 0.0D0 ) / DLZI(SKEN+1) ) &
@@ -1317,19 +1323,19 @@ contains
          SI(IJ, SKEN+1) = &
      &      MAX( SI(IJ, SKEN+1), MAX( FLTMP, S(IJ, SKEN) ) )
          SI(IJ, SKEN+1) = MIN( SI(IJ, SKEN+1), 0.0D0 )
-      ENDIF
-      ENDIF
-      ENDDO
+      END IF
+      END IF
+      END DO
 
-      ENDIF
+      END IF
 
       DO K = SKST+1, SKEN+1
       DO IJ = IJTSTR, IJTEND
          FLX(IJ, K) = ( 1.0D0 - PHII(K) ) * W(IJ, K) * SI(IJ, K)
-      ENDDO
-      ENDDO
+      END DO
+      END DO
 
-      ENDIF
+      END IF
 
 !     -- Diffusion : Crank nicolson
 
@@ -1341,13 +1347,13 @@ contains
      &            / ( 2.0D0 * DLZ(K) * DLZI(K)   ) )
          EGA(K) = ( ( ( 1.0D0 - PHII(K+1) ) * DBI(K+1) ) &
      &            / ( 2.0D0 * DLZ(K) * DLZI(K+1) ) )
-      ENDDO
+      END DO
 
       DO K = SKST+1, SKEN-1
          EA(K)     = - EBE(K)
          EB(K)     = EAL(K) + EBE(K) + EGA(K)
          EC(K)     = - EGA(K)
-      ENDDO
+      END DO
 
          EA(SKST)  = - EBE(SKST)
          EB(SKST)  = EAL(SKST) + EGA(SKST)
@@ -1362,7 +1368,7 @@ contains
      &      + EGA(SKST) * S(IJ, SKST+1) &
      &      + ( ( FLX(IJ, SKST) - FLX(IJ, SKST+1) ) / DLZ(SKST) ) &
      &      + ( ( 1.0D0 - PHI(SKST) ) / 3.1536D+7 )
-      ENDDO
+      END DO
 
       DO K = SKST+1, SKEN-1
       DO IJ = IJTSTR, IJTEND
@@ -1372,8 +1378,8 @@ contains
      &      + EGA(K) * S(IJ, K+1) &
      &      + ( ( FLX(IJ, K) - FLX(IJ, K+1) ) / DLZ(K) ) &
      &      + ( ( 1.0D0 - PHI(K) ) / 3.1536D+7 )
-      ENDDO
-      ENDDO
+      END DO
+      END DO
 
       DO IJ = IJTSTR, IJTEND
          ED(IJ, SKEN) = &
@@ -1381,11 +1387,11 @@ contains
      &      + ( EAL(SKEN) - EBE(SKEN) ) * S(IJ, SKEN) &
      &      + ( ( FLX(IJ, SKEN) - FLX(IJ, SKEN+1) ) / DLZ(SKEN) ) &
      &      + ( ( 1.0D0 - PHI(SKEN) ) / 3.1536D+7 )
-      ENDDO
+      END DO
 
       CALL STRIDAG( EA, EB, EC, ED, EX )
 
-      ENDIF
+      END IF
 
 !     -- Diffusion : Implicit
 
@@ -1397,13 +1403,13 @@ contains
      &            / ( DLZ(K) * DLZI(K)   ) )
          EGA(K) = ( ( ( 1.0D0 - PHII(K+1) ) * DBI(K+1) ) &
      &            / ( DLZ(K) * DLZI(K+1) ) )
-      ENDDO
+      END DO
 
       DO K = SKST+1, SKEN-1
          EA(K)     = - EBE(K)
          EB(K)     = EAL(K) + EBE(K) + EGA(K)
          EC(K)     = - EGA(K)
-      ENDDO
+      END DO
 
          EA(SKST)  = - EBE(SKST)
          EB(SKST)  = EAL(SKST) + EGA(SKST)
@@ -1418,12 +1424,12 @@ contains
      &      + EAL(K) * S(IJ, K) &
      &      + ( ( FLX(IJ, K) - FLX(IJ, K+1) ) / DLZ(K) ) &
      &      + ( ( 1.0D0 - PHI(K) ) / 3.1536D+7 )
-      ENDDO
-      ENDDO
+      END DO
+      END DO
 
       CALL STRIDAG( EA, EB, EC, ED, EX )
 
-      ENDIF
+      END IF
 
 !     -- t = t + dt --
 
@@ -1431,8 +1437,8 @@ contains
       DO IJ = IJTSTR, IJTEND
          SN(IJ, K) = MAX( EX(IJ, K), 0.0D0 )
          EX(IJ, K) = 0.0D0
-      ENDDO
-      ENDDO
+      END DO
+      END DO
 
       END SUBROUTINE AGE
 
@@ -1452,21 +1458,21 @@ contains
       DO IJ = IJTSTR, IJTEND
          BET(IJ)      = EB(SKST)
          EX(IJ, SKST) = ED(IJ, SKST) / BET(IJ)
-      ENDDO
+      END DO
 
       DO K = SKST+1, SKEN
       DO IJ = IJTSTR, IJTEND
          EW(IJ, K) = EC(K-1) / BET(IJ)
          BET(IJ)   = EB(K) - EA(K) * EW(IJ, K)
          EX(IJ, K) = (ED(IJ, K) - EA(K) * EX(IJ, K-1) ) / BET(IJ)
-      ENDDO
-      ENDDO
+      END DO
+      END DO
 
       DO K = SKEN-1, SKST, -1
       DO IJ = IJTSTR, IJTEND
          EX(IJ, K) = EX(IJ, K) - EW(IJ, K+1) * EX(IJ, K+1)
-      ENDDO
-      ENDDO
+      END DO
+      END DO
 
       END SUBROUTINE STRIDAG
 

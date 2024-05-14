@@ -14,32 +14,29 @@ module globals_sdopal
       use sddim_module
       implicit none
 
-      REAL*8 SOPA(NXY, SDZDIM)
-      REAL*8 PCLA(NXY, SDZDIM)
-      REAL*8 POPA(NXY, SDZDIM)
-      REAL*8 PCO(NXY, SDZDIM)
-      REAL*8 GAMMAL(NXY, SDZDIM)
-      REAL*8 CSIL(NXY, SDZDIM)
-      REAL*8 SATSIL(NXY, SDZDIM)
-      REAL*8 ROPA(NXY, SDZDIM)
+!     REAL*8 SOPA(NXY, SDZDIM)
+!     REAL*8 PCLA(NXY, SDZDIM)
+!     REAL*8 POPA(NXY, SDZDIM)
+!     REAL*8 PCO(NXY, SDZDIM)
+!     REAL*8 CSIL(NXY, SDZDIM)
+!     REAL*8 SATSIL(NXY, SDZDIM)
+!     REAL*8 ROPA(NXY, SDZDIM)
 
-      REAL*8 UO(NXY, SDZDIM)
-      REAL*8 TEM(NXY)
-      REAL*8 ETA1(NXY, SDZDIM), ETA2(NXY, SDZDIM)
-      REAL*8 KO(NXY, SDZDIM)
+!     REAL*8 UO(NXY, SDZDIM)
+!     REAL*8 TEM(NXY)
+!     REAL*8 ETA1(NXY, SDZDIM), ETA2(NXY, SDZDIM)
+!     REAL*8 KO(NXY, SDZDIM)
+
       REAL*8 RCOPA
       SAVE   RCOPA
+      LOGICAL ROPRID, ROPARC
+      SAVE ROPRID, ROPARC
       NAMELIST /NMSDOP/ RCOPA, ROPRID, ROPARC
       DATA   RCOPA &
      &    / 5.00D-3 /
           !! 5.0*10-3 [cm3/mol/s]
-
-      LOGICAL ROPRID, ROPARC
-      SAVE ROPRID, ROPARC
       DATA ROPRID / .FALSE. /  !! Ridgwell's DEI formulation ?
       DATA ROPARC / .TRUE. /  !! Archer's DEI formulation ?
-
-      INTEGER IJ, K
 
 end module globals_sdopal
 
@@ -73,6 +70,14 @@ contains
       double precision, intent(out) :: ROPA(NXY, SDZDIM)
       double precision, intent(out) :: SATSIL(NXY, SDZDIM)
 
+      double precision :: GAMMAL(NXY, SDZDIM)
+      double precision :: PCO(NXY, SDZDIM)
+      double precision :: UO(NXY, SDZDIM)
+      double precision :: ETA1(NXY, SDZDIM), ETA2(NXY, SDZDIM)
+      double precision :: KO(NXY, SDZDIM)
+
+      integer :: IJ, K
+
       DO K = SKST, SKEN
       DO IJ = IJTSTR, IJTEND
          IF ( SOPA(IJ, K) == 0.0D0 ) THEN
@@ -84,12 +89,12 @@ contains
             ELSE
                GAMMAL(IJ, K) = 1.0D0 - ( ( 4.5D-2 * PCO(IJ, K) ) &
      &                       ** 5.8D-1 )
-            ENDIF
-         ENDIF
+            END IF
+         END IF
          SATSIL(IJ, K) = ( GAMMAL(IJ, K) * 1.0D+1 &
      &      ** ( 6.44D0 - ( 9.68D+2 / ( 2.7315D+2 + TEM(IJ) ) ) ) )
-      ENDDO
-      ENDDO
+      END DO
+      END DO
 
       DO K = SKST, SKEN
       DO IJ = IJTSTR, IJTEND
@@ -111,12 +116,12 @@ contains
             ELSEIF (ROPARC) THEN
                ROPA(IJ, K) = RCOPA &
      &             * ( SATSIL(IJ, K) - CSIL(IJ, K) )
-            ENDIF
+            END IF
          ELSE
             ROPA(IJ, K) = 0.0D0
-         ENDIF
-      ENDDO
-      ENDDO
+         END IF
+      END DO
+      END DO
 
       END SUBROUTINE DISOPA
 

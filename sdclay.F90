@@ -14,10 +14,8 @@ module globals_sdclay
       use sddim_module
       implicit none
 
-      REAL*8 SCLA(NXY, SDZDIM)
-      REAL*8 RCLA(NXY, SDZDIM)
-
-      INTEGER IJ, K
+!     REAL*8 SCLA(NXY, SDZDIM)
+!     REAL*8 RCLA(NXY, SDZDIM)
 
 end module globals_sdclay
 
@@ -39,6 +37,8 @@ contains
 
       double precision, intent(in) :: SCLA(NXY, SDZDIM)
       double precision, intent(out) :: RCLA(NXY, SDZDIM)
+
+      integer :: IJ, K
 
       DO K = SKST, SKEN
          DO IJ = IJTSTR, IJTEND

@@ -15,10 +15,10 @@ module globals_sdcaco3
       use sddim_module
       implicit none
 
-      REAL*8 SCAR(NXY, SDZDIM)
-      REAL*8 CCO32(NXY, SDZDIM)
-      REAL*8 SATCO32(NXY)
-      REAL*8 RCAR(NXY, SDZDIM)
+!     REAL*8 SCAR(NXY, SDZDIM)
+!     REAL*8 CCO32(NXY, SDZDIM)
+!     REAL*8 SATCO32(NXY)
+!     REAL*8 RCAR(NXY, SDZDIM)
 
       REAL*8 RCCAR, NCAR
       SAVE   RCCAR, NCAR
@@ -27,8 +27,7 @@ module globals_sdcaco3
      &    / 365.D0, 4.50D0 /
           !! 1.0 [/day], 4.5
 
-      REAL*8 TEM(NXY), SAL(NXY), BDEP(NXY), CSAT(NXY)
-      REAL*8 K1, K2, KB
+!     REAL*8 TEM(NXY), SAL(NXY), BDEP(NXY), CSAT(NXY)
       REAL*8 KPRIME, DELV, RR, DK, PRES, KPRES !! Millero [1995]
       SAVE   KPRIME, DELV, RR, DK
       DATA KPRIME &
@@ -44,9 +43,7 @@ module globals_sdcaco3
      &    / -1.330D-2 /
           !! [cm3 / bar mol]
 
-      REAL*8 PHI(SDZDIM)
-
-      INTEGER IJ, K
+!     REAL*8 PHI(SDZDIM)
 
 end module globals_sdcaco3
 
@@ -78,6 +75,8 @@ contains
       double precision, intent(in) :: PHI(SDZDIM)
       double precision, intent(out) :: RCAR(NXY, SDZDIM)
 
+      integer :: IJ, K
+
       DO K = SKST, SKEN
       DO IJ = IJTSTR, IJTEND
          IF ( SCAR(IJ, K) /= 0.0D0 .and. &
@@ -87,9 +86,9 @@ contains
      &          ** NCAR )
          ELSE
             RCAR(IJ, K) = 0.0D0
-         ENDIF
-      ENDDO
-      ENDDO
+         END IF
+      END DO
+      END DO
 
       END SUBROUTINE DISCAR
 
@@ -101,6 +100,8 @@ contains
       double precision, intent(in) :: BDEP(NXY)
       double precision, intent(out) :: CSAT(NXY)
 
+      integer :: IJ, K
+
       DO IJ = IJTSTR, IJTEND
          PRES  =  BDEP(IJ) / 1.0D+3  !! [cm] --> [bar]
          KPRES = LOG(KPRIME) &
@@ -108,7 +109,7 @@ contains
      &      + 0.50D0 * DK / ( RR * ( TEM(IJ) + kelvin ) ) * (PRES)**2    !! Effect of Pressure
          KPRES = EXP(KPRES)
          CSAT(IJ)  = ( KPRES / 1.028D-2 ) * 1.0D+6                     !! Millero [1982]
-      ENDDO
+      END DO
 
       END SUBROUTINE SATCAR
 

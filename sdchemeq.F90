@@ -17,38 +17,37 @@ module globals_sdchemeq
       use zchem_module
       implicit none
 
-      REAL*8  CTIN(NXY, SDZDIM) !! Total carbon [mMol/m^3] (input)
-      REAL*8  ATIN(NXY, SDZDIM) !! Alkalinity [mMol/m^3] (input)
-      REAL*8  SITIN(NXY)        !! Total silicon [mMol/m^3] (input)
-      REAL*8  PTIN(NXY)         !! Total phosphorous [mMol/m^3] (input)
+!     REAL*8  CTIN(NXY, SDZDIM) !! Total carbon [mMol/m^3] (input)
+!     REAL*8  ATIN(NXY, SDZDIM) !! Alkalinity [mMol/m^3] (input)
+!     REAL*8  SITIN(NXY)        !! Total silicon [mMol/m^3] (input)
+!     REAL*8  PTIN(NXY)         !! Total phosphorous [mMol/m^3] (input)
 
-      REAL*8  TEM(NXY)          !! Temperature
-      REAL*8  SAL(NXY)          !! Salinity
-      REAL*8  PCO2O(NXY)        !! [CO2(g)] [ppmv]
-      REAL*8  ALP(NXY)          !! Solubility of CO2 [mMol/m^3/ppmv]
-      REAL*8  CT(NXY, SDZDIM)   !! Total carbon [Mol/kg]
-      REAL*8  AT(NXY, SDZDIM)   !! Alkalinity [Mol/kg]
-      REAL*8  SIT(NXY)          !! Total silicon [Mol/kg]
-      REAL*8  PT(NXY)           !! Total phosphorous [Mol/kg]
+!     REAL*8  TEM(NXY)          !! Temperature
+!     REAL*8  SAL(NXY)          !! Salinity
+!     REAL*8  PCO2O(NXY)        !! [CO2(g)] [ppmv]
+!     REAL*8  ALP(NXY)          !! Solubility of CO2 [mMol/m^3/ppmv]
+!     REAL*8  CT(NXY, SDZDIM)   !! Total carbon [Mol/kg]
+!     REAL*8  AT(NXY, SDZDIM)   !! Alkalinity [Mol/kg]
+!     REAL*8  SIT(NXY)          !! Total silicon [Mol/kg]
+!     REAL*8  PT(NXY)           !! Total phosphorous [Mol/kg]
 
-      REAL*8  CO2(NXY, SDZDIM)  !! surface [CO2]   [mMol/m^3]
-      REAL*8  HCO3(NXY, SDZDIM) !! surface [HCO3-] [mMol/m^3]
-      REAL*8  CO32(NXY, SDZDIM) !! surface [CO32-] [mMol/m^3]
+!     REAL*8  CO2(NXY, SDZDIM)  !! surface [CO2]   [mMol/m^3]
+!     REAL*8  HCO3(NXY, SDZDIM) !! surface [HCO3-] [mMol/m^3]
+!     REAL*8  CO32(NXY, SDZDIM) !! surface [CO32-] [mMol/m^3]
 
-      REAL*8  K0(NXY),  K1(NXY),   K2(NXY)
-      REAL*8  KB(NXY),  KW(NXY)
-      REAL*8  K1P(NXY), K2P(NXY),  K3P(NXY)
-      REAL*8  KSI(NXY), KSO4(NXY), KF(NXY)
+!     REAL*8  K0(NXY),  K1(NXY),   K2(NXY)
+!     REAL*8  KB(NXY),  KW(NXY)
+!     REAL*8  K1P(NXY), K2P(NXY),  K3P(NXY)
+!     REAL*8  KSI(NXY), KSO4(NXY), KF(NXY)
 
-      REAL*8  BT(NXY)           !! Total boric acid [Mol/kg]
-      REAL*8  SO4T(NXY)         !! Total SO4 [Mol/kg]
-      REAL*8  FLT(NXY)          !! Total fluorosis [Mol/kg]
+!     REAL*8  BT(NXY)           !! Total boric acid [Mol/kg]
+!     REAL*8  SO4T(NXY)         !! Total SO4 [Mol/kg]
+!     REAL*8  FLT(NXY)          !! Total fluorosis [Mol/kg]
 
       REAL*8  PH(NXY, SDZDIM), CU, RCU, PM
       SAVE    PH, CU, RCU, PM
 
-      REAL*8  H, X, XLW, XHI, F, DELT
-      INTEGER IJ, K, ITR
+!     REAL*8  H, X, XLW, XHI, F, DELT
       LOGICAL OFIRST
       SAVE OFIRST
 
@@ -77,6 +76,8 @@ contains
 
       SUBROUTINE SDCHEMEQSET
 
+      integer :: IJ, K
+
       WRITE(NFSTDO, *) '*** Carbon : SDCHEMEQSET ***'
       REWIND(NFPARM)
       READ (NFPARM, NMSDCHEM, END=99)
@@ -85,8 +86,8 @@ contains
       DO IJ = 1, NXY
          DO K = 1, SDZDIM
             PH(IJ, K) = PHINI
-         ENDDO
-      ENDDO
+         END DO
+      END DO
 
       PM  = 1.0D+6          !! [atm] --> [ppmv]
 
@@ -105,23 +106,44 @@ contains
      &     SITIN, PTIN, &
      &     CO32 )
 
-      double precision, intent(in)  :: TEM(NXY)
-      double precision, intent(in)  :: SAL(NXY)
-      double precision, intent(in)  :: CTIN(NXY, SDZDIM)
-      double precision, intent(in)  :: ATIN(NXY, SDZDIM)
-      double precision, intent(in)  :: SITIN(NXY)
-      double precision, intent(in)  :: PTIN(NXY)
-      double precision, intent(out) :: CO32(NXY, SDZDIM)
+      double precision, intent(in)  :: TEM(NXY)          !! Temperature
+      double precision, intent(in)  :: SAL(NXY)          !! Salinity
+      double precision, intent(in)  :: CTIN(NXY, SDZDIM) !! Total carbon [mMol/m^3]
+      double precision, intent(in)  :: ATIN(NXY, SDZDIM) !! Alkalinity [mMol/m^3]
+      double precision, intent(in)  :: SITIN(NXY)        !! Total silicon [mMol/m^3]
+      double precision, intent(in)  :: PTIN(NXY)         !! Total phosphorous [mMol/m^3]
+      double precision, intent(out) :: CO32(NXY, SDZDIM) !! [CO32-] [mMol/m^3]
+
+      double precision :: PCO2O(NXY)        !! [CO2(g)] [ppmv]
+      double precision :: ALP(NXY)          !! Solubility of CO2 [mMol/m^3/ppmv]
+      double precision :: CT(NXY, SDZDIM)   !! Total carbon [Mol/kg]
+      double precision :: AT(NXY, SDZDIM)   !! Alkalinity [Mol/kg]
+      double precision :: SIT(NXY)          !! Total silicon [Mol/kg]
+      double precision :: PT(NXY)           !! Total phosphorous [Mol/kg]
+      double precision :: BT(NXY)           !! Total boric acid [Mol/kg]
+      double precision :: SO4T(NXY)         !! Total SO4 [Mol/kg]
+      double precision :: FLT(NXY)          !! Total fluorosis [Mol/kg]
+      double precision :: CO2(NXY, SDZDIM)  !! [CO2]   [mMol/m^3]
+      double precision :: HCO3(NXY, SDZDIM) !! [HCO3-] [mMol/m^3]
+
+      double precision :: K0(NXY),  K1(NXY),   K2(NXY)
+      double precision :: KB(NXY),  KW(NXY)
+      double precision :: K1P(NXY), K2P(NXY),  K3P(NXY)
+      double precision :: KSI(NXY), KSO4(NXY), KF(NXY)
+
+      double precision :: H, X, XLW, XHI, F, DELT
+
+      integer :: IJ, K, ITR
 
       DO IJ = IJTSTR, IJTEND
 !        -- [mMol/m^3]-->[Mol/kg] --
          DO K = SKST, SKEN
          CT(IJ, K)  = CTIN(IJ, K)  * CU
          AT(IJ, K)  = ATIN(IJ, K)  * CU
-         ENDDO
+         END DO
          SIT(IJ) = SITIN(IJ) * CU
          PT(IJ)  = PTIN(IJ)  * CU
-      ENDDO
+      END DO
 
       DO IJ = IJTSTR, IJTEND
       IF ( TEM(IJ) /= 0.0D0 .and. SAL(IJ) /= 0.0D0 ) THEN
@@ -141,15 +163,15 @@ contains
          BT(IJ)   = FBT( SAL(IJ) )
          SO4T(IJ) = FSO4T( SAL(IJ) )
          FLT(IJ)  = FFLT( SAL(IJ) )
-      ENDIF
-      ENDDO
+      END IF
+      END DO
 
       IF (OFIRST) THEN
          DELT = DPHINI
          OFIRST = .FALSE.
       ELSE
          DELT = DPH
-      ENDIF
+      END IF
 
       DO K = SKST, SKEN
       DO IJ = IJTSTR, IJTEND
@@ -182,9 +204,9 @@ contains
                XHI = X
             ELSE
                XLW = X
-            ENDIF
+            END IF
 
-         ENDDO
+         END DO
 
          WRITE(NFSTDO,*) ' ITERATION COUNT OVER (SEDIMENT) :', IJ
          WRITE(NFSTDO,*) '    PH  = ', X
@@ -218,17 +240,17 @@ contains
                XHI = X
             ELSE
                XLW = X
-            ENDIF
-         ENDDO
+            END IF
+         END DO
 
 !        STOP
 
  999     CONTINUE
          PH(IJ, K) = X
 
-      ENDIF
-      ENDDO
-      ENDDO
+      END IF
+      END DO
+      END DO
 
       DO K = SKST, SKEN
       DO IJ = IJTSTR, IJTEND
@@ -246,9 +268,9 @@ contains
          HCO3(IJ, K) = K1(IJ) * CO2(IJ, K) / X
 !        -- CARBONATE ION --
          CO32(IJ, K) = K2(IJ) * HCO3(IJ, K) / X
-      ENDIF
-      ENDDO
-      ENDDO
+      END IF
+      END DO
+      END DO
 
       END SUBROUTINE SDCHEMEQ
 
