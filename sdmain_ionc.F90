@@ -396,40 +396,6 @@ module globals_sdmain
       INTEGER     NFSOTS
       PARAMETER ( NFSOTS = 999 )
 
-!     LOGICAL  EXEWOI
-!     SAVE     EXEWOI
-!     DATA     EXEWOI / .TRUE. /  !! execute writeout ?
-!     LOGICAL  WOITEA
-!     INTEGER  WOISTR
-!     SAVE     WOITEA, WOISTR
-!     DATA     WOITEA / .FALSE. /
-!     !! writeout all the years ? or the last N years ?
-!     INTEGER  TITERM
-!     SAVE     TITERM
-!     DATA     TITERM / 100 /
-!     LOGICAL  WOIINA
-!     SAVE     WOIINA
-!     DATA     WOIINA / .TRUE. /
-!     !! writeout all the years ? or N-year intervals ?
-!     INTEGER  TIINTE, CIINTE
-!     SAVE     TIINTE, CIINTE
-!     DATA     TIINTE / 100 /
-!     INTEGER  UNITIN, UNIT
-!     SAVE     UNITIN
-!     DATA     UNITIN / 0 /
-!     INTEGER  TIUINT, CIUINT
-!     SAVE     TIUINT, CIUINT
-!     DATA     TIUINT, CIUINT / 10000 /
-
-!     LOGICAL  EXEWOF
-!     SAVE     EXEWOF
-!     DATA     EXEWOF / .TRUE. /  !! execute writeout ?
-!     INTEGER  WOFSTR
-!     SAVE     WOFSTR
-!     INTEGER  TFTERM
-!     SAVE     TFTERM
-!     DATA     TFTERM / 100 /
-
       CHARACTER CFILE*128, CTITLE*128, CUNIT*128
 
 end module globals_sdmain
@@ -769,11 +735,6 @@ contains
       DO TT = TSTR, TEND
 
          YY = INT( TSYR * TT )
-!        IF ( EXEWOI ) THEN
-!        IF ( MOD( TT-1,   CIUINT ) == 0 ) THEN
-!           UNIT = UNITIN + INT( TT /  CIUINT )
-!        END IF
-!        END IF
 
       IF (SDFIRST) THEN
          DO K = SKST, SKEN
