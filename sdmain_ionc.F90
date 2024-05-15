@@ -25,7 +25,7 @@ module globals_sdmain
 
       INTEGER   TSTR, TEND, TENDYR
       PARAMETER (TSTR   =      1)
-      PARAMETER (TENDYR =      1)  !!      10 [yr]
+      PARAMETER (TENDYR =    2)  !!      10 [yr]
 !     PARAMETER (TENDYR =     10)  !!      10 [yr]
 !     PARAMETER (TENDYR =     20)  !!      20 [yr]
 !     PARAMETER (TENDYR =     30)  !!      30 [yr]
@@ -55,16 +55,209 @@ module globals_sdmain
 !     PARAMETER (TEND    =      1 )
 
       INTEGER   TOUT, TOUTYR
-      PARAMETER (TOUTYR  =     120000)
+      PARAMETER (TOUTYR  =     10000)
       PARAMETER (TOUT    = TOUTYR / TSYR )
 
 ! ==================================================
 !   Sediments
 ! ==================================================
 
-      REAL*8 SDTX(NXYDIM, SDZDIM, SEDTDM)
-      SAVE   SDTX
-      REAL*8 SDTXBUF(NXDIM, NYDIM, SDZDIM, SEDTDM)
+!-- Density, Molar mass :
+!      Density [g/cm^3], Molar mass [g/Mol],
+!      Molar mass / Density [cm^3/Mol]
+      REAL*8 RHOCLA, RHOPOM, RHOCAR, RHOOPA
+      REAL*8 MOLCLA, MOLPOM, MOLCAR, MOLOPA
+      REAL*8 MCLA,   MPOM,   MCAR,   MOPA
+      SAVE   RHOCLA, RHOPOM, RHOCAR, RHOOPA
+      SAVE   MOLCLA, MOLPOM, MOLCAR, MOLOPA
+      SAVE   MCLA,   MPOM,   MCAR,   MOPA
+      DATA   RHOCLA, RHOPOM, RHOCAR, RHOOPA &
+     &    / 2.60D0, 2.60D0, 2.60D0, 2.60D0 /
+          !! 2.6, 2.6, 2.6, 2.6 [g/cm^3]
+      DATA   MOLCLA, MOLPOM, MOLCAR, MOLOPA &
+     &    / 430.0D0, 12.0D0, 100.0D0,  60.0D0 /
+          !! 430, 12, 100, 60 [g/Mol]
+      REAL*8 RHO13POM, RHO14POM, RHO13CAR, RHO14CAR
+      REAL*8 MOL13POM, MOL14POM, MOL13CAR, MOL14CAR
+      REAL*8 M13POM,   M14POM,   M13CAR,   M14CAR
+      SAVE   RHO13POM, RHO14POM, RHO13CAR, RHO14CAR
+      SAVE   MOL13POM, MOL14POM, MOL13CAR, MOL14CAR
+      SAVE   M13POM,   M14POM,   M13CAR,   M14CAR
+      DATA   RHO13POM, RHO14POM, RHO13CAR, RHO14CAR &
+     &    / 2.60D0, 2.60D0, 2.60D0, 2.60D0 /
+          !! 2.6, 2.6, 2.6, 2.6 [g/cm^3]
+      DATA   MOL13POM, MOL14POM, MOL13CAR, MOL14CAR &
+     &    /  13.0D0, 14.0D0, 101.0D0, 102.0D0 /
+          !! 13, 14, 101, 102 [g/Mol]
+
+!-- Redfield ratio :
+      REAL*8 FP, PP, NP, CP, OP
+          !! Fe:P, P:P, N:P, C:P, O:P
+      SAVE   FP, PP, NP, CP, OP
+      DATA   FP, PP, NP, CP, OP &
+     &    / 4.70D-4, 1.0D0, 16.0D0, 117.0D0, 170.0D0 /
+          !! 0.00047, 1, 16, 117, 170
+
+!-- Advection, Diffusion :
+!      Sedimentation rate
+      REAL*8 W(NXY, SDZ+1)
+      REAL*8 WG(NXYDIM, SDZDIM+1)
+!      Porosity
+      REAL*8 PHI0, Z0
+      SAVE   PHI0, Z0
+      DATA   PHI0, Z0 &
+     &    / 0.9D0, 1.823D0 /
+          !! 0.9, 1.823 [m]
+      REAL*8 PHI(SDZ), PHII(SDZ+1)
+      SAVE   PHI, PHII
+!      Bioturbation diffusivity
+      REAL*8 DB0, ZB
+      SAVE   DB0, ZB
+      DATA   DB0, ZB &
+     &    / 3.0D-5, 1.0D-1 /
+          !! 3.0*10-5 [m^2/yr], 0.10 [m]
+      REAL*8 DBI(SDZ+1)
+      SAVE   DBI
+!      Pw Effective molecular diffusivity
+      REAL*8 DSW
+      REAL*8 DSWNIT, DSWDIC, DSWALK, DSWDO2, DSWSIL
+      REAL*8 DSW13DIC, DSW14DIC
+      REAL*8 NOPA
+      SAVE   DSW
+      SAVE   DSWNIT, DSWDIC, DSWALK, DSWDO2, DSWSIL
+      SAVE   DSW13DIC, DSW14DIC
+      SAVE   NOPA
+      DATA   DSW &
+     &    / 4.59D-10 /
+          !! 4.59*10-10 [m^2/s]
+      DATA   DSWNIT, DSWDIC, DSWALK, DSWDO2, DSWSIL &
+     &    / 5.0D-10, 6.4D-10, 6.4D-10, 1.2D-9, 5.0D-10 /
+          !! 5.0*10-10, 6.4*10-10, 6.4*10-10, 1.2*10-9, 5.0*10-10  [m^2/s]
+      DATA   DSW13DIC, DSW14DIC &
+     &    / 6.4D-10, 6.4D-10 /
+          !! 6.4*10-10, 6.4*10-10 [m^2/s]
+      DATA   NOPA &
+     &    / 2.50D0 /
+      REAL*8 DEINIT(SDZ+1)
+      REAL*8 DEIDIC(SDZ+1)
+      REAL*8 DEIALK(SDZ+1)
+      REAL*8 DEIDO2(SDZ+1)
+      REAL*8 DEISIL(SDZ+1)
+      REAL*8 DEI13DIC(SDZ+1)
+      REAL*8 DEI14DIC(SDZ+1)
+      SAVE   DEINIT, DEIDIC, DEIALK, DEIDO2, DEISIL
+      SAVE   DEI13DIC, DEI14DIC
+
+!-- 13C, 14C :
+      REAL*8 PDB              !! standard 13C/12C
+      REAL*8 DSTD             !! standard 14C/12C
+      REAL*8 EOPH, EOSH, EPS  !! fractionaton factor
+      REAL*8 FEOPH, FEOSH, R13, R14
+      REAL*8 THALF, ADCAY     !! half decay time [yr], decay constant
+      REAL*8 DLTC13, DLTC14
+      SAVE   PDB
+      SAVE   DSTD
+      SAVE   EOPH, EOSH
+      SAVE   FEOPH, FEOSH
+      SAVE   THALF, ADCAY
+      DATA   PDB &
+     &    / 0.0112372D0 /
+      DATA   DSTD &
+     &    / 1.1892D-12 /
+      DATA   EOPH, EOSH &
+     &    / -22.0, 0.0 /
+      DATA   EPS &
+     &    / 1.0D-10 /
+      DATA   THALF &
+     &    / 5370.D0 /
+
+
+!-- Option :
+      LOGICAL SDFIRST
+      SAVE SDFIRST
+      DATA SDFIRST / .TRUE. /
+      LOGICAL SDOFIRST
+      SAVE SDOFIRST
+      DATA SDOFIRST / .TRUE.  /
+
+      LOGICAL DEIARC
+      SAVE DEIARC
+      NAMELIST /NMSDDEAR/ DEIARC
+      DATA DEIARC / .TRUE. /  !! Archer's DEI formulation ?
+
+      LOGICAL  CALC13, CALC14
+      SAVE     CALC13, CALC14
+      NAMELIST /NMSDISO/ CALC13, CALC14
+      DATA CALC13, CALC14 / .TRUE., .TRUE. /  !! carbon isotopes ?
+
+!-- etc :
+      CHARACTER SEDTNM(SEDTDM)*16
+      SAVE SEDTNM
+
+      LOGICAL  WOTSTP
+      SAVE     WOTSTP
+      DATA     WOTSTP / .TRUE. /  !! writeout time step ?
+      INTEGER     NFSOTS
+      PARAMETER ( NFSOTS = 999 )
+
+      CHARACTER CFILE*128, CTITLE*128, CUNIT*128
+
+end module globals_sdmain
+
+! =====================================================================
+
+module sdmain_module
+      use globals_sdmain
+      use sdclay_module
+      use sdpom_module
+      use sdcaco3_module
+      use sdopal_module
+      use sdsolid_module
+      use sdliquid_module
+      use sdchemeq_module
+      implicit none
+contains
+
+      SUBROUTINE SD( &
+     &     bdepg, &
+     &     ficlag, fipomg, ficarg, fiopag, fiageg, &
+     &     bwtemg, bwsalg, bwnitg, bwdicg, bwalkg, bwsilg, bwdo2g, &
+     &     bw13dicg, bw14dicg, &
+     &     out3dvar )
+
+! ==================================================
+!   Sediments
+! ==================================================
+
+! --------------------------------------------------
+!   Forcing of Particles and Dissolved material
+!      Clay, POM, CaCO3, Opal, agetracer
+!      Phosphate, Dissolved Inorganic Carbon,
+!      Alkalinity, Dissolved Oxygen, Silicate
+! --------------------------------------------------
+
+      double precision, intent(in) :: BDEPG(NXYDIM)
+      double precision, intent(in) :: FICLAG(NXYDIM)
+      double precision, intent(in) :: FIPOMG(NXYDIM)
+      double precision, intent(in) :: FICARG(NXYDIM)
+      double precision, intent(in) :: FIOPAG(NXYDIM)
+      double precision, intent(in) :: FIAGEG(NXYDIM)
+
+      double precision, intent(in) :: BWTEMG(NXYDIM)
+      double precision, intent(in) :: BWSALG(NXYDIM)
+      double precision, intent(in) :: BWNITG(NXYDIM)
+      double precision, intent(in) :: BWDICG(NXYDIM)
+      double precision, intent(in) :: BWALKG(NXYDIM)
+      double precision, intent(in) :: BWDO2G(NXYDIM)
+      double precision, intent(in) :: BWSILG(NXYDIM)
+      double precision, intent(in) :: BW13DICG(NXYDIM)
+      double precision, intent(in) :: BW14DICG(NXYDIM)
+
+      double precision, intent(out) :: OUT3DVAR(NXYDIM, SDZDIM)
+
+      double precision :: SDTX(NXYDIM, SDZDIM, SEDTDM)
+     !SAVE   SDTX
+      double precision :: SDTXBUF(NXDIM, NYDIM, SDZDIM, SEDTDM)
 
 ! --------------------------------------------------
 !   Particles
@@ -206,7 +399,7 @@ module globals_sdmain
       REAL*8                 FOPOMG(NXYDIM)
       REAL*8                 FOCARG(NXYDIM)
       REAL*8                 FOOPAG(NXYDIM)
-      REAL*8 FIAGEG(NXYDIM), FOAGEG(NXYDIM)
+      REAL*8                 FOAGEG(NXYDIM)
       REAL*8 FI13POMG(NXYDIM), FO13POMG(NXYDIM)
       REAL*8 FI14POMG(NXYDIM), FO14POMG(NXYDIM)
       REAL*8 FI13CARG(NXYDIM), FO13CARG(NXYDIM)
@@ -218,259 +411,61 @@ module globals_sdmain
       REAL*8 FIALK(NXY),   FOALK(NXY)
       REAL*8 FIDO2(NXY),   FODO2(NXY)
       REAL*8 FISIL(NXY),   FOSIL(NXY)
-      REAL*8 FI13DIC(NXY), FO13DIC(NXY)
-      REAL*8 FI14DIC(NXY), FO14DIC(NXY)
+      double precision :: FI13DIC(NXY), FO13DIC(NXY)
+      double precision :: FI14DIC(NXY), FO14DIC(NXY)
 
 !-- Sediment-bottom Flux :
 !      clay [g/m^3*cm/s], the others [mMol/m^3*cm/s]
-      REAL*8 BFCLA(NXY)
-      REAL*8 BFPOM(NXY)
-      REAL*8 BFCAR(NXY)
-      REAL*8 BFOPA(NXY)
-      REAL*8 BF13POM(NXY)
-      REAL*8 BF14POM(NXY)
-      REAL*8 BF13CAR(NXY)
-      REAL*8 BF14CAR(NXY)
-      REAL*8 BFCLAG(NXYDIM)
-      REAL*8 BFPOMG(NXYDIM)
-      REAL*8 BFCARG(NXYDIM)
-      REAL*8 BFOPAG(NXYDIM)
-      REAL*8 BF13POMG(NXYDIM)
-      REAL*8 BF14POMG(NXYDIM)
-      REAL*8 BF13CARG(NXYDIM)
-      REAL*8 BF14CARG(NXYDIM)
-
-!-- Density, Molar mass :
-!      Density [g/cm^3], Molar mass [g/Mol],
-!      Molar mass / Density [cm^3/Mol]
-      REAL*8 RHOCLA, RHOPOM, RHOCAR, RHOOPA
-      REAL*8 MOLCLA, MOLPOM, MOLCAR, MOLOPA
-      REAL*8 MCLA,   MPOM,   MCAR,   MOPA
-      SAVE   RHOCLA, RHOPOM, RHOCAR, RHOOPA
-      SAVE   MOLCLA, MOLPOM, MOLCAR, MOLOPA
-      SAVE   MCLA,   MPOM,   MCAR,   MOPA
-      DATA   RHOCLA, RHOPOM, RHOCAR, RHOOPA &
-     &    / 2.60D0, 2.60D0, 2.60D0, 2.60D0 /
-          !! 2.6, 2.6, 2.6, 2.6 [g/cm^3]
-      DATA   MOLCLA, MOLPOM, MOLCAR, MOLOPA &
-     &    / 430.0D0, 12.0D0, 100.0D0,  60.0D0 /
-          !! 430, 12, 100, 60 [g/Mol]
-      REAL*8 RHO13POM, RHO14POM, RHO13CAR, RHO14CAR
-      REAL*8 MOL13POM, MOL14POM, MOL13CAR, MOL14CAR
-      REAL*8 M13POM,   M14POM,   M13CAR,   M14CAR
-      SAVE   RHO13POM, RHO14POM, RHO13CAR, RHO14CAR
-      SAVE   MOL13POM, MOL14POM, MOL13CAR, MOL14CAR
-      SAVE   M13POM,   M14POM,   M13CAR,   M14CAR
-      DATA   RHO13POM, RHO14POM, RHO13CAR, RHO14CAR &
-     &    / 2.60D0, 2.60D0, 2.60D0, 2.60D0 /
-          !! 2.6, 2.6, 2.6, 2.6 [g/cm^3]
-      DATA   MOL13POM, MOL14POM, MOL13CAR, MOL14CAR &
-     &    /  13.0D0, 14.0D0, 101.0D0, 102.0D0 /
-          !! 13, 14, 101, 102 [g/Mol]
-
-!-- Redfield ratio :
-      REAL*8 FP, PP, NP, CP, OP
-          !! Fe:P, P:P, N:P, C:P, O:P
-      SAVE   FP, PP, NP, CP, OP
-      DATA   FP, PP, NP, CP, OP &
-     &    / 4.70D-4, 1.0D0, 16.0D0, 117.0D0, 170.0D0 /
-          !! 0.00047, 1, 16, 117, 170
-
-!-- Advection, Diffusion :
-!      Sedimentation rate
-      REAL*8 W(NXY, SDZ+1)
-      REAL*8 WG(NXYDIM, SDZDIM+1)
-!      Porosity
-      REAL*8 PHI0, Z0
-      SAVE   PHI0, Z0
-      DATA   PHI0, Z0 &
-     &    / 0.9D0, 1.823D0 /
-          !! 0.9, 1.823 [m]
-      REAL*8 PHI(SDZ), PHII(SDZ+1)
-      SAVE   PHI, PHII
-!      Bioturbation diffusivity
-      REAL*8 DB0, ZB
-      SAVE   DB0, ZB
-      DATA   DB0, ZB &
-     &    / 3.0D-5, 1.0D-1 /
-          !! 3.0*10-5 [m^2/yr], 0.10 [m]
-      REAL*8 DBI(SDZ+1)
-      SAVE   DBI
-!      Pw Effective molecular diffusivity
-      REAL*8 DSW
-      REAL*8 DSWNIT, DSWDIC, DSWALK, DSWDO2, DSWSIL
-      REAL*8 DSW13DIC, DSW14DIC
-      REAL*8 NOPA
-      SAVE   DSW
-      SAVE   DSWNIT, DSWDIC, DSWALK, DSWDO2, DSWSIL
-      SAVE   DSW13DIC, DSW14DIC
-      SAVE   NOPA
-      DATA   DSW &
-     &    / 4.59D-10 /
-          !! 4.59*10-10 [m^2/s]
-      DATA   DSWNIT, DSWDIC, DSWALK, DSWDO2, DSWSIL &
-     &    / 5.0D-10, 6.4D-10, 6.4D-10, 1.2D-9, 5.0D-10 /
-          !! 5.0*10-10, 6.4*10-10, 6.4*10-10, 1.2*10-9, 5.0*10-10  [m^2/s]
-      DATA   DSW13DIC, DSW14DIC &
-     &    / 6.4D-10, 6.4D-10 /
-          !! 6.4*10-10, 6.4*10-10 [m^2/s]
-      DATA   NOPA &
-     &    / 2.50D0 /
-      REAL*8 DEINIT(SDZ+1)
-      REAL*8 DEIDIC(SDZ+1)
-      REAL*8 DEIALK(SDZ+1)
-      REAL*8 DEIDO2(SDZ+1)
-      REAL*8 DEISIL(SDZ+1)
-      REAL*8 DEI13DIC(SDZ+1)
-      REAL*8 DEI14DIC(SDZ+1)
-      SAVE   DEINIT, DEIDIC, DEIALK, DEIDO2, DEISIL
-      SAVE   DEI13DIC, DEI14DIC
-
-!-- 13C, 14C :
-      REAL*8 PDB              !! standard 13C/12C
-      REAL*8 DSTD             !! standard 14C/12C
-      REAL*8 EOPH, EOSH, EPS  !! fractionaton factor
-      REAL*8 FEOPH, FEOSH, R13, R14
-      REAL*8 THALF, ADCAY     !! half decay time [yr], decay constant
-      REAL*8 DLTC13, DLTC14
-      SAVE   PDB
-      SAVE   DSTD
-      SAVE   EOPH, EOSH
-      SAVE   FEOPH, FEOSH
-      SAVE   THALF, ADCAY
-      DATA   PDB &
-     &    / 0.0112372D0 /
-      DATA   DSTD &
-     &    / 1.1892D-12 /
-      DATA   EOPH, EOSH &
-     &    / -22.0, 0.0 /
-      DATA   EPS &
-     &    / 1.0D-10 /
-      DATA   THALF &
-     &    / 5370.D0 /
+      double precision :: BFCLA(NXY)
+      double precision :: BFPOM(NXY)
+      double precision :: BFCAR(NXY)
+      double precision :: BFOPA(NXY)
+      double precision :: BF13POM(NXY)
+      double precision :: BF14POM(NXY)
+      double precision :: BF13CAR(NXY)
+      double precision :: BF14CAR(NXY)
+      double precision :: BFCLAG(NXYDIM)
+      double precision :: BFPOMG(NXYDIM)
+      double precision :: BFCARG(NXYDIM)
+      double precision :: BFOPAG(NXYDIM)
+      double precision :: BF13POMG(NXYDIM)
+      double precision :: BF14POMG(NXYDIM)
+      double precision :: BF13CARG(NXYDIM)
+      double precision :: BF14CARG(NXYDIM)
 
 !-- MASK :
-      REAL*8 ZW(NZ)
+      double precision :: ZW(NZ)
       SAVE ZW
-!     REAL*8 BDEP(NXY), BDEPG(NXYDIM) !! ocean depth [m]
+!     double precision :: BDEP(NXY), BDEPG(NXYDIM) !! ocean depth [m]
 !     SAVE BDEP, BDEPG
-      REAL*8 BDEP(NXY)                !! ocean depth [m]
+      double precision :: BDEP(NXY)                !! ocean depth [m]
 !     SAVE BDEP
 
 !-- Parallel computing :
-      INTEGER, ALLOCATABLE :: NRCVC1(:),  NDISP1(:)
-      INTEGER, ALLOCATABLE :: NRCVC2(:),  NDISP2(:)
-      INTEGER, ALLOCATABLE :: NRCVC3(:),  NDISP3(:)
-      REAL*8,  ALLOCATABLE :: DUMMY01(:), DUMMY02(:), DUMMY03(:)
-      REAL*8,  ALLOCATABLE :: DUMMY04(:), DUMMY05(:), DUMMY06(:)
-      REAL*8,  ALLOCATABLE :: DUMMY07(:), DUMMY08(:), DUMMY09(:)
-      REAL*8,  ALLOCATABLE :: DUMMY11(:), DUMMY12(:), DUMMY13(:)
-      REAL*8,  ALLOCATABLE :: DUMMY14(:), DUMMY15(:), DUMMY16(:)
-      REAL*8,  ALLOCATABLE :: DUMMY17(:), DUMMY18(:), DUMMY19(:)
-      REAL*8,  ALLOCATABLE :: DUMMY20(:)
-      REAL*8,  ALLOCATABLE :: DUMMY21(:), DUMMY22(:), DUMMY23(:)
-      REAL*8,  ALLOCATABLE :: DUMMY31(:), DUMMY32(:), DUMMY33(:)
-      REAL*8,  ALLOCATABLE :: DUMMY34(:), DUMMY35(:), DUMMY36(:)
-      REAL*8,  ALLOCATABLE :: DUMMY37(:), DUMMY38(:)
-      REAL*8,  ALLOCATABLE :: DUMMY41(:), DUMMY42(:), DUMMY43(:)
-      REAL*8,  ALLOCATABLE :: DUMMY44(:), DUMMY45(:), DUMMY46(:)
-      REAL*8,  ALLOCATABLE :: DUMMY47(:), DUMMY48(:)
-      REAL*8,  ALLOCATABLE :: DUMMY51(:), DUMMY52(:), DUMMY53(:)
-      REAL*8,  ALLOCATABLE :: DUMMY54(:), DUMMY55(:), DUMMY56(:)
-      REAL*8,  ALLOCATABLE :: DUMMY57(:), DUMMY58(:)
-
-!-- Option :
-      LOGICAL SDFIRST
-      SAVE SDFIRST
-      DATA SDFIRST / .TRUE. /
-      LOGICAL SDOFIRST
-      SAVE SDOFIRST
-      DATA SDOFIRST / .TRUE.  /
-
-      LOGICAL DEIARC
-      SAVE DEIARC
-      NAMELIST /NMSDDEAR/ DEIARC
-      DATA DEIARC / .TRUE. /  !! Archer's DEI formulation ?
-
-      LOGICAL  CALC13, CALC14
-      SAVE     CALC13, CALC14
-      NAMELIST /NMSDISO/ CALC13, CALC14
-      DATA CALC13, CALC14 / .TRUE., .TRUE. /  !! carbon isotopes ?
+      integer, allocatable :: NRCVC1(:),  NDISP1(:)
+      integer, allocatable :: NRCVC2(:),  NDISP2(:)
+      integer, allocatable :: NRCVC3(:),  NDISP3(:)
+      double precision, allocatable :: DUMMY01(:), DUMMY02(:), DUMMY03(:)
+      double precision, allocatable :: DUMMY04(:), DUMMY05(:), DUMMY06(:)
+      double precision, allocatable :: DUMMY07(:), DUMMY08(:), DUMMY09(:)
+      double precision, allocatable :: DUMMY11(:), DUMMY12(:), DUMMY13(:)
+      double precision, allocatable :: DUMMY14(:), DUMMY15(:), DUMMY16(:)
+      double precision, allocatable :: DUMMY17(:), DUMMY18(:), DUMMY19(:)
+      double precision, allocatable :: DUMMY20(:)
+      double precision, allocatable :: DUMMY21(:), DUMMY22(:), DUMMY23(:)
+      double precision, allocatable :: DUMMY31(:), DUMMY32(:), DUMMY33(:)
+      double precision, allocatable :: DUMMY34(:), DUMMY35(:), DUMMY36(:)
+      double precision, allocatable :: DUMMY37(:), DUMMY38(:)
+      double precision, allocatable :: DUMMY41(:), DUMMY42(:), DUMMY43(:)
+      double precision, allocatable :: DUMMY44(:), DUMMY45(:), DUMMY46(:)
+      double precision, allocatable :: DUMMY47(:), DUMMY48(:)
+      double precision, allocatable :: DUMMY51(:), DUMMY52(:), DUMMY53(:)
+      double precision, allocatable :: DUMMY54(:), DUMMY55(:), DUMMY56(:)
+      double precision, allocatable :: DUMMY57(:), DUMMY58(:)
 
 !-- etc :
-      INTEGER I, J, IJ, K, L, IC
-      CHARACTER SEDTNM(SEDTDM)*16
-      SAVE SEDTNM
-      INTEGER TT
-
-      LOGICAL  WOTSTP
-      SAVE     WOTSTP
-      DATA     WOTSTP / .TRUE. /  !! writeout time step ?
-      INTEGER     NFSOTS
-      PARAMETER ( NFSOTS = 999 )
-
-      CHARACTER CFILE*128, CTITLE*128, CUNIT*128
-
-end module globals_sdmain
-
-! =====================================================================
-
-module sdmain_module
-      use globals_sdmain
-      use sdclay_module
-      use sdpom_module
-      use sdcaco3_module
-      use sdopal_module
-      use sdsolid_module
-      use sdliquid_module
-      use sdchemeq_module
-      implicit none
-contains
-
-!     SUBROUTINE SD
-      SUBROUTINE SD( &
-     &     bdepg, &
-     &     ficlag, fipomg, ficarg, fiopag, fiageg, &
-     &     bwtemg, bwsalg, bwnitg, bwdicg, bwalkg, bwsilg, bwdo2g, &
-     &     bw13dicg, bw14dicg )
-
-!     double precision, intent(in) :: BDEPG(NXYDIM)
-!     double precision, intent(in) :: FICLAG(NXYDIM)
-!     double precision, intent(in) :: FIPOMG(NXYDIM)
-!     double precision, intent(in) :: FICARG(NXYDIM)
-!     double precision, intent(in) :: FIOPAG(NXYDIM)
-!     double precision, intent(in) :: FIAGEG(NXYDIM)
-
-!     double precision, intent(in) :: BWTEMG(NXYDIM)
-!     double precision, intent(in) :: BWSALG(NXYDIM)
-!     double precision, intent(in) :: BWNITG(NXYDIM)
-!     double precision, intent(in) :: BWDICG(NXYDIM)
-!     double precision, intent(in) :: BWALKG(NXYDIM)
-!     double precision, intent(in) :: BWDO2G(NXYDIM)
-!     double precision, intent(in) :: BWSILG(NXYDIM)
-!     double precision, intent(in) :: BW13DICG(NXYDIM)
-!     double precision, intent(in) :: BW14DICG(NXYDIM)
-
-      double precision             :: BDEPG(NXYDIM)
-      double precision             :: FICLAG(NXYDIM)
-      double precision             :: FIPOMG(NXYDIM)
-      double precision             :: FICARG(NXYDIM)
-      double precision             :: FIOPAG(NXYDIM)
-      double precision             :: FIAGEG(NXYDIM)
-
-      double precision             :: BWTEMG(NXYDIM)
-      double precision             :: BWSALG(NXYDIM)
-      double precision             :: BWNITG(NXYDIM)
-      double precision             :: BWDICG(NXYDIM)
-      double precision             :: BWALKG(NXYDIM)
-      double precision             :: BWDO2G(NXYDIM)
-      double precision             :: BWSILG(NXYDIM)
-      double precision             :: BW13DICG(NXYDIM)
-      double precision             :: BW14DICG(NXYDIM)
-
-     do i = 1, nxydim
-     write(*,*) i, bwtemg(i)
-     end do
+      integer :: I, J, IJ, K, L, IC
+      integer :: TT
 
 !-- SEDIMENT TRACERS : setup --
 
@@ -526,6 +521,9 @@ contains
       SEDTNM(14) = 'S14POM'
       SEDTNM(15) = 'S14CAR'
       SEDTNM(16) = 'C14DIC'
+      DO K = SKST, SKEN
+      WRITE(77,*) "main0",K,DLZ(K),DLZI(K)
+      END DO
 
 !CCCCCCALL SDFILESET
       CALL SDCLAYSET
@@ -539,7 +537,7 @@ contains
 !-- SEDIMENT TRACERS : setup (end) --
 
 !     -- Ocean depth --
-!     CFILE="bound/bdep"
+!     CFILE="bound256192/bdep"
 !     CALL RDFILE(  BDEPG, NXYDIM,  CFILE )
 #ifdef PARALLEL
       DO IJ = 1, NXY
@@ -565,6 +563,9 @@ contains
       DO K = SKST, SKEN+1
          LZI(K)  = LZI(K)  * 1.0D+2            !! [m] --> [cm]
          DLZI(K) = DLZI(K) * 1.0D+2            !! [m] --> [cm]
+      END DO
+      DO K = SKST, SKEN
+      WRITE(77,*) "main",K,DLZ(K),DLZI(K)
       END DO
 
       DSWNIT   = DSWNIT   * 1.0D+4             !! [m^2/s] --> [cm^2/s]
@@ -644,13 +645,13 @@ contains
 
 !     -- Set boundary conditions --
 
-!     CFILE="bound/ficla"
+!     CFILE="bound256192/ficla"
 !     CALL RDFILE( FICLAG, NXYDIM,  CFILE )
-!     CFILE="bound/fipom"
+!     CFILE="bound256192/fipom"
 !     CALL RDFILE( FIPOMG, NXYDIM,  CFILE )
-!     CFILE="bound/ficar"
+!     CFILE="bound256192/ficar"
 !     CALL RDFILE( FICARG, NXYDIM,  CFILE )
-!     CFILE="bound/fiopa"
+!     CFILE="bound256192/fiopa"
 !     CALL RDFILE( FIOPAG, NXYDIM,  CFILE )
 #ifdef PARALLEL
       DO IJ = 1, NXY
@@ -669,19 +670,19 @@ contains
          FIAGE(IJ) = 0.0D0
       END DO
 #endif
-!     CFILE="bound/btem"
+!     CFILE="bound256192/btem"
 !     CALL RDFILE( BWTEMG, NXYDIM,  CFILE )
-!     CFILE="bound/bsal"
+!     CFILE="bound256192/bsal"
 !     CALL RDFILE( BWSALG, NXYDIM,  CFILE )
-!     CFILE="bound/bnit"
+!     CFILE="bound256192/bnit"
 !     CALL RDFILE( BWNITG, NXYDIM,  CFILE )
-!     CFILE="bound/bdic"
+!     CFILE="bound256192/bdic"
 !     CALL RDFILE( BWDICG, NXYDIM,  CFILE )
-!     CFILE="bound/balk"
+!     CFILE="bound256192/balk"
 !     CALL RDFILE( BWALKG, NXYDIM,  CFILE )
-!     CFILE="bound/bdo2"
+!     CFILE="bound256192/bdo2"
 !     CALL RDFILE( BWDO2G, NXYDIM,  CFILE )
-!     CFILE="bound/bsil"
+!     CFILE="bound256192/bsil"
 !     CALL RDFILE( BWSILG, NXYDIM,  CFILE )
 #ifdef PARALLEL
       DO IJ = 1, NXY
@@ -710,7 +711,7 @@ contains
          FI13POM(IJ) = FEOPH * PDB  * FIPOM(IJ)
          FI13CAR(IJ) = FEOSH * PDB  * FICAR(IJ)
       END DO
-!     CFILE="bound/bc13"
+!     CFILE="bound256192/bc13"
 !     CALL RDFILE(  BW13DICG, NXYDIM,  CFILE )
 #ifdef PARALLEL
       DO IJ = 1, NXY
@@ -728,7 +729,7 @@ contains
          FI14POM(IJ) = FEOPH * DSTD * FIPOM(IJ)
          FI14CAR(IJ) = FEOSH * DSTD * FICAR(IJ)
       END DO
-!     CFILE="bound/bc14"
+!     CFILE="bound256192/bc14"
 !     CALL RDFILE(  BW14DICG, NXYDIM,  CFILE )
 #ifdef PARALLEL
       DO IJ = 1, NXY
@@ -987,6 +988,12 @@ contains
       CALL SOLID( &
      &    FIPOM, TRPOM, W, PHI, PHII, DBI, SPOM, &
      &    SNPOM, BFPOM )
+
+!     DO IJ = IJTSTR, IJTEND
+!     DO K = SKST, SKEN
+!     WRITE(88,*) "TT=",TT,MYRANK,IJ,K,SCLA(IJ,K),SNCLA(IJ,K),SPOM(IJ,K),SNPOM(IJ,K)
+!     END DO
+!     END DO
 
       CALL SOLID( &
      &    FICAR, TRCAR, W, PHI, PHII, DBI, SCAR, &
@@ -1844,6 +1851,12 @@ contains
       CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 #endif
 
+      DO K = 1, SDZDIM
+      DO IJ = 1, NXYDIM
+         OUT3DVAR(IJ, K) = CALK(IJ, K)
+      END DO
+      END DO
+
       END IF
 
 !     CALL SDFILEOUT(
@@ -1987,10 +2000,10 @@ end module sdmain_module
 
       SUBROUTINE PARA_RANGE( N1, N2, NPR, IRA, IST, IEN )
 
-      INTEGER N1, N2
-      INTEGER NPR, IRA
-      INTEGER IST, IEN
-      INTEGER IWORK1, IWORK2
+      integer, intent(in) :: N1, N2
+      integer, intent(in) :: NPR, IRA
+      integer, intent(out) :: IST, IEN
+      integer :: IWORK1, IWORK2
 
       IWORK1 = ( N2 - N1 + 1 ) / NPR
       IWORK2 = MOD( N2 - N1 + 1, NPR )

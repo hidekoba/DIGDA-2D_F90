@@ -88,12 +88,16 @@ contains
 
 !     -- Convert unit --
       DO K = SKST, SKEN
-         LZ(K)   = LZ(K)   * 1.0D+2            !! [m] --> [cm]
-         DLZ(K)  = DLZ(K)  * 1.0D+2            !! [m] --> [cm]
+      WRITE(77,*) "solid00",K,DLZ(K),DLZI(K)
       END DO
-      DO K = SKST, SKEN+1
-         LZI(K)  = LZI(K)  * 1.0D+2            !! [m] --> [cm]
-         DLZI(K) = DLZI(K) * 1.0D+2            !! [m] --> [cm]
+     !DO K = SKST, SKEN
+     !   DLZ(K)  = DLZ(K)  * 1.0D+2            !! [m] --> [cm]
+     !END DO
+     !DO K = SKST, SKEN+1
+     !   DLZI(K) = DLZI(K) * 1.0D+2            !! [m] --> [cm]
+     !END DO
+      DO K = SKST, SKEN
+      WRITE(77,*) "solid01",K,DLZ(K),DLZI(K)
       END DO
 
       END SUBROUTINE SDSOLIDSET
@@ -248,6 +252,14 @@ contains
      &             - ( ( ( DLZI(K) ** 2.0D0 ) / 12.0D0 ) ) ) )
       END DO
       END DO
+      DO K = SKST, SKEN
+      WRITE(77,*) "solid",K,DLZ(K),DLZI(K)
+      END DO
+!     DO K = SKST+2, SKEN-1
+!     DO IJ = IJTSTR, IJTEND
+!     WRITE(78,*) IJ,K,C0(IJ,K),C1(IJ,K),C2(IJ,K),S(IJ,K),SI(IJ,K),TS
+!     END DO
+!     END DO
 
 !     -- Advection : Quickest Flux limiter --
 

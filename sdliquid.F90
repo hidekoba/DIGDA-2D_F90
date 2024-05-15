@@ -55,12 +55,16 @@ contains
 
 !     -- Convert unit --
       DO K = SKST, SKEN
-         LZ(K)   = LZ(K)   * 1.0D+2            !! [m] --> [cm]
-         DLZ(K)  = DLZ(K)  * 1.0D+2            !! [m] --> [cm]
+      WRITE(77,*) "liquid00",K,DLZ(K),DLZI(K)
       END DO
-      DO K = SKST, SKEN+1
-         LZI(K)  = LZI(K)  * 1.0D+2            !! [m] --> [cm]
-         DLZI(K) = DLZI(K) * 1.0D+2            !! [m] --> [cm]
+     !DO K = SKST, SKEN
+     !   DLZ(K)  = DLZ(K)  * 1.0D+2            !! [m] --> [cm]
+     !END DO
+     !DO K = SKST, SKEN+1
+     !   DLZI(K) = DLZI(K) * 1.0D+2            !! [m] --> [cm]
+     !END DO
+      DO K = SKST, SKEN
+      WRITE(77,*) "liquid01",K,DLZ(K),DLZI(K)
       END DO
 
       END SUBROUTINE SDLIQUIDSET
@@ -143,6 +147,9 @@ contains
 !     -- Diffusion : Implicit --
 
       IF (CDII) THEN
+      DO K = SKST, SKEN
+      WRITE(77,*) "liquid",K,DLZ(K),DLZI(K)
+      END DO
 
       DO K = SKST, SKEN
          EAL(K) = ( PHI(K) / TS )

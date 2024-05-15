@@ -233,7 +233,7 @@ contains
 
         character(len=*), parameter :: lonname = 'lon'
         character(len=*), parameter :: latname = 'lat'
-        character(len=*), parameter :: depname = 'dep'
+        character(len=*), parameter :: depname = 'depth'
 
         ! Determine the size of each dimension from the input variable
         lonsize = size(var, 1)

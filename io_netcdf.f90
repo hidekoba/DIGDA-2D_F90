@@ -20,13 +20,19 @@ program io_netcdf
 !   real(kind=8), dimension(:,:,:), allocatable :: depth
 !   real(kind=8), dimension(:,:), allocatable :: bdepth
 !   real(kind=8), dimension(:), allocatable :: data_flat
-    integer :: tmpi, tmpj, tmpk
+    integer :: i, j, k, l
 
     double precision, dimension(:,:), allocatable :: inficla   !! benthic clay flux [g/m3*cm/s]
     double precision, dimension(:,:), allocatable :: infipom   !! benthic pom flux [mMol/m3*cm/s]
     double precision, dimension(:,:), allocatable :: inficar   !! benthic caco3 flux [mMol/m3*cm/s]
     double precision, dimension(:,:), allocatable :: infiopa   !! benthic opal flux [mMol/m3*cm/s]
-    double precision, dimension(:,:), allocatable :: infiage   !! benthic opal flux [mMol/m3*cm/s]
+    double precision, dimension(:,:), allocatable :: infiage   !!
+
+    double precision, dimension(:,:), allocatable :: outfocla  !! benthic clay flux [g/m3*cm/s]
+    double precision, dimension(:,:), allocatable :: outfopom  !! benthic pom flux [mMol/m3*cm/s]
+    double precision, dimension(:,:), allocatable :: outfocar  !! benthic caco3 flux [mMol/m3*cm/s]
+    double precision, dimension(:,:), allocatable :: outfoopa  !! benthic opal flux [mMol/m3*cm/s]
+    double precision, dimension(:,:), allocatable :: outfoage  !!
 
     double precision, dimension(:,:), allocatable :: inbdep    !! ocean depth [m]
     double precision, dimension(:,:), allocatable :: inbwtem   !! temperature [mMol/m3]
@@ -38,6 +44,11 @@ program io_netcdf
     double precision, dimension(:,:), allocatable :: inbwsil   !! silicate [mMol/m3]o
     double precision, dimension(:,:), allocatable :: inbw13dic !! 13C-DIC [mMol/m3]
     double precision, dimension(:,:), allocatable :: inbw14dic !! 14C-DIC [mMol/m3]
+
+    double precision, dimension(:), allocatable :: outvar_sd2d !!
+    double precision, dimension(:,:), allocatable :: outvar_sd3d !!
+
+    double precision, dimension(:,:,:), allocatable :: outcalk !! 14C-DIC [mMol/m3]
 
     ! Allocate the array with appropriate dimensions
     allocate(inbdep(nxdim, nydim))
@@ -54,6 +65,10 @@ program io_netcdf
     allocate(inbwsil(nxdim, nydim))
     allocate(inbw13dic(nxdim, nydim))
     allocate(inbw14dic(nxdim, nydim))
+
+    allocate(outvar_sd2d(nxydim))
+    allocate(outvar_sd3d(nxydim, sdzdim))
+    allocate(outcalk(nxdim, nydim, sdzdim))
 
     ! Call the read_netcdf subroutine
     filename = "bound256192/bdep.nc"
@@ -106,13 +121,17 @@ program io_netcdf
     &     inbdep, &
     &     inficla, infipom, inficar, infiopa, infiage, &
     &     inbwtem, inbwsal, inbwnit, inbwdic, inbwalk, inbwsil, inbwdo2, &
-    &     inbw13dic, inbw14dic )
-!!  &     inbw13dic, inbw14dic, &
-!!  &     infopom, focar, foopa )
-     do tmpj = 1, nydim
-     do tmpi = 1, nxdim
-     write(*,*) tmpi, tmpj, inbwtem(tmpi,tmpj)
-     end do
+    &     inbw13dic, inbw14dic, &
+    &     outvar_sd3d )
+!!  &     outfopom, outfocar, outfoopa )
+
+     do k = 1, sdzdim
+        do j = 1, sdzdim
+           do i = 1, sdzdim
+              l = i + (j - 1) * nxdim
+              outcalk(i, j, k) = outvar_sd3d(l, k)
+           end do
+        end do
      end do
 
 !
@@ -152,10 +171,10 @@ program io_netcdf
 !!       end do
 !!   end do
 !
-!    ! Call the write_netcdf subroutine
-!    filename = "bound256192/output.nc"
-!    varname = "ALK"
-!    call write_netcdf_2d(filename, varname, balk)
+     ! Call the write_netcdf subroutine
+     filename = "output.nc"
+     varname = "ALK"
+     call write_netcdf_3d(filename, varname, outcalk)
 !
 !!   ! Call the write_netcdf subroutine
 !!   filename = "bound256192/output.gt"
