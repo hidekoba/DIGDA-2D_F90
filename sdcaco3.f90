@@ -15,11 +15,6 @@ module globals_sdcaco3
       use sddim_module
       implicit none
 
-!     REAL*8 SCAR(NXY, SDZDIM)
-!     REAL*8 CCO32(NXY, SDZDIM)
-!     REAL*8 SATCO32(NXY)
-!     REAL*8 RCAR(NXY, SDZDIM)
-
       REAL*8 RCCAR, NCAR
       SAVE   RCCAR, NCAR
       NAMELIST /NMSDCA/ RCCAR, NCAR
@@ -43,8 +38,6 @@ module globals_sdcaco3
      &    / -1.330D-2 /
           !! [cm3 / bar mol]
 
-!     REAL*8 PHI(SDZDIM)
-
 end module globals_sdcaco3
 
 ! =====================================================================
@@ -54,18 +47,19 @@ module sdcaco3_module
       implicit none
 contains
 
-      SUBROUTINE SDCACO3SET
+      subroutine SDCACO3SET
 
       WRITE(NFSTDO, *) '*** Carbon : SDCACO3SET ***'
       REWIND(NFPARM)
       READ (NFPARM, NMSDCA, END=99)
- 99   WRITE(NFSTDO, NMSDCA)
+99 continue
+      WRITE(NFSTDO, NMSDCA)
 
       RCCAR  = RCCAR / 3.1536D+7  !! [/yr] --> [/s]
 
-      END SUBROUTINE SDCACO3SET
+      end subroutine SDCACO3SET
 
-      SUBROUTINE DISCAR( &
+      subroutine DISCAR( &
      &      SCAR, CCO32, SATCO32, PHI, &
      &      RCAR )
 
@@ -90,9 +84,9 @@ contains
       END DO
       END DO
 
-      END SUBROUTINE DISCAR
+      end subroutine DISCAR
 
-      SUBROUTINE SATCAR( &
+      subroutine SATCAR( &
      &      TEM, SAL, BDEP,&
      &      CSAT )
 
@@ -111,6 +105,6 @@ contains
          CSAT(IJ)  = ( KPRES / 1.028D-2 ) * 1.0D+6                     !! Millero [1982]
       END DO
 
-      END SUBROUTINE SATCAR
+      end subroutine SATCAR
 
 end module sdcaco3_module

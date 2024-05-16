@@ -14,43 +14,56 @@ module globals_sdsolid
       use sddim_module
       implicit none
 
-      REAL*8 FF(NXY)
-      REAL*8 BFZ(NXY)
-      REAL*8 S(NXY,SDZDIM)
-      REAL*8 SI(NXY,SDZDIM+1)
-      REAL*8 SN(NXY,SDZDIM)
-      REAL*8 C0(NXY,SDZDIM+1)
-      REAL*8 C1(NXY,SDZDIM+1)
-      REAL*8 C2(NXY,SDZDIM+1)
-      REAL*8 FLX(NXY,SDZDIM+1), DFLX(NXY,SDZDIM+1)
-!     REAL*8 W(NXY,SDZDIM+1)
-      REAL*8 RST(NXY,SDZDIM)
+      double precision :: SI(NXY, SDZDIM+1)
 
-!     REAL*8 PHI(SDZDIM)
-!     REAL*8 PHII(SDZDIM+1)
-!     REAL*8 DBI(SDZDIM+1)
-!     REAL*8 RHOCLA
+      double precision :: C0(NXY, SDZDIM+1)
+      double precision :: C1(NXY, SDZDIM+1)
+      double precision :: C2(NXY, SDZDIM+1)
+      double precision :: FLX(NXY, SDZDIM+1), DFLX(NXY, SDZDIM+1)
 
-      REAL*8 EA(SDZDIM), EB(SDZDIM), EC(SDZDIM)
-      REAL*8 EAL(SDZDIM), EBE(SDZDIM), EGA(SDZDIM), EEP(NXY,SDZDIM)
-      REAL*8 ED(NXY,SDZDIM),  EX(NXY,SDZDIM)
-      REAL*8 FLGAM(SDZDIM+1),  FLDEL(SDZDIM+1), FLTMP
+      double precision :: EA(SDZDIM), EB(SDZDIM), EC(SDZDIM)
+      double precision :: EAL(SDZDIM), EBE(SDZDIM), EGA(SDZDIM), EEP(NXY, SDZDIM)
+      double precision :: ED(NXY, SDZDIM),  EX(NXY, SDZDIM)
+      double precision :: FLGAM(SDZDIM+1),  FLDEL(SDZDIM+1)
+      double precision :: FLTMP
 
-      INTEGER IUNIT
-      DATA    IUNIT / 1 /
-      REAL*8  AUNIT
-      SAVE    AUNIT
+      integer IUNIT
+      data    IUNIT / 1 /
+      double precision ::  AUNIT
+      save    AUNIT
 
-      LOGICAL SADU, SADQ, SADQF, SDIC, SDII
-      SAVE SADU, SADQ, SADQF, SDIC, SDII
-      NAMELIST /NMSDSO/ SADU, SADQ, SADQF, SDIC, SDII
+      logical SADU, SADQ, SADQF, SDIC, SDII
+      save SADU, SADQ, SADQF, SDIC, SDII
+      namelist /NMSDSO/ SADU, SADQ, SADQF, SDIC, SDII
 !     -- Advection choice --
-      DATA SADU  / .FALSE. / !! Upwind ?
-      DATA SADQ  / .TRUE.  / !! Quickest ?
-      DATA SADQF / .TRUE.  / !!   + Flux limiter ?
+      data SADU  / .FALSE. / !! Upwind ?
+      data SADQ  / .TRUE.  / !! Quickest ?
+      data SADQF / .TRUE.  / !!   + Flux limiter ?
 !     -- Diffusion choice --
-      DATA SDIC  / .FALSE. / !! Crank nicolson ?
-      DATA SDII  / .TRUE.  / !! Implicit ?
+      data SDIC  / .FALSE. / !! Crank nicolson ?
+      data SDII  / .TRUE.  / !! Implicit ?
+
+contains
+
+      subroutine initialize_globals_sdsolid()
+   !      call allocate_var2d(, SI)
+   !      call allocate_var2d(NXY, SDZDIM+1, C0)
+   !      call allocate_var2d(NXY, SDZDIM+1, C1)
+   !      call allocate_var2d(NXY, SDZDIM+1, C2)
+   !      call allocate_var2d(NXY, SDZDIM+1, FLX)
+   !      call allocate_var2d(NXY, SDZDIM+1, DFLX)
+   !      call allocate_var1d(SDZDIM, EA)
+   !      call allocate_var1d(SDZDIM, EB)
+   !      call allocate_var1d(SDZDIM, EC)
+   !      call allocate_var1d(SDZDIM, EAL)
+   !      call allocate_var1d(SDZDIM, EBE)
+   !      call allocate_var1d(SDZDIM, EGA)
+   !      call allocate_var2d(NXY, SDZDIM, EEP)
+   !      call allocate_var2d(NXY, SDZDIM, ED)
+   !      call allocate_var2d(NXY, SDZDIM, EX)
+   !      call allocate_var1d(SDZDIM+1, FLGAM)
+   !      call allocate_var1d(SDZDIM+1, FLDEL)
+      end subroutine initialize_globals_sdsolid
 
 end module globals_sdsolid
 
@@ -61,14 +74,17 @@ module sdsolid_module
       implicit none
 contains
 
-      SUBROUTINE SDSOLIDSET
+      subroutine SDSOLIDSET
 
       integer IJ, K
+
+      call initialize_globals_sdsolid
 
       WRITE(NFSTDO, *) '*** Carbon : SDSOLIDSET ***'
       REWIND(NFPARM)
       READ (NFPARM, NMSDSO, END=99)
- 99   WRITE(NFSTDO, NMSDSO)
+99 continue
+      WRITE(NFSTDO, NMSDSO)
 
       IF (IUNIT.EQ.1) THEN
          AUNIT = 1.0D0 / 8.64D4 / 365.0D0
@@ -86,25 +102,11 @@ contains
          AUNIT = 0.0D0
       END IF
 
-!     -- Convert unit --
-      DO K = SKST, SKEN
-      WRITE(77,*) "solid00",K,DLZ(K),DLZI(K)
-      END DO
-     !DO K = SKST, SKEN
-     !   DLZ(K)  = DLZ(K)  * 1.0D+2            !! [m] --> [cm]
-     !END DO
-     !DO K = SKST, SKEN+1
-     !   DLZI(K) = DLZI(K) * 1.0D+2            !! [m] --> [cm]
-     !END DO
-      DO K = SKST, SKEN
-      WRITE(77,*) "solid01",K,DLZ(K),DLZI(K)
-      END DO
-
-      END SUBROUTINE SDSOLIDSET
+      end subroutine SDSOLIDSET
 
 ! =====================================================================
 
-      SUBROUTINE SOLID( &
+      subroutine SOLID( &
      &      FF, RST, W, PHI, PHII, DBI, S, &
      &      SN, BFZ )
 
@@ -252,14 +254,6 @@ contains
      &             - ( ( ( DLZI(K) ** 2.0D0 ) / 12.0D0 ) ) ) )
       END DO
       END DO
-      DO K = SKST, SKEN
-      WRITE(77,*) "solid",K,DLZ(K),DLZI(K)
-      END DO
-!     DO K = SKST+2, SKEN-1
-!     DO IJ = IJTSTR, IJTEND
-!     WRITE(78,*) IJ,K,C0(IJ,K),C1(IJ,K),C2(IJ,K),S(IJ,K),SI(IJ,K),TS
-!     END DO
-!     END DO
 
 !     -- Advection : Quickest Flux limiter --
 
@@ -557,11 +551,11 @@ contains
          BFZ(IJ) = FLX(IJ, SKEN+1)
       END DO
 
-      END SUBROUTINE SOLID
+      end subroutine SOLID
 
 ! =====================================================================
 
-      SUBROUTINE SOLID_CLAY( &
+      subroutine SOLID_CLAY( &
      &      FF, RST, W, PHI, PHII, DBI, S, RHOCLA, &
      &      SN, BFZ )
 
@@ -1010,10 +1004,10 @@ contains
          BFZ(IJ) = FLX(IJ, SKEN+1)
       END DO
 
-      END SUBROUTINE SOLID_CLAY
+      end subroutine SOLID_CLAY
 
 ! =====================================================================
-      SUBROUTINE AGE( &
+      subroutine AGE( &
      &      FF, W, PHI, PHII, DBI, S, &
      &      SN )
 
@@ -1452,11 +1446,11 @@ contains
       END DO
       END DO
 
-      END SUBROUTINE AGE
+      end subroutine AGE
 
 ! =====================================================================
 
-      SUBROUTINE STRIDAG( EA, EB, EC, ED, EX )
+      subroutine STRIDAG( EA, EB, EC, ED, EX )
 
       double precision, intent(in)  :: EA(SDZDIM), EB(SDZDIM), EC(SDZDIM)
       double precision, intent(in)  :: ED(NXY,SDZDIM)
@@ -1486,6 +1480,6 @@ contains
       END DO
       END DO
 
-      END SUBROUTINE STRIDAG
+      end subroutine STRIDAG
 
 end module sdsolid_module

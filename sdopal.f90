@@ -52,7 +52,8 @@ contains
       WRITE(NFSTDO, *) '*** Carbon : SDOPALSET ***'
       REWIND(NFPARM)
       READ (NFPARM, NMSDOP, END=99)
- 99   WRITE(NFSTDO, NMSDOP)
+99 continue
+      WRITE(NFSTDO, NMSDOP)
 
       RCOPA  = RCOPA * 1.0D-9  !! [cm3/mol/s] --> [m3/mMol/s]
 

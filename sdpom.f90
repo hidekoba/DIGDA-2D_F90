@@ -14,21 +14,12 @@ module globals_sdpom
       use sddim_module
       implicit none
 
-!     REAL*8 SPOM(NXY, SDZDIM)
-!     REAL*8 CDO2(NXY, SDZDIM)
-!     REAL*8 RPOM(NXY, SDZDIM)
-!     REAL*8 RPOMMAX
-
       REAL*8 KOX, KAX
       SAVE   KOX, KAX
       NAMELIST /NMSDPM/ KOX, KAX
       DATA   KOX, KAX &
      &    / 2.00D-9, 7.90D-11 /
           !! 2.0*10-9, 7.9*10-11 [/s]
-
-!     REAL*8 CP, OP
-
-!     REAL*8 PHI(SDZDIM)
 
 end module globals_sdpom
 
@@ -39,16 +30,17 @@ module sdpom_module
       implicit none
 contains
 
-      SUBROUTINE SDPOMSET
+      subroutine SDPOMSET
 
       WRITE(NFSTDO, *) '*** Carbon : SDPOMSET ***'
       REWIND(NFPARM)
       READ (NFPARM, NMSDPM, END=99)
- 99   WRITE(NFSTDO, NMSDPM)
+99 continue
+      WRITE(NFSTDO, NMSDPM)
 
-      END SUBROUTINE SDPOMSET
+      end subroutine SDPOMSET
 
-      SUBROUTINE DISPOM( &
+      subroutine DISPOM( &
      &      SPOM, CDO2, CP, OP, PHI, &
      &      RPOM )
 
@@ -79,6 +71,6 @@ contains
       END DO
       END DO
 
-      END SUBROUTINE DISPOM
+      end subroutine DISPOM
 
 end module sdpom_module

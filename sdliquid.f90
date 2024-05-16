@@ -14,26 +14,33 @@ module globals_sdliquid
       use sddim_module
       implicit none
 
-      REAL*8 C(NXY,SDZDIM)
-      REAL*8 CN(NXY,SDZDIM)
-      REAL*8 BW(NXY)
-      REAL*8 DFLX(NXY,SDZDIM+1)
-      REAL*8 RLT(NXY,SDZDIM)
+      double precision :: DFLX(NXY, SDZDIM+1)
 
-!     REAL*8 PHI(SDZDIM)
-!     REAL*8 PHII(SDZDIM+1)
-!     REAL*8 DEI(SDZDIM+1)
+      double precision :: EA(SDZDIM), EB(NXY, SDZDIM), EC(SDZDIM)
+      double precision :: EAL(SDZDIM), EBE(SDZDIM), EGA(SDZDIM), EEP(NXY, SDZDIM)
+      double precision :: ED(NXY, SDZDIM),  EX(NXY, SDZDIM)
 
-      REAL*8 EA(SDZDIM), EB(NXY, SDZDIM), EC(SDZDIM)
-      REAL*8 EAL(SDZDIM), EBE(SDZDIM), EGA(SDZDIM), EEP(NXY,SDZDIM)
-      REAL*8 ED(NXY,SDZDIM),  EX(NXY,SDZDIM)
-
-      LOGICAL CDCN, CDII
-      SAVE CDCN, CDII
-      NAMELIST /NMSDLI/ CDCN, CDII
+      logical CDCN, CDII
+      save CDCN, CDII
+      namelist /NMSDLI/ CDCN, CDII
 !     -- Diffusion choice --
-      DATA CDCN  / .FALSE. / !! Crank nicolson ?
-      DATA CDII  / .TRUE.  / !! Implicit ?
+      data CDCN  / .FALSE. / !! Crank nicolson ?
+      data CDII  / .TRUE.  / !! Implicit ?
+
+contains
+
+      subroutine initialize_globals_sdliquid()
+     !    call allocate_var2d(, DFLX)
+     !    call allocate_var1d(, EA)
+     !    call allocate_var2d(NXY, SDZDIM, EB)
+     !    call allocate_var1d(SDZDIM, EC)
+     !    call allocate_var1d(SDZDIM, EAL)
+     !    call allocate_var1d(SDZDIM, EBE)
+     !    call allocate_var1d(SDZDIM, EGA)
+     !    call allocate_var2d(NXY, SDZDIM, EEP)
+     !    call allocate_var2d(NXY, SDZDIM, ED)
+     !    call allocate_var2d(NXY, SDZDIM, EX)
+      end subroutine initialize_globals_sdliquid
 
 end module globals_sdliquid
 
@@ -44,34 +51,23 @@ module sdliquid_module
       implicit none
 contains
 
-      SUBROUTINE SDLIQUIDSET
+      subroutine SDLIQUIDSET
 
       integer :: IJ, K
+
+      call initialize_globals_sdliquid
 
       WRITE(NFSTDO, *) '*** Carbon : SDLIQUIDSET ***'
       REWIND(NFPARM)
       READ (NFPARM, NMSDLI, END=99)
- 99   WRITE(NFSTDO, NMSDLI)
+99 continue
+      WRITE(NFSTDO, NMSDLI)
 
-!     -- Convert unit --
-      DO K = SKST, SKEN
-      WRITE(77,*) "liquid00",K,DLZ(K),DLZI(K)
-      END DO
-     !DO K = SKST, SKEN
-     !   DLZ(K)  = DLZ(K)  * 1.0D+2            !! [m] --> [cm]
-     !END DO
-     !DO K = SKST, SKEN+1
-     !   DLZI(K) = DLZI(K) * 1.0D+2            !! [m] --> [cm]
-     !END DO
-      DO K = SKST, SKEN
-      WRITE(77,*) "liquid01",K,DLZ(K),DLZI(K)
-      END DO
-
-      END SUBROUTINE SDLIQUIDSET
+      end subroutine SDLIQUIDSET
 
 ! =====================================================================
 
-      SUBROUTINE LIQUID( &
+      subroutine LIQUID( &
      &      BW, RLT, PHI, PHII, DEI, C, &
      &      CN )
 
@@ -147,9 +143,6 @@ contains
 !     -- Diffusion : Implicit --
 
       IF (CDII) THEN
-      DO K = SKST, SKEN
-      WRITE(77,*) "liquid",K,DLZ(K),DLZI(K)
-      END DO
 
       DO K = SKST, SKEN
          EAL(K) = ( PHI(K) / TS )
@@ -203,11 +196,11 @@ contains
       END DO
       END DO
 
-      END SUBROUTINE LIQUID
+      end subroutine LIQUID
 
 ! =====================================================================
 
-      SUBROUTINE LIQUID_O2( &
+      subroutine LIQUID_O2( &
      &      BW, RLT, PHI, PHII, DEI, C, &
      &      CN )
 
@@ -351,11 +344,11 @@ contains
       END DO
       END DO
 
-      END SUBROUTINE LIQUID_O2
+      end subroutine LIQUID_O2
 
 ! =====================================================================
 
-      SUBROUTINE LTRIDAG( EA, EB, EC, ED, EX )
+      subroutine LTRIDAG( EA, EB, EC, ED, EX )
 
       double precision, intent(in)  :: EA(SDZDIM), EB(NXY,SDZDIM), EC(SDZDIM)
       double precision, intent(in)  :: ED(NXY,SDZDIM)
@@ -385,6 +378,6 @@ contains
       END DO
       END DO
 
-      END SUBROUTINE LTRIDAG
+      end subroutine LTRIDAG
 
 end module sdliquid_module

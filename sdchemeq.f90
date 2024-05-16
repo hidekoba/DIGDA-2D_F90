@@ -17,53 +17,27 @@ module globals_sdchemeq
       use zchem_module
       implicit none
 
-!     REAL*8  CTIN(NXY, SDZDIM) !! Total carbon [mMol/m^3] (input)
-!     REAL*8  ATIN(NXY, SDZDIM) !! Alkalinity [mMol/m^3] (input)
-!     REAL*8  SITIN(NXY)        !! Total silicon [mMol/m^3] (input)
-!     REAL*8  PTIN(NXY)         !! Total phosphorous [mMol/m^3] (input)
+      double precision, allocatable :: PH(:,:)
+      double precision :: CU, RCU, PM
+      logical :: OFIRST
+      double precision :: PHINI, DPHINI, DPH, ALKERR, ROCN
+      integer :: ITRMAX
 
-!     REAL*8  TEM(NXY)          !! Temperature
-!     REAL*8  SAL(NXY)          !! Salinity
-!     REAL*8  PCO2O(NXY)        !! [CO2(g)] [ppmv]
-!     REAL*8  ALP(NXY)          !! Solubility of CO2 [mMol/m^3/ppmv]
-!     REAL*8  CT(NXY, SDZDIM)   !! Total carbon [Mol/kg]
-!     REAL*8  AT(NXY, SDZDIM)   !! Alkalinity [Mol/kg]
-!     REAL*8  SIT(NXY)          !! Total silicon [Mol/kg]
-!     REAL*8  PT(NXY)           !! Total phosphorous [Mol/kg]
+      namelist /NMSDCHEM/ PHINI, DPHINI, DPH, ALKERR, ITRMAX, ROCN
 
-!     REAL*8  CO2(NXY, SDZDIM)  !! surface [CO2]   [mMol/m^3]
-!     REAL*8  HCO3(NXY, SDZDIM) !! surface [HCO3-] [mMol/m^3]
-!     REAL*8  CO32(NXY, SDZDIM) !! surface [CO32-] [mMol/m^3]
+      data PHINI   / 8.0 /
+      data DPHINI  / 8.0 /
+      data DPH     / 3.0 /
+      data ALKERR  / 0.1 /
+      data ITRMAX  / 10000 /
 
-!     REAL*8  K0(NXY),  K1(NXY),   K2(NXY)
-!     REAL*8  KB(NXY),  KW(NXY)
-!     REAL*8  K1P(NXY), K2P(NXY),  K3P(NXY)
-!     REAL*8  KSI(NXY), KSO4(NXY), KF(NXY)
+      data ROCN / 1.0245 /  !! ocean density [kg/L]
 
-!     REAL*8  BT(NXY)           !! Total boric acid [Mol/kg]
-!     REAL*8  SO4T(NXY)         !! Total SO4 [Mol/kg]
-!     REAL*8  FLT(NXY)          !! Total fluorosis [Mol/kg]
+contains
 
-      REAL*8  PH(NXY, SDZDIM), CU, RCU, PM
-      SAVE    PH, CU, RCU, PM
-
-!     REAL*8  H, X, XLW, XHI, F, DELT
-      LOGICAL OFIRST
-      SAVE OFIRST
-
-      REAL*8  PHINI, DPHINI, DPH, ALKERR, ROCN
-      INTEGER ITRMAX
-      SAVE ITRMAX, DPH, DPHINI, ALKERR
-
-      NAMELIST /NMSDCHEM/ PHINI, DPHINI, DPH, ALKERR, ITRMAX, ROCN
-
-      DATA PHINI   / 8.0 /
-      DATA DPHINI  / 8.0 /
-      DATA DPH     / 3.0 /
-      DATA ALKERR  / 0.1 /
-      DATA ITRMAX  / 10000 /
-
-      DATA ROCN / 1.0245 /  !! ocean density [kg/L]
+      subroutine initialize_globals_sdchemeq()
+          call allocate_var2d(NXY, SDZDIM, PH)
+      end subroutine initialize_globals_sdchemeq
 
 end module globals_sdchemeq
 
@@ -74,9 +48,11 @@ module sdchemeq_module
     implicit none
 contains
 
-      SUBROUTINE SDCHEMEQSET
+      subroutine sdchemeqset
 
       integer :: IJ, K
+
+      call initialize_globals_sdchemeq
 
       WRITE(NFSTDO, *) '*** Carbon : SDCHEMEQSET ***'
       REWIND(NFPARM)
@@ -97,11 +73,9 @@ contains
 
       OFIRST = .TRUE.
 
-      END SUBROUTINE SDCHEMEQSET
+      end subroutine sdchemeqset
 
-! =====================================================================
-
-      SUBROUTINE SDCHEMEQ( &
+      subroutine sdchemeq( &
      &     TEM, SAL, CTIN, ATIN, &
      &     SITIN, PTIN, &
      &     CO32 )
@@ -276,6 +250,6 @@ contains
       END DO
       END DO
 
-      END SUBROUTINE SDCHEMEQ
+      end subroutine sdchemeq
 
 end module sdchemeq_module

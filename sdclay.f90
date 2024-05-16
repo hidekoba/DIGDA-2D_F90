@@ -14,9 +14,6 @@ module globals_sdclay
       use sddim_module
       implicit none
 
-!     REAL*8 SCLA(NXY, SDZDIM)
-!     REAL*8 RCLA(NXY, SDZDIM)
-
 end module globals_sdclay
 
 ! =====================================================================
@@ -26,12 +23,13 @@ module sdclay_module
       implicit none
 contains
 
-      SUBROUTINE SDCLAYSET
+      subroutine SDCLAYSET
 
       WRITE(NFSTDO, *) '*** Carbon : SDCLAYSET ***'
 
-      END SUBROUTINE SDCLAYSET
-      SUBROUTINE DISCLA( &
+      end subroutine SDCLAYSET
+
+      subroutine DISCLA( &
      &      SCLA, &
      &      RCLA )
 
@@ -46,6 +44,6 @@ contains
          END DO
       END DO
 
-      END SUBROUTINE DISCLA
+      end subroutine DISCLA
 
 end module sdclay_module

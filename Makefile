@@ -8,9 +8,9 @@ PROGS=a.out
 # SRC
 ##############################
 
-SRC=sddim.F90 zcfile.F90 zchem.F90 zcphys.F90 sdclay.F90 sdpom.F90 sdcaco3.F90 sdopal.F90 sdchemeq.F90 sdsolid.F90 sdliquid.F90 sdmain_ionc.F90 netcdf_utilities.f90 io_netcdf.f90
+SRC=config.f90 sddim.f90 zcfile.f90 zchem.f90 zcphys.f90 sdclay.f90 sdpom.f90 sdcaco3.f90 sdopal.f90 sdchemeq.f90 sdsolid.f90 sdliquid.f90 sdmain_ionc.f90 netcdf_utilities.f90 io_netcdf.f90
 
-OBJS=sddim.o zcfile.o zchem.o zcphys.o sdclay.o sdpom.o sdcaco3.o sdopal.o sdchemeq.o sdsolid.o sdliquid.o sdmain_ionc.o netcdf_utilities.o io_netcdf.o
+OBJS=config.o sddim.o zcfile.o zchem.o zcphys.o sdclay.o sdpom.o sdcaco3.o sdopal.o sdchemeq.o sdsolid.o sdliquid.o sdmain_ionc.o netcdf_utilities.o io_netcdf.o
 
 #OBJS=$(SRC:.f90=.o)
 #OBJS=$(SRC:.F=.o) $(SRC:.f90=.o)
