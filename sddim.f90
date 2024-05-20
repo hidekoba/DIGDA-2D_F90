@@ -8,7 +8,8 @@ module sddim_module
   integer, parameter :: IROOT = 0
   integer :: IERR, NPROCS, MYRANK
   integer :: IREQ, ISTATUS
-  integer, parameter :: NCPU = 16
+ !integer, parameter :: NCPU = 16
+  integer, parameter :: NCPU = 24
   integer :: IRANK, ISIZE1, ISIZE2, ISIZE3, IIST, IIEN, IJKG
   integer :: ISEND1, ISEND2, ISEND3, ISEND4, ISEND5
   integer :: IRECV1, IRECV2, IRECV3, IRECV4, IRECV5
@@ -17,7 +18,10 @@ module sddim_module
   integer :: IREQ21, IREQ22, IREQ23, IREQ24, IREQ25
   integer :: JJSTR(0:NCPU-1), JJEND(0:NCPU-1)
 
+  integer, parameter :: BENFDM = 14
+  ! cla,pom,car,opa,age,tem,sal,nit,dic,alk,sil,do2,13dic,14dic,
   integer, parameter :: SEDTDM = 16
+  ! scla,spom,scar,sopa,sage,cnit,cdic,calk,csil,cdo2,s13pom,s13car,c13dic,s14pom,s14car,c14dic,
 
   ! Vertical grid settings
   ! ZGRID_CONSTANT
@@ -99,26 +103,31 @@ module sddim_module
 !!integer, parameter :: NXDIM = 1
 !!integer, parameter :: NYDIM = 1
 !!integer, parameter :: NZDIM = 44
+!!character(len=100), parameter :: BOUND_DIR = "bound1d/"
 
   ! Grid_128x64
 !!integer, parameter :: NXDIM = 128
 !!integer, parameter :: NYDIM = 64
 !!integer, parameter :: NZDIM = 44
+!!character(len=100), parameter :: BOUND_DIR = "bound12864/"
 
-  ! Grid_256x192
-  integer, parameter :: NXDIM = 256
-  integer, parameter :: NYDIM = 192
-  integer, parameter :: NZDIM = 44
+!!! Grid_256x192
+!!integer, parameter :: NXDIM = 256
+!!integer, parameter :: NYDIM = 192
+!!integer, parameter :: NZDIM = 44
+!!character(len=100), parameter :: BOUND_DIR = "bound256192/"
 
-  ! Grid_360x180
+!!! Grid_360x180
 !!integer, parameter :: NXDIM = 360
 !!integer, parameter :: NYDIM = 180
 !!integer, parameter :: NZDIM = 44
+!!character(len=100), parameter :: BOUND_DIR = "bound360180/"
 
   ! Grid_2160x1080
-!!integer, parameter :: NXDIM = 2160
-!!integer, parameter :: NYDIM = 1080
-!!integer, parameter :: NZDIM = 44
+  integer, parameter :: NXDIM = 2160
+  integer, parameter :: NYDIM = 1080
+  integer, parameter :: NZDIM = 44
+  character(len=100), parameter :: BOUND_DIR = "bound21601080/reversed_files/"
 
   integer, parameter :: NXYDIM = NXDIM * NYDIM
   integer, parameter :: NX = NXDIM
@@ -179,6 +188,10 @@ module sddim_module
               2400.0D0, 2650.0D0, 2900.0D0, 3150.0D0, 3400.0D0, &
               3650.0D0, 3900.0D0, 4150.0D0, 4400.0D0, 4650.0D0, &
               4900.0D0, 5150.0D0, 5400.0D0, 5500.0D0 /
+
+  ! Missing value
+  double precision, parameter :: rmiss = 999.00D0
+ !double precision, parameter :: rmiss = 0.0000D0
 
 contains
 

@@ -19,8 +19,9 @@ module globals_sdmain
 ! ==================================================
 
       integer, parameter :: TSTR = 1
-      integer, parameter :: TENDYR = 1
-      integer, parameter :: TEND = TENDYR / TSYR !! Converts years to time steps
+      integer, parameter :: TENDYR = 10
+     !integer, parameter :: TEND = TENDYR / TSYR !! Converts years to time steps
+      integer, parameter :: TEND = 10
 
       integer, parameter :: TOUTYR = 1000
       integer, parameter :: TOUT = TOUTYR / TSYR !! Converts years to time steps
@@ -73,7 +74,7 @@ module globals_sdmain
       double precision :: DSWSIL = 5.0D-10    !! 5.00*10^-10 [m^2/s]
       double precision :: DSW13DIC = 6.4D-10  !! 6.40*10^-10 [m^2/s]
       double precision :: DSW14DIC = 6.4D-10  !! 6.40*10^-10 [m^2/s]
-      double precision, parameter :: NOPA = 2.50D0  !! No 0unit given
+      double precision, parameter :: NOPA = 2.50D0
 
       !-- Advection, Diffusion --
       ! Sedimentation rate
@@ -146,10 +147,8 @@ contains
 
       subroutine SD( &
      &     bdepg, &
-     &     ficlag, fipomg, ficarg, fiopag, fiageg, &
-     &     bwtemg, bwsalg, bwnitg, bwdicg, bwalkg, bwsilg, bwdo2g, &
-     &     bw13dicg, bw14dicg, &
-     &     out3dvar )
+     &     bfrcg, &
+     &     sdtx )
 
 ! ==================================================
 !   Sediments
@@ -163,25 +162,9 @@ contains
 ! --------------------------------------------------
 
       double precision, intent(in) :: BDEPG(NXYDIM)
-      double precision, intent(in) :: FICLAG(NXYDIM)
-      double precision, intent(in) :: FIPOMG(NXYDIM)
-      double precision, intent(in) :: FICARG(NXYDIM)
-      double precision, intent(in) :: FIOPAG(NXYDIM)
-      double precision, intent(in) :: FIAGEG(NXYDIM)
+      double precision, intent(in) :: BFRCG(NXYDIM, BENFDM)
 
-      double precision, intent(in) :: BWTEMG(NXYDIM)
-      double precision, intent(in) :: BWSALG(NXYDIM)
-      double precision, intent(in) :: BWNITG(NXYDIM)
-      double precision, intent(in) :: BWDICG(NXYDIM)
-      double precision, intent(in) :: BWALKG(NXYDIM)
-      double precision, intent(in) :: BWDO2G(NXYDIM)
-      double precision, intent(in) :: BWSILG(NXYDIM)
-      double precision, intent(in) :: BW13DICG(NXYDIM)
-      double precision, intent(in) :: BW14DICG(NXYDIM)
-
-      double precision, intent(out) :: OUT3DVAR(NXYDIM, SDZDIM)
-
-      double precision :: SDTX(NXYDIM, SDZDIM, SEDTDM)
+      double precision, intent(inout) :: SDTX(NXYDIM, SDZDIM, SEDTDM)
       double precision :: SDTXBUF(NXDIM, NYDIM, SDZDIM, SEDTDM)
 
 ! --------------------------------------------------
@@ -211,26 +194,26 @@ contains
       double precision :: S14CARG(NXYDIM, SDZDIM)
 
 !-- Weight percent [%] :
-      REAL*8 PCLA(NXY, SDZ)
-      REAL*8 PPOM(NXY, SDZ)
-      REAL*8 PCAR(NXY, SDZ)
-      REAL*8 POPA(NXY, SDZ)
-      REAL*8 WT(NXY, SDZ)
-      REAL*8 PCLAG(NXYDIM, SDZDIM)
-      REAL*8 PPOMG(NXYDIM, SDZDIM)
-      REAL*8 PCARG(NXYDIM, SDZDIM)
-      REAL*8 POPAG(NXYDIM, SDZDIM)
-      REAL*8 WTG(NXYDIM, SDZDIM)
+      double precision :: PCLA(NXY, SDZ)
+      double precision :: PPOM(NXY, SDZ)
+      double precision :: PCAR(NXY, SDZ)
+      double precision :: POPA(NXY, SDZ)
+      double precision :: WT(NXY, SDZ)
+      double precision :: PCLAG(NXYDIM, SDZDIM)
+      double precision :: PPOMG(NXYDIM, SDZDIM)
+      double precision :: PCARG(NXYDIM, SDZDIM)
+      double precision :: POPAG(NXYDIM, SDZDIM)
+      double precision :: WTG(NXYDIM, SDZDIM)
 
 !-- Dissolution rate [1/s], Dissolution term [mMol/m^3/s] :
-      REAL*8 RCLA(NXY, SDZ),   TRCLA(NXY, SDZ)
-      REAL*8 RPOM(NXY, SDZ),   TRPOM(NXY, SDZ)
-      REAL*8 RCAR(NXY, SDZ),   TRCAR(NXY, SDZ)
-      REAL*8 ROPA(NXY, SDZ),   TROPA(NXY, SDZ)
-      REAL*8 R13POM(NXY, SDZ), TR13POM(NXY, SDZ)
-      REAL*8 R14POM(NXY, SDZ), TR14POM(NXY, SDZ)
-      REAL*8 R13CAR(NXY, SDZ), TR13CAR(NXY, SDZ)
-      REAL*8 R14CAR(NXY, SDZ), TR14CAR(NXY, SDZ)
+      double precision :: RCLA(NXY, SDZ),   TRCLA(NXY, SDZ)
+      double precision :: RPOM(NXY, SDZ),   TRPOM(NXY, SDZ)
+      double precision :: RCAR(NXY, SDZ),   TRCAR(NXY, SDZ)
+      double precision :: ROPA(NXY, SDZ),   TROPA(NXY, SDZ)
+      double precision :: R13POM(NXY, SDZ), TR13POM(NXY, SDZ)
+      double precision :: R14POM(NXY, SDZ), TR14POM(NXY, SDZ)
+      double precision :: R13CAR(NXY, SDZ), TR13CAR(NXY, SDZ)
+      double precision :: R14CAR(NXY, SDZ), TR14CAR(NXY, SDZ)
 
 ! --------------------------------------------------
 !   Dissolved material
@@ -239,103 +222,93 @@ contains
 ! --------------------------------------------------
 
 !-- Concentration [mMol/m^3] :
-      REAL*8 CNIT(NXY, SDZ),   CNNIT(NXY, SDZ)
-      REAL*8 CDIC(NXY, SDZ),   CNDIC(NXY, SDZ)
-      REAL*8 CALK(NXY, SDZ),   CNALK(NXY, SDZ)
-      REAL*8 CDO2(NXY, SDZ),   CNDO2(NXY, SDZ)
-      REAL*8 CSIL(NXY, SDZ),   CNSIL(NXY, SDZ)
-      REAL*8 C13DIC(NXY, SDZ), CN13DIC(NXY, SDZ)
-      REAL*8 C14DIC(NXY, SDZ), CN14DIC(NXY, SDZ)
-      REAL*8 CDC13(NXY, SDZ),  CDC14(NXY, SDZ)
-      REAL*8 CCO32(NXY, SDZ)
-      REAL*8 SATCO32(NXY)
-      REAL*8 SATSIL(NXY,SDZ)
-      REAL*8 CNITG(NXYDIM, SDZDIM)
-      REAL*8 CDICG(NXYDIM, SDZDIM)
-      REAL*8 CALKG(NXYDIM, SDZDIM)
-      REAL*8 CDO2G(NXYDIM, SDZDIM)
-      REAL*8 CSILG(NXYDIM, SDZDIM)
-      REAL*8 C13DICG(NXYDIM, SDZDIM)
-      REAL*8 C14DICG(NXYDIM, SDZDIM)
-      REAL*8 CDC13G(NXYDIM, SDZDIM)
-      REAL*8 CDC14G(NXYDIM, SDZDIM)
-      REAL*8 CCO32G(NXYDIM, SDZDIM)
-      REAL*8 SATCO32G(NXYDIM)
-      REAL*8 SATSILG(NXYDIM,SDZDIM)
+      double precision :: CNIT(NXY, SDZ),   CNNIT(NXY, SDZ)
+      double precision :: CDIC(NXY, SDZ),   CNDIC(NXY, SDZ)
+      double precision :: CALK(NXY, SDZ),   CNALK(NXY, SDZ)
+      double precision :: CDO2(NXY, SDZ),   CNDO2(NXY, SDZ)
+      double precision :: CSIL(NXY, SDZ),   CNSIL(NXY, SDZ)
+      double precision :: C13DIC(NXY, SDZ), CN13DIC(NXY, SDZ)
+      double precision :: C14DIC(NXY, SDZ), CN14DIC(NXY, SDZ)
+      double precision :: CDC13(NXY, SDZ),  CDC14(NXY, SDZ)
+      double precision :: CCO32(NXY, SDZ)
+      double precision :: SATCO32(NXY)
+      double precision :: SATSIL(NXY,SDZ)
+      double precision :: CNITG(NXYDIM, SDZDIM)
+      double precision :: CDICG(NXYDIM, SDZDIM)
+      double precision :: CALKG(NXYDIM, SDZDIM)
+      double precision :: CDO2G(NXYDIM, SDZDIM)
+      double precision :: CSILG(NXYDIM, SDZDIM)
+      double precision :: C13DICG(NXYDIM, SDZDIM)
+      double precision :: C14DICG(NXYDIM, SDZDIM)
+      double precision :: CDC13G(NXYDIM, SDZDIM)
+      double precision :: CDC14G(NXYDIM, SDZDIM)
+      double precision :: CCO32G(NXYDIM, SDZDIM)
+      double precision :: SATCO32G(NXYDIM)
+      double precision :: SATSILG(NXYDIM,SDZDIM)
 
 !-- Concentration (bottom water) :
 !      temp [C], salinity [psu], the others [mMol/m^3]
-      REAL*8 BWTEM(NXY)
-      REAL*8 BWSAL(NXY)
-      REAL*8 BWNIT(NXY)
-      REAL*8 BWDIC(NXY)
-      REAL*8 BWALK(NXY)
-      REAL*8 BWDO2(NXY)
-      REAL*8 BWSIL(NXY)
-      REAL*8 BW13DIC(NXY)
-      REAL*8 BW14DIC(NXY)
-!     REAL*8 BWTEMG(NXYDIM)
-!     REAL*8 BWSALG(NXYDIM)
-!     REAL*8 BWNITG(NXYDIM)
-!     REAL*8 BWDICG(NXYDIM)
-!     REAL*8 BWALKG(NXYDIM)
-!     REAL*8 BWDO2G(NXYDIM)
-!     REAL*8 BWSILG(NXYDIM)
-!     REAL*8 BW13DICG(NXYDIM)
-!     REAL*8 BW14DICG(NXYDIM)
+      double precision :: BWTEM(NXY)
+      double precision :: BWSAL(NXY)
+      double precision :: BWNIT(NXY)
+      double precision :: BWDIC(NXY)
+      double precision :: BWALK(NXY)
+      double precision :: BWDO2(NXY)
+      double precision :: BWSIL(NXY)
+      double precision :: BW13DIC(NXY)
+      double precision :: BW14DIC(NXY)
+      double precision :: BWTEMG(NXYDIM)
+      double precision :: BWSALG(NXYDIM)
+      double precision :: BWNITG(NXYDIM)
+      double precision :: BWDICG(NXYDIM)
+      double precision :: BWALKG(NXYDIM)
+      double precision :: BWDO2G(NXYDIM)
+      double precision :: BWSILG(NXYDIM)
+      double precision :: BW13DICG(NXYDIM)
+      double precision :: BW14DICG(NXYDIM)
 
 !-- Concentration (total) :
 !      total phosphorous [mMol/m^3], total silicon [mMol/m^3]
-      REAL*8 PT(NXY)
-      REAL*8 SIT(NXY)
+      double precision :: PT(NXY)
+      double precision :: SIT(NXY)
 
 !-- Dissolution term [mMol/m^3/s] :
-      REAL*8 TRNIT(NXY, SDZ)
-      REAL*8 TRDIC(NXY, SDZ)
-      REAL*8 TRALK(NXY, SDZ)
-      REAL*8 TRDO2(NXY, SDZ)
-      REAL*8 TRSIL(NXY, SDZ)
-      REAL*8 TR13DIC(NXY, SDZ)
-      REAL*8 TR14DIC(NXY, SDZ)
+      double precision :: TRNIT(NXY, SDZ)
+      double precision :: TRDIC(NXY, SDZ)
+      double precision :: TRALK(NXY, SDZ)
+      double precision :: TRDO2(NXY, SDZ)
+      double precision :: TRSIL(NXY, SDZ)
+      double precision :: TR13DIC(NXY, SDZ)
+      double precision :: TR14DIC(NXY, SDZ)
 
 !-- Sea-bottom Flux :
 !      clay [g/m^3*cm/s], the others [mMol/m^3*cm/s]
-      REAL*8 FICLA(NXY),   FOCLA(NXY)
-      REAL*8 FIPOM(NXY),   FOPOM(NXY)
-      REAL*8 FICAR(NXY),   FOCAR(NXY)
-      REAL*8 FIOPA(NXY),   FOOPA(NXY)
-      REAL*8 FIAGE(NXY)
-      REAL*8 FI13POM(NXY), FO13POM(NXY)
-      REAL*8 FI14POM(NXY), FO14POM(NXY)
-      REAL*8 FI13CAR(NXY), FO13CAR(NXY)
-      REAL*8 FI14CAR(NXY), FO14CAR(NXY)
+      double precision :: FICLA(NXY),   FOCLA(NXY)
+      double precision :: FIPOM(NXY),   FOPOM(NXY)
+      double precision :: FICAR(NXY),   FOCAR(NXY)
+      double precision :: FIOPA(NXY),   FOOPA(NXY)
+      double precision :: FIAGE(NXY)
+      double precision :: FI13POM(NXY), FO13POM(NXY)
+      double precision :: FI14POM(NXY), FO14POM(NXY)
+      double precision :: FI13CAR(NXY), FO13CAR(NXY)
+      double precision :: FI14CAR(NXY), FO14CAR(NXY)
 
-!     REAL*8 FICLAG(NXYDIM), FOCLAG(NXYDIM)
-!     REAL*8 FIPOMG(NXYDIM), FOPOMG(NXYDIM)
-!     REAL*8 FICARG(NXYDIM), FOCARG(NXYDIM)
-!     REAL*8 FIOPAG(NXYDIM), FOOPAG(NXYDIM)
-!     REAL*8 FIAGEG(NXYDIM), FOAGEG(NXYDIM)
-!     REAL*8 FI13POMG(NXYDIM), FO13POMG(NXYDIM)
-!     REAL*8 FI14POMG(NXYDIM), FO14POMG(NXYDIM)
-!     REAL*8 FI13CARG(NXYDIM), FO13CARG(NXYDIM)
-!     REAL*8 FI14CARG(NXYDIM), FO14CARG(NXYDIM)
-
-      REAL*8                 FOCLAG(NXYDIM)
-      REAL*8                 FOPOMG(NXYDIM)
-      REAL*8                 FOCARG(NXYDIM)
-      REAL*8                 FOOPAG(NXYDIM)
-      REAL*8                 FOAGEG(NXYDIM)
-      REAL*8 FI13POMG(NXYDIM), FO13POMG(NXYDIM)
-      REAL*8 FI14POMG(NXYDIM), FO14POMG(NXYDIM)
-      REAL*8 FI13CARG(NXYDIM), FO13CARG(NXYDIM)
-      REAL*8 FI14CARG(NXYDIM), FO14CARG(NXYDIM)
+      double precision :: FICLAG(NXYDIM), FOCLAG(NXYDIM)
+      double precision :: FIPOMG(NXYDIM), FOPOMG(NXYDIM)
+      double precision :: FICARG(NXYDIM), FOCARG(NXYDIM)
+      double precision :: FIOPAG(NXYDIM), FOOPAG(NXYDIM)
+      double precision :: FIAGEG(NXYDIM), FOAGEG(NXYDIM)
+      double precision :: FI13POMG(NXYDIM), FO13POMG(NXYDIM)
+      double precision :: FI14POMG(NXYDIM), FO14POMG(NXYDIM)
+      double precision :: FI13CARG(NXYDIM), FO13CARG(NXYDIM)
+      double precision :: FI14CARG(NXYDIM), FO14CARG(NXYDIM)
 
 !-- Sea-bottom Flux [mMol/m^3*cm/s] :
-      REAL*8 FINIT(NXY),   FONIT(NXY)
-      REAL*8 FIDIC(NXY),   FODIC(NXY)
-      REAL*8 FIALK(NXY),   FOALK(NXY)
-      REAL*8 FIDO2(NXY),   FODO2(NXY)
-      REAL*8 FISIL(NXY),   FOSIL(NXY)
+      double precision :: FINIT(NXY),   FONIT(NXY)
+      double precision :: FIDIC(NXY),   FODIC(NXY)
+      double precision :: FIALK(NXY),   FOALK(NXY)
+      double precision :: FIDO2(NXY),   FODO2(NXY)
+      double precision :: FISIL(NXY),   FOSIL(NXY)
       double precision :: FI13DIC(NXY), FO13DIC(NXY)
       double precision :: FI14DIC(NXY), FO14DIC(NXY)
 
@@ -459,8 +432,6 @@ END IF
 !-- SEDIMENT TRACERS : setup (end) --
 
 !     -- Ocean depth --
-!     CFILE="bound256192/bdep"
-!     CALL RDFILE(  BDEPG, NXYDIM,  CFILE )
 IF (PARALLEL) THEN
       DO IJ = 1, NXY
          BDEP(IJ) = MAX( BDEPG(MYRANK*NXY+IJ), 0.0D0 )
@@ -485,9 +456,6 @@ END IF
       DO K = SKST, SKEN+1
          LZI(K)  = LZI(K)  * 1.0D+2            !! [m] --> [cm]
          DLZI(K) = DLZI(K) * 1.0D+2            !! [m] --> [cm]
-      END DO
-      DO K = SKST, SKEN
-      WRITE(77,*) "main",K,DLZ(K),DLZI(K)
       END DO
 
       DSWNIT   = DSWNIT   * 1.0D+4             !! [m^2/s] --> [cm^2/s]
@@ -567,14 +535,23 @@ END IF
 
 !     -- Set boundary conditions --
 
-!     CFILE="bound256192/ficla"
-!     CALL RDFILE( FICLAG, NXYDIM,  CFILE )
-!     CFILE="bound256192/fipom"
-!     CALL RDFILE( FIPOMG, NXYDIM,  CFILE )
-!     CFILE="bound256192/ficar"
-!     CALL RDFILE( FICARG, NXYDIM,  CFILE )
-!     CFILE="bound256192/fiopa"
-!     CALL RDFILE( FIOPAG, NXYDIM,  CFILE )
+      DO I = 1, NXYDIM
+        FICLAG(I) = BFRCG(I, 1)
+        FIPOMG(I) = BFRCG(I, 2)
+        FICARG(I) = BFRCG(I, 3)
+        FIOPAG(I) = BFRCG(I, 4)
+        FIAGEG(I) = BFRCG(I, 5)
+        BWTEMG(I) = BFRCG(I, 6)
+        BWSALG(I) = BFRCG(I, 7)
+        BWNITG(I) = BFRCG(I, 8)
+        BWDICG(I) = BFRCG(I, 9)
+        BWALKG(I) = BFRCG(I, 10)
+        BWSILG(I) = BFRCG(I, 11)
+        BWDO2G(I) = BFRCG(I, 12)
+        BW13DICG(I) = BFRCG(I, 13)
+        BW14DICG(I) = BFRCG(I, 14)
+      END DO
+
 IF (PARALLEL) THEN
       DO IJ = 1, NXY
          FICLA(IJ) = MAX( FICLAG(MYRANK*NXY+IJ), 0.0D0 )
@@ -592,20 +569,6 @@ ELSE
          FIAGE(IJ) = 0.0D0
       END DO
 END IF
-!     CFILE="bound256192/btem"
-!     CALL RDFILE( BWTEMG, NXYDIM,  CFILE )
-!     CFILE="bound256192/bsal"
-!     CALL RDFILE( BWSALG, NXYDIM,  CFILE )
-!     CFILE="bound256192/bnit"
-!     CALL RDFILE( BWNITG, NXYDIM,  CFILE )
-!     CFILE="bound256192/bdic"
-!     CALL RDFILE( BWDICG, NXYDIM,  CFILE )
-!     CFILE="bound256192/balk"
-!     CALL RDFILE( BWALKG, NXYDIM,  CFILE )
-!     CFILE="bound256192/bdo2"
-!     CALL RDFILE( BWDO2G, NXYDIM,  CFILE )
-!     CFILE="bound256192/bsil"
-!     CALL RDFILE( BWSILG, NXYDIM,  CFILE )
 IF (PARALLEL) THEN
       DO IJ = 1, NXY
          BWTEM(IJ)   = BWTEMG(MYRANK*NXY+IJ)
@@ -633,8 +596,6 @@ END IF
          FI13POM(IJ) = FEOPH * PDB  * FIPOM(IJ)
          FI13CAR(IJ) = FEOSH * PDB  * FICAR(IJ)
       END DO
-!     CFILE="bound256192/bc13"
-!     CALL RDFILE(  BW13DICG, NXYDIM,  CFILE )
 IF (PARALLEL) THEN
       DO IJ = 1, NXY
          BW13DIC(IJ) = MAX( BW13DICG(MYRANK*NXY+IJ), 0.0D0 )
@@ -651,8 +612,6 @@ END IF
          FI14POM(IJ) = FEOPH * DSTD * FIPOM(IJ)
          FI14CAR(IJ) = FEOSH * DSTD * FICAR(IJ)
       END DO
-!     CFILE="bound256192/bc14"
-!     CALL RDFILE(  BW14DICG, NXYDIM,  CFILE )
 IF (PARALLEL) THEN
       DO IJ = 1, NXY
          BW14DIC(IJ) = MAX( BW14DICG(MYRANK*NXY+IJ), 0.0D0 )
@@ -1213,7 +1172,7 @@ END IF
 
 !     -- Conclude --
 
-!CCCCCIF ( TT == TEND ) THEN
+!     IF ( TT == TEND ) THEN
       IF ( TT == TEND .OR. MOD(TT, TOUT) == 0 ) THEN
 
 IF (PARALLEL) THEN
@@ -1641,7 +1600,6 @@ END IF
 
 IF (PARALLEL) THEN
       IF ( MYRANK .EQ. IROOT ) THEN
-END IF
          CFILE  = 'scla'
          CTITLE = 'Clay'
          CUNIT  = 'g/m^3'
@@ -1650,12 +1608,12 @@ END IF
          CFILE  = 'spom'
          CTITLE = 'OrgM'
          CUNIT  = 'mmol/m^3'
-         CALL FILEOUT(      YY,   SCLAG,   CFILE,  CTITLE,   CUNIT, &
+         CALL FILEOUT(      YY,   SPOMG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,  SDZDIM  )
          CFILE  = 'scar'
          CTITLE = 'CaCO3'
          CUNIT  = 'mmol/m^3'
-         CALL FILEOUT(      YY,   SCLAG,   CFILE,  CTITLE,   CUNIT, &
+         CALL FILEOUT(      YY,   SCARG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,  SDZDIM  )
          CFILE  = 'sopa'
          CTITLE = 'SiO2'
@@ -1762,18 +1720,41 @@ END IF
          CUNIT  = 'permil'
          CALL FILEOUT(      YY,  CDC14G,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,  SDZDIM  )
-IF (PARALLEL) THEN
+
+         DO K = SKST, SKEN
+            DO IJ = 1, NXYDIM
+               SDTX(IJ, K, 1) = SCLAG(IJ, K)
+               SDTX(IJ, K, 2) = SPOMG(IJ, K)
+               SDTX(IJ, K, 3) = SCARG(IJ, K)
+               SDTX(IJ, K, 4) = SOPAG(IJ, K)
+               SDTX(IJ, K, 5) = SAGEG(IJ, K)
+               SDTX(IJ, K, 6) = CNITG(IJ, K)
+               SDTX(IJ, K, 7) = CDICG(IJ, K)
+               SDTX(IJ, K, 8) = CALKG(IJ, K)
+               SDTX(IJ, K, 9) = CSILG(IJ, K)
+               SDTX(IJ, K, 10) = CDO2G(IJ, K)
+            IF ( CALC13 ) THEN
+               SDTX(IJ, K, 11) = S13POMG(IJ, K)
+               SDTX(IJ, K, 12) = S13CARG(IJ, K)
+               SDTX(IJ, K, 13) = C13DICG(IJ, K)
+            END IF
+            IF ( CALC14 ) THEN
+               SDTX(IJ, K, 14) = S14POMG(IJ, K)
+               SDTX(IJ, K, 15) = S14CARG(IJ, K)
+               SDTX(IJ, K, 16) = C14DICG(IJ, K)
+            END IF
+            END DO
+         END DO
+
       END IF
+
+      CALL MPI_BCAST(SDTX, NXYDIM*SDZDIM*SEDTDM, MPI_REAL8, IROOT, MPI_COMM_WORLD, IERR)
       CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
+
 END IF
 
-      DO K = 1, SDZDIM
-      DO IJ = 1, NXYDIM
-         OUT3DVAR(IJ, K) = SDTX(IJ, K, 8)
-      END DO
-      END DO
+      END IF ! -- End of Output
 
-      END IF
 
 !     CALL SDFILEOUT(
 !    I     SEDTNM,
@@ -1821,70 +1802,70 @@ end module sdmain_module
       WRITE(YEAR, 900) YY
  900  FORMAT(I8.8)
 
-      CHEAD(1) = '9010'    !!  1 : IDFM  : I10   :   GTOOL3 version                 : 9010
-      CHEAD(2) = ''        !!  2 : DSET  : A16   :   Dataset name                   :
-      CHEAD(3) = CTITLE    !!  3 : ITEM  : A16   :   Identification (variable) name :
-      CHEAD(4) = ''        !!  4 : EDIT1 : A16   :   Edit abbreviation 01           :
-      CHEAD(5) = ''        !!  5 : EDIT2 : A16   :   Edit abbreviation 02           :
-      CHEAD(6) = ''        !!  6 : EDIT3 : A16   :   Edit abbreviation 03           :
-      CHEAD(7) = ''        !!  7 : EDIT4 : A16   :   Edit abbreviation 04           :
-      CHEAD(8) = ''        !!  8 : EDIT5 : A16   :   Edit abbreviation 05           :
-      CHEAD(9) = ''        !!  9 : EDIT6 : A16   :   Edit abbreviation 06           :
-      CHEAD(10) = ''       !! 10 : EDIT7 : A16   :   Edit abbreviation 07           :
-      CHEAD(11) = ''       !! 11 : EDIT8 : A16   :   Edit abbreviation 08           :
-      CHEAD(12) = ''       !! 12 : FNUM  : I10   :   File number                    : 0
-      CHEAD(13) = ''       !! 13 : DNUM  : I10   :   Data number                    : 0
-      CHEAD(14) = CTITLE   !! 14 : TITL1 : A16   :   Title 1                        :
-      CHEAD(15) = ''       !! 15 : TITL2 : A16   :   Title 2                        :
-      CHEAD(16) = CUNIT    !! 16 : UNIT  : A16   :   Unit                           :
-      CHEAD(17) = ''       !! 17 : ETTL1 : A16   :   Edit title 01                  :
-      CHEAD(18) = ''       !! 18 : ETTL2 : A16   :   Edit title 02                  :
-      CHEAD(19) = ''       !! 19 : ETTL3 : A16   :   Edit title 03                  :
-      CHEAD(20) = ''       !! 20 : ETTL4 : A16   :   Edit title 04                  :
-      CHEAD(21) = ''       !! 21 : ETTL5 : A16   :   Edit title 05                  :
-      CHEAD(22) = ''       !! 22 : ETTL6 : A16   :   Edit title 06                  :
-      CHEAD(23) = ''       !! 23 : ETTL7 : A16   :   Edit title 07                  :
-      CHEAD(24) = ''       !! 24 : ETTL8 : A16   :   Edit title 08                  :
-      CHEAD(25) = ''       !! 25 : TIME  : I10   :   Total time                     : 0
-      CHEAD(26) = ''       !! 26 : UTIM  : A16   :   Time unit                      :
-!     CHEAD(27) = ''       !! 27 : DATE  : A16   :   Time (yyyymmddhhmmss)          :
-      CHEAD(28) = ''       !! 28 : TDUR  : I10   :   Data representative time       : 0
-!     CHEAD(29) = ''       !! 29 : AITM1 : A16   :   Axis grid identification name  :
-!     CHEAD(30) = ''       !! 30 : ASTR1 : I10   :   Start of axis grid number      : 1
-!     CHEAD(31) = ''       !! 31 : AEND1 : I10   :   End of axis grid number        :
-!     CHEAD(32) = ''       !! 32 : AITM2 : A16   :   Axis grid identification name  :
-!     CHEAD(33) = ''       !! 33 : ASTR2 : I10   :   Start of axis grid number      : 1
-!     CHEAD(34) = ''       !! 34 : AEND2 : I10   :   End of axis grid number        :
-!     CHEAD(35) = ''       !! 35 : AITM3 : A16   :   Axis grid identification name  :
-!     CHEAD(36) = ''       !! 36 : ASTR3 : I10   :   Start of axis grid number      : 1
-!     CHEAD(37) = ''       !! 37 : AEND3 : I10   :   End of axis grid number        :
-!     CHEAD(38) = ''       !! 38 : DFMT  : A16   :   Data format                    : UR4
-!     CHEAD(39) = ''       !! 39 : MISS  : E15.7 :   Missing value                  : -999.
-!     CHEAD(40) = ''       !! 40 : DMIN  : E15.7 :   Range (minimum)                : -999.
-!     CHEAD(41) = ''       !! 41 : DMAX  : E15.7 :   Range (maximum)                : -999.
-!     CHEAD(42) = ''       !! 42 : DIVS  : E15.7 :   Interval (small)               : -999.
-!     CHEAD(43) = ''       !! 43 : DIVL  : E15.7 :   Interval (Large)               : -999.
-!     CHEAD(44) = ''       !! 44 : STYP  : I10   :   Scaling type                   : 1
-      CHEAD(45) = ''       !! 45 : COPTN : A16   :   Option (character)             :
-      CHEAD(46) = ''       !! 46 : IOPTN : I16   :   Option (integer)               : 0
-      CHEAD(47) = ''       !! 47 : ROPTN : E16.7 :   Option (real)                  : 0
-      CHEAD(48) = ''       !! 48 : DATE1 : I16   :   Time (auxiliary)               :
-      CHEAD(49) = ''       !! 49 : DATE2 : A16   :   Time unit (auxiliary)          :
-!     CHEAD(50) = ''       !! 50 : MEMO1 : A16   :   Memo O1                        :
-      CHEAD(51) = ''       !! 51 : MEMO2 : A16   :   Memo O2                        :
-      CHEAD(52) = ''       !! 52 : MEMO3 : A16   :   Memo O3                        :
-      CHEAD(53) = ''       !! 53 : MEMO4 : A16   :   Memo O4                        :
-      CHEAD(54) = ''       !! 54 : MEMO5 : A16   :   Memo O5                        :
-      CHEAD(55) = ''       !! 55 : MEMO6 : A16   :   Memo O6                        :
-      CHEAD(56) = ''       !! 56 : MEMO7 : A16   :   Memo O7                        :
-      CHEAD(57) = ''       !! 57 : MEMO8 : A16   :   Memo O8                        :
-      CHEAD(58) = ''       !! 58 : MEMO9 : A16   :   Memo O9                        :
-      CHEAD(59) = ''       !! 59 : MEM1O : A16   :   Memo 1O                        :
-      CHEAD(60) = ''       !! 60 : CDATE : A16   :   Data creation date             :
-      CHEAD(61) = ''       !! 61 : CSIGN : A16   :   Data creator                   :
-      CHEAD(62) = ''       !! 62 : MDATE : A16   :   Data change date               :
-      CHEAD(63) = ''       !! 63 : MSIGN : A16   :   Data modified by               :
-      CHEAD(64) = ''       !! 64 : SIZE  : I10   :   Array size                     : 0
+      CHEAD(1) = '            9010'  !!  1 : IDFM  : I10   :   GTOOL3 version                 : 9010
+      CHEAD(2) = ''                  !!  2 : DSET  : A16   :   Dataset name                   :
+      CHEAD(3) = CTITLE              !!  3 : ITEM  : A16   :   Identification (variable) name :
+      CHEAD(4) = ''                  !!  4 : EDIT1 : A16   :   Edit abbreviation 01           :
+      CHEAD(5) = ''                  !!  5 : EDIT2 : A16   :   Edit abbreviation 02           :
+      CHEAD(6) = ''                  !!  6 : EDIT3 : A16   :   Edit abbreviation 03           :
+      CHEAD(7) = ''                  !!  7 : EDIT4 : A16   :   Edit abbreviation 04           :
+      CHEAD(8) = ''                  !!  8 : EDIT5 : A16   :   Edit abbreviation 05           :
+      CHEAD(9) = ''                  !!  9 : EDIT6 : A16   :   Edit abbreviation 06           :
+      CHEAD(10) = ''                 !! 10 : EDIT7 : A16   :   Edit abbreviation 07           :
+      CHEAD(11) = ''                 !! 11 : EDIT8 : A16   :   Edit abbreviation 08           :
+      CHEAD(12) = ''                 !! 12 : FNUM  : I10   :   File number                    : 0
+      CHEAD(13) = ''                 !! 13 : DNUM  : I10   :   Data number                    : 0
+      CHEAD(14) = CTITLE             !! 14 : TITL1 : A16   :   Title 1                        :
+      CHEAD(15) = ''                 !! 15 : TITL2 : A16   :   Title 2                        :
+      CHEAD(16) = CUNIT              !! 16 : UNIT  : A16   :   Unit                           :
+      CHEAD(17) = ''                 !! 17 : ETTL1 : A16   :   Edit title 01                  :
+      CHEAD(18) = ''                 !! 18 : ETTL2 : A16   :   Edit title 02                  :
+      CHEAD(19) = ''                 !! 19 : ETTL3 : A16   :   Edit title 03                  :
+      CHEAD(20) = ''                 !! 20 : ETTL4 : A16   :   Edit title 04                  :
+      CHEAD(21) = ''                 !! 21 : ETTL5 : A16   :   Edit title 05                  :
+      CHEAD(22) = ''                 !! 22 : ETTL6 : A16   :   Edit title 06                  :
+      CHEAD(23) = ''                 !! 23 : ETTL7 : A16   :   Edit title 07                  :
+      CHEAD(24) = ''                 !! 24 : ETTL8 : A16   :   Edit title 08                  :
+      CHEAD(25) = ''                 !! 25 : TIME  : I10   :   Total time                     : 0
+      CHEAD(26) = ''                 !! 26 : UTIM  : A16   :   Time unit                      :
+!     CHEAD(27) = ''                 !! 27 : DATE  : A16   :   Time (yyyymmddhhmmss)          :
+      CHEAD(28) = ''                 !! 28 : TDUR  : I10   :   Data representative time       : 0
+!     CHEAD(29) = ''                 !! 29 : AITM1 : A16   :   Axis grid identification name  :
+!     CHEAD(30) = ''                 !! 30 : ASTR1 : I10   :   Start of axis grid number      : 1
+!     CHEAD(31) = ''                 !! 31 : AEND1 : I10   :   End of axis grid number        :
+!     CHEAD(32) = ''                 !! 32 : AITM2 : A16   :   Axis grid identification name  :
+!     CHEAD(33) = ''                 !! 33 : ASTR2 : I10   :   Start of axis grid number      : 1
+!     CHEAD(34) = ''                 !! 34 : AEND2 : I10   :   End of axis grid number        :
+!     CHEAD(35) = ''                 !! 35 : AITM3 : A16   :   Axis grid identification name  :
+!     CHEAD(36) = ''                 !! 36 : ASTR3 : I10   :   Start of axis grid number      : 1
+!     CHEAD(37) = ''                 !! 37 : AEND3 : I10   :   End of axis grid number        :
+!     CHEAD(38) = ''                 !! 38 : DFMT  : A16   :   Data format                    : UR4
+!     CHEAD(39) = ''                 !! 39 : MISS  : E15.7 :   Missing value                  : -999.
+!     CHEAD(40) = ''                 !! 40 : DMIN  : E15.7 :   Range (minimum)                : -999.
+!     CHEAD(41) = ''                 !! 41 : DMAX  : E15.7 :   Range (maximum)                : -999.
+!     CHEAD(42) = ''                 !! 42 : DIVS  : E15.7 :   Interval (small)               : -999.
+!     CHEAD(43) = ''                 !! 43 : DIVL  : E15.7 :   Interval (Large)               : -999.
+!     CHEAD(44) = ''                 !! 44 : STYP  : I10   :   Scaling type                   : 1
+      CHEAD(45) = ''                 !! 45 : COPTN : A16   :   Option (character)             :
+      CHEAD(46) = ''                 !! 46 : IOPTN : I16   :   Option (integer)               : 0
+      CHEAD(47) = ''                 !! 47 : ROPTN : E16.7 :   Option (real)                  : 0
+      CHEAD(48) = ''                 !! 48 : DATE1 : I16   :   Time (auxiliary)               :
+      CHEAD(49) = ''                 !! 49 : DATE2 : A16   :   Time unit (auxiliary)          :
+!     CHEAD(50) = ''                 !! 50 : MEMO1 : A16   :   Memo O1                        :
+      CHEAD(51) = ''                 !! 51 : MEMO2 : A16   :   Memo O2                        :
+      CHEAD(52) = ''                 !! 52 : MEMO3 : A16   :   Memo O3                        :
+      CHEAD(53) = ''                 !! 53 : MEMO4 : A16   :   Memo O4                        :
+      CHEAD(54) = ''                 !! 54 : MEMO5 : A16   :   Memo O5                        :
+      CHEAD(55) = ''                 !! 55 : MEMO6 : A16   :   Memo O6                        :
+      CHEAD(56) = ''                 !! 56 : MEMO7 : A16   :   Memo O7                        :
+      CHEAD(57) = ''                 !! 57 : MEMO8 : A16   :   Memo O8                        :
+      CHEAD(58) = ''                 !! 58 : MEMO9 : A16   :   Memo O9                        :
+      CHEAD(59) = ''                 !! 59 : MEM1O : A16   :   Memo 1O                        :
+      CHEAD(60) = ''                 !! 60 : CDATE : A16   :   Data creation date             :
+      CHEAD(61) = ''                 !! 61 : CSIGN : A16   :   Data creator                   :
+      CHEAD(62) = ''                 !! 62 : MDATE : A16   :   Data change date               :
+      CHEAD(63) = ''                 !! 63 : MSIGN : A16   :   Data modified by               :
+      CHEAD(64) = ''                 !! 64 : SIZE  : I10   :   Array size                     : 0
       WRITE(CHEAD(39), '(E15.7)') -999.0
       WRITE(CHEAD(40), '(E15.7)') -999.0
       WRITE(CHEAD(41), '(E15.7)') -999.0

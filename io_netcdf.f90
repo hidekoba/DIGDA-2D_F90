@@ -1,191 +1,358 @@
 program io_netcdf
-    use netcdf_utilities
-    use sdmain_module
-    implicit none
+  use netcdf_utilities
+  use sdmain_module
+  implicit none
 
-    character(len=100) :: filename
-    character(len=100) :: varname
-!   integer(kind=4) :: nsize
-!   integer(kind=4) :: nx = 2560
-!   integer(kind=4) :: ny = 1920
-!   integer(kind=4) :: nz =  44
-!   character(len=16) :: citem
-!   character(len=16) :: ctitle
-!   character(len=16) :: cunit
+  character(len=100) :: filename, varname, varunit
 
-!   real(kind=4), dimension(:,:), allocatable :: bdep
-!   real(kind=4), dimension(:,:), allocatable :: btem, bsal, bnit, bdic, balk, bdo2, bsil
-!   real(kind=4), dimension(:,:), allocatable :: bc13, bc14
-!   real(kind=4), dimension(:,:), allocatable :: ficla, fipom, ficar, fiopa
-!   real(kind=8), dimension(:,:,:), allocatable :: depth
-!   real(kind=8), dimension(:,:), allocatable :: bdepth
-!   real(kind=8), dimension(:), allocatable :: data_flat
-    integer :: i, j, k, l
+  integer :: i, j, k, l
 
-    double precision, dimension(:,:), allocatable :: inficla   !! benthic clay flux [g/m3*cm/s]
-    double precision, dimension(:,:), allocatable :: infipom   !! benthic pom flux [mMol/m3*cm/s]
-    double precision, dimension(:,:), allocatable :: inficar   !! benthic caco3 flux [mMol/m3*cm/s]
-    double precision, dimension(:,:), allocatable :: infiopa   !! benthic opal flux [mMol/m3*cm/s]
-    double precision, dimension(:,:), allocatable :: infiage   !!
+  double precision, dimension(:,:), allocatable :: bdep    !! ocean depth [m]
+! double precision, dimension(nxdim, nydim) :: bdep    !! ocean depth [m]
+  double precision, dimension(nxdim, nydim) :: omask   !! ocean depth [m]
 
-    double precision, dimension(:,:), allocatable :: outfocla  !! benthic clay flux [g/m3*cm/s]
-    double precision, dimension(:,:), allocatable :: outfopom  !! benthic pom flux [mMol/m3*cm/s]
-    double precision, dimension(:,:), allocatable :: outfocar  !! benthic caco3 flux [mMol/m3*cm/s]
-    double precision, dimension(:,:), allocatable :: outfoopa  !! benthic opal flux [mMol/m3*cm/s]
-    double precision, dimension(:,:), allocatable :: outfoage  !!
+  double precision, dimension(:,:), allocatable :: ficla   !! benthic clay flux [g/m3*cm/s]
+  double precision, dimension(:,:), allocatable :: fipom   !! benthic pom flux [mMol/m3*cm/s]
+  double precision, dimension(:,:), allocatable :: ficar   !! benthic caco3 flux [mMol/m3*cm/s]
+  double precision, dimension(:,:), allocatable :: fiopa   !! benthic opal flux [mMol/m3*cm/s]
+  double precision, dimension(:,:), allocatable :: fiage   !!
+! double precision, dimension(nxdim, nydim) :: ficla   !! benthic clay flux [g/m3*cm/s]
+! double precision, dimension(nxdim, nydim) :: fipom   !! benthic pom flux [mMol/m3*cm/s]
+! double precision, dimension(nxdim, nydim) :: ficar   !! benthic caco3 flux [mMol/m3*cm/s]
+! double precision, dimension(nxdim, nydim) :: fiopa   !! benthic opal flux [mMol/m3*cm/s]
+! double precision, dimension(nxdim, nydim) :: fiage   !!
 
-    double precision, dimension(:,:), allocatable :: inbdep    !! ocean depth [m]
-    double precision, dimension(:,:), allocatable :: inbwtem   !! temperature [mMol/m3]
-    double precision, dimension(:,:), allocatable :: inbwsal   !! salinity [mMol/m3]
-    double precision, dimension(:,:), allocatable :: inbwnit   !! phosphate [mMol/m3]
-    double precision, dimension(:,:), allocatable :: inbwdic   !! DIC [mMol/m3]
-    double precision, dimension(:,:), allocatable :: inbwalk   !! alkalinity [mMol/m3]
-    double precision, dimension(:,:), allocatable :: inbwdo2   !! oxygen [mMol/m3]
-    double precision, dimension(:,:), allocatable :: inbwsil   !! silicate [mMol/m3]o
-    double precision, dimension(:,:), allocatable :: inbw13dic !! 13C-DIC [mMol/m3]
-    double precision, dimension(:,:), allocatable :: inbw14dic !! 14C-DIC [mMol/m3]
+! double precision, dimension(:,:), allocatable :: outfocla  !! benthic clay flux [g/m3*cm/s]
+! double precision, dimension(:,:), allocatable :: outfopom  !! benthic pom flux [mMol/m3*cm/s]
+! double precision, dimension(:,:), allocatable :: outfocar  !! benthic caco3 flux [mMol/m3*cm/s]
+! double precision, dimension(:,:), allocatable :: outfoopa  !! benthic opal flux [mMol/m3*cm/s]
+! double precision, dimension(:,:), allocatable :: outfoage  !!
+  double precision, dimension(nxdim, nydim) :: outfocla  !! benthic clay flux [g/m3*cm/s]
+  double precision, dimension(nxdim, nydim) :: outfopom  !! benthic pom flux [mMol/m3*cm/s]
+  double precision, dimension(nxdim, nydim) :: outfocar  !! benthic caco3 flux [mMol/m3*cm/s]
+  double precision, dimension(nxdim, nydim) :: outfoopa  !! benthic opal flux [mMol/m3*cm/s]
+  double precision, dimension(nxdim, nydim) :: outfoage  !!
 
-    double precision, dimension(:), allocatable :: outvar_sd2d !!
-    double precision, dimension(:,:), allocatable :: outvar_sd3d !!
+  double precision, dimension(:,:), allocatable :: bwtem   !! temperature [mMol/m3]
+  double precision, dimension(:,:), allocatable :: bwsal   !! salinity [mMol/m3]
+  double precision, dimension(:,:), allocatable :: bwnit   !! phosphate [mMol/m3]
+  double precision, dimension(:,:), allocatable :: bwdic   !! DIC [mMol/m3]
+  double precision, dimension(:,:), allocatable :: bwalk   !! alkalinity [mMol/m3]
+  double precision, dimension(:,:), allocatable :: bwdo2   !! oxygen [mMol/m3]
+  double precision, dimension(:,:), allocatable :: bwsil   !! silicate [mMol/m3]o
+  double precision, dimension(:,:), allocatable :: bw13dic !! 13C-DIC [mMol/m3]
+  double precision, dimension(:,:), allocatable :: bw14dic !! 14C-DIC [mMol/m3]
+! double precision, dimension(nxdim, nydim) :: bwtem   !! temperature [mMol/m3]
+! double precision, dimension(nxdim, nydim) :: bwsal   !! salinity [mMol/m3]
+! double precision, dimension(nxdim, nydim) :: bwnit   !! phosphate [mMol/m3]
+! double precision, dimension(nxdim, nydim) :: bwdic   !! DIC [mMol/m3]
+! double precision, dimension(nxdim, nydim) :: bwalk   !! alkalinity [mMol/m3]
+! double precision, dimension(nxdim, nydim) :: bwdo2   !! oxygen [mMol/m3]
+! double precision, dimension(nxdim, nydim) :: bwsil   !! silicate [mMol/m3]o
+! double precision, dimension(nxdim, nydim) :: bw13dic !! 13C-DIC [mMol/m3]
+! double precision, dimension(nxdim, nydim) :: bw14dic !! 14C-DIC [mMol/m3]
 
-    double precision, dimension(:,:,:), allocatable :: outcalk !! 14C-DIC [mMol/m3]
+! double precision, dimension(:,:), allocatable :: bfrc !!
+  double precision, dimension(nxydim, benfdm) :: bfrc !!
+! double precision, dimension(:,:,:), allocatable :: sdtx !!
+  double precision, dimension(nxydim, sdzdim, sedtdm) :: sdtx !!
 
-    ! Allocate the array with appropriate dimensions
-    allocate(inbdep(nxdim, nydim))
-    allocate(inficla(nxdim, nydim))
-    allocate(infipom(nxdim, nydim))
-    allocate(inficar(nxdim, nydim))
-    allocate(infiopa(nxdim, nydim))
-    allocate(inbwtem(nxdim, nydim))
-    allocate(inbwsal(nxdim, nydim))
-    allocate(inbwnit(nxdim, nydim))
-    allocate(inbwdic(nxdim, nydim))
-    allocate(inbwalk(nxdim, nydim))
-    allocate(inbwdo2(nxdim, nydim))
-    allocate(inbwsil(nxdim, nydim))
-    allocate(inbw13dic(nxdim, nydim))
-    allocate(inbw14dic(nxdim, nydim))
+  double precision, dimension(:), allocatable :: lon_values !!
+  double precision, dimension(:), allocatable :: lat_values !!
+  double precision, dimension(:), allocatable :: depth_values !!
 
-    allocate(outvar_sd2d(nxydim))
-    allocate(outvar_sd3d(nxydim, sdzdim))
-    allocate(outcalk(nxdim, nydim, sdzdim))
+  double precision, dimension(:), allocatable :: outvar_sd2d !!
+  double precision, dimension(:,:), allocatable :: outvar_sd3d !!
 
-    ! Call the read_netcdf subroutine
-    filename = "bound256192/bdep.nc"
-    varname = "depth"
-    call read_netcdf_2d(filename, varname, inbdep)
-    filename = "bound256192/btem.nc"
-    varname = "TEM"
-    call read_netcdf_2d(filename, varname, inbwtem)
-    filename = "bound256192/bsal.nc"
-    varname = "SAL"
-    call read_netcdf_2d(filename, varname, inbwsal)
-    filename = "bound256192/bnit.nc"
-    varname = "NIT"
-    call read_netcdf_2d(filename, varname, inbwnit)
-    filename = "bound256192/bdic.nc"
-    varname = "DIC"
-    call read_netcdf_2d(filename, varname, inbwdic)
-    filename = "bound256192/balk.nc"
-    varname = "ALK"
-    call read_netcdf_2d(filename, varname, inbwalk)
-    filename = "bound256192/bdo2.nc"
-    varname = "DO2"
-    call read_netcdf_2d(filename, varname, inbwdo2)
-    filename = "bound256192/bsil.nc"
-    varname = "SIL"
-    call read_netcdf_2d(filename, varname, inbwsil)
-    filename = "bound256192/bc13.nc"
-    varname = "C13"
-    call read_netcdf_2d(filename, varname, inbw13dic)
-    filename = "bound256192/bc14.nc"
-    varname = "C14"
-    call read_netcdf_2d(filename, varname, inbw14dic)
-    filename = "bound256192/ficla.nc"
-    varname = "FICLA"
-    call read_netcdf_2d(filename, varname, inficla)
-    filename = "bound256192/fipom.nc"
-    varname = "FIPOM"
-    call read_netcdf_2d(filename, varname, infipom)
-    filename = "bound256192/ficar.nc"
-    varname = "FICAR"
-    call read_netcdf_2d(filename, varname, inficar)
-    filename = "bound256192/fiopa.nc"
-    varname = "FIOPA"
-    call read_netcdf_2d(filename, varname, infiopa)
+  double precision, dimension(:,:,:), allocatable :: outscla !!
+  double precision, dimension(:,:,:), allocatable :: outspom !!
+  double precision, dimension(:,:,:), allocatable :: outscar !!
+  double precision, dimension(:,:,:), allocatable :: outsopa !!
+  double precision, dimension(:,:,:), allocatable :: outsage !!
+  double precision, dimension(:,:,:), allocatable :: outcnit !!
+  double precision, dimension(:,:,:), allocatable :: outcdic !!
+  double precision, dimension(:,:,:), allocatable :: outcalk !!
+  double precision, dimension(:,:,:), allocatable :: outcsil !!
+  double precision, dimension(:,:,:), allocatable :: outcdo2 !!
 
-    infiage = 0.d0
+  double precision, dimension(:,:,:), allocatable :: out13spom !!
+  double precision, dimension(:,:,:), allocatable :: out13scar !!
+  double precision, dimension(:,:,:), allocatable :: out13cdic !!
+  double precision, dimension(:,:,:), allocatable :: out14spom !!
+  double precision, dimension(:,:,:), allocatable :: out14scar !!
+  double precision, dimension(:,:,:), allocatable :: out14cdic !!
 
-!    call sd
-     call sd( &
-    &     inbdep, &
-    &     inficla, infipom, inficar, infiopa, infiage, &
-    &     inbwtem, inbwsal, inbwnit, inbwdic, inbwalk, inbwsil, inbwdo2, &
-    &     inbw13dic, inbw14dic, &
-    &     outvar_sd3d )
-!!  &     outfopom, outfocar, outfoopa )
+  ! Allocate the array with appropriate dimensions
+  allocate(bdep(nxdim, nydim))
+  allocate(ficla(nxdim, nydim))
+  allocate(fipom(nxdim, nydim))
+  allocate(ficar(nxdim, nydim))
+  allocate(fiopa(nxdim, nydim))
+  allocate(fiage(nxdim, nydim))
+  allocate(bwtem(nxdim, nydim))
+  allocate(bwsal(nxdim, nydim))
+  allocate(bwnit(nxdim, nydim))
+  allocate(bwdic(nxdim, nydim))
+  allocate(bwalk(nxdim, nydim))
+  allocate(bwdo2(nxdim, nydim))
+  allocate(bwsil(nxdim, nydim))
+  allocate(bw13dic(nxdim, nydim))
+  allocate(bw14dic(nxdim, nydim))
 
-     do k = 1, sdzdim
-        do j = 1, sdzdim
-           do i = 1, sdzdim
-              l = i + (j - 1) * nxdim
-              outcalk(i, j, k) = outvar_sd3d(l, k)
-           end do
-        end do
-     end do
+! allocate(bfrc(nxydim, benfdm))
+! allocate(sdtx(nxydim, sdzdim, sedtdm))
 
-!
-!!   ! Call the read_gtool subroutine
-!!   filename = "bound256192/bdep.gt"
-!!   nsize = nx * ny
-!!   call read_gtool(filename, nsize, data_flat)
-!
-!!    ! Now reshape data_flat into bdepth
-!!   if (allocated(data_flat)) then
-!!       allocate(bdepth(nx, ny))
-!!       bdepth = reshape(data_flat, shape(bdepth))
-!!       deallocate(data_flat)
-!!   else
-!!       write(*,*) "Data allocation failed for data_flat."
-!!       stop
-!!   endif
-!
-!!   ! Process
-!!   if (allocated(depth)) then
-!!       write(*,*) "First element of ", varname, " = ", depth(1,1,1)
-!!   else
-!!       write(*,*) "Data allocation failed."
-!!       stop
-!!   endif
-!
-!!   if (allocated(bdepth)) then
-!!       write(*,*) "First element of ", varname, " = ", bdepth(128,96)
-!!   else
-!!       write(*,*) "Data allocation failed."
-!!       stop
-!!   endif
-!
-!!   do j = 1, ny
-!!       do i = 1, nx
-!!           bdepth(i,j) = -5. * bdepth(i,j)
-!!       end do
-!!   end do
-!
-     ! Call the write_netcdf subroutine
-     filename = "output.nc"
-     varname = "ALK"
-     call write_netcdf_3d(filename, varname, outcalk)
-!
-!!   ! Call the write_netcdf subroutine
-!!   filename = "bound256192/output.gt"
-!!   citem = "dEpTh"
-!!   ctitle = "DePtH"
-!!   cunit = "m"
-!!   call write_gtool(filename, citem, ctitle, cunit, nx, ny, 1, bdepth)
-!
-!!   ! Free memory for variables
-!!   if (allocated(depth)) deallocate(depth)
-!!   if (allocated(bdepth)) deallocate(bdepth)
-!!   if (allocated(data_flat)) deallocate(data_flat)
-!
+! allocate(lon_values(nxdim))
+! allocate(LAT_Values(nydim))
+! allocate(depth_values(sdzdim))
+
+  allocate(outvar_sd2d(nxydim))
+  allocate(outvar_sd3d(nxydim, sdzdim))
+
+  allocate(outscla(nxdim, nydim, sdzdim))
+  allocate(outspom(nxdim, nydim, sdzdim))
+  allocate(outscar(nxdim, nydim, sdzdim))
+  allocate(outsopa(nxdim, nydim, sdzdim))
+  allocate(outsage(nxdim, nydim, sdzdim))
+  allocate(outcnit(nxdim, nydim, sdzdim))
+  allocate(outcdic(nxdim, nydim, sdzdim))
+  allocate(outcalk(nxdim, nydim, sdzdim))
+  allocate(outcsil(nxdim, nydim, sdzdim))
+  allocate(outcdo2(nxdim, nydim, sdzdim))
+
+  ! Call the read_netcdf subroutine
+  filename = trim(bound_dir)//"bdep.nc"
+  varname = "depth"
+  call read_netcdf_2d(filename, varname, bdep, lon_values, lat_values)
+  filename = trim(bound_dir)//"btem.nc"
+  varname = "TEM"
+  call read_netcdf_2d(filename, varname, bwtem, lon_values, lat_values)
+  filename = trim(bound_dir)//"bsal.nc"
+  varname = "SAL"
+  call read_netcdf_2d(filename, varname, bwsal, lon_values, lat_values)
+  filename = trim(bound_dir)//"bnit.nc"
+  varname = "NIT"
+  call read_netcdf_2d(filename, varname, bwnit, lon_values, lat_values)
+  filename = trim(bound_dir)//"bdic.nc"
+  varname = "DIC"
+  call read_netcdf_2d(filename, varname, bwdic, lon_values, lat_values)
+  filename = trim(bound_dir)//"balk.nc"
+  varname = "ALK"
+  call read_netcdf_2d(filename, varname, bwalk, lon_values, lat_values)
+  filename = trim(bound_dir)//"bdo2.nc"
+  varname = "DO2"
+  call read_netcdf_2d(filename, varname, bwdo2, lon_values, lat_values)
+  filename = trim(bound_dir)//"bsil.nc"
+  varname = "SIL"
+  call read_netcdf_2d(filename, varname, bwsil, lon_values, lat_values)
+  filename = trim(bound_dir)//"bc13.nc"
+  varname = "C13"
+  call read_netcdf_2d(filename, varname, bw13dic, lon_values, lat_values)
+  filename = trim(bound_dir)//"bc14.nc"
+  varname = "C14"
+  call read_netcdf_2d(filename, varname, bw14dic, lon_values, lat_values)
+  filename = trim(bound_dir)//"ficla.nc"
+  varname = "FICLA"
+  call read_netcdf_2d(filename, varname, ficla, lon_values, lat_values)
+  filename = trim(bound_dir)//"fipom.nc"
+  varname = "FIPOM"
+  call read_netcdf_2d(filename, varname, fipom, lon_values, lat_values)
+  filename = trim(bound_dir)//"ficar.nc"
+  varname = "FICAR"
+  call read_netcdf_2d(filename, varname, ficar, lon_values, lat_values)
+  filename = trim(bound_dir)//"fiopa.nc"
+  varname = "FIOPA"
+  call read_netcdf_2d(filename, varname, fiopa, lon_values, lat_values)
+
+  fiage = 0.d0
+
+  do j = 1, nydim
+    do i = 1, nxdim
+      if (bdep(i, j) == rmiss) then
+        omask(i, j) = 0.D0
+      else
+        omask(i, j) = 1.D0
+      end if
+    end do
+  end do
+
+  do j = 1, nydim
+    do i = 1, nxdim
+      l = i + (j - 1) * nxdim
+      bfrc(l, 1) = ficla(i, j) * omask(i, j)
+      bfrc(l, 2) = fipom(i, j) * omask(i, j)
+      bfrc(l, 3) = ficar(i, j) * omask(i, j)
+      bfrc(l, 4) = fiopa(i, j) * omask(i, j)
+      bfrc(l, 5) = fiage(i, j) * omask(i, j)
+      bfrc(l, 6) = bwtem(i, j)
+      bfrc(l, 7) = bwsal(i, j)
+      bfrc(l, 8) = bwnit(i, j)
+      bfrc(l, 9) = bwdic(i, j)
+      bfrc(l, 10) = bwalk(i, j)
+      bfrc(l, 11) = bwsil(i, j)
+      bfrc(l, 12) = bwdo2(i, j)
+      bfrc(l, 13) = bw13dic(i, j)
+      bfrc(l, 14) = bw14dic(i, j)
+    end do
+  end do
+
+  call sd( &
+ &     bdep, &
+ &     bfrc, &
+ &     sdtx )
+
+  do k = 1, sdzdim
+    do j = 1, nydim
+      do i = 1, nxdim
+        l = i + (j - 1) * nxdim
+        outscla(i, j, k) = sdtx(l, k, 1)
+        outspom(i, j, k) = sdtx(l, k, 2)
+        outscar(i, j, k) = sdtx(l, k, 3)
+        outsopa(i, j, k) = sdtx(l, k, 4)
+        outsage(i, j, k) = sdtx(l, k, 5)
+        outcnit(i, j, k) = sdtx(l, k, 6)
+        outcdic(i, j, k) = sdtx(l, k, 7)
+        outcalk(i, j, k) = sdtx(l, k, 8)
+        outcsil(i, j, k) = sdtx(l, k, 9)
+        outcdo2(i, j, k) = sdtx(l, k, 10)
+!       out13spom(i, j, k) = sdtx(l, k, 11)
+!       out13scar(i, j, k) = sdtx(l, k, 12)
+!       out13cdic(i, j, k) = sdtx(l, k, 13)
+!       out14spom(i, j, k) = sdtx(l, k, 14)
+!       out14scar(i, j, k) = sdtx(l, k, 15)
+!       out14cdic(i, j, k) = sdtx(l, k, 16)
+      end do
+    end do
+  end do
+
+  ! Call the write_netcdf subroutine
+  filename = "scla.nc"
+  varname = "Clay"
+  varunit = "g m-3"
+  call write_netcdf_3d(filename, varname, varunit, outscla, lon_values, lat_values, lz)
+
+  filename = "spom.nc"
+  varname = "OrgM"
+  varunit = "mmol m-3"
+  call write_netcdf_3d(filename, varname, varunit, outspom, lon_values, lat_values, lz)
+
+  filename = "scar.nc"
+  varname = "CaCO3"
+  varunit = "mmol m-3"
+  call write_netcdf_3d(filename, varname, varunit, outscar, lon_values, lat_values, lz)
+
+  filename = "sopa.nc"
+  varname = "SiO2"
+  varunit = "mmol m-3"
+  call write_netcdf_3d(filename, varname, varunit, outsopa, lon_values, lat_values, lz)
+
+  filename = "sage.nc"
+  varname = "Age"
+  varunit = "yr"
+  call write_netcdf_3d(filename, varname, varunit, outsage, lon_values, lat_values, lz)
+
+  filename = "cnit.nc"
+  varname = "Phosphate"
+  varunit = "mmol m-3"
+  call write_netcdf_3d(filename, varname, varunit, outcnit, lon_values, lat_values, lz)
+
+  filename = "cdic.nc"
+  varname = "DIC"
+  varunit = "mmol m-3"
+  call write_netcdf_3d(filename, varname, varunit, outcdic, lon_values, lat_values, lz)
+
+  filename = "calk.nc"
+  varname = "Alkalinity"
+  varunit = "mmol m-3"
+  call write_netcdf_3d(filename, varname, varunit, outcalk, lon_values, lat_values, lz)
+
+  filename = "cdo2.nc"
+  varname = "Oxygen"
+  varunit = "mmol m-3"
+  call write_netcdf_3d(filename, varname, varunit, outcdo2, lon_values, lat_values, lz)
+
+  filename = "csil.nc"
+  varname = "Silicate"
+  varunit = "mmol m-3"
+  call write_netcdf_3d(filename, varname, varunit, outcsil, lon_values, lat_values, lz)
+
+  ! Free memory for variables
+  if (allocated(bdep)) then
+    deallocate(bdep)
+  end if
+  if (allocated(ficla)) then
+    deallocate(ficla)
+  end if
+  if (allocated(fipom)) then
+    deallocate(fipom)
+  end if
+  if (allocated(ficar)) then
+    deallocate(ficar)
+  end if
+  if (allocated(fiopa)) then
+    deallocate(fiopa)
+  end if
+  if (allocated(fiage)) then
+    deallocate(fiage)
+  end if
+  if (allocated(bwtem)) then
+    deallocate(bwtem)
+  end if
+  if (allocated(bwsal)) then
+    deallocate(bwsal)
+  end if
+  if (allocated(bwnit)) then
+    deallocate(bwnit)
+  end if
+  if (allocated(bwdic)) then
+    deallocate(bwdic)
+  end if
+  if (allocated(bwalk)) then
+    deallocate(bwalk)
+  end if
+  if (allocated(bwdo2)) then
+    deallocate(bwdo2)
+  end if
+  if (allocated(bwsil)) then
+    deallocate(bwsil)
+  end if
+  if (allocated(bw13dic)) then
+    deallocate(bw13dic)
+  end if
+  if (allocated(bw14dic)) then
+    deallocate(bw14dic)
+  end if
+
+  ! Free memory for variables
+  if (allocated(outscla)) then
+    deallocate(outscla)
+  end if
+  if (allocated(outspom)) then
+    deallocate(outspom)
+  end if
+  if (allocated(outscar)) then
+    deallocate(outscar)
+  end if
+  if (allocated(outsopa)) then
+    deallocate(outsopa)
+  end if
+  if (allocated(outsage)) then
+    deallocate(outsage)
+  end if
+  if (allocated(outcnit)) then
+    deallocate(outcnit)
+  end if
+  if (allocated(outcdic)) then
+    deallocate(outcdic)
+  end if
+  if (allocated(outcalk)) then
+    deallocate(outcalk)
+  end if
+  if (allocated(outcsil)) then
+    deallocate(outcsil)
+  end if
+  if (allocated(outcdo2)) then
+    deallocate(outcdo2)
+  end if
+
 end program io_netcdf
