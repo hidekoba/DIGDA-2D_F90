@@ -179,6 +179,21 @@ program io_netcdf
   do j = 1, nydim
     do i = 1, nxdim
       l = i + (j - 1) * nxdim
+      if (ficla(i, j) == rmiss) then
+        ficla(i, j) = 0.D0
+      end if
+      if (fipom(i, j) == rmiss) then
+        fipom(i, j) = 0.D0
+      end if
+      if (ficar(i, j) == rmiss) then
+        ficar(i, j) = 0.D0
+      end if
+      if (fiopa(i, j) == rmiss) then
+        fiopa(i, j) = 0.D0
+      end if
+      if (fiage(i, j) == rmiss) then
+        fiage(i, j) = 0.D0
+      end if
       bfrc(l, 1) = ficla(i, j) * omask(i, j)
       bfrc(l, 2) = fipom(i, j) * omask(i, j)
       bfrc(l, 3) = ficar(i, j) * omask(i, j)

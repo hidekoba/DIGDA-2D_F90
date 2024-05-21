@@ -19,9 +19,8 @@ module globals_sdmain
 ! ==================================================
 
       integer, parameter :: TSTR = 1
-      integer, parameter :: TENDYR = 10
-     !integer, parameter :: TEND = TENDYR / TSYR !! Converts years to time steps
-      integer, parameter :: TEND = 10
+      integer, parameter :: TENDYR = 2
+      integer, parameter :: TEND = TENDYR / TSYR !! Converts years to time steps
 
       integer, parameter :: TOUTYR = 1000
       integer, parameter :: TOUT = TOUTYR / TSYR !! Converts years to time steps
