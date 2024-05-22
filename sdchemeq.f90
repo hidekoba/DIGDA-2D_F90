@@ -119,8 +119,6 @@ contains
          PT(IJ)  = PTIN(IJ)  * CU
       END DO
 
-      print *, "bakbabaksabask", rmiss
-
       DO IJ = IJTSTR, IJTEND
      !IF ( TEM(IJ) /= 0.0D0 .and. SAL(IJ) /= 0.0D0 ) THEN
       IF ( TEM(IJ) /= rmiss .and. SAL(IJ) /= rmiss ) THEN

@@ -62,28 +62,41 @@ $(PROGS): $(OBJS)
 
 # .f90 file dependencies
 io_netcdf.o: netcdf_utilities.o
+sdmain_ionc.o: netcdf_utilities.o
 #sdmain_ionc.o: sdclay.o sdpom.o sdcaco3.o sdopal.o sdchemeq.o sdsolid.o sdliquid.o
 
 # output
-OUTPUTs1=scla spom scar sopa sage pcla ppom pcar popa w
-OUTPUTs2=scla.nc spom.nc scar.nc sopa.nc sage.nc pcla.nc ppom.nc pcar.nc popa.nc w.nc
-OUTPUTs3=ficla fipom ficar fiopa
-OUTPUTs4=focla fopom focar foopa
-OUTPUTs5=bfcla bfpom bfcar bfopa
-OUTPUTs6=w
-OUTPUTs7=s13pom s14pom s13car s14car
-OUTPUTs8=fo13pom fo14pom fo13car fo14car
-OUTPUTs9=fi13pom fi14pom fi13car fi14car
-OUTPUTs10=bf13pom bf14pom bf13car bf14car
-OUTPUTl1=cnit cdic calk cdo2 csil cco32 satsil satco32
-OUTPUTl2=cnit.nc cdic.nc calk.nc cdo2.nc csil.nc cco32.nc satsil.nc satco32.nc
-OUTPUTl3=finit fidic fialk fido2 fisil
-OUTPUTl4=fonit fodic foalk fodo2 fosil
-OUTPUTl5=c13dic c14dic cdc13 cdc14
-OUTPUTl6=fi13dic fi14dic
-OUTPUTl7=fo13dic fo14dic
+OUTPUTsg1=scla spom scar sopa sage pcla ppom pcar popa w
+OUTPUTsg2=ficla fipom ficar fiopa
+OUTPUTsg3=focla fopom focar foopa
+OUTPUTsg4=bfcla bfpom bfcar bfopa
+OUTPUTsg5=w
+OUTPUTsg6=s13pom s14pom s13car s14car
+OUTPUTsg7=fo13pom fo14pom fo13car fo14car
+OUTPUTsg8=fi13pom fi14pom fi13car fi14car
+OUTPUTsg9=bf13pom bf14pom bf13car bf14car
+
+OUTPUTsn1=scla.nc spom.nc scar.nc sopa.nc sage.nc pcla.nc ppom.nc pcar.nc popa.nc w.nc
+OUTPUTsn2=ficla.nc fipom.nc ficar.nc fiopa.nc
+
+OUTPUTlg1=cnit cdic calk cdo2 csil cco32 satsil satco32
+OUTPUTlg2=finit fidic fialk fido2 fisil
+OUTPUTlg3=fonit fodic foalk fodo2 fosil
+OUTPUTlg4=c13dic c14dic cdc13 cdc14
+OUTPUTlg5=fi13dic fi14dic
+OUTPUTlg6=fo13dic fo14dic
+
+OUTPUTln1=cnit.nc cdic.nc calk.nc cdo2.nc csil.nc
 
 # cleanup
 clean:
 #rm -f $(OBJS) $(OBJS:.o=.mod)
-	rm -f $(PROGS) $(OUTPUTs1) $(OUTPUTs2) $(OUTPUTs3) $(OUTPUTs4) $(OUTPUTs5) $(OUTPUTs6) $(OUTPUTs7) $(OUTPUTs8) $(OUTPUTs9) $(OUTPUTs10) $(OUTPUTl1) $(OUTPUTl2) $(OUTPUTil3) $(OUTPUTl4) $(OUTPUTl5) $(OUTPUTl6) $(OUTPUTl7) *.o *.mod fort.* dcl*
+	rm -f $(OUTPUTsg1) $(OUTPUTsg2) $(OUTPUTsg3) $(OUTPUTsg4) $(OUTPUTsg5) $(OUTPUTsg6) $(OUTPUTsg7) $(OUTPUTsg8) $(OUTPUTsg9) $(OUTPUTlg1) $(OUTPUTlg2) $(OUTPUTlg3) $(OUTPUTlg4) $(OUTPUTlg5) $(OUTPUTlg6) fort.* dcl*
+#	rm -f $(OUTPUTsn1) $(OUTPUTsn2) $(OUTPUTln1)
+	rm -rf tmpdir ; mkdir tmpdir ; mv $(OUTPUTsn1) $(OUTPUTsn2) $(OUTPUTsn3) $(OUTPUTsn4) $(OUTPUTsn5) $(OUTPUTsn6) $(OUTPUTsn7) $(OUTPUTsn8) $(OUTPUTsn9) $(OUTPUTln1) $(OUTPUTln2) $(OUTPUTln3) $(OUTPUTln4) $(OUTPUTln5) $(OUTPUTln6) tmpdir
+
+cleanall:
+#rm -f $(OBJS) $(OBJS:.o=.mod)
+	rm -f $(PROGS) $(OUTPUTsg1) $(OUTPUTsg2) $(OUTPUTsg3) $(OUTPUTsg4) $(OUTPUTsg5) $(OUTPUTsg6) $(OUTPUTsg7) $(OUTPUTsg8) $(OUTPUTsg9) $(OUTPUTlg1) $(OUTPUTlg2) $(OUTPUTlg3) $(OUTPUTlg4) $(OUTPUTlg5) $(OUTPUTlg6) *.o *.mod fort.* dcl*
+	rm -f $(OUTPUTsn1) $(OUTPUTsn2) $(OUTPUTln1)
+#	rm -rf tmpdir ; mkdir tmpdir ; mv $(OUTPUTsn1) $(OUTPUTsn2) $(OUTPUTsn3) $(OUTPUTsn4) $(OUTPUTsn5) $(OUTPUTsn6) $(OUTPUTsn7) $(OUTPUTsn8) $(OUTPUTsn9) $(OUTPUTln1) $(OUTPUTln2) $(OUTPUTln3) $(OUTPUTln4) $(OUTPUTln5) $(OUTPUTln6) tmpdir

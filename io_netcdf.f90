@@ -61,26 +61,23 @@ program io_netcdf
   double precision, dimension(:), allocatable :: lat_values !!
   double precision, dimension(:), allocatable :: depth_values !!
 
-  double precision, dimension(:), allocatable :: outvar_sd2d !!
-  double precision, dimension(:,:), allocatable :: outvar_sd3d !!
+  double precision, dimension(:,:,:,:), allocatable :: outscla !!
+  double precision, dimension(:,:,:,:), allocatable :: outspom !!
+  double precision, dimension(:,:,:,:), allocatable :: outscar !!
+  double precision, dimension(:,:,:,:), allocatable :: outsopa !!
+  double precision, dimension(:,:,:,:), allocatable :: outsage !!
+  double precision, dimension(:,:,:,:), allocatable :: outcnit !!
+  double precision, dimension(:,:,:,:), allocatable :: outcdic !!
+  double precision, dimension(:,:,:,:), allocatable :: outcalk !!
+  double precision, dimension(:,:,:,:), allocatable :: outcsil !!
+  double precision, dimension(:,:,:,:), allocatable :: outcdo2 !!
 
-  double precision, dimension(:,:,:), allocatable :: outscla !!
-  double precision, dimension(:,:,:), allocatable :: outspom !!
-  double precision, dimension(:,:,:), allocatable :: outscar !!
-  double precision, dimension(:,:,:), allocatable :: outsopa !!
-  double precision, dimension(:,:,:), allocatable :: outsage !!
-  double precision, dimension(:,:,:), allocatable :: outcnit !!
-  double precision, dimension(:,:,:), allocatable :: outcdic !!
-  double precision, dimension(:,:,:), allocatable :: outcalk !!
-  double precision, dimension(:,:,:), allocatable :: outcsil !!
-  double precision, dimension(:,:,:), allocatable :: outcdo2 !!
-
-  double precision, dimension(:,:,:), allocatable :: out13spom !!
-  double precision, dimension(:,:,:), allocatable :: out13scar !!
-  double precision, dimension(:,:,:), allocatable :: out13cdic !!
-  double precision, dimension(:,:,:), allocatable :: out14spom !!
-  double precision, dimension(:,:,:), allocatable :: out14scar !!
-  double precision, dimension(:,:,:), allocatable :: out14cdic !!
+  double precision, dimension(:,:,:,:), allocatable :: out13spom !!
+  double precision, dimension(:,:,:,:), allocatable :: out13scar !!
+  double precision, dimension(:,:,:,:), allocatable :: out13cdic !!
+  double precision, dimension(:,:,:,:), allocatable :: out14spom !!
+  double precision, dimension(:,:,:,:), allocatable :: out14scar !!
+  double precision, dimension(:,:,:,:), allocatable :: out14cdic !!
 
   ! Allocate the array with appropriate dimensions
   allocate(bdep(nxdim, nydim))
@@ -99,26 +96,16 @@ program io_netcdf
   allocate(bw13dic(nxdim, nydim))
   allocate(bw14dic(nxdim, nydim))
 
-! allocate(bfrc(nxydim, benfdm))
-! allocate(sdtx(nxydim, sdzdim, sedtdm))
-
-! allocate(lon_values(nxdim))
-! allocate(LAT_Values(nydim))
-! allocate(depth_values(sdzdim))
-
-  allocate(outvar_sd2d(nxydim))
-  allocate(outvar_sd3d(nxydim, sdzdim))
-
-  allocate(outscla(nxdim, nydim, sdzdim))
-  allocate(outspom(nxdim, nydim, sdzdim))
-  allocate(outscar(nxdim, nydim, sdzdim))
-  allocate(outsopa(nxdim, nydim, sdzdim))
-  allocate(outsage(nxdim, nydim, sdzdim))
-  allocate(outcnit(nxdim, nydim, sdzdim))
-  allocate(outcdic(nxdim, nydim, sdzdim))
-  allocate(outcalk(nxdim, nydim, sdzdim))
-  allocate(outcsil(nxdim, nydim, sdzdim))
-  allocate(outcdo2(nxdim, nydim, sdzdim))
+  allocate(outscla(nxdim, nydim, sdzdim, 1))
+  allocate(outspom(nxdim, nydim, sdzdim, 1))
+  allocate(outscar(nxdim, nydim, sdzdim, 1))
+  allocate(outsopa(nxdim, nydim, sdzdim, 1))
+  allocate(outsage(nxdim, nydim, sdzdim, 1))
+  allocate(outcnit(nxdim, nydim, sdzdim, 1))
+  allocate(outcdic(nxdim, nydim, sdzdim, 1))
+  allocate(outcalk(nxdim, nydim, sdzdim, 1))
+  allocate(outcsil(nxdim, nydim, sdzdim, 1))
+  allocate(outcdo2(nxdim, nydim, sdzdim, 1))
 
   ! Call the read_netcdf subroutine
   filename = trim(bound_dir)//"bdep.nc"
@@ -220,22 +207,22 @@ program io_netcdf
     do j = 1, nydim
       do i = 1, nxdim
         l = i + (j - 1) * nxdim
-        outscla(i, j, k) = sdtx(l, k, 1)
-        outspom(i, j, k) = sdtx(l, k, 2)
-        outscar(i, j, k) = sdtx(l, k, 3)
-        outsopa(i, j, k) = sdtx(l, k, 4)
-        outsage(i, j, k) = sdtx(l, k, 5)
-        outcnit(i, j, k) = sdtx(l, k, 6)
-        outcdic(i, j, k) = sdtx(l, k, 7)
-        outcalk(i, j, k) = sdtx(l, k, 8)
-        outcsil(i, j, k) = sdtx(l, k, 9)
-        outcdo2(i, j, k) = sdtx(l, k, 10)
-!       out13spom(i, j, k) = sdtx(l, k, 11)
-!       out13scar(i, j, k) = sdtx(l, k, 12)
-!       out13cdic(i, j, k) = sdtx(l, k, 13)
-!       out14spom(i, j, k) = sdtx(l, k, 14)
-!       out14scar(i, j, k) = sdtx(l, k, 15)
-!       out14cdic(i, j, k) = sdtx(l, k, 16)
+        outscla(i, j, k, 1) = sdtx(l, k, 1)
+        outspom(i, j, k, 1) = sdtx(l, k, 2)
+        outscar(i, j, k, 1) = sdtx(l, k, 3)
+        outsopa(i, j, k, 1) = sdtx(l, k, 4)
+        outsage(i, j, k, 1) = sdtx(l, k, 5)
+        outcnit(i, j, k, 1) = sdtx(l, k, 6)
+        outcdic(i, j, k, 1) = sdtx(l, k, 7)
+        outcalk(i, j, k, 1) = sdtx(l, k, 8)
+        outcsil(i, j, k, 1) = sdtx(l, k, 9)
+        outcdo2(i, j, k, 1) = sdtx(l, k, 10)
+!       out13spom(i, j, k, 1) = sdtx(l, k, 11)
+!       out13scar(i, j, k, 1) = sdtx(l, k, 12)
+!       out13cdic(i, j, k, 1) = sdtx(l, k, 13)
+!       out14spom(i, j, k, 1) = sdtx(l, k, 14)
+!       out14scar(i, j, k, 1) = sdtx(l, k, 15)
+!       out14cdic(i, j, k, 1) = sdtx(l, k, 16)
       end do
     end do
   end do
@@ -244,52 +231,55 @@ program io_netcdf
   filename = "scla.nc"
   varname = "Clay"
   varunit = "g m-3"
-  call write_netcdf_3d(filename, varname, varunit, outscla, lon_values, lat_values, lz)
+  call write_netcdf_3d(filename, varname, varunit, outscla, lon_values, lat_values, lz, 999)
 
   filename = "spom.nc"
   varname = "OrgM"
   varunit = "mmol m-3"
-  call write_netcdf_3d(filename, varname, varunit, outspom, lon_values, lat_values, lz)
+  call write_netcdf_3d(filename, varname, varunit, outspom, lon_values, lat_values, lz, 999)
 
   filename = "scar.nc"
   varname = "CaCO3"
   varunit = "mmol m-3"
-  call write_netcdf_3d(filename, varname, varunit, outscar, lon_values, lat_values, lz)
+  call write_netcdf_3d(filename, varname, varunit, outscar, lon_values, lat_values, lz, 999)
 
   filename = "sopa.nc"
   varname = "SiO2"
   varunit = "mmol m-3"
-  call write_netcdf_3d(filename, varname, varunit, outsopa, lon_values, lat_values, lz)
+  call write_netcdf_3d(filename, varname, varunit, outsopa, lon_values, lat_values, lz, 999)
 
   filename = "sage.nc"
   varname = "Age"
   varunit = "yr"
-  call write_netcdf_3d(filename, varname, varunit, outsage, lon_values, lat_values, lz)
+  call write_netcdf_3d(filename, varname, varunit, outsage, lon_values, lat_values, lz, 999)
 
   filename = "cnit.nc"
   varname = "Phosphate"
   varunit = "mmol m-3"
-  call write_netcdf_3d(filename, varname, varunit, outcnit, lon_values, lat_values, lz)
+  call write_netcdf_3d(filename, varname, varunit, outcnit, lon_values, lat_values, lz, 999)
 
   filename = "cdic.nc"
   varname = "DIC"
   varunit = "mmol m-3"
-  call write_netcdf_3d(filename, varname, varunit, outcdic, lon_values, lat_values, lz)
+  call write_netcdf_3d(filename, varname, varunit, outcdic, lon_values, lat_values, lz, 999)
 
   filename = "calk.nc"
   varname = "Alkalinity"
   varunit = "mmol m-3"
-  call write_netcdf_3d(filename, varname, varunit, outcalk, lon_values, lat_values, lz)
+  call write_netcdf_3d(filename, varname, varunit, outcalk, lon_values, lat_values, lz, 999)
 
   filename = "cdo2.nc"
   varname = "Oxygen"
   varunit = "mmol m-3"
-  call write_netcdf_3d(filename, varname, varunit, outcdo2, lon_values, lat_values, lz)
+  call write_netcdf_3d(filename, varname, varunit, outcdo2, lon_values, lat_values, lz, 999)
 
   filename = "csil.nc"
   varname = "Silicate"
   varunit = "mmol m-3"
-  call write_netcdf_3d(filename, varname, varunit, outcsil, lon_values, lat_values, lz)
+  call write_netcdf_3d(filename, varname, varunit, outcsil, lon_values, lat_values, lz, 999)
+
+  ! Synchronize all processes
+  call MPI_BARRIER(MPI_COMM_WORLD, ierr)
 
   ! Free memory for variables
   if (allocated(bdep)) then
@@ -369,5 +359,9 @@ program io_netcdf
   if (allocated(outcdo2)) then
     deallocate(outcdo2)
   end if
+
+  ! Finalize MPI
+  call MPI_FINALIZE(ierr)
+
 
 end program io_netcdf

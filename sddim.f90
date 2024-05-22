@@ -8,8 +8,9 @@ module sddim_module
   integer, parameter :: IROOT = 0
   integer :: IERR, NPROCS, MYRANK
   integer :: IREQ, ISTATUS
- !integer, parameter :: NCPU = 16
-  integer, parameter :: NCPU = 24
+ !integer, parameter :: NCPU = 12
+  integer, parameter :: NCPU = 16
+ !integer, parameter :: NCPU = 24
   integer :: IRANK, ISIZE1, ISIZE2, ISIZE3, IIST, IIEN, IJKG
   integer :: ISEND1, ISEND2, ISEND3, ISEND4, ISEND5
   integer :: IRECV1, IRECV2, IRECV3, IRECV4, IRECV5
@@ -111,11 +112,11 @@ module sddim_module
 !!integer, parameter :: NZDIM = 44
 !!character(len=100), parameter :: BOUND_DIR = "bound12864/"
 
-!!! Grid_256x192
-!!integer, parameter :: NXDIM = 256
-!!integer, parameter :: NYDIM = 192
-!!integer, parameter :: NZDIM = 44
-!!character(len=100), parameter :: BOUND_DIR = "bound256192/"
+  ! Grid_256x192
+  integer, parameter :: NXDIM = 256
+  integer, parameter :: NYDIM = 192
+  integer, parameter :: NZDIM = 44
+  character(len=100), parameter :: BOUND_DIR = "bound256192/"
 
 !!! Grid_360x180
 !!integer, parameter :: NXDIM = 360
@@ -123,11 +124,11 @@ module sddim_module
 !!integer, parameter :: NZDIM = 44
 !!character(len=100), parameter :: BOUND_DIR = "bound360180/"
 
-  ! Grid_2160x1080
-  integer, parameter :: NXDIM = 2160
-  integer, parameter :: NYDIM = 1080
-  integer, parameter :: NZDIM = 44
-  character(len=100), parameter :: BOUND_DIR = "bound21601080/reversed_files/"
+!!! Grid_2160x1080
+!!integer, parameter :: NXDIM = 2160
+!!integer, parameter :: NYDIM = 1080
+!!integer, parameter :: NZDIM = 44
+!!character(len=100), parameter :: BOUND_DIR = "bound21601080/reversed_files/"
 
   integer, parameter :: NXYDIM = NXDIM * NYDIM
   integer, parameter :: NX = NXDIM

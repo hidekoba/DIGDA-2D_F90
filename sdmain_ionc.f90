@@ -19,10 +19,10 @@ module globals_sdmain
 ! ==================================================
 
       integer, parameter :: TSTR = 1
-      integer, parameter :: TENDYR = 2
+      integer, parameter :: TENDYR = 3
       integer, parameter :: TEND = TENDYR / TSYR !! Converts years to time steps
 
-      integer, parameter :: TOUTYR = 1000
+      integer, parameter :: TOUTYR = 1
       integer, parameter :: TOUT = TOUTYR / TSYR !! Converts years to time steps
 
 ! ==================================================
@@ -132,6 +132,7 @@ end module globals_sdmain
 ! =====================================================================
 
 module sdmain_module
+  use netcdf_utilities
       use globals_sdmain
       use sdclay_module
       use sdpom_module
@@ -359,6 +360,13 @@ contains
       double precision, allocatable :: DUMMY57(:), DUMMY58(:)
 
 !-- etc :
+      character(len=100) :: FILENAME, VARNAME, VARUNIT
+      double precision :: LON_VALUES(NXDIM)
+      double precision :: LAT_VALUES(NYDIM)
+      double precision :: DEPTH_VALUES(SDZDIM)
+      double precision :: VAR2D_VALUES(NXDIM, NYDIM, 1)
+      double precision :: VAR3D_VALUES(NXDIM, NYDIM, SDZDIM, 1)
+
       integer :: I, J, IJ, K, L, IC
       integer :: TT, YY
 
@@ -1599,6 +1607,306 @@ END IF
 
 IF (PARALLEL) THEN
       IF ( MYRANK .EQ. IROOT ) THEN
+
+         DO I = 1, NXDIM
+         LON_VALUES(I) = ((I - 1) * 360.0 / NXDIM) + (180.0 / NXDIM)
+         END DO
+
+         DO I = 1, NYDIM
+         LAT_VALUES(I) = -90.0 + ((I - 1) * 180.0 / NYDIM) + (90.0 / NYDIM)
+         END DO
+
+!        FILENAME = "scla.nc"
+!        VARNAME = "Clay"
+!        VARUNIT = "g m-3"
+!        DO K = 1, SDZDIM
+!          DO J = 1, NYDIM
+!            DO I = 1, NXDIM
+!              IJ = I + (J - 1) * NXDIM
+!              VAR3D_VALUES(I, J, K, 1) = SCLAG(IJ, K)
+!          END DO
+!        END DO
+!        CALL WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+
+!        FILENAME = "spom.nc"
+!        VARNAME = "OrgM"
+!        VARUNIT = "mmol m-3"
+!        DO K = 1, SDZDIM
+!          DO J = 1, NYDIM
+!            DO I = 1, NXDIM
+!              IJ = I + (J - 1) * NXDIM
+!              VAR3D_VALUES(I, J, K, 1) = SPOMG(IJ, K)
+!          END DO
+!        END DO
+!        CALL WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+
+!        FILENAME = "scar.nc"
+!        VARNAME = "CaCO3"
+!        VARUNIT = "g m-3"
+!        DO K = 1, SDZDIM
+!          DO J = 1, NYDIM
+!            DO I = 1, NXDIM
+!              IJ = I + (J - 1) * NXDIM
+!              VAR3D_VALUES(I, J, K, 1) = SCARG(IJ, K)
+!          END DO
+!        END DO
+!        CALL WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+
+!        FILENAME = "sopa.nc"
+!        VARNAME = "SiO2"
+!        VARUNIT = "mmol m-3"
+!        DO K = 1, SDZDIM
+!          DO J = 1, NYDIM
+!            DO I = 1, NXDIM
+!              IJ = I + (J - 1) * NXDIM
+!              VAR3D_VALUES(I, J, K, 1) = SOPAG(IJ, K)
+!          END DO
+!        END DO
+!        CALL WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+
+!        FILENAME = "sage.nc"
+!        VARNAME = "Age tracer"
+!        VARUNIT = "year"
+!        DO K = 1, SDZDIM
+!          DO J = 1, NYDIM
+!            DO I = 1, NXDIM
+!              IJ = I + (J - 1) * NXDIM
+!              VAR3D_VALUES(I, J, K, 1) = SAGEG(IJ, K)
+!          END DO
+!        END DO
+!        CALL WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+
+!        FILENAME = "cnit.nc"
+!        VARNAME = "Phosphate"
+!        VARUNIT = "mmol m-3"
+!        DO K = 1, SDZDIM
+!          DO J = 1, NYDIM
+!            DO I = 1, NXDIM
+!              IJ = I + (J - 1) * NXDIM
+!              VAR3D_VALUES(I, J, K, 1) = CNITG(IJ, K)
+!          END DO
+!        END DO
+!        CALL WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+
+!        FILENAME = "cdic.nc"
+!        VARNAME = "DIC"
+!        VARUNIT = "mmol m-3"
+!        DO K = 1, SDZDIM
+!          DO J = 1, NYDIM
+!            DO I = 1, NXDIM
+!              IJ = I + (J - 1) * NXDIM
+!              VAR3D_VALUES(I, J, K, 1) = CDICG(IJ, K)
+!          END DO
+!        END DO
+!        CALL WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+
+!        FILENAME = "calk.nc"
+!        VARNAME = "Alkalinity"
+!        VARUNIT = "mmol m-3"
+!        DO K = 1, SDZDIM
+!          DO J = 1, NYDIM
+!            DO I = 1, NXDIM
+!              IJ = I + (J - 1) * NXDIM
+!              VAR3D_VALUES(I, J, K, 1) = CALKG(IJ, K)
+!          END DO
+!        END DO
+!        CALL WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+
+!        FILENAME = "csil.nc"
+!        VARNAME = "Silicate"
+!        VARUNIT = "mmol m-3"
+!        DO K = 1, SDZDIM
+!          DO J = 1, NYDIM
+!            DO I = 1, NXDIM
+!              IJ = I + (J - 1) * NXDIM
+!              VAR3D_VALUES(I, J, K, 1) = CSILG(IJ, K)
+!          END DO
+!        END DO
+!        CALL WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+
+!        FILENAME = "cdo2.nc"
+!        VARNAME = "Oxygen"
+!        VARUNIT = "mmol m-3"
+!        DO K = 1, SDZDIM
+!          DO J = 1, NYDIM
+!            DO I = 1, NXDIM
+!              IJ = I + (J - 1) * NXDIM
+!              VAR3D_VALUES(I, J, K, 1) = CDO2G(IJ, K)
+!          END DO
+!        END DO
+!        CALL WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+
+         FILENAME = "ficla.nc"
+         VARNAME = "Clay_bottom_flux"
+         VARUNIT = "g m-3 * cm s-1"
+         DO J = 1, NYDIM
+           DO I = 1, NXDIM
+             IJ = I + (J - 1) * NXDIM
+             VAR2D_VALUES(I, J, 1) = FICLAG(IJ)
+           END DO
+         END DO
+         CALL WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+
+         FILENAME = "fipom.nc"
+         VARNAME = "OrgM_bottom_flux"
+         VARUNIT = "mMol m-3 * cm s-1"
+         DO J = 1, NYDIM
+           DO I = 1, NXDIM
+             IJ = I + (J - 1) * NXDIM
+             VAR2D_VALUES(I, J, 1) = FIPOMG(IJ)
+           END DO
+         END DO
+         CALL WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+
+         FILENAME = "ficar.nc"
+         VARNAME = "CaCO3_bottom_flux"
+         VARUNIT = "mMol m-3 * cm s-1"
+         DO J = 1, NYDIM
+           DO I = 1, NXDIM
+             IJ = I + (J - 1) * NXDIM
+             VAR2D_VALUES(I, J, 1) = FICARG(IJ)
+           END DO
+         END DO
+         CALL WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+
+         FILENAME = "fiopa.nc"
+         VARNAME = "SiO2_bottom_flux"
+         VARUNIT = "mMol m-3 * cm s-1"
+         DO J = 1, NYDIM
+           DO I = 1, NXDIM
+             IJ = I + (J - 1) * NXDIM
+             VAR2D_VALUES(I, J, 1) = FIOPAG(IJ)
+           END DO
+         END DO
+         CALL WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+
+!        FILENAME = "focla.nc"
+!        VARNAME = "Clay_diffusion"
+!        VARUNIT = "g m-3 * cm s-1"
+!        DO J = 1, NYDIM
+!          DO I = 1, NXDIM
+!            IJ = I + (J - 1) * NXDIM
+!            VAR2D_VALUES(I, J, 1) = FOCLAG(IJ)
+!          END DO
+!        END DO
+!        CALL WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+
+!        FILENAME = "fopom.nc"
+!        VARNAME = "OrgM_diffusion"
+!        VARUNIT = "mMol m-3 * cm s-1"
+!        DO J = 1, NYDIM
+!          DO I = 1, NXDIM
+!            IJ = I + (J - 1) * NXDIM
+!            VAR2D_VALUES(I, J, 1) = FOPOMG(IJ)
+!          END DO
+!        END DO
+!        CALL WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+
+!        FILENAME = "focar.nc"
+!        VARNAME = "CaCO3_diffusion"
+!        VARUNIT = "mMol m-3 * cm s-1"
+!        DO J = 1, NYDIM
+!          DO I = 1, NXDIM
+!            IJ = I + (J - 1) * NXDIM
+!            VAR2D_VALUES(I, J, 1) = FOCARG(IJ)
+!          END DO
+!        END DO
+!        CALL WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+
+!        FILENAME = "foopa.nc"
+!        VARNAME = "SiO2_diffusion"
+!        VARUNIT = "mMol m-3 * cm s-1"
+!        DO J = 1, NYDIM
+!          DO I = 1, NXDIM
+!            IJ = I + (J - 1) * NXDIM
+!            VAR2D_VALUES(I, J, 1) = FOOPAG(IJ)
+!          END DO
+!        END DO
+!        CALL WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+
+!        FILENAME = "bfcla.nc"
+!        VARNAME = "Clay_burial"
+!        VARUNIT = "g m-3 * cm s-1"
+!        DO J = 1, NYDIM
+!          DO I = 1, NXDIM
+!            IJ = I + (J - 1) * NXDIM
+!            VAR2D_VALUES(I, J, 1) = BFCLAG(IJ)
+!          END DO
+!        END DO
+!        CALL WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+
+!        FILENAME = "bfpom.nc"
+!        VARNAME = "OrgM_burial"
+!        VARUNIT = "mMol m-3 * cm s-1"
+!        DO J = 1, NYDIM
+!          DO I = 1, NXDIM
+!            IJ = I + (J - 1) * NXDIM
+!            VAR2D_VALUES(I, J, 1) = BFPOMG(IJ)
+!          END DO
+!        END DO
+!        CALL WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+
+!        FILENAME = "bfcar.nc"
+!        VARNAME = "CaCO3_burial"
+!        VARUNIT = "mMol m-3 * cm s-1"
+!        DO J = 1, NYDIM
+!          DO I = 1, NXDIM
+!            IJ = I + (J - 1) * NXDIM
+!            VAR2D_VALUES(I, J, 1) = BFCARG(IJ)
+!          END DO
+!        END DO
+!        CALL WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+
+!        FILENAME = "bfopa.nc"
+!        VARNAME = "SiO2_burial"
+!        VARUNIT = "mMol m-3 * cm s-1"
+!        DO J = 1, NYDIM
+!          DO I = 1, NXDIM
+!            IJ = I + (J - 1) * NXDIM
+!            VAR2D_VALUES(I, J, 1) = BFOPAG(IJ)
+!          END DO
+!        END DO
+!        CALL WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+
+!        FILENAME = "w.nc"
+!        VARNAME = "Sediment_rate"
+!        VARUNIT = "mmol m-3"
+!        DO K = 1, SDZDIM+1
+!          DO J = 1, NYDIM
+!            DO I = 1, NXDIM
+!              IJ = I + (J - 1) * NXDIM
+!              VAR3D_VALUES(I, J, K, 1) = WG(IJ, K)
+!            END DO
+!          END DO
+!        END DO
+!        CALL WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ+1, YY)
+
+!        FILENAME = "cdc13.nc"
+!        VARNAME = "delta_carbon-13"
+!        VARUNIT = "permil"
+!        DO K = 1, SDZDIM
+!          DO J = 1, NYDIM
+!            DO I = 1, NXDIM
+!              IJ = I + (J - 1) * NXDIM
+!              VAR3D_VALUES(I, J, K, 1) = CDC13G(IJ, K)
+!            END DO
+!          END DO
+!        END DO
+!        CALL WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+
+!        FILENAME = "cdc14.nc"
+!        VARNAME = "Delta_carbon-14"
+!        VARUNIT = "permil"
+!        DO K = 1, SDZDIM+1
+!          DO J = 1, NYDIM
+!            DO I = 1, NXDIM
+!              IJ = I + (J - 1) * NXDIM
+!              VAR3D_VALUES(I, J, K, 1) = CDC14G(IJ, K)
+!            END DO
+!          END DO
+!        END DO
+!        CALL WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+
          CFILE  = 'scla'
          CTITLE = 'Clay'
          CUNIT  = 'g/m^3'
@@ -1621,7 +1929,7 @@ IF (PARALLEL) THEN
      &                   NXDIM,   NYDIM,  SDZDIM  )
          CFILE  = 'sage'
          CTITLE = 'Age tracer'
-         CUNIT  = 'ND'
+         CUNIT  = 'year'
          CALL FILEOUT(      YY,   SAGEG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,  SDZDIM  )
          CFILE  = 'cnit'
@@ -1639,73 +1947,73 @@ IF (PARALLEL) THEN
          CUNIT  = 'mmol/m^3'
          CALL FILEOUT(      YY,   CALKG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,  SDZDIM  )
-         CFILE  = 'cdo2'
-         CTITLE = 'Oxygen'
-         CUNIT  = 'mmol/m^3'
-         CALL FILEOUT(      YY,   CDO2G,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,  SDZDIM  )
          CFILE  = 'csil'
          CTITLE = 'Silicate'
          CUNIT  = 'mmol/m^3'
          CALL FILEOUT(      YY,   CSILG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,  SDZDIM  )
+         CFILE  = 'cdo2'
+         CTITLE = 'Oxygen'
+         CUNIT  = 'mmol/m^3'
+         CALL FILEOUT(      YY,   CDO2G,   CFILE,  CTITLE,   CUNIT, &
+     &                   NXDIM,   NYDIM,  SDZDIM  )
          CFILE  = 'ficla'
-         CTITLE = 'Clay Bottom Flux'
+         CTITLE = 'Clay bottom flux'
          CUNIT  = 'g/m^3*cm/s'
          CALL FILEOUT(      YY,  FICLAG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,       1  )
          CFILE  = 'fipom'
-         CTITLE = 'OrgM Bottom Flux'
+         CTITLE = 'OrgM bottom flux'
          CUNIT  = 'mMol/m^3*cm/s'
          CALL FILEOUT(      YY,  FIPOMG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,       1  )
          CFILE  = 'ficar'
-         CTITLE = 'CaCO3 Bottom Flux'
+         CTITLE = 'CaCO3 bottom flux'
          CUNIT  = 'mMol/m^3*cm/s'
          CALL FILEOUT(      YY,  FICARG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,       1  )
          CFILE  = 'fiopa'
-         CTITLE = 'SiO2 Bottom Flux'
+         CTITLE = 'SiO2 bottom flux'
          CUNIT  = 'mMol/m^3*cm/s'
          CALL FILEOUT(      YY,  FIOPAG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,       1  )
          CFILE  = 'fopom'
-         CTITLE = 'OrgM Diffusion'
+         CTITLE = 'OrgM diffusion'
          CUNIT  = 'mMol/m^3*cm/s'
          CALL FILEOUT(      YY,  FOPOMG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,       1  )
          CFILE  = 'focar'
-         CTITLE = 'CaCO3 Diffusion'
+         CTITLE = 'CaCO3 diffusion'
          CUNIT  = 'mMol/m^3*cm/s'
          CALL FILEOUT(      YY,  FOCARG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,       1  )
          CFILE  = 'foopa'
-         CTITLE = 'SiO2 Diffusion'
+         CTITLE = 'SiO2 diffusion'
          CUNIT  = 'mMol/m^3*cm/s'
          CALL FILEOUT(      YY,  FOOPAG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,       1  )
          CFILE  = 'bfcla'
-         CTITLE = 'Clay Burial'
+         CTITLE = 'Clay burial'
          CUNIT  = 'g/m^3*cm/s'
          CALL FILEOUT(      YY,  BFCLAG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,  SDZDIM  )
          CFILE  = 'bfpom'
-         CTITLE = 'OrgM Burial'
+         CTITLE = 'OrgM burial'
          CUNIT  = 'mMol/m^3*cm/s'
          CALL FILEOUT(      YY,  BFPOMG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,       1  )
          CFILE  = 'bfcar'
-         CTITLE = 'CaCO3 Burial'
+         CTITLE = 'CaCO3 burial'
          CUNIT  = 'mMol/m^3*cm/s'
          CALL FILEOUT(      YY,  BFCARG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,       1  )
          CFILE  = 'bfopa'
-         CTITLE = 'SiO2 Burial'
+         CTITLE = 'SiO2 burial'
          CUNIT  = 'mMol/m^3*cm/s'
          CALL FILEOUT(      YY,  BFOPAG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,       1  )
          CFILE  = 'w'
-         CTITLE = 'Sediment Rate'
+         CTITLE = 'Sediment rate'
          CUNIT  = 'cm/s'
          CALL FILEOUT(      YY,      WG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM, SDZDIM+1 )
