@@ -1,4 +1,4 @@
-program io_gtool
+program digda_dataio_gtool
   use gtool_utilities
   use module_sdmain
   implicit none
@@ -334,4 +334,4 @@ program io_gtool
     deallocate(outcdo2)
   end if
 
-end program digda_datadigda_dataio_gtool
+end program digda_datadigda_datadigda_dataio_gtool
