@@ -9,10 +9,11 @@
 !
 ! ---------------------------------------------------------------------
 
-module globals_sdliquid
-      use zcfile_module
-      use sddim_module
-      implicit none
+module globals_digda_step_liquid
+  use module_zcfile
+  use module_digda_grid
+  use module_sdtime
+  implicit none
 
       double precision :: DFLX(NXY, SDZDIM+1)
 
@@ -27,35 +28,18 @@ module globals_sdliquid
       data CDCN  / .FALSE. / !! Crank nicolson ?
       data CDII  / .TRUE.  / !! Implicit ?
 
-contains
-
-      subroutine initialize_globals_sdliquid()
-     !    call allocate_var2d(, DFLX)
-     !    call allocate_var1d(, EA)
-     !    call allocate_var2d(NXY, SDZDIM, EB)
-     !    call allocate_var1d(SDZDIM, EC)
-     !    call allocate_var1d(SDZDIM, EAL)
-     !    call allocate_var1d(SDZDIM, EBE)
-     !    call allocate_var1d(SDZDIM, EGA)
-     !    call allocate_var2d(NXY, SDZDIM, EEP)
-     !    call allocate_var2d(NXY, SDZDIM, ED)
-     !    call allocate_var2d(NXY, SDZDIM, EX)
-      end subroutine initialize_globals_sdliquid
-
-end module globals_sdliquid
+end module globals_digda_step_liquid
 
 ! =====================================================================
 
-module sdliquid_module
-      use globals_sdliquid
-      implicit none
+module module_digda_step_liquid
+  use globals_digda_step_liquid
+  implicit none
 contains
 
       subroutine SDLIQUIDSET
 
       integer :: IJ, K
-
-      call initialize_globals_sdliquid
 
       WRITE(NFSTDO, *) '*** Carbon : SDLIQUIDSET ***'
       REWIND(NFPARM)
@@ -380,4 +364,4 @@ contains
 
       end subroutine LTRIDAG
 
-end module sdliquid_module
+end module module_digda_step_liquid
