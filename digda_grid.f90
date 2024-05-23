@@ -1,6 +1,6 @@
 !######################################################################
-module sddim_module
-  use config_module
+module module_digda_grid
+  use module_digda_config
   use mpi
   implicit none
 
@@ -148,32 +148,6 @@ module sddim_module
   integer, parameter :: IJTSTR = 1
   integer, parameter :: IJTEND = NXY
 
-  ! Time step settings
-  ! Time_Step_1y
-!!double precision, parameter :: TSYR = 365.0D0 / 365D0   !! [yr]
-!!! Time_Step_1_2y
-!!double precision, parameter :: TSYR = 182.5D0 / 365D0   !! [yr]
-!!! Time_Step_50d
-!!double precision, parameter :: TSYR = 50.0D0 / 365D0   !! [yr]
-!!! Time_Step_30d
-!!double precision, parameter :: TSYR = 1.0D0 / 12.0D0   !! [yr]
-!!! Time_Step_10d
-!!double precision, parameter :: TSYR = 10.0D0 / 365D0   !! [yr]
-!!! Time_Step_5d
-!!double precision, parameter :: TSYR = 5.0D0 / 365D0   !! [yr]
-!!! Time_Step_2d
-!!double precision, parameter :: TSYR = 2.0D0 / 365D0   !! [yr]
-  ! Time_Step_1d
-  double precision, parameter :: TSYR = 1.0D0 / 365D0   !! [yr]
-!!! Time_Step_1_10d
-!!double precision, parameter :: TSYR = 0.1D0 / 365D0   !! [yr]
-!!! Time_Step_1_25d
-!!double precision, parameter :: TSYR = 0.04D0 / 365D0   !! [yr]
-!!! Time_Step_1_50d
-!!double precision, parameter :: TSYR = 0.02D0 / 365D0   !! [yr]
-
-  double precision :: TS = TSYR * 3.1536D+7  !! [s]
-
   ! Ocean depth settings
   double precision :: DEPTH(NZDIM)
   integer :: NBOT(NXYDIM)
@@ -214,4 +188,4 @@ contains
     allocate(var3d(iidim, jjdim, kkdim))
   end subroutine allocate_var3d
 
-end module sddim_module
+end module module_digda_grid
