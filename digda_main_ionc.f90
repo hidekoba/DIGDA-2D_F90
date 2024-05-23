@@ -9,34 +9,23 @@
 !
 ! ---------------------------------------------------------------------
 
-module globals_digda_main
+module module_digda_main
+  use netcdf_utilities
+  use gtool_utilities
   use module_zcfile
   use module_digda_grid
+  use module_digda_mpi
   use module_digda_parameter
   use module_digda_timestep
-  use module_digda_mpi
+  use module_digda_clay
+  use module_digda_pom
+  use module_digda_carbonate
+  use module_digda_sio2l
+  use module_digda_step_solid
+  use module_digda_step_liquid
+  use module_digda_chemeq
   implicit none
 
-! ! Porosity
-! double precision :: PHI(SDZ)
-! double precision :: PHII(SDZ+1)
-
-! ! Bioturbation diffusivity
-! double precision :: DBI(SDZ+1)
-
-! ! Porewater diffusivity
-! double precision :: DEINIT(SDZ+1)
-! double precision :: DEIDIC(SDZ+1)
-! double precision :: DEIALK(SDZ+1)
-! double precision :: DEIDO2(SDZ+1)
-! double precision :: DEISIL(SDZ+1)
-! double precision :: DEI13DIC(SDZ+1)
-! double precision :: DEI14DIC(SDZ+1)
-
-  ! Carbon isotopes
-  double precision :: FEOPH, FEOSH, R13, R14, ADCAY, THALF, DLTC13, DLTC14
-
-  ! Option --
   logical :: SDFIRST = .true.
   logical :: SDOFIRST = .true.
 
@@ -50,25 +39,6 @@ module globals_digda_main
   ! etc
   character(16) :: SEDTNM(SEDTDM)
   character(128) :: CFILE, CTITLE, CUNIT
-
-contains
-
-end module globals_digda_main
-
-! =====================================================================
-
-module module_digda_main
-  use netcdf_utilities
-  use gtool_utilities
-  use globals_digda_main
-  use module_digda_clay
-  use module_digda_pom
-  use module_digda_carbonate
-  use module_digda_sio2l
-  use module_digda_step_solid
-  use module_digda_step_liquid
-  use module_digda_chemeq
-  implicit none
 
 contains
 
@@ -270,6 +240,9 @@ contains
     ! ocean depth [m]
     double precision :: BDEP(NXY)
 
+    ! Carbon isotope metrics
+    double precision :: FEOPH, FEOSH, R13, R14, ADCAY, THALF, DLTC13, DLTC14
+
     ! Parallel computing
     integer, allocatable :: NRCVC1(:),  NDISP1(:)
     integer, allocatable :: NRCVC2(:),  NDISP2(:)
@@ -323,12 +296,16 @@ END IF
       WRITE(NFSTDO, *) '-- Setup of Sediment Model --'
       WRITE(NFSTDO, *) '-----------------------------'
       REWIND(NFPARM)
-      READ (NFPARM, NMSDDEAR, END=99)
+      READ (NFPARM, NMSDHI, END=99)
 99 continue
+      WRITE(NFSTDO, NMSDHI)
+      REWIND(NFPARM)
+      READ (NFPARM, NMSDDEAR, END=98)
+98 continue
       WRITE(NFSTDO, NMSDDEAR)
       REWIND(NFPARM)
-      READ (NFPARM, NMSDISO, END=98)
-98 continue
+      READ (NFPARM, NMSDISO, END=97)
+97 continue
       WRITE(NFSTDO, NMSDISO)
 
 !     ### for Sediment Model ###

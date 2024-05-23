@@ -10,7 +10,7 @@
 !
 ! ---------------------------------------------------------------------
 
-module globals_calc_digda_chemeq
+module globals_digda_chemeq
   use module_zcfile
   use module_zcphys
   use module_digda_grid
@@ -26,15 +26,15 @@ module globals_calc_digda_chemeq
 
   namelist /NMSDCHEM/ PHINI, DPHINI, DPH, ALKERR, ITRMAX, ROCN
 
-end module globals_calc_digda_chemeq
+end module globals_digda_chemeq
 
 ! =====================================================================
 
 module module_digda_chemeq
-  use globals_calc_digda_chemeq
+  use globals_digda_chemeq
   implicit none
 
-  double precision, allocatable :: PH(:,:)
+  double precision :: PH(NXY, SDZDIM)
   double precision :: CU, RCU, PM
   logical :: OFIRST
 
