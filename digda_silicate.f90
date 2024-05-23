@@ -47,7 +47,7 @@ module module_digda_sio2l
   implicit none
 contains
 
-      SUBROUTINE SDOPALSET
+      subroutine SDOPALSET
 
       WRITE(NFSTDO, *) '*** Carbon : SDOPALSET ***'
       REWIND(NFPARM)
@@ -57,9 +57,9 @@ contains
 
       RCOPA  = RCOPA * 1.0D-9  !! [cm3/mol/s] --> [m3/mMol/s]
 
-      END SUBROUTINE SDOPALSET
+      END subroutine SDOPALSET
 
-      SUBROUTINE DISOPA( &
+      subroutine DISOPA( &
      &      SOPA, CSIL, PCLA, POPA, TEM, &
      &      ROPA, SATSIL )
 
@@ -124,6 +124,6 @@ contains
       END DO
       END DO
 
-      END SUBROUTINE DISOPA
+      END subroutine DISOPA
 
 end module module_digda_sio2l
