@@ -9,10 +9,11 @@
 !
 ! ---------------------------------------------------------------------
 
-module globals_sdpom
-      use zcfile_module
-      use sddim_module
-      implicit none
+module globals_digda_pom
+  use module_zcfile
+  use module_digda_grid
+  use module_sdtime
+  implicit none
 
       REAL*8 KOX, KAX
       SAVE   KOX, KAX
@@ -21,13 +22,13 @@ module globals_sdpom
      &    / 2.00D-9, 7.90D-11 /
           !! 2.0*10-9, 7.9*10-11 [/s]
 
-end module globals_sdpom
+end module globals_digda_pom
 
 ! =====================================================================
 
-module sdpom_module
-      use globals_sdpom
-      implicit none
+module module_digda_pom
+  use globals_digda_pom
+  implicit none
 contains
 
       subroutine SDPOMSET
@@ -73,4 +74,4 @@ contains
 
       end subroutine DISPOM
 
-end module sdpom_module
+end module module_digda_pom
