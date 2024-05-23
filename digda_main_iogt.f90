@@ -9,7 +9,7 @@
 !
 ! ---------------------------------------------------------------------
 
-module globals_sdmain
+module globals_digda_main
       use module_zcfile
       use module_digda_grid
       implicit none
@@ -364,20 +364,20 @@ module globals_sdmain
 !-- Option :
       LOGICAL SDFIRST
       SAVE SDFIRST
-      DATA SDFIRST / .TRUE. /
+      DATA SDFIRST / .true. /
       LOGICAL SDOFIRST
       SAVE SDOFIRST
-      DATA SDOFIRST / .TRUE.  /
+      DATA SDOFIRST / .true.  /
 
       LOGICAL DEIARC
       SAVE DEIARC
-      NAMELIST /NMSDDEAR/ DEIARC
-      DATA DEIARC / .TRUE. /  !! Archer's DEI formulation ?
+      namelist /NMSDDEAR/ DEIARC
+      DATA DEIARC / .true. /  !! Archer's DEI formulation ?
 
       LOGICAL  CALC13, CALC14
       SAVE     CALC13, CALC14
-      NAMELIST /NMSDISO/ CALC13, CALC14
-      DATA CALC13, CALC14 / .TRUE., .TRUE. /  !! carbon isotopes ?
+      namelist /NMSDISO/ CALC13, CALC14
+      DATA CALC13, CALC14 / .true., .true. /  !! carbon isotopes ?
 
 !-- etc :
       INTEGER I, J, IJ, K, L, IC
@@ -387,21 +387,21 @@ module globals_sdmain
 
       LOGICAL  WOTSTP
       SAVE     WOTSTP
-      DATA     WOTSTP / .TRUE. /  !! writeout time step ?
+      DATA     WOTSTP / .true. /  !! writeout time step ?
       INTEGER     NFSOTS
       PARAMETER ( NFSOTS = 999 )
 
       CHARACTER CFILE*128, CTITLE*128, CUNIT*128
 
-end module globals_sdmain
+end module globals_digda_main
 
 ! =====================================================================
 
-module module_sdmain
-      use globals_sdmain
+module module_digda_main
+      use globals_digda_main
       use module_digda_clay
       use module_digda_pom
-      use module_digda_caco3
+      use module_digda_carbonate
       use module_digda_sio2l
       use module_digda_step_solid
       use module_digda_step_liquid
@@ -409,25 +409,29 @@ module module_sdmain
       implicit none
 contains
 
-      SUBROUTINE SD
+      subroutine digda_main()
+    ! subroutine digda_main( &
+    !&     bdepg, &
+    !&     bfrcg, &
+    !&     sdtx )
 
 !-- SEDIMENT TRACERS : setup --
 
-IF (PARALLEL) THEN
-      CALL MPI_INIT(IERR)
-      CALL MPI_COMM_SIZE(MPI_COMM_WORLD, NPROCS, IERR)
-      CALL MPI_COMM_RANK(MPI_COMM_WORLD, MYRANK, IERR)
+IF (use_mpi) THEN
+      call MPI_INIT(IERR)
+      call MPI_COMM_SIZE(MPI_COMM_WORLD, NPROCS, IERR)
+      call MPI_COMM_RANK(MPI_COMM_WORLD, MYRANK, IERR)
 
       IF ( NPROCS /= NCPU ) THEN
          IF ( MYRANK == 0 ) THEN
             PRINT *, '=== ERROR ==='
-            CALL MPI_FINALIZE(IERR)
+            call MPI_FINALIZE(IERR)
             STOP
          END IF
       END IF
 
       DO IRANK = 0, NPROCS-1
-         CALL PARA_RANGE( &
+         call set_parallel_range( &
      &                    1, NXYDIM, NPROCS, IRANK, &
      &                    JJSTR(IRANK), JJEND(IRANK) &
      &                  )
@@ -437,7 +441,6 @@ END IF
       OPEN(NFPARM, file="PARAMET")
       OPEN(NFSTDO, file="STDOUT")
 
-      WRITE(NFSTDO, *) '*** SDMAINSET ***'
       WRITE(NFSTDO, *) '-----------------------------'
       WRITE(NFSTDO, *) '-- Setup of Sediment Model --'
       WRITE(NFSTDO, *) '-----------------------------'
@@ -468,21 +471,21 @@ END IF
       SEDTNM(15) = 'S14CAR'
       SEDTNM(16) = 'C14DIC'
 
-!CCCCCCALL SDFILESET
-      CALL SDCLAYSET
-      CALL SDPOMSET
-      CALL SDCACO3SET
-      CALL SDOPALSET
-      CALL SDCHEMEQSET
-      CALL SDSOLIDSET
-      CALL SDLIQUIDSET
+!CCCCCcall SDFILESET
+      call set_digda_clay
+      call set_digda_pom
+      call set_digda_carbonate
+      call set_digda_silicate
+      call set_digda_chemeq
+      call set_digda_step_solid
+      call set_digda_step_liquid
 
 !-- SEDIMENT TRACERS : setup (end) --
 
 !     -- Ocean depth --
       CFILE="bound/bdep"
-      CALL RDFILE(  BDEPG, NXYDIM,  CFILE )
-IF (PARALLEL) THEN
+      call read_gtool( CFILE, NXYDIM,  BDEPG )
+IF (use_mpi) THEN
       DO IJ = 1, NXY
          BDEP(IJ) = MAX( BDEPG(MYRANK*NXY+IJ), 0.0D0 )
       END DO
@@ -586,14 +589,14 @@ END IF
 !     -- Set boundary conditions --
 
       CFILE="bound/ficla"
-      CALL RDFILE( FICLAG, NXYDIM,  CFILE )
+      call read_gtool( CFILE, NXYDIM,  FICLAG )
       CFILE="bound/fipom"
-      CALL RDFILE( FIPOMG, NXYDIM,  CFILE )
+      call read_gtool( CFILE, NXYDIM,  FIPOMG )
       CFILE="bound/ficar"
-      CALL RDFILE( FICARG, NXYDIM,  CFILE )
+      call read_gtool( CFILE, NXYDIM,  FICARG )
       CFILE="bound/fiopa"
-      CALL RDFILE( FIOPAG, NXYDIM,  CFILE )
-IF (PARALLEL) THEN
+      call read_gtool( CFILE, NXYDIM,  FIOPAG )
+IF (use_mpi) THEN
       DO IJ = 1, NXY
          FICLA(IJ) = MAX( FICLAG(MYRANK*NXY+IJ), 0.0D0 )
          FIPOM(IJ) = MAX( FIPOMG(MYRANK*NXY+IJ), 0.0D0 )
@@ -611,20 +614,20 @@ ELSE
       END DO
 END IF
       CFILE="bound/btem"
-      CALL RDFILE( BWTEMG, NXYDIM,  CFILE )
+      call read_gtool( CFILE, NXYDIM,  BWTEMG )
       CFILE="bound/bsal"
-      CALL RDFILE( BWSALG, NXYDIM,  CFILE )
+      call read_gtool( CFILE, NXYDIM,  BWSALG )
       CFILE="bound/bnit"
-      CALL RDFILE( BWNITG, NXYDIM,  CFILE )
+      call read_gtool( CFILE, NXYDIM,  BWNITG )
       CFILE="bound/bdic"
-      CALL RDFILE( BWDICG, NXYDIM,  CFILE )
+      call read_gtool( CFILE, NXYDIM,  BWDICG )
       CFILE="bound/balk"
-      CALL RDFILE( BWALKG, NXYDIM,  CFILE )
+      call read_gtool( CFILE, NXYDIM,  BWALKG )
       CFILE="bound/bdo2"
-      CALL RDFILE( BWDO2G, NXYDIM,  CFILE )
+      call read_gtool( CFILE, NXYDIM,  BWDO2G )
       CFILE="bound/bsil"
-      CALL RDFILE( BWSILG, NXYDIM,  CFILE )
-IF (PARALLEL) THEN
+      call read_gtool( CFILE, NXYDIM,  BWSILG )
+IF (use_mpi) THEN
       DO IJ = 1, NXY
          BWTEM(IJ)   = BWTEMG(MYRANK*NXY+IJ)
          BWSAL(IJ)   = BWSALG(MYRANK*NXY+IJ)
@@ -652,8 +655,8 @@ END IF
          FI13CAR(IJ) = FEOSH * PDB  * FICAR(IJ)
       END DO
       CFILE="bound/bc13"
-      CALL RDFILE(  BW13DICG, NXYDIM,  CFILE )
-IF (PARALLEL) THEN
+      call read_gtool( CFILE, NXYDIM,  BW13DICG )
+IF (use_mpi) THEN
       DO IJ = 1, NXY
          BW13DIC(IJ) = MAX( BW13DICG(MYRANK*NXY+IJ), 0.0D0 )
       END DO
@@ -670,8 +673,8 @@ END IF
          FI14CAR(IJ) = FEOSH * DSTD * FICAR(IJ)
       END DO
       CFILE="bound/bc14"
-      CALL RDFILE(  BW14DICG, NXYDIM,  CFILE )
-IF (PARALLEL) THEN
+      call read_gtool( CFILE, NXYDIM,  BW14DICG )
+IF (use_mpi) THEN
       DO IJ = 1, NXY
          BW14DIC(IJ) = MAX( BW14DICG(MYRANK*NXY+IJ), 0.0D0 )
       END DO
@@ -762,9 +765,9 @@ END IF
                POPA(IJ, K) = 0.0D0
             END DO
          END DO
-         SDFIRST = .FALSE.
+         SDFIRST = .false.
       ELSE
-IF (PARALLEL) THEN
+IF (use_mpi) THEN
          DO K = SKST, SKEN
             DO IJ = 1, NXY
                SCLA(IJ, K) = SDTX(MYRANK*NXY+IJ, K,  1)
@@ -835,30 +838,30 @@ END IF
 
 !     -- Saturated carbonate ion concentration --
 
-      CALL SDCHEMEQ( &
+      call calc_digda_chemeq( &
      &    BWTEM, BWSAL, CDIC, CALK, &
      &    SIT, PT, &
      &    CCO32 )
 
-      CALL SATCAR( &
+      call calc_carbonate_saturation( &
      &    BWTEM, BWSAL, BDEP, &
      &    SATCO32 )
 
 !     -- Dissolution term --
 
-      CALL DISCLA( &
+      call calc_clay_dissolution( &
      &    SCLA, &
      &    RCLA )
 
-      CALL DISPOM( &
+      call calc_pom_dissolution( &
      &    SPOM, CDO2, CP, OP, PHI, &
      &    RPOM )
 
-      CALL DISCAR( &
+      call calc_carbonate_dissolution( &
      &    SCAR, CCO32, SATCO32, PHI, &
      &    RCAR )
 
-      CALL DISOPA( &
+      call calc_silicate_dissolution( &
      &    SOPA, CSIL, PCLA, POPA, BWTEM, &
      &    ROPA, SATSIL )
 
@@ -921,42 +924,42 @@ END IF
 !     -- Particles (t --> t+dt) --
 !        Clay, POM, CaCO3, Opal
 
-      CALL SOLID_CLAY( &
+      call calc_step_solid_clay( &
      &    FICLA, TRCLA, W, PHI, PHII, DBI, SCLA, RHOCLA, &
      &    SNCLA, BFCLA )
 
-      CALL SOLID( &
+      call calc_step_solid( &
      &    FIPOM, TRPOM, W, PHI, PHII, DBI, SPOM, &
      &    SNPOM, BFPOM )
 
-      CALL SOLID( &
+      call calc_step_solid( &
      &    FICAR, TRCAR, W, PHI, PHII, DBI, SCAR, &
      &    SNCAR, BFCAR )
 
-      CALL SOLID( &
+      call calc_step_solid( &
      &    FIOPA, TROPA, W, PHI, PHII, DBI, SOPA, &
      &    SNOPA, BFOPA )
 
-      CALL AGE( &
+      call calc_step_solid_age( &
      &    FIAGE, W, PHI, PHII, DBI, SAGE, &
      &    SNAGE )
 
       IF ( CALC13 ) THEN
-      CALL SOLID( &
+      call calc_step_solid( &
      &    FI13POM, TR13POM, W, PHI, PHII, DBI, S13POM, &
      &    SN13POM, BF13POM )
 
-      CALL SOLID( &
+      call calc_step_solid( &
      &    FI13CAR, TR13CAR, W, PHI, PHII, DBI, S13CAR, &
      &    SN13CAR, BF13CAR )
       END IF
 
       IF ( CALC14 ) THEN
-      CALL SOLID( &
+      call calc_step_solid( &
      &    FI14POM, TR14POM, W, PHI, PHII, DBI, S14POM, &
      &    SN14POM, BF14POM )
 
-      CALL SOLID( &
+      call calc_step_solid( &
      &    FI14CAR, TR14CAR, W, PHI, PHII, DBI, S14CAR, &
      &    SN14CAR, BF14CAR )
       DO K = SKST, SKEN
@@ -1005,34 +1008,34 @@ END IF
 !     -- Dissolved material (t --> t+dt) --
 !        NIT, DIC, ALK, DO2, SIL
 
-      CALL LIQUID( &
+      call calc_step_liquid( &
      &    BWNIT, TRNIT, PHI, PHII, DEINIT, CNIT, &
      &    CNNIT )
 
-      CALL LIQUID( &
+      call calc_step_liquid( &
      &    BWDIC, TRDIC, PHI, PHII, DEIDIC, CDIC, &
      &    CNDIC )
 
-      CALL LIQUID( &
+      call calc_step_liquid( &
      &    BWALK, TRALK, PHI, PHII, DEIALK, CALK, &
      &    CNALK )
 
-      CALL LIQUID_O2( &
+      call calc_step_liquid_o2( &
      &    BWDO2, TRDO2, PHI, PHII, DEIDO2, CDO2, &
      &    CNDO2 )
 
-      CALL LIQUID( &
+      call calc_step_liquid( &
      &    BWSIL, TRSIL, PHI, PHII, DEISIL, CSIL, &
      &    CNSIL )
 
       IF ( CALC13 ) THEN
-      CALL LIQUID( &
+      call calc_step_liquid( &
      &    BW13DIC, TR13DIC, PHI, PHII, DEI13DIC, C13DIC, &
      &    CN13DIC )
       END IF
 
       IF ( CALC14 ) THEN
-      CALL LIQUID( &
+      call calc_step_liquid( &
      &    BW14DIC, TR14DIC, PHI, PHII, DEI14DIC, C14DIC, &
      &    CN14DIC )
       END IF
@@ -1156,7 +1159,7 @@ END IF
       END DO
 
 !     -- OUTPUT --
-IF (PARALLEL) THEN
+IF (use_mpi) THEN
       DO K = SKST, SKEN
          DO IJ = 1, NXY
             SDTX(MYRANK*NXY+IJ, K,  1) = SNCLA(IJ, K)
@@ -1234,7 +1237,7 @@ END IF
 !CCCCCIF ( TT == TEND ) THEN
       IF ( TT == TEND .OR. MOD(TT, TOUT) == 0 ) THEN
 
-IF (PARALLEL) THEN
+IF (use_mpi) THEN
 
       IF (SDOFIRST) THEN
       ALLOCATE(NRCVC1(0:NPROCS-1))
@@ -1311,147 +1314,147 @@ IF (PARALLEL) THEN
          NDISP3(IRANK) = ( NXYZ + NXY ) * IRANK
       END DO
 
-      SDOFIRST = .FALSE.
+      SDOFIRST = .false.
       END IF
 
-      CALL MPI_GATHERV( SCLA,    ISIZE2,         MPI_REAL8, &
+      call MPI_GATHERV( SCLA,    ISIZE2,         MPI_REAL8, &
      &                  DUMMY01, NRCVC2, NDISP2, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( SPOM,    ISIZE2,         MPI_REAL8, &
+      call MPI_GATHERV( SPOM,    ISIZE2,         MPI_REAL8, &
      &                  DUMMY02, NRCVC2, NDISP2, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( SCAR,    ISIZE2,         MPI_REAL8, &
+      call MPI_GATHERV( SCAR,    ISIZE2,         MPI_REAL8, &
      &                  DUMMY03, NRCVC2, NDISP2, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( SOPA,    ISIZE2,         MPI_REAL8, &
+      call MPI_GATHERV( SOPA,    ISIZE2,         MPI_REAL8, &
      &                  DUMMY04, NRCVC2, NDISP2, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( SAGE,    ISIZE2,         MPI_REAL8, &
+      call MPI_GATHERV( SAGE,    ISIZE2,         MPI_REAL8, &
      &                  DUMMY05, NRCVC2, NDISP2, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( CNIT,    ISIZE2,         MPI_REAL8, &
+      call MPI_GATHERV( CNIT,    ISIZE2,         MPI_REAL8, &
      &                  DUMMY11, NRCVC2, NDISP2, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( CDIC,    ISIZE2,         MPI_REAL8, &
+      call MPI_GATHERV( CDIC,    ISIZE2,         MPI_REAL8, &
      &                  DUMMY12, NRCVC2, NDISP2, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( CALK,    ISIZE2,         MPI_REAL8, &
+      call MPI_GATHERV( CALK,    ISIZE2,         MPI_REAL8, &
      &                  DUMMY13, NRCVC2, NDISP2, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( CDO2,    ISIZE2,         MPI_REAL8, &
+      call MPI_GATHERV( CDO2,    ISIZE2,         MPI_REAL8, &
      &                  DUMMY14, NRCVC2, NDISP2, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( CSIL,    ISIZE2,         MPI_REAL8, &
+      call MPI_GATHERV( CSIL,    ISIZE2,         MPI_REAL8, &
      &                  DUMMY15, NRCVC2, NDISP2, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( CCO32,   ISIZE2,         MPI_REAL8, &
+      call MPI_GATHERV( CCO32,   ISIZE2,         MPI_REAL8, &
      &                  DUMMY16, NRCVC2, NDISP2, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( SATSIL,  ISIZE2,         MPI_REAL8, &
+      call MPI_GATHERV( SATSIL,  ISIZE2,         MPI_REAL8, &
      &                  DUMMY21, NRCVC2, NDISP2, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( SATCO32, ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( SATCO32, ISIZE1,         MPI_REAL8, &
      &                  DUMMY22, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( W,       ISIZE3,         MPI_REAL8, &
+      call MPI_GATHERV( W,       ISIZE3,         MPI_REAL8, &
      &                  DUMMY23, NRCVC3, NDISP3, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( FICLA,   ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( FICLA,   ISIZE1,         MPI_REAL8, &
      &                  DUMMY31, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( FIPOM,   ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( FIPOM,   ISIZE1,         MPI_REAL8, &
      &                  DUMMY32, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( FICAR,   ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( FICAR,   ISIZE1,         MPI_REAL8, &
      &                  DUMMY33, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( FIOPA,   ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( FIOPA,   ISIZE1,         MPI_REAL8, &
      &                  DUMMY34, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( FOCLA,   ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( FOCLA,   ISIZE1,         MPI_REAL8, &
      &                  DUMMY41, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( FOPOM,   ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( FOPOM,   ISIZE1,         MPI_REAL8, &
      &                  DUMMY42, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( FOCAR,   ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( FOCAR,   ISIZE1,         MPI_REAL8, &
      &                  DUMMY43, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( FOOPA,   ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( FOOPA,   ISIZE1,         MPI_REAL8, &
      &                  DUMMY44, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( BFCLA,   ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( BFCLA,   ISIZE1,         MPI_REAL8, &
      &                  DUMMY51, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( BFPOM,   ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( BFPOM,   ISIZE1,         MPI_REAL8, &
      &                  DUMMY52, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( BFCAR,   ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( BFCAR,   ISIZE1,         MPI_REAL8, &
      &                  DUMMY53, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( BFOPA,   ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( BFOPA,   ISIZE1,         MPI_REAL8, &
      &                  DUMMY54, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
 
       IF ( CALC13 ) THEN
-      CALL MPI_GATHERV( S13POM,  ISIZE2,         MPI_REAL8, &
+      call MPI_GATHERV( S13POM,  ISIZE2,         MPI_REAL8, &
      &                  DUMMY06, NRCVC2, NDISP2, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( S13CAR,  ISIZE2,         MPI_REAL8, &
+      call MPI_GATHERV( S13CAR,  ISIZE2,         MPI_REAL8, &
      &                  DUMMY08, NRCVC2, NDISP2, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( C13DIC,  ISIZE2,         MPI_REAL8, &
+      call MPI_GATHERV( C13DIC,  ISIZE2,         MPI_REAL8, &
      &                  DUMMY17, NRCVC2, NDISP2, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( CDC13,   ISIZE2,         MPI_REAL8, &
+      call MPI_GATHERV( CDC13,   ISIZE2,         MPI_REAL8, &
      &                  DUMMY19, NRCVC2, NDISP2, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( FI13POM, ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( FI13POM, ISIZE1,         MPI_REAL8, &
      &                  DUMMY35, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( FI13CAR, ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( FI13CAR, ISIZE1,         MPI_REAL8, &
      &                  DUMMY37, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( FO13POM, ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( FO13POM, ISIZE1,         MPI_REAL8, &
      &                  DUMMY45, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( FO13CAR, ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( FO13CAR, ISIZE1,         MPI_REAL8, &
      &                  DUMMY47, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( BF13POM, ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( BF13POM, ISIZE1,         MPI_REAL8, &
      &                  DUMMY55, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( BF13CAR, ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( BF13CAR, ISIZE1,         MPI_REAL8, &
      &                  DUMMY57, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
       END IF
 
       IF ( CALC14 ) THEN
-      CALL MPI_GATHERV( S14POM,  ISIZE2,         MPI_REAL8, &
+      call MPI_GATHERV( S14POM,  ISIZE2,         MPI_REAL8, &
      &                  DUMMY07, NRCVC2, NDISP2, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( S14CAR,  ISIZE2,         MPI_REAL8, &
+      call MPI_GATHERV( S14CAR,  ISIZE2,         MPI_REAL8, &
      &                  DUMMY09, NRCVC2, NDISP2, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( C14DIC,  ISIZE2,         MPI_REAL8, &
+      call MPI_GATHERV( C14DIC,  ISIZE2,         MPI_REAL8, &
      &                  DUMMY18, NRCVC2, NDISP2, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( CDC14,   ISIZE2,         MPI_REAL8, &
+      call MPI_GATHERV( CDC14,   ISIZE2,         MPI_REAL8, &
      &                  DUMMY20, NRCVC2, NDISP2, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( FI14POM, ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( FI14POM, ISIZE1,         MPI_REAL8, &
      &                  DUMMY36, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( FO14POM, ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( FO14POM, ISIZE1,         MPI_REAL8, &
      &                  DUMMY46, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( FO14CAR, ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( FO14CAR, ISIZE1,         MPI_REAL8, &
      &                  DUMMY48, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( BF14POM, ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( BF14POM, ISIZE1,         MPI_REAL8, &
      &                  DUMMY56, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( BF14CAR, ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( BF14CAR, ISIZE1,         MPI_REAL8, &
      &                  DUMMY58, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
       END IF
@@ -1546,7 +1549,7 @@ IF (PARALLEL) THEN
          END DO
 
       END IF
-      CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
+      call MPI_BARRIER(MPI_COMM_WORLD, IERR)
 
 ELSE
 
@@ -1657,146 +1660,146 @@ ELSE
 
 END IF
 
-IF (PARALLEL) THEN
+IF (use_mpi) THEN
       IF ( MYRANK .EQ. IROOT ) THEN
          CFILE  = 'scla'
          CTITLE = 'Clay'
          CUNIT  = 'g/m^3'
-         CALL FILEOUT(      YY,   SCLAG,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,   SCLAG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,  SDZDIM  )
          CFILE  = 'spom'
          CTITLE = 'OrgM'
          CUNIT  = 'mmol/m^3'
-         CALL FILEOUT(      YY,   SPOMG,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,   SPOMG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,  SDZDIM  )
          CFILE  = 'scar'
          CTITLE = 'CaCO3'
          CUNIT  = 'mmol/m^3'
-         CALL FILEOUT(      YY,   SCARG,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,   SCARG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,  SDZDIM  )
          CFILE  = 'sopa'
          CTITLE = 'SiO2'
          CUNIT  = 'mmol/m^3'
-         CALL FILEOUT(      YY,   SOPAG,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,   SOPAG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,  SDZDIM  )
          CFILE  = 'sage'
          CTITLE = 'Age tracer'
          CUNIT  = 'ND'
-         CALL FILEOUT(      YY,   SAGEG,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,   SAGEG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,  SDZDIM  )
          CFILE  = 'cnit'
          CTITLE = 'Phosphate'
          CUNIT  = 'mmol/m^3'
-         CALL FILEOUT(      YY,   CNITG,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,   CNITG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,  SDZDIM  )
          CFILE  = 'cdic'
          CTITLE = 'DIC'
          CUNIT  = 'mmol/m^3'
-         CALL FILEOUT(      YY,   CDICG,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,   CDICG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,  SDZDIM  )
          CFILE  = 'calk'
          CTITLE = 'Alkalinity'
          CUNIT  = 'mmol/m^3'
-         CALL FILEOUT(      YY,   CALKG,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,   CALKG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,  SDZDIM  )
          CFILE  = 'cdo2'
          CTITLE = 'Oxygen'
          CUNIT  = 'mmol/m^3'
-         CALL FILEOUT(      YY,   CDO2G,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,   CDO2G,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,  SDZDIM  )
          CFILE  = 'csil'
          CTITLE = 'Silicate'
          CUNIT  = 'mmol/m^3'
-         CALL FILEOUT(      YY,   CSILG,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,   CSILG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,  SDZDIM  )
          CFILE  = 'ficla'
          CTITLE = 'Clay Bottom Flux'
          CUNIT  = 'g/m^3*cm/s'
-         CALL FILEOUT(      YY,  FICLAG,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,  FICLAG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,       1  )
          CFILE  = 'fipom'
          CTITLE = 'OrgM Bottom Flux'
          CUNIT  = 'mMol/m^3*cm/s'
-         CALL FILEOUT(      YY,  FIPOMG,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,  FIPOMG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,       1  )
          CFILE  = 'ficar'
          CTITLE = 'CaCO3 Bottom Flux'
          CUNIT  = 'mMol/m^3*cm/s'
-         CALL FILEOUT(      YY,  FICARG,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,  FICARG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,       1  )
          CFILE  = 'fiopa'
          CTITLE = 'SiO2 Bottom Flux'
          CUNIT  = 'mMol/m^3*cm/s'
-         CALL FILEOUT(      YY,  FIOPAG,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,  FIOPAG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,       1  )
          CFILE  = 'fopom'
          CTITLE = 'OrgM Diffusion'
          CUNIT  = 'mMol/m^3*cm/s'
-         CALL FILEOUT(      YY,  FOPOMG,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,  FOPOMG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,       1  )
          CFILE  = 'focar'
          CTITLE = 'CaCO3 Diffusion'
          CUNIT  = 'mMol/m^3*cm/s'
-         CALL FILEOUT(      YY,  FOCARG,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,  FOCARG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,       1  )
          CFILE  = 'foopa'
          CTITLE = 'SiO2 Diffusion'
          CUNIT  = 'mMol/m^3*cm/s'
-         CALL FILEOUT(      YY,  FOOPAG,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,  FOOPAG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,       1  )
          CFILE  = 'bfcla'
          CTITLE = 'Clay Burial'
          CUNIT  = 'g/m^3*cm/s'
-         CALL FILEOUT(      YY,  BFCLAG,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,  BFCLAG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,  SDZDIM  )
          CFILE  = 'bfpom'
          CTITLE = 'OrgM Burial'
          CUNIT  = 'mMol/m^3*cm/s'
-         CALL FILEOUT(      YY,  BFPOMG,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,  BFPOMG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,       1  )
          CFILE  = 'bfcar'
          CTITLE = 'CaCO3 Burial'
          CUNIT  = 'mMol/m^3*cm/s'
-         CALL FILEOUT(      YY,  BFCARG,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,  BFCARG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,       1  )
          CFILE  = 'bfopa'
          CTITLE = 'SiO2 Burial'
          CUNIT  = 'mMol/m^3*cm/s'
-         CALL FILEOUT(      YY,  BFOPAG,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,  BFOPAG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,       1  )
          CFILE  = 'w'
          CTITLE = 'Sediment Rate'
          CUNIT  = 'cm/s'
-         CALL FILEOUT(      YY,      WG,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,      WG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM, SDZDIM+1 )
          CFILE  = 'cdc13'
          CTITLE = 'delta carbon-13'
          CUNIT  = 'permil'
-         CALL FILEOUT(      YY,  CDC13G,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,  CDC13G,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,  SDZDIM  )
          CFILE  = 'cdc14'
          CTITLE = 'Delta carbon-14'
          CUNIT  = 'permil'
-         CALL FILEOUT(      YY,  CDC14G,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,  CDC14G,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,  SDZDIM  )
       END IF
-      CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
+      call MPI_BARRIER(MPI_COMM_WORLD, IERR)
 END IF
 
       END IF ! -- End of Output
 
-!     CALL SDFILEOUT(
+!     call SDwrite_gtoolfile(
 !    I     SEDTNM,
 !    I     SDTX )
 
       END DO ! -- End of Time integration
 
-      end subroutine SD
+      end subroutine digda_main
 
-end module module_sdmain
+end module module_digda_main
 
 ! =====================================================================
-      SUBROUTINE RDFILE( FLX, NSIZE, CFILE)
+      subroutine read_gtoolfile( FLX, NSIZE, CFILE)
 
       IMPLICIT NONE
 
@@ -1810,10 +1813,10 @@ end module module_sdmain
       READ(11) FLX
       CLOSE(11)
 
-      END SUBROUTINE RDFILE
+      end subroutine read_gtoolfile
 
 ! =====================================================================
-      SUBROUTINE FILEOUT( &
+      subroutine write_gtoolfile( &
      &           YY,    DAT3,  CFILE, CTITLE,  CUNIT, &
      &           NX,    NY,    NZ     )
 
@@ -1922,9 +1925,9 @@ end module module_sdmain
       WRITE(13) (((REAL(DAT3(I,J,K)),I=1,NX),J=1,NY),K=1,NZ)
       CLOSE(13)
 
-      END SUBROUTINE FILEOUT
+      end subroutine write_gtoolfile
 
-      SUBROUTINE PARA_RANGE( N1, N2, NPR, IRA, IST, IEN )
+      subroutine set_parallel_range( N1, N2, NPR, IRA, IST, IEN )
 
       INTEGER N1, N2
       INTEGER NPR, IRA
@@ -1939,4 +1942,4 @@ end module module_sdmain
         IEN = IEN + 1
       END IF
 
-      END SUBROUTINE PARA_RANGE
+      end subroutine set_parallel_range

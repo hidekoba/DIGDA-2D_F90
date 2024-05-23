@@ -28,13 +28,18 @@ module module_digda_timestep
 
   double precision :: TS = TSYR * 3.1536D+7  !! [s]
 
-  ! -- Start and end year
+  ! Start and end year
   integer, parameter :: TSTR = 1
   integer, parameter :: TENDYR = 3
   integer, parameter :: TEND = TENDYR / TSYR !! Converts years to time steps
 
-  ! -- Interval for outputting history files
+  ! Interval for outputting history files
   integer, parameter :: TOUTYR = 1
   integer, parameter :: TOUT = TOUTYR / TSYR !! Converts years to time steps
+
+  ! Control whether history files and time steps are written
+  logical :: WOTSTP = .true.  !! write out time step ?
+  logical :: WOHIST = .true.  !! write out history file ?
+  namelist /NMSDHI/ WOTSTP, WOHIST
 
 end module module_digda_timestep

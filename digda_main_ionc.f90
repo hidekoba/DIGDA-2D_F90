@@ -9,396 +9,316 @@
 !
 ! ---------------------------------------------------------------------
 
-module globals_sdmain
-      use module_zcfile
-      use module_digda_grid
-      use module_sdpara
-      use module_sdtime
-      implicit none
+module globals_digda_main
+  use module_zcfile
+  use module_digda_grid
+  use module_digda_parameter
+  use module_digda_timestep
+  use module_digda_mpi
+  implicit none
 
-! ==================================================
-!   Time
-! ==================================================
+! ! Porosity
+! double precision :: PHI(SDZ)
+! double precision :: PHII(SDZ+1)
 
-!     integer, parameter :: TSTR = 1
-!     integer, parameter :: TENDYR = 3
-!     integer, parameter :: TEND = TENDYR / TSYR !! Converts years to time steps
+! ! Bioturbation diffusivity
+! double precision :: DBI(SDZ+1)
 
-!     integer, parameter :: TOUTYR = 1
-!     integer, parameter :: TOUT = TOUTYR / TSYR !! Converts years to time steps
+! ! Porewater diffusivity
+! double precision :: DEINIT(SDZ+1)
+! double precision :: DEIDIC(SDZ+1)
+! double precision :: DEIALK(SDZ+1)
+! double precision :: DEIDO2(SDZ+1)
+! double precision :: DEISIL(SDZ+1)
+! double precision :: DEI13DIC(SDZ+1)
+! double precision :: DEI14DIC(SDZ+1)
 
-! ==================================================
-!   Sediments
-! ==================================================
+  ! Carbon isotopes
+  double precision :: FEOPH, FEOSH, R13, R14, ADCAY, THALF, DLTC13, DLTC14
 
-!     ! -- Density and Molar mass --
-!     ! Density [g/cm^3], Molar mass [g/Mol], Molar mass / Density [cm^3/Mol]
+  ! Option --
+  logical :: SDFIRST = .true.
+  logical :: SDOFIRST = .true.
 
-!     double precision, parameter :: RHOCLA = 2.60D0  !! 2.6 [g/cm^3]
-!     double precision, parameter :: RHOPOM = 2.60D0  !! 2.6 [g/cm^3]
-!     double precision, parameter :: RHOCAR = 2.60D0  !! 2.6 [g/cm^3]
-!     double precision, parameter :: RHOOPA = 2.60D0  !! 2.6 [g/cm^3]
+  logical :: DEIARC = .true.  !! Archer's DEI formulation ?
+  namelist /NMSDDEAR/ DEIARC
 
-!     double precision, parameter :: MOLCLA = 430.0D0  !! 430 [g/Mol]
-!     double precision, parameter :: MOLPOM = 12.0D0   !!  12 [g/Mol]
-!     double precision, parameter :: MOLCAR = 100.0D0  !! 100 [g/Mol]
-!     double precision, parameter :: MOLOPA = 60.0D0   !!  60 [g/Mol]
+  logical :: CALC13 = .true. !! calculate carbon-13 ?
+  logical :: CALC14 = .true. !! calculate carbon-14 ?
+  namelist /NMSDISO/ CALC13, CALC14
 
-!     double precision :: MCLA, MPOM, MCAR, MOPA
-
-!     double precision, parameter :: RHO13POM = 2.60D0  !! 2.6 [g/cm^3]
-!     double precision, parameter :: RHO14POM = 2.60D0  !! 2.6 [g/cm^3]
-!     double precision, parameter :: RHO13CAR = 2.60D0  !! 2.6 [g/cm^3]
-!     double precision, parameter :: RHO14CAR = 2.60D0  !! 2.6 [g/cm^3]
-
-!     double precision, parameter :: MOL13POM = 13.0D0   !!  13 [g/Mol]
-!     double precision, parameter :: MOL14POM = 14.0D0   !!  14 [g/Mol]
-!     double precision, parameter :: MOL13CAR = 101.0D0  !! 101 [g/Mol]
-!     double precision, parameter :: MOL14CAR = 102.0D0  !! 102 [g/Mol]
-
-!     double precision :: M13POM, M14POM, M13CAR, M14CAR
-
-!     ! -- Redfield ratio --
-!     ! Fe:P, P:P, N:P, C:P, O:P
-!     double precision, parameter :: FP = 4.70D-4
-!     double precision, parameter :: PP = 1.0D0
-!     double precision, parameter :: NP = 16.0D0
-!     double precision, parameter :: CP = 117.0D0
-!     double precision, parameter :: OP = 170.0D0
-
-!     ! -- Porewater effective molecular diffusivity --
-!     double precision :: DSW = 4.59D-10      !! 4.59*10^-10 [m^2/s]
-!     double precision :: DSWNIT = 5.0D-10    !! 5.00*10^-10 [m^2/s]
-!     double precision :: DSWDIC = 6.4D-10    !! 6.40*10^-10 [m^2/s]
-!     double precision :: DSWALK = 6.4D-10    !! 6.40*10^-10 [m^2/s]
-!     double precision :: DSWDO2 = 1.2D-9     !! 1.20*10^-9  [m^2/s]
-!     double precision :: DSWSIL = 5.0D-10    !! 5.00*10^-10 [m^2/s]
-!     double precision :: DSW13DIC = 6.4D-10  !! 6.40*10^-10 [m^2/s]
-!     double precision :: DSW14DIC = 6.4D-10  !! 6.40*10^-10 [m^2/s]
-!     double precision, parameter :: NOPA = 2.50D0
-
-      !-- Advection, Diffusion --
-      ! Sedimentation rate
-      double precision :: W(NXY, SDZ+1)
-      double precision :: WG(NXYDIM, SDZDIM+1)
-
-      ! Porosity
-      double precision, parameter :: PHI0 = 0.9D0  !! 0.9
-      double precision :: Z0 = 1.823D0  !! 1.823 [m]
-      double precision :: PHI(SDZ)
-      double precision :: PHII(SDZ+1)
-
-      ! Bioturbation diffusivity
-      double precision :: DB0 = 3.0D-5, ZB = 1.0D-1  !! 3.0*10-5 [m^2/yr], 0.10 [m]
-      double precision :: DBI(SDZ+1)
-
-      ! Porewater diffusivity
-      double precision :: DEINIT(SDZ+1)
-      double precision :: DEIDIC(SDZ+1)
-      double precision :: DEIALK(SDZ+1)
-      double precision :: DEIDO2(SDZ+1)
-      double precision :: DEISIL(SDZ+1)
-      double precision :: DEI13DIC(SDZ+1)
-      double precision :: DEI14DIC(SDZ+1)
-
-      !-- 13C, 14C --
-      double precision, parameter :: PDB = 0.0112372D0  !! standard 13C/12C
-      double precision, parameter :: DSTD = 1.1892D-12  !! standard 14C/12C
-      double precision, parameter :: EOPH = -22.0, EOSH = 0.0  !! fractionation factor
-      double precision, parameter :: EPS = 1.0D-10
-      double precision :: THALF = 5370.D0  !! half decay time [yr], decay constant
-      double precision :: FEOPH, FEOSH, R13, R14, ADCAY, DLTC13, DLTC14
-
-      ! -- Option --
-      logical :: SDFIRST = .TRUE.
-      logical :: SDOFIRST = .TRUE.
-
-      logical :: DEIARC
-      namelist /NMSDDEAR/ DEIARC
-      data DEIARC / .TRUE. /  !! Archer's DEI formulation ?
-
-      logical :: CALC13, CALC14
-      namelist /NMSDISO/ CALC13, CALC14
-      data CALC13, CALC14 / .TRUE., .TRUE. /  !! carbon isotopes ?
-
-      ! -- etc --
-      character(16) :: SEDTNM(SEDTDM)
-      logical, parameter :: WOTSTP = .TRUE.  !! writeout time step ?
-      integer, parameter :: NFSOTS = 999
-      character(128) :: CFILE, CTITLE, CUNIT
+  ! etc
+  character(16) :: SEDTNM(SEDTDM)
+  character(128) :: CFILE, CTITLE, CUNIT
 
 contains
 
-end module globals_sdmain
+end module globals_digda_main
 
 ! =====================================================================
 
-module module_sdmain
+module module_digda_main
   use netcdf_utilities
-      use globals_sdmain
-      use module_digda_clay
-      use module_digda_pom
-      use module_digda_caco3
-      use module_digda_sio2l
-      use module_digda_step_solid
-      use module_digda_step_liquid
-      use module_digda_chemeq
-      implicit none
+  use gtool_utilities
+  use globals_digda_main
+  use module_digda_clay
+  use module_digda_pom
+  use module_digda_carbonate
+  use module_digda_sio2l
+  use module_digda_step_solid
+  use module_digda_step_liquid
+  use module_digda_chemeq
+  implicit none
 
 contains
 
-      subroutine SD( &
-     &     bdepg, &
-     &     bfrcg, &
-     &     sdtx )
+  subroutine digda_main( &
+ &  bdepg, &
+ &  bfrcg, &
+ &  sdtx )
 
-! ==================================================
-!   Sediments
-! ==================================================
+    ! --------------------------------------------------
+    !   Forcing of Particles and Dissolved material
+    !      Clay, POM, CaCO3, Opal, agetracer
+    !      Phosphate, Dissolved Inorganic Carbon,
+    !      Alkalinity, Dissolved Oxygen, Silicate
+    ! --------------------------------------------------
 
-! --------------------------------------------------
-!   Forcing of Particles and Dissolved material
-!      Clay, POM, CaCO3, Opal, agetracer
-!      Phosphate, Dissolved Inorganic Carbon,
-!      Alkalinity, Dissolved Oxygen, Silicate
-! --------------------------------------------------
+    double precision, intent(in) :: BDEPG(NXYDIM)
+    double precision, intent(in) :: BFRCG(NXYDIM, BENFDM)
 
-      double precision, intent(in) :: BDEPG(NXYDIM)
-      double precision, intent(in) :: BFRCG(NXYDIM, BENFDM)
+    double precision, intent(inout) :: SDTX(NXYDIM, SDZDIM, SEDTDM)
+    double precision :: SDTXBUF(NXDIM, NYDIM, SDZDIM, SEDTDM)
 
-      double precision, intent(inout) :: SDTX(NXYDIM, SDZDIM, SEDTDM)
-      double precision :: SDTXBUF(NXDIM, NYDIM, SDZDIM, SEDTDM)
+    ! --------------------------------------------------
+    !   Particles
+    !     Clay, POM, CaCO3, Opal, agetracer
+    ! --------------------------------------------------
 
-! --------------------------------------------------
-!   Particles
-!      Clay, POM, CaCO3, Opal, agetracer
-! --------------------------------------------------
+    ! Concentration
+    !   clay [g/m^3], pom, caco3, opal [mMol/m^3], agetracer [yr]
+    double precision :: SCLA(NXY, SDZ),   SNCLA(NXY, SDZ)
+    double precision :: SPOM(NXY, SDZ),   SNPOM(NXY, SDZ)
+    double precision :: SCAR(NXY, SDZ),   SNCAR(NXY, SDZ)
+    double precision :: SOPA(NXY, SDZ),   SNOPA(NXY, SDZ)
+    double precision :: SAGE(NXY, SDZ),   SNAGE(NXY, SDZ)
+    double precision :: S13POM(NXY, SDZ), SN13POM(NXY, SDZ)
+    double precision :: S14POM(NXY, SDZ), SN14POM(NXY, SDZ)
+    double precision :: S13CAR(NXY, SDZ), SN13CAR(NXY, SDZ)
+    double precision :: S14CAR(NXY, SDZ), SN14CAR(NXY, SDZ)
+    double precision :: SCLAG(NXYDIM, SDZDIM)
+    double precision :: SPOMG(NXYDIM, SDZDIM)
+    double precision :: SCARG(NXYDIM, SDZDIM)
+    double precision :: SOPAG(NXYDIM, SDZDIM)
+    double precision :: SAGEG(NXYDIM, SDZDIM)
+    double precision :: S13POMG(NXYDIM, SDZDIM)
+    double precision :: S14POMG(NXYDIM, SDZDIM)
+    double precision :: S13CARG(NXYDIM, SDZDIM)
+    double precision :: S14CARG(NXYDIM, SDZDIM)
 
-!-- Concentration :
-!      clay [g/m^3], pom, caco3, opal [mMol/m^3], agetracer [yr]
-      double precision :: SCLA(NXY, SDZ),   SNCLA(NXY, SDZ)
-      double precision :: SPOM(NXY, SDZ),   SNPOM(NXY, SDZ)
-      double precision :: SCAR(NXY, SDZ),   SNCAR(NXY, SDZ)
-      double precision :: SOPA(NXY, SDZ),   SNOPA(NXY, SDZ)
-      double precision :: SAGE(NXY, SDZ),   SNAGE(NXY, SDZ)
-      double precision :: S13POM(NXY, SDZ), SN13POM(NXY, SDZ)
-      double precision :: S14POM(NXY, SDZ), SN14POM(NXY, SDZ)
-      double precision :: S13CAR(NXY, SDZ), SN13CAR(NXY, SDZ)
-      double precision :: S14CAR(NXY, SDZ), SN14CAR(NXY, SDZ)
-      double precision :: SCLAG(NXYDIM, SDZDIM)
-      double precision :: SPOMG(NXYDIM, SDZDIM)
-      double precision :: SCARG(NXYDIM, SDZDIM)
-      double precision :: SOPAG(NXYDIM, SDZDIM)
-      double precision :: SAGEG(NXYDIM, SDZDIM)
-      double precision :: S13POMG(NXYDIM, SDZDIM)
-      double precision :: S14POMG(NXYDIM, SDZDIM)
-      double precision :: S13CARG(NXYDIM, SDZDIM)
-      double precision :: S14CARG(NXYDIM, SDZDIM)
+    ! Weight percent [%]
+    double precision :: PCLA(NXY, SDZ)
+    double precision :: PPOM(NXY, SDZ)
+    double precision :: PCAR(NXY, SDZ)
+    double precision :: POPA(NXY, SDZ)
+    double precision :: WT(NXY, SDZ)
+    double precision :: PCLAG(NXYDIM, SDZDIM)
+    double precision :: PPOMG(NXYDIM, SDZDIM)
+    double precision :: PCARG(NXYDIM, SDZDIM)
+    double precision :: POPAG(NXYDIM, SDZDIM)
+    double precision :: WTG(NXYDIM, SDZDIM)
 
-!-- Weight percent [%] :
-      double precision :: PCLA(NXY, SDZ)
-      double precision :: PPOM(NXY, SDZ)
-      double precision :: PCAR(NXY, SDZ)
-      double precision :: POPA(NXY, SDZ)
-      double precision :: WT(NXY, SDZ)
-      double precision :: PCLAG(NXYDIM, SDZDIM)
-      double precision :: PPOMG(NXYDIM, SDZDIM)
-      double precision :: PCARG(NXYDIM, SDZDIM)
-      double precision :: POPAG(NXYDIM, SDZDIM)
-      double precision :: WTG(NXYDIM, SDZDIM)
+    ! Dissolution rate [1/s], Dissolution term [mMol/m^3/s]
+    double precision :: RCLA(NXY, SDZ),   TRCLA(NXY, SDZ)
+    double precision :: RPOM(NXY, SDZ),   TRPOM(NXY, SDZ)
+    double precision :: RCAR(NXY, SDZ),   TRCAR(NXY, SDZ)
+    double precision :: ROPA(NXY, SDZ),   TROPA(NXY, SDZ)
+    double precision :: R13POM(NXY, SDZ), TR13POM(NXY, SDZ)
+    double precision :: R14POM(NXY, SDZ), TR14POM(NXY, SDZ)
+    double precision :: R13CAR(NXY, SDZ), TR13CAR(NXY, SDZ)
+    double precision :: R14CAR(NXY, SDZ), TR14CAR(NXY, SDZ)
 
-!-- Dissolution rate [1/s], Dissolution term [mMol/m^3/s] :
-      double precision :: RCLA(NXY, SDZ),   TRCLA(NXY, SDZ)
-      double precision :: RPOM(NXY, SDZ),   TRPOM(NXY, SDZ)
-      double precision :: RCAR(NXY, SDZ),   TRCAR(NXY, SDZ)
-      double precision :: ROPA(NXY, SDZ),   TROPA(NXY, SDZ)
-      double precision :: R13POM(NXY, SDZ), TR13POM(NXY, SDZ)
-      double precision :: R14POM(NXY, SDZ), TR14POM(NXY, SDZ)
-      double precision :: R13CAR(NXY, SDZ), TR13CAR(NXY, SDZ)
-      double precision :: R14CAR(NXY, SDZ), TR14CAR(NXY, SDZ)
+    ! --------------------------------------------------
+    !   Dissolved material
+    !     Phosphate, Dissolved Inorganic Carbon,
+    !     Alkalinity, Dissolved Oxygen, Silicate
+    ! --------------------------------------------------
 
-! --------------------------------------------------
-!   Dissolved material
-!      Phosphate, Dissolved Inorganic Carbon,
-!      Alkalinity, Dissolved Oxygen, Silicate
-! --------------------------------------------------
+    ! Concentration [mMol/m^3]
+    double precision :: CNIT(NXY, SDZ),   CNNIT(NXY, SDZ)
+    double precision :: CDIC(NXY, SDZ),   CNDIC(NXY, SDZ)
+    double precision :: CALK(NXY, SDZ),   CNALK(NXY, SDZ)
+    double precision :: CDO2(NXY, SDZ),   CNDO2(NXY, SDZ)
+    double precision :: CSIL(NXY, SDZ),   CNSIL(NXY, SDZ)
+    double precision :: C13DIC(NXY, SDZ), CN13DIC(NXY, SDZ)
+    double precision :: C14DIC(NXY, SDZ), CN14DIC(NXY, SDZ)
+    double precision :: CDC13(NXY, SDZ),  CDC14(NXY, SDZ)
+    double precision :: CCO32(NXY, SDZ)
+    double precision :: SATCO32(NXY)
+    double precision :: SATSIL(NXY,SDZ)
+    double precision :: CNITG(NXYDIM, SDZDIM)
+    double precision :: CDICG(NXYDIM, SDZDIM)
+    double precision :: CALKG(NXYDIM, SDZDIM)
+    double precision :: CDO2G(NXYDIM, SDZDIM)
+    double precision :: CSILG(NXYDIM, SDZDIM)
+    double precision :: C13DICG(NXYDIM, SDZDIM)
+    double precision :: C14DICG(NXYDIM, SDZDIM)
+    double precision :: CDC13G(NXYDIM, SDZDIM)
+    double precision :: CDC14G(NXYDIM, SDZDIM)
+    double precision :: CCO32G(NXYDIM, SDZDIM)
+    double precision :: SATCO32G(NXYDIM)
+    double precision :: SATSILG(NXYDIM,SDZDIM)
 
-!-- Concentration [mMol/m^3] :
-      double precision :: CNIT(NXY, SDZ),   CNNIT(NXY, SDZ)
-      double precision :: CDIC(NXY, SDZ),   CNDIC(NXY, SDZ)
-      double precision :: CALK(NXY, SDZ),   CNALK(NXY, SDZ)
-      double precision :: CDO2(NXY, SDZ),   CNDO2(NXY, SDZ)
-      double precision :: CSIL(NXY, SDZ),   CNSIL(NXY, SDZ)
-      double precision :: C13DIC(NXY, SDZ), CN13DIC(NXY, SDZ)
-      double precision :: C14DIC(NXY, SDZ), CN14DIC(NXY, SDZ)
-      double precision :: CDC13(NXY, SDZ),  CDC14(NXY, SDZ)
-      double precision :: CCO32(NXY, SDZ)
-      double precision :: SATCO32(NXY)
-      double precision :: SATSIL(NXY,SDZ)
-      double precision :: CNITG(NXYDIM, SDZDIM)
-      double precision :: CDICG(NXYDIM, SDZDIM)
-      double precision :: CALKG(NXYDIM, SDZDIM)
-      double precision :: CDO2G(NXYDIM, SDZDIM)
-      double precision :: CSILG(NXYDIM, SDZDIM)
-      double precision :: C13DICG(NXYDIM, SDZDIM)
-      double precision :: C14DICG(NXYDIM, SDZDIM)
-      double precision :: CDC13G(NXYDIM, SDZDIM)
-      double precision :: CDC14G(NXYDIM, SDZDIM)
-      double precision :: CCO32G(NXYDIM, SDZDIM)
-      double precision :: SATCO32G(NXYDIM)
-      double precision :: SATSILG(NXYDIM,SDZDIM)
+    ! Concentration (bottom water)
+    !   temperature [C], salinity [psu], the others [mMol/m^3]
+    double precision :: BWTEM(NXY)
+    double precision :: BWSAL(NXY)
+    double precision :: BWNIT(NXY)
+    double precision :: BWDIC(NXY)
+    double precision :: BWALK(NXY)
+    double precision :: BWDO2(NXY)
+    double precision :: BWSIL(NXY)
+    double precision :: BW13DIC(NXY)
+    double precision :: BW14DIC(NXY)
+    double precision :: BWTEMG(NXYDIM)
+    double precision :: BWSALG(NXYDIM)
+    double precision :: BWNITG(NXYDIM)
+    double precision :: BWDICG(NXYDIM)
+    double precision :: BWALKG(NXYDIM)
+    double precision :: BWDO2G(NXYDIM)
+    double precision :: BWSILG(NXYDIM)
+    double precision :: BW13DICG(NXYDIM)
+    double precision :: BW14DICG(NXYDIM)
 
-!-- Concentration (bottom water) :
-!      temp [C], salinity [psu], the others [mMol/m^3]
-      double precision :: BWTEM(NXY)
-      double precision :: BWSAL(NXY)
-      double precision :: BWNIT(NXY)
-      double precision :: BWDIC(NXY)
-      double precision :: BWALK(NXY)
-      double precision :: BWDO2(NXY)
-      double precision :: BWSIL(NXY)
-      double precision :: BW13DIC(NXY)
-      double precision :: BW14DIC(NXY)
-      double precision :: BWTEMG(NXYDIM)
-      double precision :: BWSALG(NXYDIM)
-      double precision :: BWNITG(NXYDIM)
-      double precision :: BWDICG(NXYDIM)
-      double precision :: BWALKG(NXYDIM)
-      double precision :: BWDO2G(NXYDIM)
-      double precision :: BWSILG(NXYDIM)
-      double precision :: BW13DICG(NXYDIM)
-      double precision :: BW14DICG(NXYDIM)
+    ! Concentration (total)
+    !   total phosphorous [mMol/m^3], total silicon [mMol/m^3]
+    double precision :: PT(NXY)
+    double precision :: SIT(NXY)
 
-!-- Concentration (total) :
-!      total phosphorous [mMol/m^3], total silicon [mMol/m^3]
-      double precision :: PT(NXY)
-      double precision :: SIT(NXY)
+    ! Dissolution term [mMol/m^3/s]
+    double precision :: TRNIT(NXY, SDZ)
+    double precision :: TRDIC(NXY, SDZ)
+    double precision :: TRALK(NXY, SDZ)
+    double precision :: TRDO2(NXY, SDZ)
+    double precision :: TRSIL(NXY, SDZ)
+    double precision :: TR13DIC(NXY, SDZ)
+    double precision :: TR14DIC(NXY, SDZ)
 
-!-- Dissolution term [mMol/m^3/s] :
-      double precision :: TRNIT(NXY, SDZ)
-      double precision :: TRDIC(NXY, SDZ)
-      double precision :: TRALK(NXY, SDZ)
-      double precision :: TRDO2(NXY, SDZ)
-      double precision :: TRSIL(NXY, SDZ)
-      double precision :: TR13DIC(NXY, SDZ)
-      double precision :: TR14DIC(NXY, SDZ)
+    ! --------------------------------------------------
+    !   Fluxes
+    ! --------------------------------------------------
 
-!-- Sea-bottom Flux :
-!      clay [g/m^3*cm/s], the others [mMol/m^3*cm/s]
-      double precision :: FICLA(NXY),   FOCLA(NXY)
-      double precision :: FIPOM(NXY),   FOPOM(NXY)
-      double precision :: FICAR(NXY),   FOCAR(NXY)
-      double precision :: FIOPA(NXY),   FOOPA(NXY)
-      double precision :: FIAGE(NXY)
-      double precision :: FI13POM(NXY), FO13POM(NXY)
-      double precision :: FI14POM(NXY), FO14POM(NXY)
-      double precision :: FI13CAR(NXY), FO13CAR(NXY)
-      double precision :: FI14CAR(NXY), FO14CAR(NXY)
+    ! Sedimentation rate
+    double precision :: W(NXY, SDZ+1)
+    double precision :: WG(NXYDIM, SDZDIM+1)
 
-      double precision :: FICLAG(NXYDIM), FOCLAG(NXYDIM)
-      double precision :: FIPOMG(NXYDIM), FOPOMG(NXYDIM)
-      double precision :: FICARG(NXYDIM), FOCARG(NXYDIM)
-      double precision :: FIOPAG(NXYDIM), FOOPAG(NXYDIM)
-      double precision :: FIAGEG(NXYDIM), FOAGEG(NXYDIM)
-      double precision :: FI13POMG(NXYDIM), FO13POMG(NXYDIM)
-      double precision :: FI14POMG(NXYDIM), FO14POMG(NXYDIM)
-      double precision :: FI13CARG(NXYDIM), FO13CARG(NXYDIM)
-      double precision :: FI14CARG(NXYDIM), FO14CARG(NXYDIM)
+    ! Sea-bottom Flux
+    !   clay [g/m^3*cm/s], the others [mMol/m^3*cm/s]
+    double precision :: FICLA(NXY),   FOCLA(NXY)
+    double precision :: FIPOM(NXY),   FOPOM(NXY)
+    double precision :: FICAR(NXY),   FOCAR(NXY)
+    double precision :: FIOPA(NXY),   FOOPA(NXY)
+    double precision :: FIAGE(NXY)
+    double precision :: FI13POM(NXY), FO13POM(NXY)
+    double precision :: FI14POM(NXY), FO14POM(NXY)
+    double precision :: FI13CAR(NXY), FO13CAR(NXY)
+    double precision :: FI14CAR(NXY), FO14CAR(NXY)
 
-!-- Sea-bottom Flux [mMol/m^3*cm/s] :
-      double precision :: FINIT(NXY),   FONIT(NXY)
-      double precision :: FIDIC(NXY),   FODIC(NXY)
-      double precision :: FIALK(NXY),   FOALK(NXY)
-      double precision :: FIDO2(NXY),   FODO2(NXY)
-      double precision :: FISIL(NXY),   FOSIL(NXY)
-      double precision :: FI13DIC(NXY), FO13DIC(NXY)
-      double precision :: FI14DIC(NXY), FO14DIC(NXY)
+    double precision :: FICLAG(NXYDIM), FOCLAG(NXYDIM)
+    double precision :: FIPOMG(NXYDIM), FOPOMG(NXYDIM)
+    double precision :: FICARG(NXYDIM), FOCARG(NXYDIM)
+    double precision :: FIOPAG(NXYDIM), FOOPAG(NXYDIM)
+    double precision :: FIAGEG(NXYDIM), FOAGEG(NXYDIM)
+    double precision :: FI13POMG(NXYDIM), FO13POMG(NXYDIM)
+    double precision :: FI14POMG(NXYDIM), FO14POMG(NXYDIM)
+    double precision :: FI13CARG(NXYDIM), FO13CARG(NXYDIM)
+    double precision :: FI14CARG(NXYDIM), FO14CARG(NXYDIM)
 
-!-- Sediment-bottom Flux :
-!      clay [g/m^3*cm/s], the others [mMol/m^3*cm/s]
-      double precision :: BFCLA(NXY)
-      double precision :: BFPOM(NXY)
-      double precision :: BFCAR(NXY)
-      double precision :: BFOPA(NXY)
-      double precision :: BF13POM(NXY)
-      double precision :: BF14POM(NXY)
-      double precision :: BF13CAR(NXY)
-      double precision :: BF14CAR(NXY)
-      double precision :: BFCLAG(NXYDIM)
-      double precision :: BFPOMG(NXYDIM)
-      double precision :: BFCARG(NXYDIM)
-      double precision :: BFOPAG(NXYDIM)
-      double precision :: BF13POMG(NXYDIM)
-      double precision :: BF14POMG(NXYDIM)
-      double precision :: BF13CARG(NXYDIM)
-      double precision :: BF14CARG(NXYDIM)
+    ! Sea-bottom Flux [mMol/m^3*cm/s]
+    double precision :: FINIT(NXY),   FONIT(NXY)
+    double precision :: FIDIC(NXY),   FODIC(NXY)
+    double precision :: FIALK(NXY),   FOALK(NXY)
+    double precision :: FIDO2(NXY),   FODO2(NXY)
+    double precision :: FISIL(NXY),   FOSIL(NXY)
+    double precision :: FI13DIC(NXY), FO13DIC(NXY)
+    double precision :: FI14DIC(NXY), FO14DIC(NXY)
 
-!-- MASK :
-!     double precision :: BDEP(NXY), BDEPG(NXYDIM) !! ocean depth [m]
-!     SAVE BDEP, BDEPG
-      double precision :: BDEP(NXY)                !! ocean depth [m]
-!     SAVE BDEP
+    ! Sediment-bottom Flux
+    !   clay [g/m^3*cm/s], the others [mMol/m^3*cm/s]
+    double precision :: BFCLA(NXY)
+    double precision :: BFPOM(NXY)
+    double precision :: BFCAR(NXY)
+    double precision :: BFOPA(NXY)
+    double precision :: BF13POM(NXY)
+    double precision :: BF14POM(NXY)
+    double precision :: BF13CAR(NXY)
+    double precision :: BF14CAR(NXY)
+    double precision :: BFCLAG(NXYDIM)
+    double precision :: BFPOMG(NXYDIM)
+    double precision :: BFCARG(NXYDIM)
+    double precision :: BFOPAG(NXYDIM)
+    double precision :: BF13POMG(NXYDIM)
+    double precision :: BF14POMG(NXYDIM)
+    double precision :: BF13CARG(NXYDIM)
+    double precision :: BF14CARG(NXYDIM)
 
-!-- Parallel computing :
-      integer, allocatable :: NRCVC1(:),  NDISP1(:)
-      integer, allocatable :: NRCVC2(:),  NDISP2(:)
-      integer, allocatable :: NRCVC3(:),  NDISP3(:)
-      double precision, allocatable :: DUMMY01(:), DUMMY02(:), DUMMY03(:)
-      double precision, allocatable :: DUMMY04(:), DUMMY05(:), DUMMY06(:)
-      double precision, allocatable :: DUMMY07(:), DUMMY08(:), DUMMY09(:)
-      double precision, allocatable :: DUMMY11(:), DUMMY12(:), DUMMY13(:)
-      double precision, allocatable :: DUMMY14(:), DUMMY15(:), DUMMY16(:)
-      double precision, allocatable :: DUMMY17(:), DUMMY18(:), DUMMY19(:)
-      double precision, allocatable :: DUMMY20(:)
-      double precision, allocatable :: DUMMY21(:), DUMMY22(:), DUMMY23(:)
-      double precision, allocatable :: DUMMY31(:), DUMMY32(:), DUMMY33(:)
-      double precision, allocatable :: DUMMY34(:), DUMMY35(:), DUMMY36(:)
-      double precision, allocatable :: DUMMY37(:), DUMMY38(:)
-      double precision, allocatable :: DUMMY41(:), DUMMY42(:), DUMMY43(:)
-      double precision, allocatable :: DUMMY44(:), DUMMY45(:), DUMMY46(:)
-      double precision, allocatable :: DUMMY47(:), DUMMY48(:)
-      double precision, allocatable :: DUMMY51(:), DUMMY52(:), DUMMY53(:)
-      double precision, allocatable :: DUMMY54(:), DUMMY55(:), DUMMY56(:)
-      double precision, allocatable :: DUMMY57(:), DUMMY58(:)
+    ! --------------------------------------------------
+    !   Others
+    ! --------------------------------------------------
 
-!-- etc :
-      character(len=100) :: FILENAME, VARNAME, VARUNIT
-      double precision :: LON_VALUES(NXDIM)
-      double precision :: LAT_VALUES(NYDIM)
-      double precision :: DEPTH_VALUES(SDZDIM)
-      double precision :: VAR2D_VALUES(NXDIM, NYDIM, 1)
-      double precision :: VAR3D_VALUES(NXDIM, NYDIM, SDZDIM, 1)
+    ! MASK
+    ! ocean depth [m]
+    double precision :: BDEP(NXY)
 
-      integer :: I, J, IJ, K, L, IC
-      integer :: TT, YY
+    ! Parallel computing
+    integer, allocatable :: NRCVC1(:),  NDISP1(:)
+    integer, allocatable :: NRCVC2(:),  NDISP2(:)
+    integer, allocatable :: NRCVC3(:),  NDISP3(:)
+    double precision, allocatable :: DUMMY01(:), DUMMY02(:), DUMMY03(:)
+    double precision, allocatable :: DUMMY04(:), DUMMY05(:), DUMMY06(:)
+    double precision, allocatable :: DUMMY07(:), DUMMY08(:), DUMMY09(:)
+    double precision, allocatable :: DUMMY11(:), DUMMY12(:), DUMMY13(:)
+    double precision, allocatable :: DUMMY14(:), DUMMY15(:), DUMMY16(:)
+    double precision, allocatable :: DUMMY17(:), DUMMY18(:), DUMMY19(:)
+    double precision, allocatable :: DUMMY20(:)
+    double precision, allocatable :: DUMMY21(:), DUMMY22(:), DUMMY23(:)
+    double precision, allocatable :: DUMMY31(:), DUMMY32(:), DUMMY33(:)
+    double precision, allocatable :: DUMMY34(:), DUMMY35(:), DUMMY36(:)
+    double precision, allocatable :: DUMMY37(:), DUMMY38(:)
+    double precision, allocatable :: DUMMY41(:), DUMMY42(:), DUMMY43(:)
+    double precision, allocatable :: DUMMY44(:), DUMMY45(:), DUMMY46(:)
+    double precision, allocatable :: DUMMY47(:), DUMMY48(:)
+    double precision, allocatable :: DUMMY51(:), DUMMY52(:), DUMMY53(:)
+    double precision, allocatable :: DUMMY54(:), DUMMY55(:), DUMMY56(:)
+    double precision, allocatable :: DUMMY57(:), DUMMY58(:)
+
+    ! etc
+    character(len=100) :: FILENAME, VARNAME, VARUNIT
+    double precision :: LON_VALUES(NXDIM)
+    double precision :: LAT_VALUES(NYDIM)
+    double precision :: DEPTH_VALUES(SDZDIM)
+    double precision :: VAR2D_VALUES(NXDIM, NYDIM, 1)
+    double precision :: VAR3D_VALUES(NXDIM, NYDIM, SDZDIM, 1)
+
+    integer :: I, J, IJ, K, L, IC
+    integer :: TT, YY
 
 !-- SEDIMENT TRACERS : setup --
 
-IF (PARALLEL) THEN
-      CALL MPI_INIT(IERR)
-      CALL MPI_COMM_SIZE(MPI_COMM_WORLD, NPROCS, IERR)
-      CALL MPI_COMM_RANK(MPI_COMM_WORLD, MYRANK, IERR)
-
-      IF ( NPROCS /= NCPU ) THEN
-         IF ( MYRANK == 0 ) THEN
-            PRINT *, '=== MPI ERROR ==='
-            CALL MPI_FINALIZE(IERR)
-            STOP
-         END IF
-      END IF
-
-      DO IRANK = 0, NPROCS-1
-         CALL PARA_RANGE( &
-     &                    1, NXYDIM, NPROCS, IRANK, &
-     &                    JJSTR(IRANK), JJEND(IRANK) &
-     &                  )
-      END DO
+IF (use_mpi) THEN
+    call initialize_digda_mpi
+    DO IRANK = 0, NPROCS-1
+      call set_parallel_range( &
+   &       1, NXYDIM, NPROCS, IRANK, &
+   &       JJSTR(IRANK), JJEND(IRANK) &
+   &       )
+    END DO
 END IF
 
-      OPEN(NFPARM, file="PARAMET")
-      OPEN(NFSTDO, file="STDOUT")
+      OPEN(NFPARM, FILE="PARAMET")
+      OPEN(NFSTDO, FILE="STDOUT")
+      OPEN(NFSOTS, FILE="TSTEP")
 
-      WRITE(NFSTDO, *) '*** SDMAINSET ***'
       WRITE(NFSTDO, *) '-----------------------------'
       WRITE(NFSTDO, *) '-- Setup of Sediment Model --'
       WRITE(NFSTDO, *) '-----------------------------'
@@ -429,19 +349,18 @@ END IF
       SEDTNM(15) = 'S14CAR'
       SEDTNM(16) = 'C14DIC'
 
-!     CALL SDFILESET
-      CALL SDCLAYSET
-      CALL SDPOMSET
-      CALL SDCACO3SET
-      CALL SDOPALSET
-      CALL SDCHEMEQSET
-      CALL SDSOLIDSET
-      CALL SDLIQUIDSET
+      call set_digda_clay
+      call set_digda_pom
+      call set_digda_carbonate
+      call set_digda_silicate
+      call set_digda_chemeq
+      call set_digda_step_solid
+      call set_digda_step_liquid
 
 !-- SEDIMENT TRACERS : setup (end) --
 
 !     -- Ocean depth --
-IF (PARALLEL) THEN
+IF (use_mpi) THEN
       DO IJ = 1, NXY
          BDEP(IJ) = MAX( BDEPG(MYRANK*NXY+IJ), 0.0D0 )
       END DO
@@ -491,7 +410,7 @@ END IF
       IF ( CALC14 ) THEN
       M14POM = 1.0D-9 / ( RHOPOM / MOL14POM )  !! [m^3/mMol]
       M14CAR = 1.0D-9 / ( RHOCAR / MOL14CAR )  !! [m^3/mMol]
-      THALF  = THALF * 3.1536D+7               !! [yr] --> [s]
+      THALF  = THALFYR * 3.1536D+7             !! [yr] --> [s]
       ADCAY  = LOG( 2.0D0 ) / THALF / 365.0D0 / 8.64D4
       END IF
       IF ( CALC13 .or. CALC14 ) THEN
@@ -561,7 +480,7 @@ END IF
         BW14DICG(I) = BFRCG(I, 14)
       END DO
 
-IF (PARALLEL) THEN
+IF (use_mpi) THEN
       DO IJ = 1, NXY
          FICLA(IJ) = MAX( FICLAG(MYRANK*NXY+IJ), 0.0D0 )
          FIPOM(IJ) = MAX( FIPOMG(MYRANK*NXY+IJ), 0.0D0 )
@@ -578,7 +497,7 @@ ELSE
          FIAGE(IJ) = 0.0D0
       END DO
 END IF
-IF (PARALLEL) THEN
+IF (use_mpi) THEN
       DO IJ = 1, NXY
          BWTEM(IJ)   = BWTEMG(MYRANK*NXY+IJ)
          BWSAL(IJ)   = BWSALG(MYRANK*NXY+IJ)
@@ -605,7 +524,7 @@ END IF
          FI13POM(IJ) = FEOPH * PDB  * FIPOM(IJ)
          FI13CAR(IJ) = FEOSH * PDB  * FICAR(IJ)
       END DO
-IF (PARALLEL) THEN
+IF (use_mpi) THEN
       DO IJ = 1, NXY
          BW13DIC(IJ) = MAX( BW13DICG(MYRANK*NXY+IJ), 0.0D0 )
       END DO
@@ -621,7 +540,7 @@ END IF
          FI14POM(IJ) = FEOPH * DSTD * FIPOM(IJ)
          FI14CAR(IJ) = FEOSH * DSTD * FICAR(IJ)
       END DO
-IF (PARALLEL) THEN
+IF (use_mpi) THEN
       DO IJ = 1, NXY
          BW14DIC(IJ) = MAX( BW14DICG(MYRANK*NXY+IJ), 0.0D0 )
       END DO
@@ -712,9 +631,9 @@ END IF
                POPA(IJ, K) = 0.0D0
             END DO
          END DO
-         SDFIRST = .FALSE.
+         SDFIRST = .false.
       ELSE
-IF (PARALLEL) THEN
+IF (use_mpi) THEN
          DO K = SKST, SKEN
             DO IJ = 1, NXY
                SCLA(IJ, K) = SDTX(MYRANK*NXY+IJ, K,  1)
@@ -785,30 +704,30 @@ END IF
 
 !     -- Saturated carbonate ion concentration --
 
-      CALL SDCHEMEQ( &
+      call calc_digda_chemeq( &
      &    BWTEM, BWSAL, CDIC, CALK, &
      &    SIT, PT, &
      &    CCO32 )
 
-      CALL SATCAR( &
+      call calc_carbonate_saturation( &
      &    BWTEM, BWSAL, BDEP, &
      &    SATCO32 )
 
 !     -- Dissolution term --
 
-      CALL DISCLA( &
+      call calc_clay_dissolution( &
      &    SCLA, &
      &    RCLA )
 
-      CALL DISPOM( &
+      call calc_pom_dissolution( &
      &    SPOM, CDO2, CP, OP, PHI, &
      &    RPOM )
 
-      CALL DISCAR( &
+      call calc_carbonate_dissolution( &
      &    SCAR, CCO32, SATCO32, PHI, &
      &    RCAR )
 
-      CALL DISOPA( &
+      call calc_silicate_dissolution( &
      &    SOPA, CSIL, PCLA, POPA, BWTEM, &
      &    ROPA, SATSIL )
 
@@ -871,42 +790,42 @@ END IF
 !     -- Particles (t --> t+dt) --
 !        Clay, POM, CaCO3, Opal
 
-      CALL SOLID_CLAY( &
+      call calc_step_solid_clay( &
      &    FICLA, TRCLA, W, PHI, PHII, DBI, SCLA, RHOCLA, &
      &    SNCLA, BFCLA )
 
-      CALL SOLID( &
+      call calc_step_solid( &
      &    FIPOM, TRPOM, W, PHI, PHII, DBI, SPOM, &
      &    SNPOM, BFPOM )
 
-      CALL SOLID( &
+      call calc_step_solid( &
      &    FICAR, TRCAR, W, PHI, PHII, DBI, SCAR, &
      &    SNCAR, BFCAR )
 
-      CALL SOLID( &
+      call calc_step_solid( &
      &    FIOPA, TROPA, W, PHI, PHII, DBI, SOPA, &
      &    SNOPA, BFOPA )
 
-      CALL AGE( &
+      call calc_step_solid_age( &
      &    FIAGE, W, PHI, PHII, DBI, SAGE, &
      &    SNAGE )
 
       IF ( CALC13 ) THEN
-      CALL SOLID( &
+      call calc_step_solid( &
      &    FI13POM, TR13POM, W, PHI, PHII, DBI, S13POM, &
      &    SN13POM, BF13POM )
 
-      CALL SOLID( &
+      call calc_step_solid( &
      &    FI13CAR, TR13CAR, W, PHI, PHII, DBI, S13CAR, &
      &    SN13CAR, BF13CAR )
       END IF
 
       IF ( CALC14 ) THEN
-      CALL SOLID( &
+      call calc_step_solid( &
      &    FI14POM, TR14POM, W, PHI, PHII, DBI, S14POM, &
      &    SN14POM, BF14POM )
 
-      CALL SOLID( &
+      call calc_step_solid( &
      &    FI14CAR, TR14CAR, W, PHI, PHII, DBI, S14CAR, &
      &    SN14CAR, BF14CAR )
       DO K = SKST, SKEN
@@ -955,34 +874,34 @@ END IF
 !     -- Dissolved material (t --> t+dt) --
 !        NIT, DIC, ALK, DO2, SIL
 
-      CALL LIQUID( &
+      call calc_step_liquid( &
      &    BWNIT, TRNIT, PHI, PHII, DEINIT, CNIT, &
      &    CNNIT )
 
-      CALL LIQUID( &
+      call calc_step_liquid( &
      &    BWDIC, TRDIC, PHI, PHII, DEIDIC, CDIC, &
      &    CNDIC )
 
-      CALL LIQUID( &
+      call calc_step_liquid( &
      &    BWALK, TRALK, PHI, PHII, DEIALK, CALK, &
      &    CNALK )
 
-      CALL LIQUID_O2( &
+      call calc_step_liquid_o2( &
      &    BWDO2, TRDO2, PHI, PHII, DEIDO2, CDO2, &
      &    CNDO2 )
 
-      CALL LIQUID( &
+      call calc_step_liquid( &
      &    BWSIL, TRSIL, PHI, PHII, DEISIL, CSIL, &
      &    CNSIL )
 
       IF ( CALC13 ) THEN
-      CALL LIQUID( &
+      call calc_step_liquid( &
      &    BW13DIC, TR13DIC, PHI, PHII, DEI13DIC, C13DIC, &
      &    CN13DIC )
       END IF
 
       IF ( CALC14 ) THEN
-      CALL LIQUID( &
+      call calc_step_liquid( &
      &    BW14DIC, TR14DIC, PHI, PHII, DEI14DIC, C14DIC, &
      &    CN14DIC )
       END IF
@@ -1106,7 +1025,7 @@ END IF
       END DO
 
 !     -- OUTPUT --
-IF (PARALLEL) THEN
+IF (use_mpi) THEN
       DO K = SKST, SKEN
          DO IJ = 1, NXY
             SDTX(MYRANK*NXY+IJ, K,  1) = SNCLA(IJ, K)
@@ -1180,11 +1099,13 @@ END IF
       END IF
 
 !     -- Conclude --
+!     IF ( WOHIST ) THEN
+        IF ( TT == TEND .OR. MOD(TT, TOUT) == 0 ) THEN
+!     ELSE
+!       IF ( TT == TEND ) THEN
+!     END IF
 
-!     IF ( TT == TEND ) THEN
-      IF ( TT == TEND .OR. MOD(TT, TOUT) == 0 ) THEN
-
-IF (PARALLEL) THEN
+IF (use_mpi) THEN
 
       IF (SDOFIRST) THEN
       ALLOCATE(NRCVC1(0:NPROCS-1))
@@ -1261,147 +1182,147 @@ IF (PARALLEL) THEN
          NDISP3(IRANK) = ( NXYZ + NXY ) * IRANK
       END DO
 
-      SDOFIRST = .FALSE.
+      SDOFIRST = .false.
       END IF
 
-      CALL MPI_GATHERV( SCLA,    ISIZE2,         MPI_REAL8, &
+      call MPI_GATHERV( SCLA,    ISIZE2,         MPI_REAL8, &
      &                  DUMMY01, NRCVC2, NDISP2, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( SPOM,    ISIZE2,         MPI_REAL8, &
+      call MPI_GATHERV( SPOM,    ISIZE2,         MPI_REAL8, &
      &                  DUMMY02, NRCVC2, NDISP2, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( SCAR,    ISIZE2,         MPI_REAL8, &
+      call MPI_GATHERV( SCAR,    ISIZE2,         MPI_REAL8, &
      &                  DUMMY03, NRCVC2, NDISP2, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( SOPA,    ISIZE2,         MPI_REAL8, &
+      call MPI_GATHERV( SOPA,    ISIZE2,         MPI_REAL8, &
      &                  DUMMY04, NRCVC2, NDISP2, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( SAGE,    ISIZE2,         MPI_REAL8, &
+      call MPI_GATHERV( SAGE,    ISIZE2,         MPI_REAL8, &
      &                  DUMMY05, NRCVC2, NDISP2, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( CNIT,    ISIZE2,         MPI_REAL8, &
+      call MPI_GATHERV( CNIT,    ISIZE2,         MPI_REAL8, &
      &                  DUMMY11, NRCVC2, NDISP2, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( CDIC,    ISIZE2,         MPI_REAL8, &
+      call MPI_GATHERV( CDIC,    ISIZE2,         MPI_REAL8, &
      &                  DUMMY12, NRCVC2, NDISP2, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( CALK,    ISIZE2,         MPI_REAL8, &
+      call MPI_GATHERV( CALK,    ISIZE2,         MPI_REAL8, &
      &                  DUMMY13, NRCVC2, NDISP2, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( CDO2,    ISIZE2,         MPI_REAL8, &
+      call MPI_GATHERV( CDO2,    ISIZE2,         MPI_REAL8, &
      &                  DUMMY14, NRCVC2, NDISP2, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( CSIL,    ISIZE2,         MPI_REAL8, &
+      call MPI_GATHERV( CSIL,    ISIZE2,         MPI_REAL8, &
      &                  DUMMY15, NRCVC2, NDISP2, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( CCO32,   ISIZE2,         MPI_REAL8, &
+      call MPI_GATHERV( CCO32,   ISIZE2,         MPI_REAL8, &
      &                  DUMMY16, NRCVC2, NDISP2, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( SATSIL,  ISIZE2,         MPI_REAL8, &
+      call MPI_GATHERV( SATSIL,  ISIZE2,         MPI_REAL8, &
      &                  DUMMY21, NRCVC2, NDISP2, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( SATCO32, ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( SATCO32, ISIZE1,         MPI_REAL8, &
      &                  DUMMY22, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( W,       ISIZE3,         MPI_REAL8, &
+      call MPI_GATHERV( W,       ISIZE3,         MPI_REAL8, &
      &                  DUMMY23, NRCVC3, NDISP3, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( FICLA,   ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( FICLA,   ISIZE1,         MPI_REAL8, &
      &                  DUMMY31, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( FIPOM,   ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( FIPOM,   ISIZE1,         MPI_REAL8, &
      &                  DUMMY32, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( FICAR,   ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( FICAR,   ISIZE1,         MPI_REAL8, &
      &                  DUMMY33, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( FIOPA,   ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( FIOPA,   ISIZE1,         MPI_REAL8, &
      &                  DUMMY34, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( FOCLA,   ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( FOCLA,   ISIZE1,         MPI_REAL8, &
      &                  DUMMY41, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( FOPOM,   ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( FOPOM,   ISIZE1,         MPI_REAL8, &
      &                  DUMMY42, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( FOCAR,   ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( FOCAR,   ISIZE1,         MPI_REAL8, &
      &                  DUMMY43, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( FOOPA,   ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( FOOPA,   ISIZE1,         MPI_REAL8, &
      &                  DUMMY44, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( BFCLA,   ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( BFCLA,   ISIZE1,         MPI_REAL8, &
      &                  DUMMY51, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( BFPOM,   ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( BFPOM,   ISIZE1,         MPI_REAL8, &
      &                  DUMMY52, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( BFCAR,   ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( BFCAR,   ISIZE1,         MPI_REAL8, &
      &                  DUMMY53, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( BFOPA,   ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( BFOPA,   ISIZE1,         MPI_REAL8, &
      &                  DUMMY54, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
 
       IF ( CALC13 ) THEN
-      CALL MPI_GATHERV( S13POM,  ISIZE2,         MPI_REAL8, &
+      call MPI_GATHERV( S13POM,  ISIZE2,         MPI_REAL8, &
      &                  DUMMY06, NRCVC2, NDISP2, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( S13CAR,  ISIZE2,         MPI_REAL8, &
+      call MPI_GATHERV( S13CAR,  ISIZE2,         MPI_REAL8, &
      &                  DUMMY08, NRCVC2, NDISP2, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( C13DIC,  ISIZE2,         MPI_REAL8, &
+      call MPI_GATHERV( C13DIC,  ISIZE2,         MPI_REAL8, &
      &                  DUMMY17, NRCVC2, NDISP2, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( CDC13,   ISIZE2,         MPI_REAL8, &
+      call MPI_GATHERV( CDC13,   ISIZE2,         MPI_REAL8, &
      &                  DUMMY19, NRCVC2, NDISP2, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( FI13POM, ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( FI13POM, ISIZE1,         MPI_REAL8, &
      &                  DUMMY35, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( FI13CAR, ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( FI13CAR, ISIZE1,         MPI_REAL8, &
      &                  DUMMY37, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( FO13POM, ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( FO13POM, ISIZE1,         MPI_REAL8, &
      &                  DUMMY45, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( FO13CAR, ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( FO13CAR, ISIZE1,         MPI_REAL8, &
      &                  DUMMY47, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( BF13POM, ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( BF13POM, ISIZE1,         MPI_REAL8, &
      &                  DUMMY55, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( BF13CAR, ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( BF13CAR, ISIZE1,         MPI_REAL8, &
      &                  DUMMY57, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
       END IF
 
       IF ( CALC14 ) THEN
-      CALL MPI_GATHERV( S14POM,  ISIZE2,         MPI_REAL8, &
+      call MPI_GATHERV( S14POM,  ISIZE2,         MPI_REAL8, &
      &                  DUMMY07, NRCVC2, NDISP2, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( S14CAR,  ISIZE2,         MPI_REAL8, &
+      call MPI_GATHERV( S14CAR,  ISIZE2,         MPI_REAL8, &
      &                  DUMMY09, NRCVC2, NDISP2, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( C14DIC,  ISIZE2,         MPI_REAL8, &
+      call MPI_GATHERV( C14DIC,  ISIZE2,         MPI_REAL8, &
      &                  DUMMY18, NRCVC2, NDISP2, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( CDC14,   ISIZE2,         MPI_REAL8, &
+      call MPI_GATHERV( CDC14,   ISIZE2,         MPI_REAL8, &
      &                  DUMMY20, NRCVC2, NDISP2, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( FI14POM, ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( FI14POM, ISIZE1,         MPI_REAL8, &
      &                  DUMMY36, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( FO14POM, ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( FO14POM, ISIZE1,         MPI_REAL8, &
      &                  DUMMY46, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( FO14CAR, ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( FO14CAR, ISIZE1,         MPI_REAL8, &
      &                  DUMMY48, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( BF14POM, ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( BF14POM, ISIZE1,         MPI_REAL8, &
      &                  DUMMY56, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      CALL MPI_GATHERV( BF14CAR, ISIZE1,         MPI_REAL8, &
+      call MPI_GATHERV( BF14CAR, ISIZE1,         MPI_REAL8, &
      &                  DUMMY58, NRCVC1, NDISP1, MPI_REAL8, &
      &                  IROOT,   MPI_COMM_WORLD, IERR     )
       END IF
@@ -1496,7 +1417,7 @@ IF (PARALLEL) THEN
          END DO
 
       END IF
-      CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
+      call MPI_BARRIER(MPI_COMM_WORLD, IERR)
 
 ELSE
 
@@ -1607,7 +1528,7 @@ ELSE
 
 END IF
 
-IF (PARALLEL) THEN
+IF (use_mpi) THEN
       IF ( MYRANK .EQ. IROOT ) THEN
 
          DO I = 1, NXDIM
@@ -1628,7 +1549,7 @@ IF (PARALLEL) THEN
 !              VAR3D_VALUES(I, J, K, 1) = SCLAG(IJ, K)
 !          END DO
 !        END DO
-!        CALL WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+!        call WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
 
 !        FILENAME = "spom.nc"
 !        VARNAME = "OrgM"
@@ -1640,7 +1561,7 @@ IF (PARALLEL) THEN
 !              VAR3D_VALUES(I, J, K, 1) = SPOMG(IJ, K)
 !          END DO
 !        END DO
-!        CALL WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+!        call WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
 
 !        FILENAME = "scar.nc"
 !        VARNAME = "CaCO3"
@@ -1652,7 +1573,7 @@ IF (PARALLEL) THEN
 !              VAR3D_VALUES(I, J, K, 1) = SCARG(IJ, K)
 !          END DO
 !        END DO
-!        CALL WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+!        call WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
 
 !        FILENAME = "sopa.nc"
 !        VARNAME = "SiO2"
@@ -1664,7 +1585,7 @@ IF (PARALLEL) THEN
 !              VAR3D_VALUES(I, J, K, 1) = SOPAG(IJ, K)
 !          END DO
 !        END DO
-!        CALL WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+!        call WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
 
 !        FILENAME = "sage.nc"
 !        VARNAME = "Age tracer"
@@ -1676,7 +1597,7 @@ IF (PARALLEL) THEN
 !              VAR3D_VALUES(I, J, K, 1) = SAGEG(IJ, K)
 !          END DO
 !        END DO
-!        CALL WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+!        call WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
 
 !        FILENAME = "cnit.nc"
 !        VARNAME = "Phosphate"
@@ -1688,7 +1609,7 @@ IF (PARALLEL) THEN
 !              VAR3D_VALUES(I, J, K, 1) = CNITG(IJ, K)
 !          END DO
 !        END DO
-!        CALL WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+!        call WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
 
 !        FILENAME = "cdic.nc"
 !        VARNAME = "DIC"
@@ -1700,7 +1621,7 @@ IF (PARALLEL) THEN
 !              VAR3D_VALUES(I, J, K, 1) = CDICG(IJ, K)
 !          END DO
 !        END DO
-!        CALL WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+!        call WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
 
 !        FILENAME = "calk.nc"
 !        VARNAME = "Alkalinity"
@@ -1712,7 +1633,7 @@ IF (PARALLEL) THEN
 !              VAR3D_VALUES(I, J, K, 1) = CALKG(IJ, K)
 !          END DO
 !        END DO
-!        CALL WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+!        call WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
 
 !        FILENAME = "csil.nc"
 !        VARNAME = "Silicate"
@@ -1724,7 +1645,7 @@ IF (PARALLEL) THEN
 !              VAR3D_VALUES(I, J, K, 1) = CSILG(IJ, K)
 !          END DO
 !        END DO
-!        CALL WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+!        call WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
 
 !        FILENAME = "cdo2.nc"
 !        VARNAME = "Oxygen"
@@ -1736,7 +1657,7 @@ IF (PARALLEL) THEN
 !              VAR3D_VALUES(I, J, K, 1) = CDO2G(IJ, K)
 !          END DO
 !        END DO
-!        CALL WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+!        call WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
 
          FILENAME = "ficla.nc"
          VARNAME = "Clay_bottom_flux"
@@ -1747,7 +1668,7 @@ IF (PARALLEL) THEN
              VAR2D_VALUES(I, J, 1) = FICLAG(IJ)
            END DO
          END DO
-         CALL WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+         call WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
 
          FILENAME = "fipom.nc"
          VARNAME = "OrgM_bottom_flux"
@@ -1758,7 +1679,7 @@ IF (PARALLEL) THEN
              VAR2D_VALUES(I, J, 1) = FIPOMG(IJ)
            END DO
          END DO
-         CALL WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+         call WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
 
          FILENAME = "ficar.nc"
          VARNAME = "CaCO3_bottom_flux"
@@ -1769,7 +1690,7 @@ IF (PARALLEL) THEN
              VAR2D_VALUES(I, J, 1) = FICARG(IJ)
            END DO
          END DO
-         CALL WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+         call WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
 
          FILENAME = "fiopa.nc"
          VARNAME = "SiO2_bottom_flux"
@@ -1780,7 +1701,7 @@ IF (PARALLEL) THEN
              VAR2D_VALUES(I, J, 1) = FIOPAG(IJ)
            END DO
          END DO
-         CALL WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+         call WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
 
 !        FILENAME = "focla.nc"
 !        VARNAME = "Clay_diffusion"
@@ -1791,7 +1712,7 @@ IF (PARALLEL) THEN
 !            VAR2D_VALUES(I, J, 1) = FOCLAG(IJ)
 !          END DO
 !        END DO
-!        CALL WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+!        call WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
 
 !        FILENAME = "fopom.nc"
 !        VARNAME = "OrgM_diffusion"
@@ -1802,7 +1723,7 @@ IF (PARALLEL) THEN
 !            VAR2D_VALUES(I, J, 1) = FOPOMG(IJ)
 !          END DO
 !        END DO
-!        CALL WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+!        call WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
 
 !        FILENAME = "focar.nc"
 !        VARNAME = "CaCO3_diffusion"
@@ -1813,7 +1734,7 @@ IF (PARALLEL) THEN
 !            VAR2D_VALUES(I, J, 1) = FOCARG(IJ)
 !          END DO
 !        END DO
-!        CALL WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+!        call WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
 
 !        FILENAME = "foopa.nc"
 !        VARNAME = "SiO2_diffusion"
@@ -1824,7 +1745,7 @@ IF (PARALLEL) THEN
 !            VAR2D_VALUES(I, J, 1) = FOOPAG(IJ)
 !          END DO
 !        END DO
-!        CALL WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+!        call WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
 
 !        FILENAME = "bfcla.nc"
 !        VARNAME = "Clay_burial"
@@ -1835,7 +1756,7 @@ IF (PARALLEL) THEN
 !            VAR2D_VALUES(I, J, 1) = BFCLAG(IJ)
 !          END DO
 !        END DO
-!        CALL WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+!        call WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
 
 !        FILENAME = "bfpom.nc"
 !        VARNAME = "OrgM_burial"
@@ -1846,7 +1767,7 @@ IF (PARALLEL) THEN
 !            VAR2D_VALUES(I, J, 1) = BFPOMG(IJ)
 !          END DO
 !        END DO
-!        CALL WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+!        call WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
 
 !        FILENAME = "bfcar.nc"
 !        VARNAME = "CaCO3_burial"
@@ -1857,7 +1778,7 @@ IF (PARALLEL) THEN
 !            VAR2D_VALUES(I, J, 1) = BFCARG(IJ)
 !          END DO
 !        END DO
-!        CALL WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+!        call WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
 
 !        FILENAME = "bfopa.nc"
 !        VARNAME = "SiO2_burial"
@@ -1868,7 +1789,7 @@ IF (PARALLEL) THEN
 !            VAR2D_VALUES(I, J, 1) = BFOPAG(IJ)
 !          END DO
 !        END DO
-!        CALL WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+!        call WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
 
 !        FILENAME = "w.nc"
 !        VARNAME = "Sediment_rate"
@@ -1881,7 +1802,7 @@ IF (PARALLEL) THEN
 !            END DO
 !          END DO
 !        END DO
-!        CALL WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ+1, YY)
+!        call WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ+1, YY)
 
 !        FILENAME = "cdc13.nc"
 !        VARNAME = "delta_carbon-13"
@@ -1894,7 +1815,7 @@ IF (PARALLEL) THEN
 !            END DO
 !          END DO
 !        END DO
-!        CALL WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+!        call WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
 
 !        FILENAME = "cdc14.nc"
 !        VARNAME = "Delta_carbon-14"
@@ -1907,127 +1828,127 @@ IF (PARALLEL) THEN
 !            END DO
 !          END DO
 !        END DO
-!        CALL WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+!        call WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
 
          CFILE  = 'scla'
          CTITLE = 'Clay'
          CUNIT  = 'g/m^3'
-         CALL FILEOUT(      YY,   SCLAG,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,   SCLAG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,  SDZDIM  )
          CFILE  = 'spom'
          CTITLE = 'OrgM'
          CUNIT  = 'mmol/m^3'
-         CALL FILEOUT(      YY,   SPOMG,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,   SPOMG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,  SDZDIM  )
          CFILE  = 'scar'
          CTITLE = 'CaCO3'
          CUNIT  = 'mmol/m^3'
-         CALL FILEOUT(      YY,   SCARG,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,   SCARG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,  SDZDIM  )
          CFILE  = 'sopa'
          CTITLE = 'SiO2'
          CUNIT  = 'mmol/m^3'
-         CALL FILEOUT(      YY,   SOPAG,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,   SOPAG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,  SDZDIM  )
          CFILE  = 'sage'
          CTITLE = 'Age tracer'
          CUNIT  = 'year'
-         CALL FILEOUT(      YY,   SAGEG,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,   SAGEG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,  SDZDIM  )
          CFILE  = 'cnit'
          CTITLE = 'Phosphate'
          CUNIT  = 'mmol/m^3'
-         CALL FILEOUT(      YY,   CNITG,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,   CNITG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,  SDZDIM  )
          CFILE  = 'cdic'
          CTITLE = 'DIC'
          CUNIT  = 'mmol/m^3'
-         CALL FILEOUT(      YY,   CDICG,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,   CDICG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,  SDZDIM  )
          CFILE  = 'calk'
          CTITLE = 'Alkalinity'
          CUNIT  = 'mmol/m^3'
-         CALL FILEOUT(      YY,   CALKG,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,   CALKG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,  SDZDIM  )
          CFILE  = 'csil'
          CTITLE = 'Silicate'
          CUNIT  = 'mmol/m^3'
-         CALL FILEOUT(      YY,   CSILG,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,   CSILG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,  SDZDIM  )
          CFILE  = 'cdo2'
          CTITLE = 'Oxygen'
          CUNIT  = 'mmol/m^3'
-         CALL FILEOUT(      YY,   CDO2G,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,   CDO2G,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,  SDZDIM  )
          CFILE  = 'ficla'
          CTITLE = 'Clay bottom flux'
          CUNIT  = 'g/m^3*cm/s'
-         CALL FILEOUT(      YY,  FICLAG,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,  FICLAG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,       1  )
          CFILE  = 'fipom'
          CTITLE = 'OrgM bottom flux'
          CUNIT  = 'mMol/m^3*cm/s'
-         CALL FILEOUT(      YY,  FIPOMG,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,  FIPOMG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,       1  )
          CFILE  = 'ficar'
          CTITLE = 'CaCO3 bottom flux'
          CUNIT  = 'mMol/m^3*cm/s'
-         CALL FILEOUT(      YY,  FICARG,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,  FICARG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,       1  )
          CFILE  = 'fiopa'
          CTITLE = 'SiO2 bottom flux'
          CUNIT  = 'mMol/m^3*cm/s'
-         CALL FILEOUT(      YY,  FIOPAG,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,  FIOPAG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,       1  )
          CFILE  = 'fopom'
          CTITLE = 'OrgM diffusion'
          CUNIT  = 'mMol/m^3*cm/s'
-         CALL FILEOUT(      YY,  FOPOMG,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,  FOPOMG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,       1  )
          CFILE  = 'focar'
          CTITLE = 'CaCO3 diffusion'
          CUNIT  = 'mMol/m^3*cm/s'
-         CALL FILEOUT(      YY,  FOCARG,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,  FOCARG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,       1  )
          CFILE  = 'foopa'
          CTITLE = 'SiO2 diffusion'
          CUNIT  = 'mMol/m^3*cm/s'
-         CALL FILEOUT(      YY,  FOOPAG,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,  FOOPAG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,       1  )
          CFILE  = 'bfcla'
          CTITLE = 'Clay burial'
          CUNIT  = 'g/m^3*cm/s'
-         CALL FILEOUT(      YY,  BFCLAG,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,  BFCLAG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,  SDZDIM  )
          CFILE  = 'bfpom'
          CTITLE = 'OrgM burial'
          CUNIT  = 'mMol/m^3*cm/s'
-         CALL FILEOUT(      YY,  BFPOMG,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,  BFPOMG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,       1  )
          CFILE  = 'bfcar'
          CTITLE = 'CaCO3 burial'
          CUNIT  = 'mMol/m^3*cm/s'
-         CALL FILEOUT(      YY,  BFCARG,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,  BFCARG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,       1  )
          CFILE  = 'bfopa'
          CTITLE = 'SiO2 burial'
          CUNIT  = 'mMol/m^3*cm/s'
-         CALL FILEOUT(      YY,  BFOPAG,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,  BFOPAG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,       1  )
          CFILE  = 'w'
          CTITLE = 'Sediment rate'
          CUNIT  = 'cm/s'
-         CALL FILEOUT(      YY,      WG,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,      WG,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM, SDZDIM+1 )
          CFILE  = 'cdc13'
          CTITLE = 'delta carbon-13'
          CUNIT  = 'permil'
-         CALL FILEOUT(      YY,  CDC13G,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,  CDC13G,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,  SDZDIM  )
          CFILE  = 'cdc14'
          CTITLE = 'Delta carbon-14'
          CUNIT  = 'permil'
-         CALL FILEOUT(      YY,  CDC14G,   CFILE,  CTITLE,   CUNIT, &
+         call write_gtoolfile(      YY,  CDC14G,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,  SDZDIM  )
 
          DO K = SKST, SKEN
@@ -2057,166 +1978,15 @@ IF (PARALLEL) THEN
 
       END IF
 
-      CALL MPI_BCAST(SDTX, NXYDIM*SDZDIM*SEDTDM, MPI_REAL8, IROOT, MPI_COMM_WORLD, IERR)
-      CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
+      call MPI_BCAST(SDTX, NXYDIM*SDZDIM*SEDTDM, MPI_REAL8, IROOT, MPI_COMM_WORLD, IERR)
+      call MPI_BARRIER(MPI_COMM_WORLD, IERR)
 
 END IF
 
       END IF ! -- End of Output
 
-
-!     CALL SDFILEOUT(
-!    I     SEDTNM,
-!    I     SDTX )
-
       END DO ! -- End of Time integration
 
-      end subroutine SD
+      end subroutine digda_main
 
-end module module_sdmain
-
-! =====================================================================
-      subroutine RDFILE( FLX, NSIZE, CFILE)
-
-      IMPLICIT NONE
-
-      INTEGER NSIZE
-      REAL*8  FLX(NSIZE)
-      CHARACTER CFILE*128
-      CHARACTER CHEAD(64)*16
-
-      OPEN(11, FILE=CFILE, FORM='UNFORMATTED')
-      READ(11) CHEAD
-      READ(11) FLX
-      CLOSE(11)
-
-      end subroutine RDFILE
-
-! =====================================================================
-      subroutine FILEOUT( &
-     &           YY,    DAT3,  CFILE, CTITLE,  CUNIT, &
-     &           NX,    NY,    NZ     )
-
-      IMPLICIT NONE
-
-      INTEGER I, J, K
-      INTEGER NX, NY, NZ
-      REAL*8  DAT3(NX,NY,NZ)
-      CHARACTER CFILE*128, CTITLE*128, CUNIT*128
-      CHARACTER CHEAD(64)*16
-      CHARACTER YEAR*8
-      INTEGER YY
-
-      DATA CHEAD / 64*'' /
-      WRITE(YEAR, 900) YY
- 900  FORMAT(I8.8)
-
-      CHEAD(1) = '            9010'  !!  1 : IDFM  : I10   :   GTOOL3 version                 : 9010
-      CHEAD(2) = ''                  !!  2 : DSET  : A16   :   Dataset name                   :
-      CHEAD(3) = CTITLE              !!  3 : ITEM  : A16   :   Identification (variable) name :
-      CHEAD(4) = ''                  !!  4 : EDIT1 : A16   :   Edit abbreviation 01           :
-      CHEAD(5) = ''                  !!  5 : EDIT2 : A16   :   Edit abbreviation 02           :
-      CHEAD(6) = ''                  !!  6 : EDIT3 : A16   :   Edit abbreviation 03           :
-      CHEAD(7) = ''                  !!  7 : EDIT4 : A16   :   Edit abbreviation 04           :
-      CHEAD(8) = ''                  !!  8 : EDIT5 : A16   :   Edit abbreviation 05           :
-      CHEAD(9) = ''                  !!  9 : EDIT6 : A16   :   Edit abbreviation 06           :
-      CHEAD(10) = ''                 !! 10 : EDIT7 : A16   :   Edit abbreviation 07           :
-      CHEAD(11) = ''                 !! 11 : EDIT8 : A16   :   Edit abbreviation 08           :
-      CHEAD(12) = ''                 !! 12 : FNUM  : I10   :   File number                    : 0
-      CHEAD(13) = ''                 !! 13 : DNUM  : I10   :   Data number                    : 0
-      CHEAD(14) = CTITLE             !! 14 : TITL1 : A16   :   Title 1                        :
-      CHEAD(15) = ''                 !! 15 : TITL2 : A16   :   Title 2                        :
-      CHEAD(16) = CUNIT              !! 16 : UNIT  : A16   :   Unit                           :
-      CHEAD(17) = ''                 !! 17 : ETTL1 : A16   :   Edit title 01                  :
-      CHEAD(18) = ''                 !! 18 : ETTL2 : A16   :   Edit title 02                  :
-      CHEAD(19) = ''                 !! 19 : ETTL3 : A16   :   Edit title 03                  :
-      CHEAD(20) = ''                 !! 20 : ETTL4 : A16   :   Edit title 04                  :
-      CHEAD(21) = ''                 !! 21 : ETTL5 : A16   :   Edit title 05                  :
-      CHEAD(22) = ''                 !! 22 : ETTL6 : A16   :   Edit title 06                  :
-      CHEAD(23) = ''                 !! 23 : ETTL7 : A16   :   Edit title 07                  :
-      CHEAD(24) = ''                 !! 24 : ETTL8 : A16   :   Edit title 08                  :
-      CHEAD(25) = ''                 !! 25 : TIME  : I10   :   Total time                     : 0
-      CHEAD(26) = ''                 !! 26 : UTIM  : A16   :   Time unit                      :
-!     CHEAD(27) = ''                 !! 27 : DATE  : A16   :   Time (yyyymmddhhmmss)          :
-      CHEAD(28) = ''                 !! 28 : TDUR  : I10   :   Data representative time       : 0
-!     CHEAD(29) = ''                 !! 29 : AITM1 : A16   :   Axis grid identification name  :
-!     CHEAD(30) = ''                 !! 30 : ASTR1 : I10   :   Start of axis grid number      : 1
-!     CHEAD(31) = ''                 !! 31 : AEND1 : I10   :   End of axis grid number        :
-!     CHEAD(32) = ''                 !! 32 : AITM2 : A16   :   Axis grid identification name  :
-!     CHEAD(33) = ''                 !! 33 : ASTR2 : I10   :   Start of axis grid number      : 1
-!     CHEAD(34) = ''                 !! 34 : AEND2 : I10   :   End of axis grid number        :
-!     CHEAD(35) = ''                 !! 35 : AITM3 : A16   :   Axis grid identification name  :
-!     CHEAD(36) = ''                 !! 36 : ASTR3 : I10   :   Start of axis grid number      : 1
-!     CHEAD(37) = ''                 !! 37 : AEND3 : I10   :   End of axis grid number        :
-!     CHEAD(38) = ''                 !! 38 : DFMT  : A16   :   Data format                    : UR4
-!     CHEAD(39) = ''                 !! 39 : MISS  : E15.7 :   Missing value                  : -999.
-!     CHEAD(40) = ''                 !! 40 : DMIN  : E15.7 :   Range (minimum)                : -999.
-!     CHEAD(41) = ''                 !! 41 : DMAX  : E15.7 :   Range (maximum)                : -999.
-!     CHEAD(42) = ''                 !! 42 : DIVS  : E15.7 :   Interval (small)               : -999.
-!     CHEAD(43) = ''                 !! 43 : DIVL  : E15.7 :   Interval (Large)               : -999.
-!     CHEAD(44) = ''                 !! 44 : STYP  : I10   :   Scaling type                   : 1
-      CHEAD(45) = ''                 !! 45 : COPTN : A16   :   Option (character)             :
-      CHEAD(46) = ''                 !! 46 : IOPTN : I16   :   Option (integer)               : 0
-      CHEAD(47) = ''                 !! 47 : ROPTN : E16.7 :   Option (real)                  : 0
-      CHEAD(48) = ''                 !! 48 : DATE1 : I16   :   Time (auxiliary)               :
-      CHEAD(49) = ''                 !! 49 : DATE2 : A16   :   Time unit (auxiliary)          :
-!     CHEAD(50) = ''                 !! 50 : MEMO1 : A16   :   Memo O1                        :
-      CHEAD(51) = ''                 !! 51 : MEMO2 : A16   :   Memo O2                        :
-      CHEAD(52) = ''                 !! 52 : MEMO3 : A16   :   Memo O3                        :
-      CHEAD(53) = ''                 !! 53 : MEMO4 : A16   :   Memo O4                        :
-      CHEAD(54) = ''                 !! 54 : MEMO5 : A16   :   Memo O5                        :
-      CHEAD(55) = ''                 !! 55 : MEMO6 : A16   :   Memo O6                        :
-      CHEAD(56) = ''                 !! 56 : MEMO7 : A16   :   Memo O7                        :
-      CHEAD(57) = ''                 !! 57 : MEMO8 : A16   :   Memo O8                        :
-      CHEAD(58) = ''                 !! 58 : MEMO9 : A16   :   Memo O9                        :
-      CHEAD(59) = ''                 !! 59 : MEM1O : A16   :   Memo 1O                        :
-      CHEAD(60) = ''                 !! 60 : CDATE : A16   :   Data creation date             :
-      CHEAD(61) = ''                 !! 61 : CSIGN : A16   :   Data creator                   :
-      CHEAD(62) = ''                 !! 62 : MDATE : A16   :   Data change date               :
-      CHEAD(63) = ''                 !! 63 : MSIGN : A16   :   Data modified by               :
-      CHEAD(64) = ''                 !! 64 : SIZE  : I10   :   Array size                     : 0
-      WRITE(CHEAD(39), '(E15.7)') -999.0
-      WRITE(CHEAD(40), '(E15.7)') -999.0
-      WRITE(CHEAD(41), '(E15.7)') -999.0
-      WRITE(CHEAD(42), '(E15.7)') -999.0
-      WRITE(CHEAD(43), '(E15.7)') -999.0
-      WRITE(CHEAD(44), '(I10)') 1
-      WRITE(CHEAD(29), '(A16)') 'TX'
-      WRITE(CHEAD(32), '(A16)') 'TY'
-      WRITE(CHEAD(35), '(A16)') 'TZ'
-      WRITE(CHEAD(30), '(I10)') 1
-      WRITE(CHEAD(31), '(I10)') NX
-      WRITE(CHEAD(33), '(I10)') 1
-      WRITE(CHEAD(34), '(I10)') NY
-      WRITE(CHEAD(36), '(I10)') 1
-      WRITE(CHEAD(37), '(I10)') NZ
-      WRITE(CHEAD(64), '(I10)') NX*NY*NZ
-      CHEAD(27) = '09990101 000000 '
-      CHEAD(50) = '  09990101000000'
-      CHEAD(27) = YEAR//' 000000 '
-      CHEAD(50) = '  '//YEAR//'000000'
-      CHEAD(38) = 'UR4'
-
-      OPEN(13, FILE=CFILE, FORM='UNFORMATTED', ACCESS='APPEND')
-      WRITE(13) CHEAD
-      WRITE(13) (((REAL(DAT3(I,J,K)),I=1,NX),J=1,NY),K=1,NZ)
-      CLOSE(13)
-
-      end subroutine FILEOUT
-
-      subroutine PARA_RANGE( N1, N2, NPR, IRA, IST, IEN )
-
-      integer, intent(in) :: N1, N2
-      integer, intent(in) :: NPR, IRA
-      integer, intent(out) :: IST, IEN
-      integer :: IWORK1, IWORK2
-
-      IWORK1 = ( N2 - N1 + 1 ) / NPR
-      IWORK2 = MOD( N2 - N1 + 1, NPR )
-      IST = IRA*IWORK1 + N1 + MIN( IRA, IWORK2 )
-      IEN = IST + IWORK1 - 1
-      IF ( IWORK2 > IRA ) THEN
-        IEN = IEN + 1
-      END IF
-
-      end subroutine PARA_RANGE
+end module module_digda_main

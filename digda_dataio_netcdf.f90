@@ -1,6 +1,6 @@
-program digda_datadigda_dataio_gtool
+program digda_dataio_netcdf
   use netcdf_utilities
-  use module_sdmain
+  use module_digda_main
   implicit none
 
   character(len=100) :: filename, varname, varunit
@@ -198,7 +198,7 @@ program digda_datadigda_dataio_gtool
     end do
   end do
 
-  call sd( &
+  call digda_main( &
  &     bdep, &
  &     bfrc, &
  &     sdtx )
@@ -367,5 +367,4 @@ program digda_datadigda_dataio_gtool
   ! Finalize MPI
   call MPI_FINALIZE(ierr)
 
-
-end program digda_datadigda_dataio_gtool
+end program digda_dataio_netcdf

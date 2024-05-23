@@ -1,33 +1,33 @@
 !######################################################################
 module module_digda_config
-    implicit none
+  implicit none
 
-    ! Parallel digda_configuration
-    logical, parameter :: PARALLEL = .TRUE.
+! ! Parallel digda_configuration
+! logical, parameter :: use_mpi = .true.
 
-    ! Grid digda_configuration
-    logical, parameter :: ONE_DIM = .FALSE.
-    logical, parameter :: Grid_128x64 = .FALSE.
-    logical, parameter :: Grid_256x192 = .TRUE.
-    logical, parameter :: Grid_360x180 = .FALSE.
-    logical, parameter :: Grid_2160x1080 = .FALSE.
+! ! Grid digda_configuration
+! logical, parameter :: grid_one_dim   = .false.
+! logical, parameter :: grid_128x64    = .false.
+! logical, parameter :: grid_256x192   = .true.
+! logical, parameter :: grid_360x180   = .false.
+! logical, parameter :: grid_2160x1080 = .false.
 
-    ! Vertical grid digda_configuration
-    logical, parameter :: ZGRID_CONSTANT = .FALSE.
-    logical, parameter :: ZGRID_ARCHER = .FALSE.
-    logical, parameter :: ZGRID_HEINZE = .TRUE.
+! ! Vertical grid digda_configuration
+! logical, parameter :: zgrid_constant = .false.
+! logical, parameter :: zgrid_archer   = .false.
+! logical, parameter :: zgrid_heinze   = .true.
 
-    ! Time step digda_configuration
-    logical, parameter :: Time_Step_1y = .FALSE.
-    logical, parameter :: Time_Step_1_2y = .FALSE.
-    logical, parameter :: Time_Step_50d = .FALSE.
-    logical, parameter :: Time_Step_30d = .FALSE.
-    logical, parameter :: Time_Step_10d = .FALSE.
-    logical, parameter :: Time_Step_5d = .FALSE.
-    logical, parameter :: Time_Step_2d = .FALSE.
-    logical, parameter :: Time_Step_1d = .TRUE.
-    logical, parameter :: Time_Step_1_10d = .FALSE.
-    logical, parameter :: Time_Step_1_25d = .FALSE.
-    logical, parameter :: Time_Step_1_50d = .FALSE.
+! ! Time step digda_configuration
+! logical, parameter :: time_step_1y    = .false.
+! logical, parameter :: time_step_1_2y  = .false.
+! logical, parameter :: time_step_50d   = .false.
+! logical, parameter :: time_step_30d   = .false.
+! logical, parameter :: time_step_10d   = .false.
+! logical, parameter :: time_step_5d    = .false.
+! logical, parameter :: time_step_2d    = .false.
+! logical, parameter :: time_step_1d    = .true.
+! logical, parameter :: time_step_1_10d = .false.
+! logical, parameter :: time_step_1_25d = .false.
+! logical, parameter :: time_step_1_50d = .false.
 
 end module module_digda_config

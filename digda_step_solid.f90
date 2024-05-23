@@ -12,37 +12,33 @@
 module globals_digda_step_solid
   use module_zcfile
   use module_digda_grid
-  use module_sdtime
+  use module_digda_timestep
   implicit none
 
-      double precision :: SI(NXY, SDZDIM+1)
+  double precision :: SI(NXY, SDZDIM+1)
 
-      double precision :: C0(NXY, SDZDIM+1)
-      double precision :: C1(NXY, SDZDIM+1)
-      double precision :: C2(NXY, SDZDIM+1)
-      double precision :: FLX(NXY, SDZDIM+1), DFLX(NXY, SDZDIM+1)
+  double precision :: C0(NXY, SDZDIM+1)
+  double precision :: C1(NXY, SDZDIM+1)
+  double precision :: C2(NXY, SDZDIM+1)
+  double precision :: FLX(NXY, SDZDIM+1), DFLX(NXY, SDZDIM+1)
 
-      double precision :: EA(SDZDIM), EB(SDZDIM), EC(SDZDIM)
-      double precision :: EAL(SDZDIM), EBE(SDZDIM), EGA(SDZDIM), EEP(NXY, SDZDIM)
-      double precision :: ED(NXY, SDZDIM),  EX(NXY, SDZDIM)
-      double precision :: FLGAM(SDZDIM+1),  FLDEL(SDZDIM+1)
-      double precision :: FLTMP
+  double precision :: EA(SDZDIM), EB(SDZDIM), EC(SDZDIM)
+  double precision :: EAL(SDZDIM), EBE(SDZDIM), EGA(SDZDIM), EEP(NXY, SDZDIM)
+  double precision :: ED(NXY, SDZDIM),  EX(NXY, SDZDIM)
+  double precision :: FLGAM(SDZDIM+1),  FLDEL(SDZDIM+1)
+  double precision :: FLTMP
 
-      integer IUNIT
-      data    IUNIT / 1 /
-      double precision ::  AUNIT
-      save    AUNIT
+  integer :: IUNIT = 1
+  double precision ::  AUNIT
 
-      logical SADU, SADQ, SADQF, SDIC, SDII
-      save SADU, SADQ, SADQF, SDIC, SDII
-      namelist /NMSDSO/ SADU, SADQ, SADQF, SDIC, SDII
-!     -- Advection choice --
-      data SADU  / .FALSE. / !! Upwind ?
-      data SADQ  / .TRUE.  / !! Quickest ?
-      data SADQF / .TRUE.  / !!   + Flux limiter ?
-!     -- Diffusion choice --
-      data SDIC  / .FALSE. / !! Crank nicolson ?
-      data SDII  / .TRUE.  / !! Implicit ?
+  ! Advection choice
+  logical :: SADU = .false. !! Upwind ?
+  logical :: SADQ = .true.  !! Quickest ?
+  logical :: SADQF = .true. !!   + Flux limiter ?
+  ! Diffusion choice
+  logical :: SDIC = .false. !! Crank nicolson ?
+  logical :: SDII = .true.  !! Implicit ?
+  namelist /NMSDSO/ SADU, SADQ, SADQF, SDIC, SDII
 
 end module globals_digda_step_solid
 
@@ -53,37 +49,37 @@ module module_digda_step_solid
   implicit none
 contains
 
-      subroutine SDSOLIDSET
+  subroutine set_digda_step_solid
 
-      integer IJ, K
+    integer :: IJ, K
 
-      WRITE(NFSTDO, *) '*** Carbon : SDSOLIDSET ***'
-      REWIND(NFPARM)
-      READ (NFPARM, NMSDSO, END=99)
+    WRITE(NFSTDO, *) '*** Sediment : set_digda_step_solid ***'
+    REWIND(NFPARM)
+    READ (NFPARM, NMSDSO, END=99)
 99 continue
-      WRITE(NFSTDO, NMSDSO)
+    WRITE(NFSTDO, NMSDSO)
 
-      IF (IUNIT.EQ.1) THEN
-         AUNIT = 1.0D0 / 8.64D4 / 365.0D0
-      ELSEIF (IUNIT.EQ.2) THEN
-         AUNIT = 1.0D0 / 8.64D4 / 30.0D0
-      ELSEIF (IUNIT.EQ.3) THEN
-         AUNIT = 1.0D0 / 8.64D4
-      ELSEIF (IUNIT.EQ.4) THEN
-         AUNIT = 1.0D0 / 3600.0D0
-      ELSEIF (IUNIT.EQ.5) THEN
-         AUNIT = 1.0D0 / 60.0D0
-      ELSEIF (IUNIT.EQ.6) THEN
-         AUNIT = 1.0D0
-      ELSE
-         AUNIT = 0.0D0
-      END IF
+    IF (IUNIT.EQ.1) THEN
+      AUNIT = 1.0D0 / 8.64D4 / 365.0D0
+    ELSE IF (IUNIT.EQ.2) THEN
+      AUNIT = 1.0D0 / 8.64D4 / 30.0D0
+    ELSE IF (IUNIT.EQ.3) THEN
+      AUNIT = 1.0D0 / 8.64D4
+    ELSE IF (IUNIT.EQ.4) THEN
+      AUNIT = 1.0D0 / 3600.0D0
+    ELSE IF (IUNIT.EQ.5) THEN
+      AUNIT = 1.0D0 / 60.0D0
+    ELSE IF (IUNIT.EQ.6) THEN
+      AUNIT = 1.0D0
+    ELSE
+      AUNIT = 0.0D0
+    END IF
 
-      end subroutine SDSOLIDSET
+  end subroutine set_digda_step_solid
 
 ! =====================================================================
 
-      subroutine SOLID( &
+      subroutine calc_step_solid( &
      &      FF, RST, W, PHI, PHII, DBI, S, &
      &      SN, BFZ )
 
@@ -97,7 +93,7 @@ contains
       double precision, intent(out) :: SN(NXY,SDZDIM)
       double precision, intent(out) :: BFZ(NXY)
 
-      integer IJ, K
+      integer :: IJ, K
 
       DO IJ = IJTSTR, IJTEND
          FLX(IJ, SKST) = FF(IJ)
@@ -140,7 +136,7 @@ contains
             C2(IJ, K) = ( 1.0D0 / ( DLZI(K-1) + DLZI(K) ) ) &
      &         * ( ( ( S(IJ, K-2) - S(IJ, K-1) ) / DLZI(K-1) ) &
      &           - ( ( S(IJ, K-1) - S(IJ, K)   ) / DLZI(K)   ) )
-         ELSEIF ( W(IJ, K) < 0.0D0 ) THEN
+         ELSE IF ( W(IJ, K) < 0.0D0 ) THEN
             C2(IJ, K) = ( 1.0D0 / ( DLZI(K) + DLZI(K+1) ) ) &
      &         * ( ( ( S(IJ, K-1) - S(IJ, K) ) / DLZI(K)   ) &
      &           - ( ( S(IJ, K) - S(IJ, K+1) ) / DLZI(K+1) ) )
@@ -158,7 +154,7 @@ contains
          C2(IJ, SKST+1) = ( 1.0D0 / ( DLZI(SKST) + DLZI(SKST+1) ) ) &
      &      * ( ( ( 0.0D0       - S(IJ, SKST)   ) / DLZI(SKST) ) &
      &        - ( ( S(IJ, SKST) - S(IJ, SKST+1) ) / DLZI(SKST+1) ) )
-      ELSEIF ( W(IJ, SKST+1) < 0.0D0 ) THEN
+      ELSE IF ( W(IJ, SKST+1) < 0.0D0 ) THEN
          C2(IJ, SKST+1) = ( 1.0D0 / ( DLZI(SKST+1) + DLZI(SKST+2) ) ) &
      &      * ( ( ( S(IJ, SKST)   - S(IJ, SKST+1) ) / DLZI(SKST+1) ) &
      &        - ( ( S(IJ, SKST+1) - S(IJ, SKST+2) ) / DLZI(SKST+2) ) )
@@ -179,7 +175,7 @@ contains
          C2(IJ, SKEN) = ( 1.0D0 / ( DLZI(SKEN-1) + DLZI(SKEN) ) ) &
      &      * ( ( ( S(IJ, SKEN-2) - S(IJ, SKEN-1) ) / DLZI(SKEN-1) ) &
      &        - ( ( S(IJ, SKEN-1) - S(IJ, SKEN)   ) / DLZI(SKEN)   ) )
-      ELSEIF ( W(IJ, SKEN) < 0.0D0 ) THEN
+      ELSE IF ( W(IJ, SKEN) < 0.0D0 ) THEN
          C2(IJ, SKEN) = ( 1.0D0 / ( DLZI(SKEN) + DLZI(SKEN+1) ) ) &
      &      * ( ( ( S(IJ, SKEN-1) - S(IJ, SKEN) ) / DLZI(SKEN)   ) &
      &        - ( ( S(IJ, SKEN)   - 0.0D0       ) / DLZI(SKEN+1) ) )
@@ -199,7 +195,7 @@ contains
          C2(IJ, SKEN+1) = ( 1.0D0 / ( DLZI(SKEN) + DLZI(SKEN+1) ) ) &
      &      * ( ( ( S(IJ, SKEN-1) - S(IJ, SKEN) ) / DLZI(SKEN)   ) &
      &        - ( ( S(IJ, SKEN)   - S(IJ, SKEN) ) / DLZI(SKEN+1) ) )
-      ELSEIF ( W(IJ, SKEN+1) < 0.0D0 ) THEN
+      ELSE IF ( W(IJ, SKEN+1) < 0.0D0 ) THEN
          C2(IJ, SKEN) = ( 1.0D0 / ( DLZI(SKEN+1) + DLZI(SKEN+1) ) ) &
      &      * ( ( ( S(IJ, SKEN) - 0.0D0 ) / DLZI(SKEN+1) ) &
      &        - ( ( 0.0D0       - 0.0D0 ) / DLZI(SKEN+1) ) )
@@ -212,7 +208,7 @@ contains
      &                  / ( 2.0D0 * DLZI(SKEN+1) ) ) &
      &      - ( ( ( DLZ(SKEN) * DLZ(SKEN) ) / 4.0D0 ) &
      &          * C2(IJ, SKEN+1) )
-      ELSEIF ( W(IJ, SKEN+1) < 0.0D0 ) THEN
+      ELSE IF ( W(IJ, SKEN+1) < 0.0D0 ) THEN
          C1(IJ, SKEN+1) = ( ( 0.0D0 - S(IJ, SKEN) ) &
      &                    / DLZI(SKEN+1) )
          C0(IJ, SKEN+1) = ( ( DLZ(SKEN) * S(IJ, SKEN) &
@@ -258,7 +254,7 @@ contains
      &      MAX( SI(IJ, SKST+1), MAX( FLTMP, S(IJ, SKST+1) ) )
          SI(IJ, SKST+1) = MIN( SI(IJ, SKST+1), S(IJ, SKST) )
       END IF
-      ELSEIF ( W(IJ, SKST+1) < 0.0D0 ) THEN
+      ELSE IF ( W(IJ, SKST+1) < 0.0D0 ) THEN
       FLDEL(SKST+1) = S(IJ, SKST) - S(IJ, SKST+2)
       FLGAM(SKST+1) = ( ( S(IJ, SKST)   - S(IJ, SKST+1) ) &
      &                  / DLZI(SKST+1) ) &
@@ -304,7 +300,7 @@ contains
      &         MAX( SI(IJ, K), MAX( FLTMP, S(IJ, K) ) )
             SI(IJ, K) = MIN( SI(IJ, K), S(IJ, K-1) )
          END IF
-      ELSEIF ( W(IJ, K) < 0.0D0 ) THEN
+      ELSE IF ( W(IJ, K) < 0.0D0 ) THEN
          FLDEL(K) = S(IJ, K-1) - S(IJ, K+1)
          FLGAM(K) = ( ( S(IJ, K-1) - S(IJ, K)   ) / DLZI(K)   ) &
      &            - ( ( S(IJ, K)   - S(IJ, K+1) ) / DLZI(K+1) )
@@ -347,7 +343,7 @@ contains
      &      MAX( SI(IJ, SKEN), MAX( FLTMP, S(IJ, SKEN) ) )
          SI(IJ, SKEN) = MIN( SI(IJ, SKEN), S(IJ, SKEN-1) )
       END IF
-      ELSEIF ( W(IJ, SKEN) < 0.0D0 ) THEN
+      ELSE IF ( W(IJ, SKEN) < 0.0D0 ) THEN
       FLDEL(SKEN) = S(IJ, SKEN-1) - 0.0D0
       FLGAM(SKEN) = ( ( S(IJ, SKEN-1) - S(IJ, SKEN) ) / DLZI(SKEN)   ) &
      &            - ( ( S(IJ, SKEN)   - 0.0D0       ) / DLZI(SKEN+1) )
@@ -389,7 +385,7 @@ contains
      &      MAX( SI(IJ, SKEN+1), MAX( FLTMP, S(IJ, SKEN) ) )
          SI(IJ, SKEN+1) = MIN( SI(IJ, SKEN+1), S(IJ, SKEN) )
       END IF
-      ELSEIF ( W(IJ, SKEN+1) < 0.0D0 ) THEN
+      ELSE IF ( W(IJ, SKEN+1) < 0.0D0 ) THEN
       FLDEL(SKEN+1) = S(IJ, SKEN) - 0.0D0
       FLGAM(SKEN+1) = ( ( S(IJ, SKEN) - 0.0D0 ) / DLZI(SKEN+1) ) &
      &              - ( ( 0.0D0       - 0.0D0 ) / DLZI(SKEN+1) )
@@ -473,7 +469,7 @@ contains
      &      - RST(IJ, SKEN)
       END DO
 
-      CALL STRIDAG( EA, EB, EC, ED, EX )
+      call calc_tridiagonal_solid( EA, EB, EC, ED, EX )
 
       END IF
 
@@ -511,7 +507,7 @@ contains
       END DO
       END DO
 
-      CALL STRIDAG( EA, EB, EC, ED, EX )
+      call calc_tridiagonal_solid( EA, EB, EC, ED, EX )
 
       END IF
 
@@ -528,11 +524,11 @@ contains
          BFZ(IJ) = FLX(IJ, SKEN+1)
       END DO
 
-      end subroutine SOLID
+      end subroutine calc_step_solid
 
 ! =====================================================================
 
-      subroutine SOLID_CLAY( &
+      subroutine calc_step_solid_CLAY( &
      &      FF, RST, W, PHI, PHII, DBI, S, RHOCLA, &
      &      SN, BFZ )
 
@@ -547,7 +543,7 @@ contains
       double precision, intent(out) :: SN(NXY,SDZDIM)
       double precision, intent(out) :: BFZ(NXY)
 
-      integer IJ, K
+      integer :: IJ, K
 
       DO IJ = IJTSTR, IJTEND
          FLX(IJ, SKST) = FF(IJ)
@@ -590,7 +586,7 @@ contains
             C2(IJ, K) = ( 1.0D0 / ( DLZI(K-1) + DLZI(K) ) ) &
      &         * ( ( ( S(IJ, K-2) - S(IJ, K-1) ) / DLZI(K-1) ) &
      &           - ( ( S(IJ, K-1) - S(IJ, K)   ) / DLZI(K)   ) )
-         ELSEIF ( W(IJ, K) < 0.0D0 ) THEN
+         ELSE IF ( W(IJ, K) < 0.0D0 ) THEN
             C2(IJ, K) = ( 1.0D0 / ( DLZI(K) + DLZI(K+1) ) ) &
      &         * ( ( ( S(IJ, K-1) - S(IJ, K) ) / DLZI(K)   ) &
      &           - ( ( S(IJ, K) - S(IJ, K+1) ) / DLZI(K+1) ) )
@@ -608,7 +604,7 @@ contains
          C2(IJ, SKST+1) = ( 1.0D0 / ( DLZI(SKST) + DLZI(SKST+1) ) ) &
      &      * ( ( ( 0.0D0       - S(IJ, SKST)   ) / DLZI(SKST) ) &
      &        - ( ( S(IJ, SKST) - S(IJ, SKST+1) ) / DLZI(SKST+1) ) )
-      ELSEIF ( W(IJ, SKST+1) < 0.0D0 ) THEN
+      ELSE IF ( W(IJ, SKST+1) < 0.0D0 ) THEN
          C2(IJ, SKST+1) = ( 1.0D0 / ( DLZI(SKST+1) + DLZI(SKST+2) ) ) &
      &      * ( ( ( S(IJ, SKST)   - S(IJ, SKST+1) ) / DLZI(SKST+1) ) &
      &        - ( ( S(IJ, SKST+1) - S(IJ, SKST+2) ) / DLZI(SKST+2) ) )
@@ -629,7 +625,7 @@ contains
          C2(IJ, SKEN) = ( 1.0D0 / ( DLZI(SKEN-1) + DLZI(SKEN) ) ) &
      &      * ( ( ( S(IJ, SKEN-2) - S(IJ, SKEN-1) ) / DLZI(SKEN-1) ) &
      &        - ( ( S(IJ, SKEN-1) - S(IJ, SKEN)   ) / DLZI(SKEN)   ) )
-      ELSEIF ( W(IJ, SKEN) < 0.0D0 ) THEN
+      ELSE IF ( W(IJ, SKEN) < 0.0D0 ) THEN
          C2(IJ, SKEN) = ( 1.0D0 / ( DLZI(SKEN) + DLZI(SKEN+1) ) ) &
      &      * ( ( ( S(IJ, SKEN-1) - S(IJ, SKEN) ) / DLZI(SKEN)   ) &
      &        - ( ( S(IJ, SKEN)   - 1.0D+6 * RHOCLA ) / DLZI(SKEN+1) ) )
@@ -649,7 +645,7 @@ contains
          C2(IJ, SKEN+1) = ( 1.0D0 / ( DLZI(SKEN) + DLZI(SKEN+1) ) ) &
      &      * ( ( ( S(IJ, SKEN-1) - S(IJ, SKEN) ) / DLZI(SKEN)   ) &
      &        - ( ( S(IJ, SKEN)   - S(IJ, SKEN) ) / DLZI(SKEN+1) ) )
-      ELSEIF ( W(IJ, SKEN+1) < 0.0D0 ) THEN
+      ELSE IF ( W(IJ, SKEN+1) < 0.0D0 ) THEN
          C2(IJ, SKEN) = ( 1.0D0 / ( DLZI(SKEN+1) + DLZI(SKEN+1) ) ) &
      &      * ( ( ( S(IJ, SKEN) - 1.0D+6 * RHOCLA ) / DLZI(SKEN+1) ) &
      &    - ( ( 1.0D+6 * RHOCLA - 1.0D+6 * RHOCLA ) / DLZI(SKEN+1) ) )
@@ -662,7 +658,7 @@ contains
      &                  / ( 2.0D0 * DLZI(SKEN+1) ) ) &
      &      - ( ( ( DLZ(SKEN) * DLZ(SKEN) ) / 4.0D0 ) &
      &          * C2(IJ, SKEN+1) )
-      ELSEIF ( W(IJ, SKEN+1) < 0.0D0 ) THEN
+      ELSE IF ( W(IJ, SKEN+1) < 0.0D0 ) THEN
          C1(IJ, SKEN+1) = ( ( 1.0D+6 * RHOCLA - S(IJ, SKEN) ) &
      &                    / DLZI(SKEN+1) )
          C0(IJ, SKEN+1) = ( ( DLZ(SKEN) * S(IJ, SKEN) &
@@ -708,7 +704,7 @@ contains
      &      MAX( SI(IJ, SKST+1), MAX( FLTMP, S(IJ, SKST+1) ) )
          SI(IJ, SKST+1) = MIN( SI(IJ, SKST+1), S(IJ, SKST) )
       END IF
-      ELSEIF ( W(IJ, SKST+1) < 0.0D0 ) THEN
+      ELSE IF ( W(IJ, SKST+1) < 0.0D0 ) THEN
       FLDEL(SKST+1) = S(IJ, SKST) - S(IJ, SKST+2)
       FLGAM(SKST+1) = ( ( S(IJ, SKST)   - S(IJ, SKST+1) ) &
      &                  / DLZI(SKST+1) ) &
@@ -754,7 +750,7 @@ contains
      &         MAX( SI(IJ, K), MAX( FLTMP, S(IJ, K) ) )
             SI(IJ, K) = MIN( SI(IJ, K), S(IJ, K-1) )
          END IF
-      ELSEIF ( W(IJ, K) < 0.0D0 ) THEN
+      ELSE IF ( W(IJ, K) < 0.0D0 ) THEN
          FLDEL(K) = S(IJ, K-1) - S(IJ, K+1)
          FLGAM(K) = ( ( S(IJ, K-1) - S(IJ, K)   ) / DLZI(K)   ) &
      &            - ( ( S(IJ, K)   - S(IJ, K+1) ) / DLZI(K+1) )
@@ -797,7 +793,7 @@ contains
      &      MAX( SI(IJ, SKEN), MAX( FLTMP, S(IJ, SKEN) ) )
          SI(IJ, SKEN) = MIN( SI(IJ, SKEN), S(IJ, SKEN-1) )
       END IF
-      ELSEIF ( W(IJ, SKEN) < 0.0D0 ) THEN
+      ELSE IF ( W(IJ, SKEN) < 0.0D0 ) THEN
       FLDEL(SKEN) = S(IJ, SKEN-1) - 1.0D+6 * RHOCLA
       FLGAM(SKEN) = ( ( S(IJ, SKEN-1) - S(IJ, SKEN) ) / DLZI(SKEN)   ) &
      &            - ( ( S(IJ, SKEN) - 1.0D+6 * RHOCLA ) / DLZI(SKEN+1) )
@@ -839,7 +835,7 @@ contains
      &      MAX( SI(IJ, SKEN+1), MAX( FLTMP, S(IJ, SKEN) ) )
          SI(IJ, SKEN+1) = MIN( SI(IJ, SKEN+1), S(IJ, SKEN) )
       END IF
-      ELSEIF ( W(IJ, SKEN+1) < 0.0D0 ) THEN
+      ELSE IF ( W(IJ, SKEN+1) < 0.0D0 ) THEN
       FLDEL(SKEN+1) = S(IJ, SKEN) - 1.0D+6 * RHOCLA
       FLGAM(SKEN+1) &
      &= ( ( S(IJ, SKEN)     - 1.0D+6 * RHOCLA ) / DLZI(SKEN+1) ) &
@@ -926,7 +922,7 @@ contains
      &      - RST(IJ, SKEN)
       END DO
 
-      CALL STRIDAG( EA, EB, EC, ED, EX )
+      call calc_tridiagonal_solid( EA, EB, EC, ED, EX )
 
       END IF
 
@@ -964,7 +960,7 @@ contains
       END DO
       END DO
 
-      CALL STRIDAG( EA, EB, EC, ED, EX )
+      call calc_tridiagonal_solid( EA, EB, EC, ED, EX )
 
       END IF
 
@@ -981,10 +977,10 @@ contains
          BFZ(IJ) = FLX(IJ, SKEN+1)
       END DO
 
-      end subroutine SOLID_CLAY
+      end subroutine calc_step_solid_CLAY
 
 ! =====================================================================
-      subroutine AGE( &
+      subroutine calc_step_solid_age( &
      &      FF, W, PHI, PHII, DBI, S, &
      &      SN )
 
@@ -996,7 +992,7 @@ contains
       double precision, intent(in)  :: S(NXY,SDZDIM)
       double precision, intent(out) :: SN(NXY,SDZDIM)
 
-      integer IJ, K
+      integer :: IJ, K
 
       DO IJ = IJTSTR, IJTEND
          FLX(IJ, SKST) = FF(IJ)
@@ -1039,7 +1035,7 @@ contains
             C2(IJ, K) = ( 1.0D0 / ( DLZI(K-1) + DLZI(K) ) ) &
      &         * ( ( ( S(IJ, K-2) - S(IJ, K-1) ) / DLZI(K-1) ) &
      &           - ( ( S(IJ, K-1) - S(IJ, K)   ) / DLZI(K)   ) )
-         ELSEIF ( W(IJ, K) < 0.0D0 ) THEN
+         ELSE IF ( W(IJ, K) < 0.0D0 ) THEN
             C2(IJ, K) = ( 1.0D0 / ( DLZI(K) + DLZI(K+1) ) ) &
      &         * ( ( ( S(IJ, K-1) - S(IJ, K) ) / DLZI(K)   ) &
      &           - ( ( S(IJ, K) - S(IJ, K+1) ) / DLZI(K+1) ) )
@@ -1057,7 +1053,7 @@ contains
          C2(IJ, SKST+1) = ( 1.0D0 / ( DLZI(SKST) + DLZI(SKST+1) ) ) &
      &      * ( ( ( 0.0D0       - S(IJ, SKST)   ) / DLZI(SKST) ) &
      &        - ( ( S(IJ, SKST) - S(IJ, SKST+1) ) / DLZI(SKST+1) ) )
-      ELSEIF ( W(IJ, SKST+1) < 0.0D0 ) THEN
+      ELSE IF ( W(IJ, SKST+1) < 0.0D0 ) THEN
          C2(IJ, SKST+1) = ( 1.0D0 / ( DLZI(SKST+1) + DLZI(SKST+2) ) ) &
      &      * ( ( ( S(IJ, SKST)   - S(IJ, SKST+1) ) / DLZI(SKST+1) ) &
      &        - ( ( S(IJ, SKST+1) - S(IJ, SKST+2) ) / DLZI(SKST+2) ) )
@@ -1078,7 +1074,7 @@ contains
          C2(IJ, SKEN) = ( 1.0D0 / ( DLZI(SKEN-1) + DLZI(SKEN) ) ) &
      &      * ( ( ( S(IJ, SKEN-2) - S(IJ, SKEN-1) ) / DLZI(SKEN-1) ) &
      &        - ( ( S(IJ, SKEN-1) - S(IJ, SKEN)   ) / DLZI(SKEN)   ) )
-      ELSEIF ( W(IJ, SKEN) < 0.0D0 ) THEN
+      ELSE IF ( W(IJ, SKEN) < 0.0D0 ) THEN
          C2(IJ, SKEN) = ( 1.0D0 / ( DLZI(SKEN) + DLZI(SKEN+1) ) ) &
      &      * ( ( ( S(IJ, SKEN-1) - S(IJ, SKEN) ) / DLZI(SKEN)   ) &
      &        - ( ( S(IJ, SKEN)   - 0.0D0       ) / DLZI(SKEN+1) ) )
@@ -1098,7 +1094,7 @@ contains
          C2(IJ, SKEN+1) = ( 1.0D0 / ( DLZI(SKEN) + DLZI(SKEN+1) ) ) &
      &      * ( ( ( S(IJ, SKEN-1) - S(IJ, SKEN) ) / DLZI(SKEN)   ) &
      &        - ( ( S(IJ, SKEN)   - S(IJ, SKEN) ) / DLZI(SKEN+1) ) )
-      ELSEIF ( W(IJ, SKEN+1) < 0.0D0 ) THEN
+      ELSE IF ( W(IJ, SKEN+1) < 0.0D0 ) THEN
          C2(IJ, SKEN) = ( 1.0D0 / ( DLZI(SKEN+1) + DLZI(SKEN+1) ) ) &
      &      * ( ( ( S(IJ, SKEN) - 0.0D0 ) / DLZI(SKEN+1) ) &
      &        - ( ( 0.0D0       - 0.0D0 ) / DLZI(SKEN+1) ) )
@@ -1111,7 +1107,7 @@ contains
      &                  / ( 2.0D0 * DLZI(SKEN+1) ) ) &
      &      - ( ( ( DLZ(SKEN) * DLZ(SKEN) ) / 4.0D0 ) &
      &          * C2(IJ, SKEN+1) )
-      ELSEIF ( W(IJ, SKEN+1) < 0.0D0 ) THEN
+      ELSE IF ( W(IJ, SKEN+1) < 0.0D0 ) THEN
          C1(IJ, SKEN+1) = ( ( 0.0D0 - S(IJ, SKEN) ) &
      &                    / DLZI(SKEN+1) )
          C0(IJ, SKEN+1) = ( ( DLZ(SKEN) * S(IJ, SKEN) &
@@ -1157,7 +1153,7 @@ contains
      &      MAX( SI(IJ, SKST+1), MAX( FLTMP, S(IJ, SKST+1) ) )
          SI(IJ, SKST+1) = MIN( SI(IJ, SKST+1), S(IJ, SKST) )
       END IF
-      ELSEIF ( W(IJ, SKST+1) < 0.0D0 ) THEN
+      ELSE IF ( W(IJ, SKST+1) < 0.0D0 ) THEN
       FLDEL(SKST+1) = S(IJ, SKST) - S(IJ, SKST+2)
       FLGAM(SKST+1) = ( ( S(IJ, SKST)   - S(IJ, SKST+1) ) &
      &                  / DLZI(SKST+1) ) &
@@ -1203,7 +1199,7 @@ contains
      &         MAX( SI(IJ, K), MAX( FLTMP, S(IJ, K) ) )
             SI(IJ, K) = MIN( SI(IJ, K), S(IJ, K-1) )
          END IF
-      ELSEIF ( W(IJ, K) < 0.0D0 ) THEN
+      ELSE IF ( W(IJ, K) < 0.0D0 ) THEN
          FLDEL(K) = S(IJ, K-1) - S(IJ, K+1)
          FLGAM(K) = ( ( S(IJ, K-1) - S(IJ, K)   ) / DLZI(K)   ) &
      &            - ( ( S(IJ, K)   - S(IJ, K+1) ) / DLZI(K+1) )
@@ -1246,7 +1242,7 @@ contains
      &      MAX( SI(IJ, SKEN), MAX( FLTMP, S(IJ, SKEN) ) )
          SI(IJ, SKEN) = MIN( SI(IJ, SKEN), S(IJ, SKEN-1) )
       END IF
-      ELSEIF ( W(IJ, SKEN) < 0.0D0 ) THEN
+      ELSE IF ( W(IJ, SKEN) < 0.0D0 ) THEN
       FLDEL(SKEN) = S(IJ, SKEN-1) - 0.0D0
       FLGAM(SKEN) = ( ( S(IJ, SKEN-1) - S(IJ, SKEN) ) / DLZI(SKEN)   ) &
      &            - ( ( S(IJ, SKEN)   - 0.0D0       ) / DLZI(SKEN+1) )
@@ -1288,7 +1284,7 @@ contains
      &      MAX( SI(IJ, SKEN+1), MAX( FLTMP, S(IJ, SKEN) ) )
          SI(IJ, SKEN+1) = MIN( SI(IJ, SKEN+1), S(IJ, SKEN) )
       END IF
-      ELSEIF ( W(IJ, SKEN+1) < 0.0D0 ) THEN
+      ELSE IF ( W(IJ, SKEN+1) < 0.0D0 ) THEN
       FLDEL(SKEN+1) = S(IJ, SKEN) - 0.0D0
       FLGAM(SKEN+1) = ( ( S(IJ, SKEN) - 0.0D0 ) / DLZI(SKEN+1) ) &
      &              - ( ( 0.0D0       - 0.0D0 ) / DLZI(SKEN+1) )
@@ -1372,7 +1368,7 @@ contains
      &      + ( ( 1.0D0 - PHI(SKEN) ) / 3.1536D+7 )
       END DO
 
-      CALL STRIDAG( EA, EB, EC, ED, EX )
+      call calc_tridiagonal_solid( EA, EB, EC, ED, EX )
 
       END IF
 
@@ -1410,7 +1406,7 @@ contains
       END DO
       END DO
 
-      CALL STRIDAG( EA, EB, EC, ED, EX )
+      call calc_tridiagonal_solid( EA, EB, EC, ED, EX )
 
       END IF
 
@@ -1423,11 +1419,11 @@ contains
       END DO
       END DO
 
-      end subroutine AGE
+      end subroutine calc_step_solid_age
 
 ! =====================================================================
 
-      subroutine STRIDAG( EA, EB, EC, ED, EX )
+      subroutine calc_tridiagonal_solid( EA, EB, EC, ED, EX )
 
       double precision, intent(in)  :: EA(SDZDIM), EB(SDZDIM), EC(SDZDIM)
       double precision, intent(in)  :: ED(NXY,SDZDIM)
@@ -1457,6 +1453,6 @@ contains
       END DO
       END DO
 
-      end subroutine STRIDAG
+      end subroutine calc_tridiagonal_solid
 
 end module module_digda_step_solid

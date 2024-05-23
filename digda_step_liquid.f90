@@ -12,21 +12,18 @@
 module globals_digda_step_liquid
   use module_zcfile
   use module_digda_grid
-  use module_sdtime
+  use module_digda_timestep
   implicit none
 
-      double precision :: DFLX(NXY, SDZDIM+1)
+  double precision :: DFLX(NXY, SDZDIM+1)
 
-      double precision :: EA(SDZDIM), EB(NXY, SDZDIM), EC(SDZDIM)
-      double precision :: EAL(SDZDIM), EBE(SDZDIM), EGA(SDZDIM), EEP(NXY, SDZDIM)
-      double precision :: ED(NXY, SDZDIM),  EX(NXY, SDZDIM)
+  double precision :: EA(SDZDIM), EB(NXY, SDZDIM), EC(SDZDIM)
+  double precision :: EAL(SDZDIM), EBE(SDZDIM), EGA(SDZDIM), EEP(NXY, SDZDIM)
+  double precision :: ED(NXY, SDZDIM),  EX(NXY, SDZDIM)
 
-      logical CDCN, CDII
-      save CDCN, CDII
-      namelist /NMSDLI/ CDCN, CDII
-!     -- Diffusion choice --
-      data CDCN  / .FALSE. / !! Crank nicolson ?
-      data CDII  / .TRUE.  / !! Implicit ?
+  logical :: CDCN = .false. !! Crank nicolson ?
+  logical :: CDII = .true.  !! Implicit ?
+  namelist /NMSDLI/ CDCN, CDII
 
 end module globals_digda_step_liquid
 
@@ -37,21 +34,21 @@ module module_digda_step_liquid
   implicit none
 contains
 
-      subroutine SDLIQUIDSET
+  subroutine set_digda_step_liquid
 
-      integer :: IJ, K
+    integer :: IJ, K
 
-      WRITE(NFSTDO, *) '*** Carbon : SDLIQUIDSET ***'
-      REWIND(NFPARM)
-      READ (NFPARM, NMSDLI, END=99)
+    WRITE(NFSTDO, *) '*** Sediment : set_digda_step_liquid ***'
+    REWIND(NFPARM)
+    READ (NFPARM, NMSDLI, END=99)
 99 continue
-      WRITE(NFSTDO, NMSDLI)
+    WRITE(NFSTDO, NMSDLI)
 
-      end subroutine SDLIQUIDSET
+  end subroutine set_digda_step_liquid
 
 ! =====================================================================
 
-      subroutine LIQUID( &
+      subroutine calc_step_liquid( &
      &      BW, RLT, PHI, PHII, DEI, C, &
      &      CN )
 
@@ -120,7 +117,7 @@ contains
      &      + RLT(IJ, SKEN)
       END DO
 
-      CALL LTRIDAG( EA, EB, EC, ED, EX )
+      call calc_tridiagonal_liquid( EA, EB, EC, ED, EX )
 
       END IF
 
@@ -167,7 +164,7 @@ contains
      &   + ( PHII(SKST) * DEI(SKST) * BW(IJ) / DLZI(SKST) / DLZI(SKST) )
       END DO
 
-      CALL LTRIDAG( EA, EB, EC, ED, EX )
+      call calc_tridiagonal_liquid( EA, EB, EC, ED, EX )
 
       END IF
 
@@ -180,11 +177,11 @@ contains
       END DO
       END DO
 
-      end subroutine LIQUID
+      end subroutine calc_step_liquid
 
 ! =====================================================================
 
-      subroutine LIQUID_O2( &
+      subroutine calc_step_liquid_O2( &
      &      BW, RLT, PHI, PHII, DEI, C, &
      &      CN )
 
@@ -266,7 +263,7 @@ contains
      &      + 0.50D0 * RLT(IJ, SKEN) * C(IJ, SKEN)
       END DO
 
-      CALL LTRIDAG( EA, EB, EC, ED, EX )
+      call calc_tridiagonal_liquid( EA, EB, EC, ED, EX )
 
       END IF
 
@@ -315,7 +312,7 @@ contains
      &   + ( PHII(SKST) * DEI(SKST) * BW(IJ) / DLZI(SKST) / DLZI(SKST) )
       END DO
 
-      CALL LTRIDAG( EA, EB, EC, ED, EX )
+      call calc_tridiagonal_liquid( EA, EB, EC, ED, EX )
 
       END IF
 
@@ -328,11 +325,11 @@ contains
       END DO
       END DO
 
-      end subroutine LIQUID_O2
+      end subroutine calc_step_liquid_O2
 
 ! =====================================================================
 
-      subroutine LTRIDAG( EA, EB, EC, ED, EX )
+      subroutine calc_tridiagonal_liquid( EA, EB, EC, ED, EX )
 
       double precision, intent(in)  :: EA(SDZDIM), EB(NXY,SDZDIM), EC(SDZDIM)
       double precision, intent(in)  :: ED(NXY,SDZDIM)
@@ -362,6 +359,6 @@ contains
       END DO
       END DO
 
-      end subroutine LTRIDAG
+      end subroutine calc_tridiagonal_liquid
 
 end module module_digda_step_liquid

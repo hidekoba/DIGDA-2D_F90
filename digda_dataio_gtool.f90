@@ -1,6 +1,6 @@
 program digda_dataio_gtool
   use gtool_utilities
-  use module_sdmain
+  use module_digda_main
   implicit none
 
   character(len=100) :: filename, varname, vartitle, varunit
@@ -165,7 +165,7 @@ program digda_dataio_gtool
     bfrc(i, 14) = bw14dic(i)
   end do
 
-  call sd( &
+  call digda_main( &
  &     bdep, &
  &     bfrc, &
  &     sdtx )
@@ -334,4 +334,4 @@ program digda_dataio_gtool
     deallocate(outcdo2)
   end if
 
-end program digda_datadigda_datadigda_dataio_gtool
+end program digda_dataio_gtool

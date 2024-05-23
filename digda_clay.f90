@@ -23,27 +23,27 @@ module module_digda_clay
   implicit none
 contains
 
-      subroutine SDCLAYSET
+  subroutine set_digda_clay
 
-      WRITE(NFSTDO, *) '*** Carbon : SDCLAYSET ***'
+    WRITE(NFSTDO, *) '*** Sediment : set_digda_clay ***'
 
-      end subroutine SDCLAYSET
+  end subroutine set_digda_clay
 
-      subroutine DISCLA( &
-     &      SCLA, &
-     &      RCLA )
+  subroutine calc_clay_dissolution( &
+ &  SCLA, &
+ &  RCLA )
 
-      double precision, intent(in) :: SCLA(NXY, SDZDIM)
-      double precision, intent(out) :: RCLA(NXY, SDZDIM)
+    double precision, intent(in) :: SCLA(NXY, SDZDIM)
+    double precision, intent(out) :: RCLA(NXY, SDZDIM)
 
-      integer :: IJ, K
+    integer :: IJ, K
 
-      DO K = SKST, SKEN
-         DO IJ = IJTSTR, IJTEND
-            RCLA(IJ, K)  = 0.0D0
-         END DO
+    DO K = SKST, SKEN
+      DO IJ = IJTSTR, IJTEND
+        RCLA(IJ, K)  = 0.0D0
       END DO
+    END DO
 
-      end subroutine DISCLA
+  end subroutine calc_clay_dissolution
 
 end module module_digda_clay

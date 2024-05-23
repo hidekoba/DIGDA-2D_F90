@@ -8,12 +8,11 @@ PROGS=a.out
 # SRC
 ##############################
 
-SRC=config.f90 sddim.f90 zcfile.f90 zchem.f90 zcphys.f90 sdclay.f90 sdpom.f90 sdcaco3.f90 sdopal.f90 sdchemeq.f90 sdsolid.f90 sdliquid.f90 sdmain_ionc.f90 netcdf_utilities.f90 io_netcdf.f90
-OBJS=config.o sddim.o zcfile.o zchem.o zcphys.o sdclay.o sdpom.o sdcaco3.o sdopal.o sdchemeq.o sdsolid.o sdliquid.o sdmain_ionc.o netcdf_utilities.o io_netcdf.o
+SRC=digda_config.f90 digda_mpi.f90 digda_grid.f90 digda_parameter.f90 digda_timestep.f90 zcfile.f90 zchem.f90 zcphys.f90 digda_clay.f90 digda_pom.f90 digda_carbonate.f90 digda_silicate.f90 digda_chemeq.f90 digda_step_solid.f90 digda_step_liquid.f90 digda_main_ionc.f90 netcdf_utilities.f90 gtool_utilities.f90 digda_dataio_netcdf.f90
+OBJS=digda_config.o digda_mpi.o digda_grid.o digda_parameter.o digda_timestep.o zcfile.o zchem.o zcphys.o digda_clay.o digda_pom.o digda_carbonate.o digda_silicate.o digda_chemeq.o digda_step_solid.o digda_step_liquid.o digda_main_ionc.o netcdf_utilities.o gtool_utilities.o digda_dataio_netcdf.o
 
-
-#SRC=config.f90 sddim.f90 zcfile.f90 zchem.f90 zcphys.f90 sdclay.f90 sdpom.f90 sdcaco3.f90 sdopal.f90 sdchemeq.f90 sdsolid.f90 sdliquid.f90 sdmain_ionc.f90 netcdf_utilities.f90 io_gtool.f90
-#OBJS=config.o sddim.o zcfile.o zchem.o zcphys.o sdclay.o sdpom.o sdcaco3.o sdopal.o sdchemeq.o sdsolid.o sdliquid.o sdmain_ionc.o gtool_utilities.o io_gtool.o
+#SRC=digda_config.f90 digda_grid.f90 digda_parameter.f90 zcfile.f90 zchem.f90 zcphys.f90 digda_clay.f90 digda_pom.f90 digda_carbonate.f90 digda_silicate.f90 digda_chemeq.f90 digda_step_solid.f90 digda_step_liquid.f90 digda_main_ionc.f90 netcdf_utilities.f90 digda_dataio_gtool.f90
+#OBJS=digda_config.o digda_grid.o digda_parameter.o zcfile.o zchem.o zcphys.o digda_clay.o digda_pom.o digda_carbonate.o digda_silicate.o digda_chemeq.o digda_step_solid.o digda_step_liquid.o digda_main_ionc.o gtool_utilities.o digda_dataio_gtool.o
 
 
 #OBJS=$(SRC:.f90=.o)
@@ -61,9 +60,9 @@ $(PROGS): $(OBJS)
 	$(FC) $(FFLAGS) -c $<
 
 # .f90 file dependencies
-io_netcdf.o: netcdf_utilities.o
-sdmain_ionc.o: netcdf_utilities.o
-#sdmain_ionc.o: sdclay.o sdpom.o sdcaco3.o sdopal.o sdchemeq.o sdsolid.o sdliquid.o
+digda_dataio_netcdf.o: netcdf_utilities.o
+digda_main_ionc.o: netcdf_utilities.o gtool_utilities.o
+#digda_main_ionc.o: digda_clay.o digda_pom.o digda_carbonate.o digda_silicate.o digda_chemeq.o digda_step_solid.o digda_step_liquid.o
 
 # output
 OUTPUTsg1=scla spom scar sopa sage pcla ppom pcar popa w
