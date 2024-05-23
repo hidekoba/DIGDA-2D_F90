@@ -9,7 +9,7 @@
 !
 ! ---------------------------------------------------------------------
 
-module globals_digda_caco3
+module globals_digda_carbonate
   use module_zcfile
   use module_zcphys
   use module_digda_grid
@@ -38,12 +38,12 @@ module globals_digda_caco3
      &    / -1.330D-2 /
           !! [cm3 / bar mol]
 
-end module globals_digda_caco3
+end module globals_digda_carbonate
 
 ! =====================================================================
 
-module module_digda_caco3
-  use globals_digda_caco3
+module module_digda_carbonate
+  use globals_digda_carbonate
   implicit none
 contains
 
@@ -107,4 +107,4 @@ contains
 
       end subroutine SATCAR
 
-end module module_digda_caco3
+end module module_digda_carbonate
