@@ -1,6 +1,6 @@
-program io_netcdf
+program digda_datadigda_dataio_gtool
   use netcdf_utilities
-  use sdmain_module
+  use module_sdmain
   implicit none
 
   character(len=100) :: filename, varname, varunit
@@ -227,56 +227,60 @@ program io_netcdf
     end do
   end do
 
-  ! Call the write_netcdf subroutine
-  filename = "scla.nc"
-  varname = "Clay"
-  varunit = "g m-3"
-  call write_netcdf_3d(filename, varname, varunit, outscla, lon_values, lat_values, lz, 999)
+  if ( myrank == iroot ) then
 
-  filename = "spom.nc"
-  varname = "OrgM"
-  varunit = "mmol m-3"
-  call write_netcdf_3d(filename, varname, varunit, outspom, lon_values, lat_values, lz, 999)
+    ! Call the write_netcdf subroutine
+    filename = "scla.nc"
+    varname = "Clay"
+    varunit = "g m-3"
+    call write_netcdf_3d(filename, varname, varunit, outscla, lon_values, lat_values, lz, 999)
 
-  filename = "scar.nc"
-  varname = "CaCO3"
-  varunit = "mmol m-3"
-  call write_netcdf_3d(filename, varname, varunit, outscar, lon_values, lat_values, lz, 999)
+    filename = "spom.nc"
+    varname = "OrgM"
+    varunit = "mmol m-3"
+    call write_netcdf_3d(filename, varname, varunit, outspom, lon_values, lat_values, lz, 999)
 
-  filename = "sopa.nc"
-  varname = "SiO2"
-  varunit = "mmol m-3"
-  call write_netcdf_3d(filename, varname, varunit, outsopa, lon_values, lat_values, lz, 999)
+    filename = "scar.nc"
+    varname = "CaCO3"
+    varunit = "mmol m-3"
+    call write_netcdf_3d(filename, varname, varunit, outscar, lon_values, lat_values, lz, 999)
 
-  filename = "sage.nc"
-  varname = "Age"
-  varunit = "yr"
-  call write_netcdf_3d(filename, varname, varunit, outsage, lon_values, lat_values, lz, 999)
+    filename = "sopa.nc"
+    varname = "SiO2"
+    varunit = "mmol m-3"
+    call write_netcdf_3d(filename, varname, varunit, outsopa, lon_values, lat_values, lz, 999)
 
-  filename = "cnit.nc"
-  varname = "Phosphate"
-  varunit = "mmol m-3"
-  call write_netcdf_3d(filename, varname, varunit, outcnit, lon_values, lat_values, lz, 999)
+    filename = "sage.nc"
+    varname = "Age"
+    varunit = "yr"
+    call write_netcdf_3d(filename, varname, varunit, outsage, lon_values, lat_values, lz, 999)
 
-  filename = "cdic.nc"
-  varname = "DIC"
-  varunit = "mmol m-3"
-  call write_netcdf_3d(filename, varname, varunit, outcdic, lon_values, lat_values, lz, 999)
+    filename = "cnit.nc"
+    varname = "Phosphate"
+    varunit = "mmol m-3"
+    call write_netcdf_3d(filename, varname, varunit, outcnit, lon_values, lat_values, lz, 999)
 
-  filename = "calk.nc"
-  varname = "Alkalinity"
-  varunit = "mmol m-3"
-  call write_netcdf_3d(filename, varname, varunit, outcalk, lon_values, lat_values, lz, 999)
+    filename = "cdic.nc"
+    varname = "DIC"
+    varunit = "mmol m-3"
+    call write_netcdf_3d(filename, varname, varunit, outcdic, lon_values, lat_values, lz, 999)
 
-  filename = "cdo2.nc"
-  varname = "Oxygen"
-  varunit = "mmol m-3"
-  call write_netcdf_3d(filename, varname, varunit, outcdo2, lon_values, lat_values, lz, 999)
+    filename = "calk.nc"
+    varname = "Alkalinity"
+    varunit = "mmol m-3"
+    call write_netcdf_3d(filename, varname, varunit, outcalk, lon_values, lat_values, lz, 999)
 
-  filename = "csil.nc"
-  varname = "Silicate"
-  varunit = "mmol m-3"
-  call write_netcdf_3d(filename, varname, varunit, outcsil, lon_values, lat_values, lz, 999)
+    filename = "cdo2.nc"
+    varname = "Oxygen"
+    varunit = "mmol m-3"
+    call write_netcdf_3d(filename, varname, varunit, outcdo2, lon_values, lat_values, lz, 999)
+
+    filename = "csil.nc"
+    varname = "Silicate"
+    varunit = "mmol m-3"
+    call write_netcdf_3d(filename, varname, varunit, outcsil, lon_values, lat_values, lz, 999)
+
+  end if
 
   ! Synchronize all processes
   call MPI_BARRIER(MPI_COMM_WORLD, ierr)
@@ -364,4 +368,4 @@ program io_netcdf
   call MPI_FINALIZE(ierr)
 
 
-end program io_netcdf
+end program digda_datadigda_dataio_gtool
