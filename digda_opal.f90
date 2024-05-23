@@ -9,10 +9,10 @@
 !
 ! ---------------------------------------------------------------------
 
-module globals_sdopal
-      use zcfile_module
-      use sddim_module
-      implicit none
+module globals_digda_sio2l
+  use module_zcfile
+  use module_digda_grid
+  implicit none
 
 !     REAL*8 SOPA(NXY, SDZDIM)
 !     REAL*8 PCLA(NXY, SDZDIM)
@@ -38,13 +38,13 @@ module globals_sdopal
       DATA ROPRID / .FALSE. /  !! Ridgwell's DEI formulation ?
       DATA ROPARC / .TRUE. /  !! Archer's DEI formulation ?
 
-end module globals_sdopal
+end module globals_digda_sio2l
 
 ! =====================================================================
 
-module sdopal_module
-      use globals_sdopal
-      implicit none
+module module_digda_sio2l
+  use globals_digda_sio2l
+  implicit none
 contains
 
       SUBROUTINE SDOPALSET
@@ -126,4 +126,4 @@ contains
 
       END SUBROUTINE DISOPA
 
-end module sdopal_module
+end module module_digda_sio2l
