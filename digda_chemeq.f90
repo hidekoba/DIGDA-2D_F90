@@ -10,11 +10,11 @@
 !
 ! ---------------------------------------------------------------------
 
-module globals_sdchemeq
-      use zcfile_module
-      use zcphys_module
-      use sddim_module
-      use zchem_module
+module globals_digda_chemeq
+      use module_zcfile
+      use module_zcphys
+      use module_digda_grid
+      use module_zchem
       implicit none
 
       double precision, allocatable :: PH(:,:)
@@ -35,24 +35,24 @@ module globals_sdchemeq
 
 contains
 
-      subroutine initialize_globals_sdchemeq()
+      subroutine initialize_globals_digda_chemeq()
           call allocate_var2d(NXY, SDZDIM, PH)
-      end subroutine initialize_globals_sdchemeq
+      end subroutine initialize_globals_digda_chemeq
 
-end module globals_sdchemeq
+end module globals_digda_chemeq
 
 ! =====================================================================
 
-module sdchemeq_module
-    use globals_sdchemeq
+module module_digda_chemeq
+    use globals_digda_chemeq
     implicit none
 contains
 
-      subroutine sdchemeqset
+      subroutine digda_chemeqset
 
       integer :: IJ, K
 
-      call initialize_globals_sdchemeq
+      call initialize_globals_digda_chemeq
 
       WRITE(NFSTDO, *) '*** Carbon : SDCHEMEQSET ***'
       REWIND(NFPARM)
@@ -73,9 +73,9 @@ contains
 
       OFIRST = .TRUE.
 
-      end subroutine sdchemeqset
+      end subroutine digda_chemeqset
 
-      subroutine sdchemeq( &
+      subroutine digda_chemeq( &
      &     TEM, SAL, CTIN, ATIN, &
      &     SITIN, PTIN, &
      &     CO32 )
@@ -250,6 +250,6 @@ contains
       END DO
       END DO
 
-      end subroutine sdchemeq
+      end subroutine digda_chemeq
 
-end module sdchemeq_module
+end module module_digda_chemeq
