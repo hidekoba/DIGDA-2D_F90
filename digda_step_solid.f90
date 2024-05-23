@@ -9,10 +9,11 @@
 !
 ! ---------------------------------------------------------------------
 
-module globals_sdsolid
-      use zcfile_module
-      use sddim_module
-      implicit none
+module globals_digda_step_solid
+  use module_zcfile
+  use module_digda_grid
+  use module_sdtime
+  implicit none
 
       double precision :: SI(NXY, SDZDIM+1)
 
@@ -43,42 +44,18 @@ module globals_sdsolid
       data SDIC  / .FALSE. / !! Crank nicolson ?
       data SDII  / .TRUE.  / !! Implicit ?
 
-contains
-
-      subroutine initialize_globals_sdsolid()
-   !      call allocate_var2d(, SI)
-   !      call allocate_var2d(NXY, SDZDIM+1, C0)
-   !      call allocate_var2d(NXY, SDZDIM+1, C1)
-   !      call allocate_var2d(NXY, SDZDIM+1, C2)
-   !      call allocate_var2d(NXY, SDZDIM+1, FLX)
-   !      call allocate_var2d(NXY, SDZDIM+1, DFLX)
-   !      call allocate_var1d(SDZDIM, EA)
-   !      call allocate_var1d(SDZDIM, EB)
-   !      call allocate_var1d(SDZDIM, EC)
-   !      call allocate_var1d(SDZDIM, EAL)
-   !      call allocate_var1d(SDZDIM, EBE)
-   !      call allocate_var1d(SDZDIM, EGA)
-   !      call allocate_var2d(NXY, SDZDIM, EEP)
-   !      call allocate_var2d(NXY, SDZDIM, ED)
-   !      call allocate_var2d(NXY, SDZDIM, EX)
-   !      call allocate_var1d(SDZDIM+1, FLGAM)
-   !      call allocate_var1d(SDZDIM+1, FLDEL)
-      end subroutine initialize_globals_sdsolid
-
-end module globals_sdsolid
+end module globals_digda_step_solid
 
 ! =====================================================================
 
-module sdsolid_module
-      use globals_sdsolid
-      implicit none
+module module_digda_step_solid
+  use globals_digda_step_solid
+  implicit none
 contains
 
       subroutine SDSOLIDSET
 
       integer IJ, K
-
-      call initialize_globals_sdsolid
 
       WRITE(NFSTDO, *) '*** Carbon : SDSOLIDSET ***'
       REWIND(NFPARM)
@@ -1482,4 +1459,4 @@ contains
 
       end subroutine STRIDAG
 
-end module sdsolid_module
+end module module_digda_step_solid
