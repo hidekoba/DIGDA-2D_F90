@@ -9,18 +9,18 @@
 !
 ! ---------------------------------------------------------------------
 
-module globals_sdclay
-      use zcfile_module
-      use sddim_module
-      implicit none
+module globals_digda_clay
+  use module_zcfile
+  use module_digda_grid
+  implicit none
 
-end module globals_sdclay
+end module globals_digda_clay
 
 ! =====================================================================
 
-module sdclay_module
-      use globals_sdclay
-      implicit none
+module module_digda_clay
+  use globals_digda_clay
+  implicit none
 contains
 
       subroutine SDCLAYSET
@@ -46,4 +46,4 @@ contains
 
       end subroutine DISCLA
 
-end module sdclay_module
+end module module_digda_clay
