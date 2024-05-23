@@ -9,11 +9,11 @@
 !
 ! ---------------------------------------------------------------------
 
-module globals_sdcaco3
-      use zcfile_module
-      use zcphys_module
-      use sddim_module
-      implicit none
+module globals_digda_caco3
+  use module_zcfile
+  use module_zcphys
+  use module_digda_grid
+  implicit none
 
       REAL*8 RCCAR, NCAR
       SAVE   RCCAR, NCAR
@@ -38,13 +38,13 @@ module globals_sdcaco3
      &    / -1.330D-2 /
           !! [cm3 / bar mol]
 
-end module globals_sdcaco3
+end module globals_digda_caco3
 
 ! =====================================================================
 
-module sdcaco3_module
-      use globals_sdcaco3
-      implicit none
+module module_digda_caco3
+  use globals_digda_caco3
+  implicit none
 contains
 
       subroutine SDCACO3SET
@@ -107,4 +107,4 @@ contains
 
       end subroutine SATCAR
 
-end module sdcaco3_module
+end module module_digda_caco3
