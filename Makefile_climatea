@@ -40,8 +40,8 @@ FC=mpiifort
 #FCFLAGS=-O3 -u -convert big_endian -traceback -pg -shared-intel -mcmodel=large -warn declarations -check uninit -warn unused
 #FCFLAGS=-convert big_endian -traceback -mcmodel=large
 
-FFLAGS=-O3 -u -convert big_endian -traceback -mcmodel=large -I/home/hidekoba/local/netcdf4-intel-fortran/4.6.0/include
-LDFLAGS=-L/home/hidekoba/local/netcdf4-intel-fortran/4.6.0/lib -lnetcdff -L/home/hidekoba/local/netcdf4-intel/4.9.2/lib -lnetcdf -lnetcdf -lm
+FFLAGS=-O3 -u -convert big_endian -traceback -mcmodel=large -I/usr/local/tools/netcdf4/include
+LDFLAGS=-L/usr/local/tools/netcdf4/lib -lnetcdff -lnetcdf -lm
 
 ##############################
 # Suffixes
