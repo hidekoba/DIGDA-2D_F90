@@ -2,7 +2,7 @@ FC	= mpifrtpx
 
 #FFLAGS	= -Kfast -fw
 #FFLAGS	= -Kfast -fw -Knoauto -Nsave
-FFLAGS	= -Kfast -fw -Knoauto -Nsave -Knoautoobjstack
+FFLAGS	= -Kfast -fw -Knoauto -Nsave -Knoautoobjstack -mcmodel=large
 #FFLAGS	= -Kfast,fp_precision -fw
 #FFLAGS	= -Kfast,fp_precision -fw -Knoauto -Nsave
 #FFLAGS	= -Kfast,fp_precision -fw -Knoauto -Nsave -Knoautoobjstack
