@@ -249,7 +249,7 @@ contains
    !chead(50) = '  09990101000000'
     chead(27) = chead_orig(27, t)
     chead(50) = chead_orig(50, t)
-    chead(38) = 'UR4'
+    chead(38) = 'UR8'
 
     write(unit) chead
    !write(unit) (((REAL(var(i,j,k)),i=1,nx),j=1,ny),k=1,nz)
