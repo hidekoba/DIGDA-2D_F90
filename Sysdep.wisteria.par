@@ -1,0 +1,16 @@
+FC	= mpifrtpx
+
+#FFLAGS	= -Kfast -fw
+#FFLAGS	= -Kfast -fw -Knoauto -Nsave
+FFLAGS	= -Kfast -fw -Knoauto -Nsave -Knoautoobjstack
+#FFLAGS	= -Kfast,fp_precision -fw
+#FFLAGS	= -Kfast,fp_precision -fw -Knoauto -Nsave
+#FFLAGS	= -Kfast,fp_precision -fw -Knoauto -Nsave -Knoautoobjstack
+
+FOPTION	= $(FFLAGS) -DOPT_PARALLEL -lnetcdff -lnetcdf -lhdf5_fortran -lhdf5hl_fortran -lhdf5_hl -lhdf5
+
+.f90.o:
+	$(FC) $(FOPTION) -c $<
+
+%.o: %.f90
+	$(FC) $(FFLAGS) -c $< -o $@
