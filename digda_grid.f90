@@ -103,31 +103,31 @@ module module_digda_grid
 !!integer, parameter :: NXDIM = 1
 !!integer, parameter :: NYDIM = 1
 !!integer, parameter :: NZDIM = 44
-!!character(len=100), parameter :: BOUND_DIR = "bound1d/"
 
   ! Grid_128x64
 !!integer, parameter :: NXDIM = 128
 !!integer, parameter :: NYDIM = 64
 !!integer, parameter :: NZDIM = 44
-!!character(len=100), parameter :: BOUND_DIR = "bound12864/"
 
   ! Grid_256x192
   integer, parameter :: NXDIM = 256
   integer, parameter :: NYDIM = 192
   integer, parameter :: NZDIM = 44
-  character(len=100), parameter :: BOUND_DIR = "bound256192/"
 
 !!! Grid_360x180
 !!integer, parameter :: NXDIM = 360
 !!integer, parameter :: NYDIM = 180
 !!integer, parameter :: NZDIM = 44
-!!character(len=100), parameter :: BOUND_DIR = "bound360180/"
 
 !!! Grid_2160x1080
 !!integer, parameter :: NXDIM = 2160
 !!integer, parameter :: NYDIM = 1080
 !!integer, parameter :: NZDIM = 44
-!!character(len=100), parameter :: BOUND_DIR = "bound21601080/reversed_files/"
+!!character(len=100), parameter :: bound_dir = "bound21601080/reversed_files"
+
+!!character(len=100) :: bound_dir = 'not-specified/'
+  character(len=100) :: bound_dir = 'bound256192/'
+  namelist /nmocbc/ bound_dir
 
   integer, parameter :: NXYDIM = NXDIM * NYDIM
   integer, parameter :: NX = NXDIM
@@ -166,5 +166,12 @@ module module_digda_grid
   ! Missing value
   double precision, parameter :: rmiss = 999.00D0
  !double precision, parameter :: rmiss = 0.0000D0
+
+!  open(nfparm, file="PARAMET")
+!  rewind(nfparm)
+!  read(nfparm, nmocbc, end=99)
+!99 continue
+!  WRITE(*, *) trim(bound_dir)
+!  close(nmparm)
 
 end module module_digda_grid

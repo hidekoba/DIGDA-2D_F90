@@ -30,11 +30,13 @@ module module_digda_timestep
 
   ! Start and end year
   integer, parameter :: TSTR = 1
-  integer, parameter :: TENDYR = 3
+  integer, parameter :: TENDYR = 2
+ !integer            :: TENDYR = 2
   integer, parameter :: TEND = TENDYR / TSYR !! Converts years to time steps
+ !namelist /nmtime/ tendyr
 
   ! Interval for outputting history files
-  integer, parameter :: TOUTYR = 1
+  integer, parameter :: TOUTYR = 10
   integer, parameter :: TOUT = TOUTYR / TSYR !! Converts years to time steps
 
   ! Control whether history files and time steps are written

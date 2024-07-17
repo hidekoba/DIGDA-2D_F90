@@ -15,7 +15,7 @@ contains
 
     ! Variable declarations
     open(newunit=unit, file=filename, form='unformatted', status='old', iostat=iostat)
-    write(*,*)'iostat' , iostat
+    WRITE(*,*)'iostat' , iostat
     if (iostat /= 0) then
       print *, "Error opening file: ", filename
       stop
@@ -74,19 +74,19 @@ contains
     chead(28) = '0'
     chead(29) = 'TX'
     chead(30) = '1'
-    write(tmpstr, '(I10)') nx
+    WRITE(tmpstr, '(I10)') nx
     chead(31) = trim(adjustl(tmpstr))
     chead(32) = 'TY'
     chead(33) = '1'
-    write(tmpstr, '(I10)') ny
+    WRITE(tmpstr, '(I10)') ny
     chead(34) = trim(adjustl(tmpstr))
     chead(35) = 'TZ'
     chead(36) = '1'
-    write(tmpstr, '(I10)') nz
+    WRITE(tmpstr, '(I10)') nz
     chead(37) = trim(adjustl(tmpstr))
     chead(38) = 'UR8'
     chead(50) = '09990101000000'
-    write(tmpstr, '(E15.7)') missing_value
+    WRITE(tmpstr, '(E15.7)') missing_value
     chead(39:43) = trim(adjustl(tmpstr))
     chead(44) = '1'
     chead(46) = '0'
@@ -97,9 +97,9 @@ contains
     open(newunit=unit, file=filename, form='unformatted', status='replace', action='write')
 
     ! Write header and data
-    write(unit) chead
-   !write(unit) (((real(var(i,j,k)),i=1,nx),j=1,ny),k=1,nz)
-    write(unit) var
+    WRITE(unit) chead
+   !WRITE(unit) (((real(var(i,j,k)),i=1,nx),j=1,ny),k=1,nz)
+    WRITE(unit) var
 
     ! Close the file
     close(unit)

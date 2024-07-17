@@ -273,6 +273,8 @@ contains
     double precision :: VAR2D_VALUES(NXDIM, NYDIM, 1)
     double precision :: VAR3D_VALUES(NXDIM, NYDIM, SDZDIM, 1)
 
+    double precision :: integral_value, mean_value
+
     integer :: I, J, IJ, K, L, IC
     integer :: TT, YY
 
@@ -292,9 +294,9 @@ END IF
       OPEN(NFSTDO, FILE="STDOUT")
       OPEN(NFSOTS, FILE="TSTEP")
 
-      WRITE(NFSTDO, *) '-----------------------------'
-      WRITE(NFSTDO, *) '-- Setup of Sediment Model --'
-      WRITE(NFSTDO, *) '-----------------------------'
+      WRITE(NFSTDO, *) "'-----------------------------'"
+      WRITE(NFSTDO, *) "'-- Setup of Sediment Model --'"
+      WRITE(NFSTDO, *) "'-----------------------------'"
       REWIND(NFPARM)
       READ (NFPARM, NMSDHI, END=99)
 99 continue
@@ -1509,11 +1511,11 @@ IF (use_mpi) THEN
       IF ( MYRANK .EQ. IROOT ) THEN
 
          DO I = 1, NXDIM
-         LON_VALUES(I) = ((I - 1) * 360.0 / NXDIM) + (180.0 / NXDIM)
+           LON_VALUES(I) = ((I - 1) * 360.0 / NXDIM) + (180.0 / NXDIM)
          END DO
 
          DO I = 1, NYDIM
-         LAT_VALUES(I) = -90.0 + ((I - 1) * 180.0 / NYDIM) + (90.0 / NYDIM)
+           LAT_VALUES(I) = -90.0 + ((I - 1) * 180.0 / NYDIM) + (90.0 / NYDIM)
          END DO
 
 !        FILENAME = "scla.nc"
@@ -1526,7 +1528,13 @@ IF (use_mpi) THEN
 !              VAR3D_VALUES(I, J, K, 1) = SCLAG(IJ, K)
 !          END DO
 !        END DO
-!        call WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+!        call write_netcdf_3d(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+!        call calc_integral_and_mean_3d( sclag, lon_values, lat_values, lz, integral_value, mean_value )
+!        WRITE(NFSTDO, *) "'--------------------------------------------------'"
+!        WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
+!        WRITE(NFSTDO,'(A, E12.6, A)') " Global Averaged: ", mean_value, " g m-3"
+!        WRITE(NFSTDO,'(A, E12.6, A)') " Global Integrated: ", integral_value, " g"
+!        WRITE(NFSTDO, *) "'--------------------------------------------------'"
 
 !        FILENAME = "spom.nc"
 !        VARNAME = "OrgM"
@@ -1538,7 +1546,13 @@ IF (use_mpi) THEN
 !              VAR3D_VALUES(I, J, K, 1) = SPOMG(IJ, K)
 !          END DO
 !        END DO
-!        call WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+!        call write_netcdf_3d(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+!        call calc_integral_and_mean_3d( spomg, lon_values, lat_values, lz, integral_value, mean_value )
+!        WRITE(NFSTDO, *) "'--------------------------------------------------'"
+!        WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
+!        WRITE(NFSTDO,'(A, E12.6, A)') " Global Averaged: ", mean_value, " mmol m-3"
+!        WRITE(NFSTDO,'(A, E12.6, A)') " Global Integrated: ", integral_value * 1.D-3, " mol"
+!        WRITE(NFSTDO, *) "'--------------------------------------------------'"
 
 !        FILENAME = "scar.nc"
 !        VARNAME = "CaCO3"
@@ -1550,7 +1564,13 @@ IF (use_mpi) THEN
 !              VAR3D_VALUES(I, J, K, 1) = SCARG(IJ, K)
 !          END DO
 !        END DO
-!        call WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+!        call write_netcdf_3d(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+!        call calc_integral_and_mean_3d( scarg, lon_values, lat_values, lz, integral_value, mean_value )
+!        WRITE(NFSTDO, *) "'--------------------------------------------------'"
+!        WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
+!        WRITE(NFSTDO,'(A, E12.6, A)') " Global Averaged: ", mean_value, " mmol m-3"
+!        WRITE(NFSTDO,'(A, E12.6, A)') " Global Integrated: ", integral_value * 1.D-3, " mol"
+!        WRITE(NFSTDO, *) "'--------------------------------------------------'"
 
 !        FILENAME = "sopa.nc"
 !        VARNAME = "SiO2"
@@ -1562,7 +1582,13 @@ IF (use_mpi) THEN
 !              VAR3D_VALUES(I, J, K, 1) = SOPAG(IJ, K)
 !          END DO
 !        END DO
-!        call WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+!        call write_netcdf_3d(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+!        call calc_integral_and_mean_3d( sopag, lon_values, lat_values, lz, integral_value, mean_value )
+!        WRITE(NFSTDO, *) "'--------------------------------------------------'"
+!        WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
+!        WRITE(NFSTDO,'(A, E12.6, A)') " Global Averaged: ", mean_value, " mmol m-3"
+!        WRITE(NFSTDO,'(A, E12.6, A)') " Global Integrated: ", integral_value * 1.D-3, " mol"
+!        WRITE(NFSTDO, *) "'--------------------------------------------------'"
 
 !        FILENAME = "sage.nc"
 !        VARNAME = "Age tracer"
@@ -1574,7 +1600,12 @@ IF (use_mpi) THEN
 !              VAR3D_VALUES(I, J, K, 1) = SAGEG(IJ, K)
 !          END DO
 !        END DO
-!        call WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+!        call write_netcdf_3d(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+!        call calc_integral_and_mean_3d( sageg, lon_values, lat_values, lz, integral_value, mean_value )
+!        WRITE(NFSTDO, *) "'--------------------------------------------------'"
+!        WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
+!        WRITE(NFSTDO,'(A, E12.6, A)') " Global Averaged: ", mean_value, " yr"
+!        WRITE(NFSTDO, *) "'--------------------------------------------------'"
 
 !        FILENAME = "cnit.nc"
 !        VARNAME = "Phosphate"
@@ -1586,7 +1617,13 @@ IF (use_mpi) THEN
 !              VAR3D_VALUES(I, J, K, 1) = CNITG(IJ, K)
 !          END DO
 !        END DO
-!        call WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+!        call write_netcdf_3d(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+!        call calc_integral_and_mean_3d( cnitg, lon_values, lat_values, lz, integral_value, mean_value )
+!        WRITE(NFSTDO, *) "'--------------------------------------------------'"
+!        WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
+!        WRITE(NFSTDO,'(A, E12.6, A)') " Global Averaged: ", mean_value, " mmol m-3"
+!        WRITE(NFSTDO,'(A, E12.6, A)') " Global Integrated: ", integral_value * 1.D-3, " mol"
+!        WRITE(NFSTDO, *) "'--------------------------------------------------'"
 
 !        FILENAME = "cdic.nc"
 !        VARNAME = "DIC"
@@ -1598,7 +1635,13 @@ IF (use_mpi) THEN
 !              VAR3D_VALUES(I, J, K, 1) = CDICG(IJ, K)
 !          END DO
 !        END DO
-!        call WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+!        call write_netcdf_3d(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+!        call calc_integral_and_mean_3d( cdicg, lon_values, lat_values, lz, integral_value, mean_value )
+!        WRITE(NFSTDO, *) "'--------------------------------------------------'"
+!        WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
+!        WRITE(NFSTDO,'(A, E12.6, A)') " Global Averaged: ", mean_value, " mmol m-3"
+!        WRITE(NFSTDO,'(A, E12.6, A)') " Global Integrated: ", integral_value * 1.D-3, " mol"
+!        WRITE(NFSTDO, *) "'--------------------------------------------------'"
 
 !        FILENAME = "calk.nc"
 !        VARNAME = "Alkalinity"
@@ -1610,19 +1653,13 @@ IF (use_mpi) THEN
 !              VAR3D_VALUES(I, J, K, 1) = CALKG(IJ, K)
 !          END DO
 !        END DO
-!        call WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
-
-!        FILENAME = "csil.nc"
-!        VARNAME = "Silicate"
-!        VARUNIT = "mmol m-3"
-!        DO K = 1, SDZDIM
-!          DO J = 1, NYDIM
-!            DO I = 1, NXDIM
-!              IJ = I + (J - 1) * NXDIM
-!              VAR3D_VALUES(I, J, K, 1) = CSILG(IJ, K)
-!          END DO
-!        END DO
-!        call WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+!        call write_netcdf_3d(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+!        call calc_integral_and_mean_3d( calkg, lon_values, lat_values, lz, integral_value, mean_value )
+!        WRITE(NFSTDO, *) "'--------------------------------------------------'"
+!        WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
+!        WRITE(NFSTDO,'(A, E12.6, A)') " Global Averaged: ", mean_value, " mmol m-3"
+!        WRITE(NFSTDO,'(A, E12.6, A)') " Global Integrated: ", integral_value * 1.D-3, " mol"
+!        WRITE(NFSTDO, *) "'--------------------------------------------------'"
 
 !        FILENAME = "cdo2.nc"
 !        VARNAME = "Oxygen"
@@ -1634,7 +1671,31 @@ IF (use_mpi) THEN
 !              VAR3D_VALUES(I, J, K, 1) = CDO2G(IJ, K)
 !          END DO
 !        END DO
-!        call WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+!        call write_netcdf_3d(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+!        call calc_integral_and_mean_3d( cdo2g, lon_values, lat_values, lz, integral_value, mean_value )
+!        WRITE(NFSTDO, *) "'--------------------------------------------------'"
+!        WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
+!        WRITE(NFSTDO,'(A, E12.6, A)') " Global Averaged: ", mean_value, " mmol m-3"
+!        WRITE(NFSTDO,'(A, E12.6, A)') " Global Integrated: ", integral_value * 1.D-3, " mol"
+!        WRITE(NFSTDO, *) "'--------------------------------------------------'"
+
+!        FILENAME = "csil.nc"
+!        VARNAME = "Silicate"
+!        VARUNIT = "mmol m-3"
+!        DO K = 1, SDZDIM
+!          DO J = 1, NYDIM
+!            DO I = 1, NXDIM
+!              IJ = I + (J - 1) * NXDIM
+!              VAR3D_VALUES(I, J, K, 1) = CSILG(IJ, K)
+!          END DO
+!        END DO
+!        call write_netcdf_3d(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+!        call calc_integral_and_mean_3d( csilg, lon_values, lat_values, lz, integral_value, mean_value )
+!        WRITE(NFSTDO, *) "'--------------------------------------------------'"
+!        WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
+!        WRITE(NFSTDO,'(A, E12.6, A)') " Global Averaged: ", mean_value, " mmol m-3"
+!        WRITE(NFSTDO,'(A, E12.6, A)') " Global Integrated: ", integral_value * 1.D-3, " mol"
+!        WRITE(NFSTDO, *) "'--------------------------------------------------'"
 
          FILENAME = "ficla.nc"
          VARNAME = "Clay_bottom_flux"
@@ -1645,7 +1706,14 @@ IF (use_mpi) THEN
              VAR2D_VALUES(I, J, 1) = FICLAG(IJ)
            END DO
          END DO
-         call WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+         call write_netcdf_2d(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+         call calc_integral_and_mean_2d( ficlag, lon_values, lat_values, integral_value, mean_value )
+         WRITE(9999, *) "'--------------------------------------------------'"
+         WRITE(NFSTDO, *) "'--------------------------------------------------'"
+         WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
+         WRITE(NFSTDO,'(A, E12.6, A)') " Global Averaged: ", mean_value, " g m-3 * cm s-1"
+         WRITE(NFSTDO,'(A, E12.6, A)') " Global Integrated: ", integral_value * 3.1536D+5, " g * yr-1"
+         WRITE(NFSTDO, *) "'--------------------------------------------------'"
 
          FILENAME = "fipom.nc"
          VARNAME = "OrgM_bottom_flux"
@@ -1656,7 +1724,13 @@ IF (use_mpi) THEN
              VAR2D_VALUES(I, J, 1) = FIPOMG(IJ)
            END DO
          END DO
-         call WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+         call write_netcdf_2d(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+         call calc_integral_and_mean_2d( fipomg, lon_values, lat_values, integral_value, mean_value )
+         WRITE(NFSTDO, *) "'--------------------------------------------------'"
+         WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
+         WRITE(NFSTDO,'(A, E12.6, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
+         WRITE(NFSTDO,'(A, E12.6, A)') " Global Integrated: ", integral_value * 3.1536D+2, " mol * yr-1"
+         WRITE(NFSTDO, *) "'--------------------------------------------------'"
 
          FILENAME = "ficar.nc"
          VARNAME = "CaCO3_bottom_flux"
@@ -1667,7 +1741,13 @@ IF (use_mpi) THEN
              VAR2D_VALUES(I, J, 1) = FICARG(IJ)
            END DO
          END DO
-         call WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+         call write_netcdf_2d(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+         call calc_integral_and_mean_2d( ficarg, lon_values, lat_values, integral_value, mean_value )
+         WRITE(NFSTDO, *) "'--------------------------------------------------'"
+         WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
+         WRITE(NFSTDO,'(A, E12.6, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
+         WRITE(NFSTDO,'(A, E12.6, A)') " Global Integrated: ", integral_value * 3.1536D+2, " mol * yr-1"
+         WRITE(NFSTDO, *) "'--------------------------------------------------'"
 
          FILENAME = "fiopa.nc"
          VARNAME = "SiO2_bottom_flux"
@@ -1678,7 +1758,13 @@ IF (use_mpi) THEN
              VAR2D_VALUES(I, J, 1) = FIOPAG(IJ)
            END DO
          END DO
-         call WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+         call write_netcdf_2d(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+         call calc_integral_and_mean_2d( fiopag, lon_values, lat_values, integral_value, mean_value )
+         WRITE(NFSTDO, *) "'--------------------------------------------------'"
+         WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
+         WRITE(NFSTDO,'(A, E12.6, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
+         WRITE(NFSTDO,'(A, E12.6, A)') " Global Integrated: ", integral_value * 3.1536D+2, " mol * yr-1"
+         WRITE(NFSTDO, *) "'--------------------------------------------------'"
 
 !        FILENAME = "focla.nc"
 !        VARNAME = "Clay_diffusion"
@@ -1689,7 +1775,7 @@ IF (use_mpi) THEN
 !            VAR2D_VALUES(I, J, 1) = FOCLAG(IJ)
 !          END DO
 !        END DO
-!        call WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+!        call write_netcdf_2d(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
 
 !        FILENAME = "fopom.nc"
 !        VARNAME = "OrgM_diffusion"
@@ -1700,7 +1786,7 @@ IF (use_mpi) THEN
 !            VAR2D_VALUES(I, J, 1) = FOPOMG(IJ)
 !          END DO
 !        END DO
-!        call WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+!        call write_netcdf_2d(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
 
 !        FILENAME = "focar.nc"
 !        VARNAME = "CaCO3_diffusion"
@@ -1711,7 +1797,7 @@ IF (use_mpi) THEN
 !            VAR2D_VALUES(I, J, 1) = FOCARG(IJ)
 !          END DO
 !        END DO
-!        call WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+!        call write_netcdf_2d(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
 
 !        FILENAME = "foopa.nc"
 !        VARNAME = "SiO2_diffusion"
@@ -1722,7 +1808,7 @@ IF (use_mpi) THEN
 !            VAR2D_VALUES(I, J, 1) = FOOPAG(IJ)
 !          END DO
 !        END DO
-!        call WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+!        call write_netcdf_2d(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
 
 !        FILENAME = "bfcla.nc"
 !        VARNAME = "Clay_burial"
@@ -1733,7 +1819,7 @@ IF (use_mpi) THEN
 !            VAR2D_VALUES(I, J, 1) = BFCLAG(IJ)
 !          END DO
 !        END DO
-!        call WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+!        call write_netcdf_2d(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
 
 !        FILENAME = "bfpom.nc"
 !        VARNAME = "OrgM_burial"
@@ -1744,7 +1830,7 @@ IF (use_mpi) THEN
 !            VAR2D_VALUES(I, J, 1) = BFPOMG(IJ)
 !          END DO
 !        END DO
-!        call WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+!        call write_netcdf_2d(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
 
 !        FILENAME = "bfcar.nc"
 !        VARNAME = "CaCO3_burial"
@@ -1755,7 +1841,7 @@ IF (use_mpi) THEN
 !            VAR2D_VALUES(I, J, 1) = BFCARG(IJ)
 !          END DO
 !        END DO
-!        call WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+!        call write_netcdf_2d(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
 
 !        FILENAME = "bfopa.nc"
 !        VARNAME = "SiO2_burial"
@@ -1766,7 +1852,7 @@ IF (use_mpi) THEN
 !            VAR2D_VALUES(I, J, 1) = BFOPAG(IJ)
 !          END DO
 !        END DO
-!        call WRITE_NETCDF_2D(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+!        call write_netcdf_2d(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
 
 !        FILENAME = "w.nc"
 !        VARNAME = "Sediment_rate"
@@ -1779,7 +1865,7 @@ IF (use_mpi) THEN
 !            END DO
 !          END DO
 !        END DO
-!        call WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ+1, YY)
+!        call write_netcdf_3d(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ+1, YY)
 
 !        FILENAME = "cdc13.nc"
 !        VARNAME = "delta_carbon-13"
@@ -1792,7 +1878,7 @@ IF (use_mpi) THEN
 !            END DO
 !          END DO
 !        END DO
-!        call WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+!        call write_netcdf_3d(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
 
 !        FILENAME = "cdc14.nc"
 !        VARNAME = "Delta_carbon-14"
@@ -1805,7 +1891,7 @@ IF (use_mpi) THEN
 !            END DO
 !          END DO
 !        END DO
-!        call WRITE_NETCDF_3D(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+!        call write_netcdf_3d(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
 
          CFILE  = 'scla'
          CTITLE = 'Clay'
@@ -1965,5 +2051,154 @@ END IF
       END DO ! -- End of Time integration
 
       end subroutine digda_main
+
+      subroutine calc_integral_and_mean_2d(var_values, lon_values, lat_values, integral_value, mean_value)
+
+        double precision, dimension(:), intent(in) :: var_values
+        double precision, dimension(:), intent(in) :: lon_values, lat_values
+        double precision, intent(out) :: integral_value, mean_value
+        double precision :: grid_volume
+        integer(kind=4) :: nx, ny, nz
+        double precision, dimension(:), allocatable :: lon_grid_size, lat_grid_size
+        double precision, dimension(:), allocatable :: lon_grid_size_m, lat_grid_size_m
+        integer :: i, j, ij
+
+        nx = size(lon_values)
+        ny = size(lat_values)
+        allocate(lon_grid_size(nx))
+        allocate(lat_grid_size(ny))
+        allocate(lon_grid_size_m(nx*ny))
+        allocate(lat_grid_size_m(nx*ny))
+
+        ! Calculate grid sizes
+          lon_grid_size(1) = (lon_values(1) - 0.d0) * 2.d0
+        do i = 2, nx
+          lon_grid_size(i) = ( abs(lon_values(i) - lon_values(i-1)) &
+                             - 0.5d0 * lon_grid_size(i-1) ) &
+                             * 2.d0
+        end do
+          lat_grid_size(1) = (lat_values(1) + 90.d0) * 2.d0
+        do j = 2, ny
+          lat_grid_size(j) = ( abs(lat_values(j) - lat_values(j-1)) &
+                             - 0.5d0 * lat_grid_size(j-1) ) &
+                             * 2.d0
+        end do
+
+        ! Convert grid sizes to meters
+        do j = 1, ny
+          do i = 1, nx
+            ij = i + (j-1)*nx
+            lon_grid_size_m(ij) = lon_grid_size(i) * (pi/180.d00) * er * cos(lat_values(j) * (pi/180.d00))
+            lat_grid_size_m(ij) = lat_grid_size(j) * (pi/180.d00) * er
+          end do
+        end do
+
+        grid_volume = 0.d0
+        integral_value = 0.d0
+        mean_value = 0.d0
+        do j = 1, ny
+          do i = 1, nx
+            ij = i + (j-1)*nx
+            grid_volume = grid_volume &
+              + lon_grid_size_m(ij) &
+              * lat_grid_size_m(ij)
+            integral_value = integral_value &
+              + var_values(ij) &
+              * lon_grid_size_m(ij) &
+              * lat_grid_size_m(ij)
+          end do
+        end do
+        mean_value = integral_value / grid_volume
+
+        deallocate(lon_grid_size)
+        deallocate(lat_grid_size)
+        deallocate(lon_grid_size_m)
+        deallocate(lat_grid_size_m)
+
+      end subroutine calc_integral_and_mean_2d
+
+      subroutine calc_integral_and_mean_3d(var_values, lon_values, lat_values, dep_values, integral_value, mean_value)
+
+        double precision, dimension(:,:), intent(in) :: var_values
+        double precision, dimension(:), intent(in) :: lon_values, lat_values, dep_values
+        double precision, intent(out) :: integral_value, mean_value
+        double precision :: grid_volume
+        integer(kind=4) :: nx, ny, nz
+        double precision, dimension(:), allocatable :: lon_grid_size, lat_grid_size, dep_grid_size
+        double precision, dimension(:), allocatable :: lon_grid_size_m, lat_grid_size_m, dep_grid_size_m
+        integer :: i, j, k, ij
+
+        nx = size(lon_values)
+        ny = size(lat_values)
+        nz = size(dep_values)
+        allocate(lon_grid_size(nx))
+        allocate(lat_grid_size(ny))
+        allocate(dep_grid_size(nz))
+        allocate(lon_grid_size_m(nx*ny))
+        allocate(lat_grid_size_m(nx*ny))
+        allocate(dep_grid_size_m(nz))
+
+        ! Calculate grid sizes
+          lon_grid_size(1) = (lon_values(1) - 0.d0) * 2.d0
+        do i = 2, nx
+          lon_grid_size(i) = ( abs(lon_values(i) - lon_values(i-1)) &
+                             - 0.5d0 * lon_grid_size(i-1) ) &
+                             * 2.d0
+        end do
+          lat_grid_size(1) = (lat_values(1) + 90.d0) * 2.d0
+        do j = 2, ny
+          lat_grid_size(j) = ( abs(lat_values(j) - lat_values(j-1)) &
+                             - 0.5d0 * lat_grid_size(j-1) ) &
+                             * 2.d0
+        end do
+          dep_grid_size(1) = (dep_values(1) - 0.d0) * 2.d0
+        do k = 2, nz
+          dep_grid_size(k) = ( abs(dep_values(k) - dep_values(k-1)) &
+                             - 0.5d0 * dep_grid_size(k-1) ) &
+                             * 2.d0
+        end do
+
+        ! Convert grid sizes to meters
+        do j = 1, ny
+          do i = 1, nx
+            ij = i + (j-1)*nx
+            lon_grid_size_m(ij) = lon_grid_size(i) * (pi/180.d00) * er * cos(lat_values(j) * (pi/180.d00))
+            lat_grid_size_m(ij) = lat_grid_size(j) * (pi/180.d00) * er
+          end do
+        end do
+        do k = 1, nz
+          dep_grid_size_m(k) = dep_grid_size(k) * 1.d-2
+        end do
+
+        grid_volume = 0.d0
+        integral_value = 0.d0
+        mean_value = 0.d0
+        do k = 1, nz
+          do j = 1, ny
+            do i = 1, nx
+              ij = i + (j-1)*nx
+              grid_volume = grid_volume &
+                + lon_grid_size_m(ij) &
+                * lat_grid_size_m(ij) &
+                * dep_grid_size_m(k)
+              integral_value = integral_value &
+                + var_values(ij, k) &
+                * lon_grid_size_m(ij) &
+                * lat_grid_size_m(ij) &
+                * dep_grid_size_m(k)
+            end do
+          end do
+        end do
+        mean_value = integral_value / grid_volume
+
+        deallocate(lon_grid_size)
+        deallocate(lon_grid_size)
+        deallocate(lat_grid_size)
+        deallocate(dep_grid_size)
+        deallocate(lon_grid_size_m)
+        deallocate(lat_grid_size_m)
+        deallocate(dep_grid_size_m)
+
+      end subroutine calc_integral_and_mean_3d
 
 end module module_digda_main
