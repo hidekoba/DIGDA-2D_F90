@@ -130,13 +130,14 @@ contains
 
     character(len=*), intent(in) :: filename
     integer, intent(in) :: nx, ny, nz, nt
-    double precision, intent(in) :: var(nx*ny*nz, nt)
+    double precision, intent(in) :: var(nx*ny, nz, nt)
+    double precision, :: vartmp(nx*ny*nz, nt)
     character(len=16), intent(in) :: chead_orig(64, nt)
     character(len=16) :: chead(64)
     character(len=16), intent(in) :: citem
     character(len=16), intent(in) :: ctitle
     character(len=16), intent(in) :: cunit
-    integer :: unit, i, j, k, t
+    integer :: unit, i, j, k, t, ij, ijk
     logical :: file_first
 
     file_first = .true.
@@ -153,6 +154,16 @@ contains
     chead = ' '
 
     do t = 1, nt
+
+    do k = 1, nz
+      do j = 1, ny
+        do i = 1, nx
+          ijk = (k-1) * nx * ny + (j-1) * nx + i
+          ij = (j-1) * nx + i
+          vartmp(ijk, t) = var(ij, k, t)
+        end do
+      end do
+    end do
 
     chead(1) = '            9010'  !!  1 : IDFM  : I10   :   GTOOL3 version                 : 9010
     chead(2) = ''                  !!  2 : DSET  : A16   :   Dataset name                   :
@@ -242,7 +253,8 @@ contains
 
     write(unit) chead
    !write(unit) (((REAL(var(i,j,k)),i=1,nx),j=1,ny),k=1,nz)
-    write(unit) var(:, t)
+   !write(unit) var(:, t)
+    write(unit) vartmp(:, t)
 
     end do
 
