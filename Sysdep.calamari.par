@@ -1,0 +1,11 @@
+FC	= mpiifort
+
+FFLAGS=-O3 -u -convert big_endian -traceback -mcmodel=large -I/home/hidekoba/local/netcdf4-intel-fortran/4.6.0/include
+
+FOPTION	= $(FFLAGS) -L/home/hidekoba/local/netcdf4-intel-fortran/4.6.0/lib -L/home/hidekoba/local/netcdf4-intel/4.9.2/lib -lnetcdff -lnetcdf -lm
+
+.f90.o:
+	$(FC) $(FOPTION) -c $<
+
+%.o: %.f90
+	$(FC) $(FFLAGS) -c $< -o $@
