@@ -24,7 +24,7 @@ module globals_digda_chemeq
   double precision :: ROCN = 1.0245 !! ocean density [kg/L]
   integer :: ITRMAX = 10000
 
-  namelist /NMSDCHEM/ PHINI, DPHINI, DPH, ALKERR, ITRMAX, ROCN
+  namelist /NMSDCHEM/ PHINI, DPHINI, DPH, ALKERR, ROCN, ITRMAX
 
 end module globals_digda_chemeq
 

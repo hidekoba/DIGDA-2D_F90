@@ -107,47 +107,50 @@ program digda_dataio_netcdf
   allocate(outcsil(nxdim, nydim, sdzdim, 1))
   allocate(outcdo2(nxdim, nydim, sdzdim, 1))
 
+  ! Call the subroutine to read the namelist
+  call read_namelist()
+
   ! Call the read_netcdf subroutine
-  filename = trim(bound_dir)//"bdep.nc"
+  filename = trim(bound_dir)//"/bdep.nc"
   varname = "depth"
   call read_netcdf_2d(filename, varname, bdep, lon_values, lat_values)
-  filename = trim(bound_dir)//"btem.nc"
+  filename = trim(bound_dir)//"/btem.nc"
   varname = "TEM"
   call read_netcdf_2d(filename, varname, bwtem, lon_values, lat_values)
-  filename = trim(bound_dir)//"bsal.nc"
+  filename = trim(bound_dir)//"/bsal.nc"
   varname = "SAL"
   call read_netcdf_2d(filename, varname, bwsal, lon_values, lat_values)
-  filename = trim(bound_dir)//"bnit.nc"
+  filename = trim(bound_dir)//"/bnit.nc"
   varname = "NIT"
   call read_netcdf_2d(filename, varname, bwnit, lon_values, lat_values)
-  filename = trim(bound_dir)//"bdic.nc"
+  filename = trim(bound_dir)//"/bdic.nc"
   varname = "DIC"
   call read_netcdf_2d(filename, varname, bwdic, lon_values, lat_values)
-  filename = trim(bound_dir)//"balk.nc"
+  filename = trim(bound_dir)//"/balk.nc"
   varname = "ALK"
   call read_netcdf_2d(filename, varname, bwalk, lon_values, lat_values)
-  filename = trim(bound_dir)//"bdo2.nc"
+  filename = trim(bound_dir)//"/bdo2.nc"
   varname = "DO2"
   call read_netcdf_2d(filename, varname, bwdo2, lon_values, lat_values)
-  filename = trim(bound_dir)//"bsil.nc"
+  filename = trim(bound_dir)//"/bsil.nc"
   varname = "SIL"
   call read_netcdf_2d(filename, varname, bwsil, lon_values, lat_values)
-  filename = trim(bound_dir)//"bc13.nc"
+  filename = trim(bound_dir)//"/bc13.nc"
   varname = "C13"
   call read_netcdf_2d(filename, varname, bw13dic, lon_values, lat_values)
-  filename = trim(bound_dir)//"bc14.nc"
+  filename = trim(bound_dir)//"/bc14.nc"
   varname = "C14"
   call read_netcdf_2d(filename, varname, bw14dic, lon_values, lat_values)
-  filename = trim(bound_dir)//"ficla.nc"
+  filename = trim(bound_dir)//"/ficla.nc"
   varname = "FICLA"
   call read_netcdf_2d(filename, varname, ficla, lon_values, lat_values)
-  filename = trim(bound_dir)//"fipom.nc"
+  filename = trim(bound_dir)//"/fipom.nc"
   varname = "FIPOM"
   call read_netcdf_2d(filename, varname, fipom, lon_values, lat_values)
-  filename = trim(bound_dir)//"ficar.nc"
+  filename = trim(bound_dir)//"/ficar.nc"
   varname = "FICAR"
   call read_netcdf_2d(filename, varname, ficar, lon_values, lat_values)
-  filename = trim(bound_dir)//"fiopa.nc"
+  filename = trim(bound_dir)//"/fiopa.nc"
   varname = "FIOPA"
   call read_netcdf_2d(filename, varname, fiopa, lon_values, lat_values)
 
@@ -367,4 +370,28 @@ program digda_dataio_netcdf
   ! Finalize MPI
   call MPI_FINALIZE(ierr)
 
+contains
+
+  subroutine read_namelist()
+    ! Open the namelist file
+    integer :: unit, iostat
+    character(len=100) :: namelist_file
+
+    namelist_file = 'PARAMET'
+    open(unit=10, file=namelist_file, status='old', iostat=iostat)
+
+    if (iostat /= 0) then
+      print *, 'Error opening namelist file: ', trim(namelist_file)
+    else
+      read(10, nml=nmocbc, iostat=iostat)
+      if (iostat /= 0) then
+        print *, 'Error reading namelist file: ', trim(namelist_file)
+      else
+        print *, 'Namelist read successfully: ', trim(bound_dir)
+      end if
+      close(10)
+    end if
+  end subroutine read_namelist
+
 end program digda_dataio_netcdf
+

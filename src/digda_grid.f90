@@ -125,8 +125,7 @@ module module_digda_grid
 !!integer, parameter :: NZDIM = 44
 !!character(len=100), parameter :: bound_dir = "bound21601080/reversed_files"
 
-!!character(len=100) :: bound_dir = 'not-specified/'
-  character(len=100) :: bound_dir = 'bound256192/'
+  character(len=100) :: bound_dir = 'not-specified/'
   namelist /nmocbc/ bound_dir
 
   integer, parameter :: NXYDIM = NXDIM * NYDIM

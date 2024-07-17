@@ -38,7 +38,8 @@ module module_digda_main
 
   ! etc
   character(16) :: SEDTNM(SEDTDM)
-  character(128) :: CFILE, CTITLE, CUNIT
+  character(128) :: CFILE, CITEM, CTITLE, CUNIT
+  character(len=16) :: CHEAD(64)
 
 contains
 
@@ -1518,6 +1519,8 @@ IF (use_mpi) THEN
            LAT_VALUES(I) = -90.0 + ((I - 1) * 180.0 / NYDIM) + (90.0 / NYDIM)
          END DO
 
+!     -- NetCDF output --
+
 !        FILENAME = "scla.nc"
 !        VARNAME = "Clay"
 !        VARUNIT = "g m-3"
@@ -1532,8 +1535,8 @@ IF (use_mpi) THEN
 !        call calc_integral_and_mean_3d( sclag, lon_values, lat_values, lz, integral_value, mean_value )
 !        WRITE(NFSTDO, *) "'--------------------------------------------------'"
 !        WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
-!        WRITE(NFSTDO,'(A, E12.6, A)') " Global Averaged: ", mean_value, " g m-3"
-!        WRITE(NFSTDO,'(A, E12.6, A)') " Global Integrated: ", integral_value, " g"
+!        WRITE(NFSTDO,'(A, E12.5, A)') " Global Averaged: ", mean_value, " g m-3"
+!        WRITE(NFSTDO,'(A, E12.5, A)') " Global Integrated: ", integral_value, " g"
 !        WRITE(NFSTDO, *) "'--------------------------------------------------'"
 
 !        FILENAME = "spom.nc"
@@ -1550,8 +1553,8 @@ IF (use_mpi) THEN
 !        call calc_integral_and_mean_3d( spomg, lon_values, lat_values, lz, integral_value, mean_value )
 !        WRITE(NFSTDO, *) "'--------------------------------------------------'"
 !        WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
-!        WRITE(NFSTDO,'(A, E12.6, A)') " Global Averaged: ", mean_value, " mmol m-3"
-!        WRITE(NFSTDO,'(A, E12.6, A)') " Global Integrated: ", integral_value * 1.D-3, " mol"
+!        WRITE(NFSTDO,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
+!        WRITE(NFSTDO,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.D-3, " mol"
 !        WRITE(NFSTDO, *) "'--------------------------------------------------'"
 
 !        FILENAME = "scar.nc"
@@ -1568,8 +1571,8 @@ IF (use_mpi) THEN
 !        call calc_integral_and_mean_3d( scarg, lon_values, lat_values, lz, integral_value, mean_value )
 !        WRITE(NFSTDO, *) "'--------------------------------------------------'"
 !        WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
-!        WRITE(NFSTDO,'(A, E12.6, A)') " Global Averaged: ", mean_value, " mmol m-3"
-!        WRITE(NFSTDO,'(A, E12.6, A)') " Global Integrated: ", integral_value * 1.D-3, " mol"
+!        WRITE(NFSTDO,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
+!        WRITE(NFSTDO,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.D-3, " mol"
 !        WRITE(NFSTDO, *) "'--------------------------------------------------'"
 
 !        FILENAME = "sopa.nc"
@@ -1586,8 +1589,8 @@ IF (use_mpi) THEN
 !        call calc_integral_and_mean_3d( sopag, lon_values, lat_values, lz, integral_value, mean_value )
 !        WRITE(NFSTDO, *) "'--------------------------------------------------'"
 !        WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
-!        WRITE(NFSTDO,'(A, E12.6, A)') " Global Averaged: ", mean_value, " mmol m-3"
-!        WRITE(NFSTDO,'(A, E12.6, A)') " Global Integrated: ", integral_value * 1.D-3, " mol"
+!        WRITE(NFSTDO,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
+!        WRITE(NFSTDO,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.D-3, " mol"
 !        WRITE(NFSTDO, *) "'--------------------------------------------------'"
 
 !        FILENAME = "sage.nc"
@@ -1604,7 +1607,7 @@ IF (use_mpi) THEN
 !        call calc_integral_and_mean_3d( sageg, lon_values, lat_values, lz, integral_value, mean_value )
 !        WRITE(NFSTDO, *) "'--------------------------------------------------'"
 !        WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
-!        WRITE(NFSTDO,'(A, E12.6, A)') " Global Averaged: ", mean_value, " yr"
+!        WRITE(NFSTDO,'(A, E12.5, A)') " Global Averaged: ", mean_value, " yr"
 !        WRITE(NFSTDO, *) "'--------------------------------------------------'"
 
 !        FILENAME = "cnit.nc"
@@ -1621,8 +1624,8 @@ IF (use_mpi) THEN
 !        call calc_integral_and_mean_3d( cnitg, lon_values, lat_values, lz, integral_value, mean_value )
 !        WRITE(NFSTDO, *) "'--------------------------------------------------'"
 !        WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
-!        WRITE(NFSTDO,'(A, E12.6, A)') " Global Averaged: ", mean_value, " mmol m-3"
-!        WRITE(NFSTDO,'(A, E12.6, A)') " Global Integrated: ", integral_value * 1.D-3, " mol"
+!        WRITE(NFSTDO,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
+!        WRITE(NFSTDO,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.D-3, " mol"
 !        WRITE(NFSTDO, *) "'--------------------------------------------------'"
 
 !        FILENAME = "cdic.nc"
@@ -1639,8 +1642,8 @@ IF (use_mpi) THEN
 !        call calc_integral_and_mean_3d( cdicg, lon_values, lat_values, lz, integral_value, mean_value )
 !        WRITE(NFSTDO, *) "'--------------------------------------------------'"
 !        WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
-!        WRITE(NFSTDO,'(A, E12.6, A)') " Global Averaged: ", mean_value, " mmol m-3"
-!        WRITE(NFSTDO,'(A, E12.6, A)') " Global Integrated: ", integral_value * 1.D-3, " mol"
+!        WRITE(NFSTDO,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
+!        WRITE(NFSTDO,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.D-3, " mol"
 !        WRITE(NFSTDO, *) "'--------------------------------------------------'"
 
 !        FILENAME = "calk.nc"
@@ -1657,8 +1660,8 @@ IF (use_mpi) THEN
 !        call calc_integral_and_mean_3d( calkg, lon_values, lat_values, lz, integral_value, mean_value )
 !        WRITE(NFSTDO, *) "'--------------------------------------------------'"
 !        WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
-!        WRITE(NFSTDO,'(A, E12.6, A)') " Global Averaged: ", mean_value, " mmol m-3"
-!        WRITE(NFSTDO,'(A, E12.6, A)') " Global Integrated: ", integral_value * 1.D-3, " mol"
+!        WRITE(NFSTDO,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
+!        WRITE(NFSTDO,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.D-3, " mol"
 !        WRITE(NFSTDO, *) "'--------------------------------------------------'"
 
 !        FILENAME = "cdo2.nc"
@@ -1675,8 +1678,8 @@ IF (use_mpi) THEN
 !        call calc_integral_and_mean_3d( cdo2g, lon_values, lat_values, lz, integral_value, mean_value )
 !        WRITE(NFSTDO, *) "'--------------------------------------------------'"
 !        WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
-!        WRITE(NFSTDO,'(A, E12.6, A)') " Global Averaged: ", mean_value, " mmol m-3"
-!        WRITE(NFSTDO,'(A, E12.6, A)') " Global Integrated: ", integral_value * 1.D-3, " mol"
+!        WRITE(NFSTDO,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
+!        WRITE(NFSTDO,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.D-3, " mol"
 !        WRITE(NFSTDO, *) "'--------------------------------------------------'"
 
 !        FILENAME = "csil.nc"
@@ -1693,8 +1696,8 @@ IF (use_mpi) THEN
 !        call calc_integral_and_mean_3d( csilg, lon_values, lat_values, lz, integral_value, mean_value )
 !        WRITE(NFSTDO, *) "'--------------------------------------------------'"
 !        WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
-!        WRITE(NFSTDO,'(A, E12.6, A)') " Global Averaged: ", mean_value, " mmol m-3"
-!        WRITE(NFSTDO,'(A, E12.6, A)') " Global Integrated: ", integral_value * 1.D-3, " mol"
+!        WRITE(NFSTDO,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
+!        WRITE(NFSTDO,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.D-3, " mol"
 !        WRITE(NFSTDO, *) "'--------------------------------------------------'"
 
          FILENAME = "ficla.nc"
@@ -1711,8 +1714,8 @@ IF (use_mpi) THEN
          WRITE(9999, *) "'--------------------------------------------------'"
          WRITE(NFSTDO, *) "'--------------------------------------------------'"
          WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
-         WRITE(NFSTDO,'(A, E12.6, A)') " Global Averaged: ", mean_value, " g m-3 * cm s-1"
-         WRITE(NFSTDO,'(A, E12.6, A)') " Global Integrated: ", integral_value * 3.1536D+5, " g * yr-1"
+         WRITE(NFSTDO,'(A, E12.5, A)') " Global Averaged: ", mean_value, " g m-3 * cm s-1"
+         WRITE(NFSTDO,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536D+5, " g * yr-1"
          WRITE(NFSTDO, *) "'--------------------------------------------------'"
 
          FILENAME = "fipom.nc"
@@ -1728,8 +1731,8 @@ IF (use_mpi) THEN
          call calc_integral_and_mean_2d( fipomg, lon_values, lat_values, integral_value, mean_value )
          WRITE(NFSTDO, *) "'--------------------------------------------------'"
          WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
-         WRITE(NFSTDO,'(A, E12.6, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
-         WRITE(NFSTDO,'(A, E12.6, A)') " Global Integrated: ", integral_value * 3.1536D+2, " mol * yr-1"
+         WRITE(NFSTDO,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
+         WRITE(NFSTDO,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536D+2, " mol * yr-1"
          WRITE(NFSTDO, *) "'--------------------------------------------------'"
 
          FILENAME = "ficar.nc"
@@ -1745,8 +1748,8 @@ IF (use_mpi) THEN
          call calc_integral_and_mean_2d( ficarg, lon_values, lat_values, integral_value, mean_value )
          WRITE(NFSTDO, *) "'--------------------------------------------------'"
          WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
-         WRITE(NFSTDO,'(A, E12.6, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
-         WRITE(NFSTDO,'(A, E12.6, A)') " Global Integrated: ", integral_value * 3.1536D+2, " mol * yr-1"
+         WRITE(NFSTDO,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
+         WRITE(NFSTDO,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536D+2, " mol * yr-1"
          WRITE(NFSTDO, *) "'--------------------------------------------------'"
 
          FILENAME = "fiopa.nc"
@@ -1762,8 +1765,8 @@ IF (use_mpi) THEN
          call calc_integral_and_mean_2d( fiopag, lon_values, lat_values, integral_value, mean_value )
          WRITE(NFSTDO, *) "'--------------------------------------------------'"
          WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
-         WRITE(NFSTDO,'(A, E12.6, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
-         WRITE(NFSTDO,'(A, E12.6, A)') " Global Integrated: ", integral_value * 3.1536D+2, " mol * yr-1"
+         WRITE(NFSTDO,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
+         WRITE(NFSTDO,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536D+2, " mol * yr-1"
          WRITE(NFSTDO, *) "'--------------------------------------------------'"
 
 !        FILENAME = "focla.nc"
@@ -1893,126 +1896,134 @@ IF (use_mpi) THEN
 !        END DO
 !        call write_netcdf_3d(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
 
+!     -- Gtool output --
+         CHEAD  = ''
          CFILE  = 'scla'
+         CITEM  = 'scla'
          CTITLE = 'Clay'
          CUNIT  = 'g/m^3'
-         call write_gtoolfile(      YY,   SCLAG,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,  SDZDIM  )
+         call write_gtool_beta( CFILE, CHEAD, CITEM, CTITLE, CUNIT, NXDIM, NYDIM, SDZDIM, 1, SCLAG)
          CFILE  = 'spom'
+         CITEM  = 'spom'
          CTITLE = 'OrgM'
          CUNIT  = 'mmol/m^3'
-         call write_gtoolfile(      YY,   SPOMG,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,  SDZDIM  )
+         call write_gtool_beta( CFILE, CHEAD, CITEM, CTITLE, CUNIT, NXDIM, NYDIM, SDZDIM, 1, SPOMG)
          CFILE  = 'scar'
+         CITEM  = 'scar'
          CTITLE = 'CaCO3'
          CUNIT  = 'mmol/m^3'
-         call write_gtoolfile(      YY,   SCARG,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,  SDZDIM  )
+         call write_gtool_beta( CFILE, CHEAD, CITEM, CTITLE, CUNIT, NXDIM, NYDIM, SDZDIM, 1, SCARG)
          CFILE  = 'sopa'
+         CITEM  = 'sopa'
          CTITLE = 'SiO2'
          CUNIT  = 'mmol/m^3'
-         call write_gtoolfile(      YY,   SOPAG,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,  SDZDIM  )
+         call write_gtool_beta( CFILE, CHEAD, CITEM, CTITLE, CUNIT, NXDIM, NYDIM, SDZDIM, 1, SOPAG)
          CFILE  = 'sage'
+         CITEM  = 'sage'
          CTITLE = 'Age tracer'
          CUNIT  = 'year'
-         call write_gtoolfile(      YY,   SAGEG,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,  SDZDIM  )
+         call write_gtool_beta( CFILE, CHEAD, CITEM, CTITLE, CUNIT, NXDIM, NYDIM, SDZDIM, 1, SAGEG)
+
          CFILE  = 'cnit'
+         CITEM  = 'cnit'
          CTITLE = 'Phosphate'
          CUNIT  = 'mmol/m^3'
-         call write_gtoolfile(      YY,   CNITG,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,  SDZDIM  )
+         call write_gtool_beta( CFILE, CHEAD, CITEM, CTITLE, CUNIT, NXDIM, NYDIM, SDZDIM, 1, CNITG)
          CFILE  = 'cdic'
+         CITEM  = 'cdic'
          CTITLE = 'DIC'
          CUNIT  = 'mmol/m^3'
-         call write_gtoolfile(      YY,   CDICG,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,  SDZDIM  )
+         call write_gtool_beta( CFILE, CHEAD, CITEM, CTITLE, CUNIT, NXDIM, NYDIM, SDZDIM, 1, CDICG)
          CFILE  = 'calk'
+         CITEM  = 'calk'
          CTITLE = 'Alkalinity'
          CUNIT  = 'mmol/m^3'
-         call write_gtoolfile(      YY,   CALKG,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,  SDZDIM  )
-         CFILE  = 'csil'
-         CTITLE = 'Silicate'
-         CUNIT  = 'mmol/m^3'
-         call write_gtoolfile(      YY,   CSILG,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,  SDZDIM  )
+         call write_gtool_beta( CFILE, CHEAD, CITEM, CTITLE, CUNIT, NXDIM, NYDIM, SDZDIM, 1, CALKG)
          CFILE  = 'cdo2'
+         CITEM  = 'cdo2'
          CTITLE = 'Oxygen'
          CUNIT  = 'mmol/m^3'
-         call write_gtoolfile(      YY,   CDO2G,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,  SDZDIM  )
+         call write_gtool_beta( CFILE, CHEAD, CITEM, CTITLE, CUNIT, NXDIM, NYDIM, SDZDIM, 1, CDO2G)
+         CFILE  = 'csil'
+         CITEM  = 'csil'
+         CTITLE = 'Silicate'
+         CUNIT  = 'mmol/m^3'
+         call write_gtool_beta( CFILE, CHEAD, CITEM, CTITLE, CUNIT, NXDIM, NYDIM, SDZDIM, 1, CSILG)
+
          CFILE  = 'ficla'
+         CITEM  = 'ficla'
          CTITLE = 'Clay bottom flux'
          CUNIT  = 'g/m^3*cm/s'
-         call write_gtoolfile(      YY,  FICLAG,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,       1  )
+         call write_gtool_beta( CFILE, CHEAD, CITEM, CTITLE, CUNIT, NXDIM, NYDIM, 1, 1, FICLAG)
          CFILE  = 'fipom'
+         CITEM  = 'fipom'
          CTITLE = 'OrgM bottom flux'
          CUNIT  = 'mMol/m^3*cm/s'
-         call write_gtoolfile(      YY,  FIPOMG,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,       1  )
+         call write_gtool_beta( CFILE, CHEAD, CITEM, CTITLE, CUNIT, NXDIM, NYDIM, 1, 1, FIPOMG)
          CFILE  = 'ficar'
+         CITEM  = 'ficar'
          CTITLE = 'CaCO3 bottom flux'
          CUNIT  = 'mMol/m^3*cm/s'
-         call write_gtoolfile(      YY,  FICARG,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,       1  )
+         call write_gtool_beta( CFILE, CHEAD, CITEM, CTITLE, CUNIT, NXDIM, NYDIM, 1, 1, FICARG)
          CFILE  = 'fiopa'
+         CITEM  = 'fiopa'
          CTITLE = 'SiO2 bottom flux'
          CUNIT  = 'mMol/m^3*cm/s'
-         call write_gtoolfile(      YY,  FIOPAG,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,       1  )
+         call write_gtool_beta( CFILE, CHEAD, CITEM, CTITLE, CUNIT, NXDIM, NYDIM, 1, 1, FIOPAG)
+
          CFILE  = 'fopom'
+         CITEM  = 'fopom'
          CTITLE = 'OrgM diffusion'
          CUNIT  = 'mMol/m^3*cm/s'
-         call write_gtoolfile(      YY,  FOPOMG,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,       1  )
+         call write_gtool_beta( CFILE, CHEAD, CITEM, CTITLE, CUNIT, NXDIM, NYDIM, 1, 1, FOPOMG)
          CFILE  = 'focar'
+         CITEM  = 'focar'
          CTITLE = 'CaCO3 diffusion'
          CUNIT  = 'mMol/m^3*cm/s'
-         call write_gtoolfile(      YY,  FOCARG,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,       1  )
+         call write_gtool_beta( CFILE, CHEAD, CITEM, CTITLE, CUNIT, NXDIM, NYDIM, 1, 1, FOCARG)
          CFILE  = 'foopa'
+         CITEM  = 'foopa'
          CTITLE = 'SiO2 diffusion'
          CUNIT  = 'mMol/m^3*cm/s'
-         call write_gtoolfile(      YY,  FOOPAG,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,       1  )
+         call write_gtool_beta( CFILE, CHEAD, CITEM, CTITLE, CUNIT, NXDIM, NYDIM, 1, 1, FOOPAG)
+
          CFILE  = 'bfcla'
+         CITEM  = 'bfcla'
          CTITLE = 'Clay burial'
          CUNIT  = 'g/m^3*cm/s'
-         call write_gtoolfile(      YY,  BFCLAG,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,  SDZDIM  )
+         call write_gtool_beta( CFILE, CHEAD, CITEM, CTITLE, CUNIT, NXDIM, NYDIM, 1, 1, BFCLAG)
          CFILE  = 'bfpom'
+         CITEM  = 'bfpom'
          CTITLE = 'OrgM burial'
          CUNIT  = 'mMol/m^3*cm/s'
-         call write_gtoolfile(      YY,  BFPOMG,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,       1  )
+         call write_gtool_beta( CFILE, CHEAD, CITEM, CTITLE, CUNIT, NXDIM, NYDIM, 1, 1, BFPOMG)
          CFILE  = 'bfcar'
+         CITEM  = 'bfcar'
          CTITLE = 'CaCO3 burial'
          CUNIT  = 'mMol/m^3*cm/s'
-         call write_gtoolfile(      YY,  BFCARG,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,       1  )
+         call write_gtool_beta( CFILE, CHEAD, CITEM, CTITLE, CUNIT, NXDIM, NYDIM, 1, 1, BFCARG)
          CFILE  = 'bfopa'
+         CITEM  = 'bfopa'
          CTITLE = 'SiO2 burial'
          CUNIT  = 'mMol/m^3*cm/s'
-         call write_gtoolfile(      YY,  BFOPAG,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,       1  )
+         call write_gtool_beta( CFILE, CHEAD, CITEM, CTITLE, CUNIT, NXDIM, NYDIM, 1, 1, BFOPAG)
+
          CFILE  = 'w'
+         CITEM  = 'w'
          CTITLE = 'Sediment rate'
          CUNIT  = 'cm/s'
-         call write_gtoolfile(      YY,      WG,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM, SDZDIM+1 )
+         call write_gtool_beta( CFILE, CHEAD, CITEM, CTITLE, CUNIT, NXDIM, NYDIM, SDZDIM+1, 1, WG)
+
          CFILE  = 'cdc13'
+         CITEM  = 'cdc13'
          CTITLE = 'delta carbon-13'
          CUNIT  = 'permil'
-         call write_gtoolfile(      YY,  CDC13G,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,  SDZDIM  )
+         call write_gtool_beta( CFILE, CHEAD, CITEM, CTITLE, CUNIT, NXDIM, NYDIM, SDZDIM, 1, CDC13G)
          CFILE  = 'cdc14'
+         CITEM  = 'cdc14'
          CTITLE = 'Delta carbon-14'
          CUNIT  = 'permil'
-         call write_gtoolfile(      YY,  CDC14G,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,  SDZDIM  )
+         call write_gtool_beta( CFILE, CHEAD, CITEM, CTITLE, CUNIT, NXDIM, NYDIM, SDZDIM, 1, CDC14G)
 
          DO K = SKST, SKEN
             DO IJ = 1, NXYDIM

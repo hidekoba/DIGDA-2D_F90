@@ -131,7 +131,7 @@ contains
     character(len=*), intent(in) :: filename
     integer, intent(in) :: nx, ny, nz, nt
     double precision, intent(in) :: var(nx*ny, nz, nt)
-    double precision, :: vartmp(nx*ny*nz, nt)
+    double precision :: vartmp(nx*ny*nz, nt)
     character(len=16), intent(in) :: chead_orig(64, nt)
     character(len=16) :: chead(64)
     character(len=16), intent(in) :: citem
