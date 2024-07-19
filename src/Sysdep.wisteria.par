@@ -2,7 +2,10 @@ FC	= mpifrtpx
 
 #FFLAGS	= -Kfast -fw
 #FFLAGS	= -Kfast -fw -Knoauto -Nsave
-FFLAGS	= -Kfast -fw -Knoauto -Nsave -Knoautoobjstack -mcmodel=large
+#
+FFLAGS	= -O2 -Kfast -fw -Cpp -Koptmsg=2,ocl,options -Nlst=t -NRnotrap -mcmodel=large
+#FFLAGS	= -Kfast -fw -Knoauto -Nsave -Knoautoobjstack -mcmodel=large
+#
 #FFLAGS	= -Kfast,fp_precision -fw
 #FFLAGS	= -Kfast,fp_precision -fw -Knoauto -Nsave
 #FFLAGS	= -Kfast,fp_precision -fw -Knoauto -Nsave -Knoautoobjstack
