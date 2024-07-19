@@ -111,6 +111,11 @@ contains
       stop
     endif
 
+!   ! Deallocate arrays if they are already allocated
+!   if (allocated(lon_values)) deallocate(lon_values)
+!   if (allocated(lat_values)) deallocate(lat_values)
+!   if (allocated(var)) deallocate(var)
+
   end subroutine read_netcdf_2d
 
 
@@ -234,6 +239,12 @@ contains
       print *, 'Error occurred while closing the file.'
       stop
     endif
+
+    ! Deallocate arrays if they are already allocated
+    if (allocated(lon_values)) deallocate(lon_values)
+    if (allocated(lat_values)) deallocate(lat_values)
+    if (allocated(depth_values)) deallocate(depth_values)
+    if (allocated(var)) deallocate(var)
 
   end subroutine read_netcdf_3d
 

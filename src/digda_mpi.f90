@@ -8,8 +8,15 @@ module module_digda_mpi
   integer :: IERR, NPROCS, MYRANK
   integer :: IREQ, ISTATUS
  !integer, parameter :: NCPU = 12
-  integer, parameter :: NCPU = 16
+ !integer, parameter :: NCPU = 16
  !integer, parameter :: NCPU = 24
+ !integer, parameter :: NCPU = 45
+ !integer, parameter :: NCPU = 64
+  integer, parameter :: NCPU = 90 !! 2160x1080
+ !integer, parameter :: NCPU = 96
+ !integer, parameter :: NCPU = 180
+ !integer, parameter :: NCPU = 192
+  integer :: NSNDCT2D, NSNDCT3D, NSNDCW3D
   integer :: IRANK, ISIZE1, ISIZE2, ISIZE3, IIST, IIEN, IJKG
   integer :: ISEND1, ISEND2, ISEND3, ISEND4, ISEND5
   integer :: IRECV1, IRECV2, IRECV3, IRECV4, IRECV5
@@ -38,12 +45,6 @@ contains
         END IF
       END IF
 
-!     DO IRANK = 0, NPROCS-1
-!       call set_parallel_range( &
-!  &         1, NXYDIM, NPROCS, IRANK, &
-!  &         JJSTR(IRANK), JJEND(IRANK) &
-!  &    )
-!     END DO
     END IF
 
   end subroutine initialize_digda_mpi

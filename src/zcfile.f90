@@ -3,7 +3,7 @@ module module_zcfile
   implicit none
 
   integer, parameter :: NFSTDI = 5
-  integer, parameter :: NFSTDO = 6
+  integer, parameter :: NFSTDO = 998
   integer, parameter :: NFPARM = 7
 
   integer, parameter :: NFSOTS = 999
