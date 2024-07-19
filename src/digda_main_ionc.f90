@@ -313,8 +313,6 @@ END IF
 97 continue
       WRITE(NFSTDO, NMSDISO)
 
-      call fipp_start
-
 !     ### for Sediment Model ###
       SEDTNM(1)  = 'SCLA'
       SEDTNM(2)  = 'SPOM'
@@ -2452,8 +2450,6 @@ END IF
       END IF ! -- End of Output
 
       END DO ! -- End of Time integration
-
-      call fipp_stop
 
       end subroutine digda_main
 

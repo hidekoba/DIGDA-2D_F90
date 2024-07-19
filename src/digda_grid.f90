@@ -3,25 +3,11 @@ module module_digda_grid
   use module_digda_mpi
   implicit none
 
-! ! Declaration of parameters and variables
-! integer, parameter :: IROOT = 0
-! integer :: IERR, NPROCS, MYRANK
-! integer :: IREQ, ISTATUS
-!!integer, parameter :: NCPU = 12
-! integer, parameter :: NCPU = 16
-!!integer, parameter :: NCPU = 24
-! integer :: IRANK, ISIZE1, ISIZE2, ISIZE3, IIST, IIEN, IJKG
-! integer :: ISEND1, ISEND2, ISEND3, ISEND4, ISEND5
-! integer :: IRECV1, IRECV2, IRECV3, IRECV4, IRECV5
-! integer :: IREQ1, IREQ2, IREQ3, IREQ4, IREQ5
-! integer :: IREQ11, IREQ12, IREQ13, IREQ14, IREQ15
-! integer :: IREQ21, IREQ22, IREQ23, IREQ24, IREQ25
-! integer :: JJSTR(0:NCPU-1), JJEND(0:NCPU-1)
-
+  ! Declaration of parameters and variables
   integer, parameter :: BENFDM = 14
-  ! cla,pom,car,opa,age,tem,sal,nit,dic,alk,sil,do2,13dic,14dic,
+  ! cla,pom,car,opa,age,tem,sal,nit,dic,alk,sil,do2,13dic,14dic
   integer, parameter :: SEDTDM = 16
-  ! scla,spom,scar,sopa,sage,cnit,cdic,calk,csil,cdo2,s13pom,s13car,c13dic,s14pom,s14car,c14dic,
+  ! scla,spom,scar,sopa,sage,cnit,cdic,calk,csil,cdo2,s13pom,s13car,c13dic,s14pom,s14car,c14dic
 
   ! Vertical grid settings
   ! ZGRID_CONSTANT
@@ -109,21 +95,20 @@ module module_digda_grid
 !!integer, parameter :: NYDIM = 64
 !!integer, parameter :: NZDIM = 44
 
-  ! Grid_256x192
-  integer, parameter :: NXDIM = 256
-  integer, parameter :: NYDIM = 192
-  integer, parameter :: NZDIM = 44
+!!! Grid_256x192
+!!integer, parameter :: NXDIM = 256
+!!integer, parameter :: NYDIM = 192
+!!integer, parameter :: NZDIM = 44
 
 !!! Grid_360x180
 !!integer, parameter :: NXDIM = 360
 !!integer, parameter :: NYDIM = 180
 !!integer, parameter :: NZDIM = 44
 
-!!! Grid_2160x1080
-!!integer, parameter :: NXDIM = 2160
-!!integer, parameter :: NYDIM = 1080
-!!integer, parameter :: NZDIM = 44
-!!character(len=100), parameter :: bound_dir = "bound21601080/reversed_files"
+  ! Grid_2160x1080
+  integer, parameter :: NXDIM = 2160
+  integer, parameter :: NYDIM = 1080
+  integer, parameter :: NZDIM = 44
 
   character(len=100) :: bound_dir = 'not-specified/'
   namelist /nmocbc/ bound_dir
@@ -165,12 +150,5 @@ module module_digda_grid
   ! Missing value
   double precision, parameter :: rmiss = 999.00D0
  !double precision, parameter :: rmiss = 0.0000D0
-
-!  open(nfparm, file="PARAMET")
-!  rewind(nfparm)
-!  read(nfparm, nmocbc, end=99)
-!99 continue
-!  WRITE(*, *) trim(bound_dir)
-!  close(nmparm)
 
 end module module_digda_grid
