@@ -185,20 +185,15 @@ contains
 
     ! Sea-bottom Flux
     !   clay [g/m^3*cm/s], the others [mMol/m^3*cm/s]
-   !double precision :: FICLA(NXY),   FOCLA(NXY)
     double precision :: FICLA(NXY),   FOCLA(NXY)
     double precision :: FIPOM(NXY),   FOPOM(NXY)
     double precision :: FICAR(NXY),   FOCAR(NXY)
     double precision :: FIOPA(NXY),   FOOPA(NXY)
     double precision :: FIAGE(NXY)
-   !double precision :: FI13POM(NXY), FO13POM(NXY)
-    double precision :: FI13POM(NXY)
-   !double precision :: FI13CAR(NXY), FO13CAR(NXY)
-    double precision :: FI14CAR(NXY)
-   !double precision :: FI14POM(NXY), FO14POM(NXY)
-    double precision :: FI14POM(NXY)
-   !double precision :: FI13CAR(NXY), FO13CAR(NXY)
-    double precision :: FI14CAR(NXY)
+    double precision :: FI13POM(NXY), FO13POM(NXY)
+    double precision :: FI13CAR(NXY), FO13CAR(NXY)
+    double precision :: FI14POM(NXY), FO14POM(NXY)
+    double precision :: FI14CAR(NXY), FO14CAR(NXY)
 
     double precision :: FICLAG(NXYDIM), FOCLAG(NXYDIM)
     double precision :: FIPOMG(NXYDIM), FOPOMG(NXYDIM)
@@ -206,8 +201,8 @@ contains
     double precision :: FIOPAG(NXYDIM), FOOPAG(NXYDIM)
     double precision :: FIAGEG(NXYDIM), FOAGEG(NXYDIM)
     double precision :: FI13POMG(NXYDIM), FO13POMG(NXYDIM)
-    double precision :: FI14POMG(NXYDIM), FO14POMG(NXYDIM)
     double precision :: FI13CARG(NXYDIM), FO13CARG(NXYDIM)
+    double precision :: FI14POMG(NXYDIM), FO14POMG(NXYDIM)
     double precision :: FI14CARG(NXYDIM), FO14CARG(NXYDIM)
 
     ! Sea-bottom Flux [mMol/m^3*cm/s]
