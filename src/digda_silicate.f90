@@ -9,102 +9,101 @@
 !
 ! ---------------------------------------------------------------------
 
-module globals_digda_sio2l
+module globals_digda_silicate
   use module_zcfile
   use module_digda_grid
   implicit none
 
-  double precision :: RCOPA = 5.00D-3 !! 5.0*10-3 [cm3/mol/s]
-  logical :: ROPRID = .false. !! Ridgwell's DEI formulation ?
-  logical :: ROPARC = .true.  !! Archer's DEI formulation ?
-  namelist /NMSDOP/ RCOPA, ROPRID, ROPARC
+  double precision :: rcopa = 5.00d-3 !! 5.0*10-3 [cm3/mol/s]
+  logical :: roprid = .false. !! Ridgwell's DEI formulation ?
+  logical :: roparc = .true.  !! Archer's DEI formulation ?
+  namelist /nmsdop/ rcopa, roprid, roparc
 
-end module globals_digda_sio2l
+end module globals_digda_silicate
 
 ! =====================================================================
 
-module module_digda_sio2l
-  use globals_digda_sio2l
+module module_digda_silicate
+  use globals_digda_silicate
   implicit none
 contains
 
   subroutine set_digda_silicate
 
-    WRITE(NFSTDO, *) '*** Sediment : set_digda_silicate ***'
-    REWIND(NFPARM)
-    READ (NFPARM, NMSDOP, END=99)
+    write(nfstdo, *) '*** Sediment : set_digda_silicate ***'
+    rewind(nfparm)
+    read(nfparm, nmsdop, end=99)
 99 continue
-    WRITE(NFSTDO, NMSDOP)
+    write(nfstdo, nmsdop)
 
-    RCOPA  = RCOPA * 1.0D-9  !! [cm3/mol/s] --> [m3/mMol/s]
+    rcopa  = rcopa * 1.0d-9  !! [cm3/mol/s] --> [m3/mMol/s]
 
   end subroutine set_digda_silicate
 
-  subroutine calc_silicate_dissolution( &
-&   SOPA, CSIL, PCLA, POPA, TEM, &
-&   ROPA, SATSIL )
+  subroutine calc_silicate_dissolution( sopa, csil, pcla, popa, temp, & !! IN
+                                      & ropa, satsil                  ) !! OUT
 
-    double precision, intent(in) :: SOPA(NXY, SDZDIM)
-    double precision, intent(in) :: CSIL(NXY, SDZDIM)
-    double precision, intent(in) :: PCLA(NXY, SDZDIM)
-    double precision, intent(in) :: POPA(NXY, SDZDIM)
-    double precision, intent(in) :: TEM(NXY)
-    double precision, intent(out) :: ROPA(NXY, SDZDIM)
-    double precision, intent(out) :: SATSIL(NXY, SDZDIM)
+    double precision, intent(in) :: sopa(nxy, sdzdim)
+    double precision, intent(in) :: csil(nxy, sdzdim)
+    double precision, intent(in) :: pcla(nxy, sdzdim)
+    double precision, intent(in) :: popa(nxy, sdzdim)
+    double precision, intent(in) :: temp(nxy)
+    double precision, intent(out) :: ropa(nxy, sdzdim)
+    double precision, intent(out) :: satsil(nxy, sdzdim)
 
-    double precision :: GAMMAL(NXY, SDZDIM)
-    double precision :: PCO(NXY, SDZDIM)
-    double precision :: UO(NXY, SDZDIM)
-    double precision :: ETA1(NXY, SDZDIM), ETA2(NXY, SDZDIM)
-    double precision :: KO(NXY, SDZDIM)
+    double precision :: gammal(nxy, sdzdim)
+    double precision :: pco(nxy, sdzdim)
+    double precision :: uo(nxy, sdzdim)
+    double precision :: eta1(nxy, sdzdim), eta2(nxy, sdzdim)
+    double precision :: ko(nxy, sdzdim)
 
-    integer :: IJ, K
+    integer :: ij, k
 
-    DO K = SKST, SKEN
-      DO IJ = IJTSTR, IJTEND
-        IF ( SOPA(IJ, K) == 0.0D0 ) THEN
-          GAMMAL(IJ, K) = 0.2D0
-        ELSE
-          PCO(IJ, K) = PCLA(IJ, K) / POPA(IJ, K)
-          IF ( PCO(IJ, K) > 1.5D+1 ) THEN
-            GAMMAL(IJ, K) = 0.2D0
-          ELSE
-            GAMMAL(IJ, K) = 1.0D0 - ( ( 4.5D-2 * PCO(IJ, K) ) &
-   &                      ** 5.8D-1 )
-          END IF
-        END IF
-        SATSIL(IJ, K) = ( GAMMAL(IJ, K) * 1.0D+1 &
-   &      ** ( 6.44D0 - ( 9.68D+2 / ( 2.7315D+2 + TEM(IJ) ) ) ) )
-      END DO
-    END DO
+    do k = skst, sken
+      do ij = ijtstr, ijtend
+        if ( sopa(ij, k) == 0.0d0 ) then
+          gammal(ij, k) = 0.2d0
+        else
+          pco(ij, k) = pcla(ij, k) / popa(ij, k)
+          if ( pco(ij, k) > 1.5d+1 ) then
+            gammal(ij, k) = 0.2d0
+          else
+            gammal(ij, k) = 1.0d0 - ( ( 4.5d-2 * pco(ij, k) ) &
+   &                      ** 5.8d-1 )
+          end if
+        end if
+        satsil(ij, k) = ( gammal(ij, k) * 1.0d+1 &
+   &      ** ( 6.44d0 - ( 9.68d+2 / ( 2.7315d+2 + temp(ij) ) ) ) )
+      end do
+    end do
 
-    DO K = SKST, SKEN
-      DO IJ = IJTSTR, IJTEND
-        IF ( SOPA(IJ, K) /= 0.0D0 .and. &
-   &         CSIL(IJ, K) < SATSIL(IJ, K) ) THEN
-          IF (ROPRID) THEN
-            UO(IJ, K)   = 1.0D0 - ( CSIL(IJ, K) / SATSIL(IJ, K) )
-            ETA1(IJ, K) = 2.25D-1 * ( 1.0D0 + ( TEM(IJ) / 1.5D+1 ) ) &
-   &                    * UO(IJ, K) +  7.75D-1 &
-   &                    * ( ( ( ( 1.0D0 + ( TEM(IJ) / 4.0D+2 ) ) &
-   &                    ** 4.0D0 ) * UO(IJ, K) ) ** 9.25D0 )
-            ETA2(IJ, K) = 2.6D-1 + 7.4D-1 &
-   &                    * EXP( - LZ(K) / 7.0D-2 )
-            KO(IJ, K)   = 5.0D-2 + 5.5D-2 &
-   &                    * ( ( 1.64D-2 + PCO(IJ, K) ) &
-   &                    ** ( - 7.5D-1 ) )
-            ROPA(IJ, K) = ETA1(IJ, K) * ETA2(IJ, K) * KO(IJ, K) &
-   &                    / 3.1536D+7
-          ELSE IF (ROPARC) THEN
-            ROPA(IJ, K) = RCOPA &
-   &          * ( SATSIL(IJ, K) - CSIL(IJ, K) )
-          END IF
-        ELSE
-          ROPA(IJ, K) = 0.0D0
-        END IF
-      END DO
-    END DO
+    do k = skst, sken
+      do ij = ijtstr, ijtend
+        if ( sopa(ij, k) /= 0.0d0 .and. &
+   &         csil(ij, k) < satsil(ij, k) ) then
+          if (roprid) then
+            uo(ij, k)   = 1.0d0 - ( csil(ij, k) / satsil(ij, k) )
+            eta1(ij, k) = 2.25d-1 * ( 1.0d0 + ( temp(ij) / 1.5d+1 ) ) &
+   &                    * uo(ij, k) +  7.75d-1 &
+   &                    * ( ( ( ( 1.0d0 + ( temp(ij) / 4.0d+2 ) ) &
+   &                    ** 4.0d0 ) * uo(ij, k) ) ** 9.25d0 )
+            eta2(ij, k) = 2.6d-1 + 7.4d-1 &
+   &                    * exp( - lz(k) / 7.0d-2 )
+            ko(ij, k)   = 5.0d-2 + 5.5d-2 &
+   &                    * ( ( 1.64d-2 + pco(ij, k) ) &
+   &                    ** ( - 7.5d-1 ) )
+            ropa(ij, k) = eta1(ij, k) * eta2(ij, k) * ko(ij, k) &
+   &                    / 3.1536d+7
+          else if (roparc) then
+            ropa(ij, k) = rcopa &
+   &          * ( satsil(ij, k) - csil(ij, k) )
+          end if
+        else
+          ropa(ij, k) = 0.0d0
+        end if
+      end do
+    end do
 
   end subroutine calc_silicate_dissolution
 
-end module module_digda_sio2l
+end module module_digda_silicate

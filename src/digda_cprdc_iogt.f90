@@ -18,48 +18,48 @@ module globals_digda_cprdc
 !   Time
 ! ==================================================
 
-      INTEGER   TSTR, TEND, TENDYR
-      PARAMETER (TSTR   =      1)
-      PARAMETER (TENDYR =      1)  !!      10 [yr]
-!     PARAMETER (TENDYR =     10)  !!      10 [yr]
-!     PARAMETER (TENDYR =     20)  !!      20 [yr]
-!     PARAMETER (TENDYR =     30)  !!      30 [yr]
-!     PARAMETER (TENDYR =     40)  !!      40 [yr]
-!     PARAMETER (TENDYR =     50)  !!      50 [yr]
-!     PARAMETER (TENDYR =    100)  !!     100 [yr]
-!     PARAMETER (TENDYR =    200)  !!     200 [yr]
-!     PARAMETER (TENDYR =    300)  !!     300 [yr]
-!     PARAMETER (TENDYR =    400)  !!     400 [yr]
-!     PARAMETER (TENDYR =    500)  !!     500 [yr]
-!     PARAMETER (TENDYR =   1000)  !!   1,000 [yr]
-!     PARAMETER (TENDYR =   2000)  !!   2,000 [yr]
-!     PARAMETER (TENDYR =   3000)  !!   3,000 [yr]
-!     PARAMETER (TENDYR =   4000)  !!   4,000 [yr]
-!     PARAMETER (TENDYR =   5000)  !!   5,000 [yr]
-!     PARAMETER (TENDYR =  10000)  !!  10,000 [yr]
-!     PARAMETER (TENDYR =  20000)  !!  20,000 [yr]
-!     PARAMETER (TENDYR =  30000)  !!  30,000 [yr]
-!     PARAMETER (TENDYR =  40000)  !!  40,000 [yr]
-!     PARAMETER (TENDYR =  50000)  !!  50,000 [yr]
-!     PARAMETER (TENDYR = 100000)  !! 100,000 [yr]
-!     PARAMETER (TENDYR = 200000)  !! 200,000 [yr]
-!     PARAMETER (TENDYR = 300000)  !! 300,000 [yr]
-!     PARAMETER (TENDYR = 400000)  !! 400,000 [yr]
-!     PARAMETER (TENDYR = 500000)  !! 500,000 [yr]
-      PARAMETER (TEND    = TENDYR / TSYR )
-!     PARAMETER (TEND    =      1 )
+      INTEGER   tstr, tend, tendyr
+      PARAMETER (tstr   =      1)
+      PARAMETER (tendyr =      1)  !!      10 [yr]
+!     PARAMETER (tendyr =     10)  !!      10 [yr]
+!     PARAMETER (tendyr =     20)  !!      20 [yr]
+!     PARAMETER (tendyr =     30)  !!      30 [yr]
+!     PARAMETER (tendyr =     40)  !!      40 [yr]
+!     PARAMETER (tendyr =     50)  !!      50 [yr]
+!     PARAMETER (tendyr =    100)  !!     100 [yr]
+!     PARAMETER (tendyr =    200)  !!     200 [yr]
+!     PARAMETER (tendyr =    300)  !!     300 [yr]
+!     PARAMETER (tendyr =    400)  !!     400 [yr]
+!     PARAMETER (tendyr =    500)  !!     500 [yr]
+!     PARAMETER (tendyr =   1000)  !!   1,000 [yr]
+!     PARAMETER (tendyr =   2000)  !!   2,000 [yr]
+!     PARAMETER (tendyr =   3000)  !!   3,000 [yr]
+!     PARAMETER (tendyr =   4000)  !!   4,000 [yr]
+!     PARAMETER (tendyr =   5000)  !!   5,000 [yr]
+!     PARAMETER (tendyr =  10000)  !!  10,000 [yr]
+!     PARAMETER (tendyr =  20000)  !!  20,000 [yr]
+!     PARAMETER (tendyr =  30000)  !!  30,000 [yr]
+!     PARAMETER (tendyr =  40000)  !!  40,000 [yr]
+!     PARAMETER (tendyr =  50000)  !!  50,000 [yr]
+!     PARAMETER (tendyr = 100000)  !! 100,000 [yr]
+!     PARAMETER (tendyr = 200000)  !! 200,000 [yr]
+!     PARAMETER (tendyr = 300000)  !! 300,000 [yr]
+!     PARAMETER (tendyr = 400000)  !! 400,000 [yr]
+!     PARAMETER (tendyr = 500000)  !! 500,000 [yr]
+      PARAMETER (tend    = tendyr / tsyr )
+!     PARAMETER (tend    =      1 )
 
-      INTEGER   TOUT, TOUTYR
-      PARAMETER (TOUTYR  =     120000)
-      PARAMETER (TOUT    = TOUTYR / TSYR )
+      INTEGER   tout, toutyr
+      PARAMETER (toutyr  =     120000)
+      PARAMETER (tout    = toutyr / tsyr )
 
 ! ==================================================
 !   Sediments
 ! ==================================================
 
-      REAL*8 SDTX(NXYDIM, SDZDIM, SEDTDM)
+      REAL*8 SDTX(nxydim, sdzdim, sedtdm)
       SAVE   SDTX
-      REAL*8 SDTXBUF(NXDIM, NYDIM, SDZDIM, SEDTDM)
+      REAL*8 SDTXBUF(nxdim, nydim, sdzdim, sedtdm)
 
 ! --------------------------------------------------
 !   Particles
@@ -68,46 +68,46 @@ module globals_digda_cprdc
 
 !-- Concentration :
 !      clay [g/m^3], pom, caco3, opal [mMol/m^3], agetracer [yr]
-      REAL*8 SCLA(NXY, SDZ),   SNCLA(NXY, SDZ)
-      REAL*8 SPOM(NXY, SDZ),   SNPOM(NXY, SDZ)
-      REAL*8 SCAR(NXY, SDZ),   SNCAR(NXY, SDZ)
-      REAL*8 SOPA(NXY, SDZ),   SNOPA(NXY, SDZ)
-      REAL*8 SAGE(NXY, SDZ),   SNAGE(NXY, SDZ)
-      REAL*8 S13POM(NXY, SDZ), SN13POM(NXY, SDZ)
-      REAL*8 S14POM(NXY, SDZ), SN14POM(NXY, SDZ)
-      REAL*8 S13CAR(NXY, SDZ), SN13CAR(NXY, SDZ)
-      REAL*8 S14CAR(NXY, SDZ), SN14CAR(NXY, SDZ)
-      REAL*8 SCLAG(NXYDIM, SDZDIM)
-      REAL*8 SPOMG(NXYDIM, SDZDIM)
-      REAL*8 SCARG(NXYDIM, SDZDIM)
-      REAL*8 SOPAG(NXYDIM, SDZDIM)
-      REAL*8 SAGEG(NXYDIM, SDZDIM)
-      REAL*8 S13POMG(NXYDIM, SDZDIM)
-      REAL*8 S14POMG(NXYDIM, SDZDIM)
-      REAL*8 S13CARG(NXYDIM, SDZDIM)
-      REAL*8 S14CARG(NXYDIM, SDZDIM)
+      REAL*8 scla(nxy, sdz),   sncla(nxy, sdz)
+      REAL*8 spom(nxy, sdz),   snpom(nxy, sdz)
+      REAL*8 scar(nxy, sdz),   sncar(nxy, sdz)
+      REAL*8 sopa(nxy, sdz),   snopa(nxy, sdz)
+      REAL*8 sage(nxy, sdz),   snage(nxy, sdz)
+      REAL*8 s13pom(nxy, sdz), sn13pom(nxy, sdz)
+      REAL*8 s14pom(nxy, sdz), sn14pom(nxy, sdz)
+      REAL*8 s13car(nxy, sdz), sn13car(nxy, sdz)
+      REAL*8 s14car(nxy, sdz), sn14car(nxy, sdz)
+      REAL*8 sclag(nxydim, sdzdim)
+      REAL*8 spomg(nxydim, sdzdim)
+      REAL*8 scarg(nxydim, sdzdim)
+      REAL*8 sopag(nxydim, sdzdim)
+      REAL*8 sageg(nxydim, sdzdim)
+      REAL*8 s13pomg(nxydim, sdzdim)
+      REAL*8 s14pomg(nxydim, sdzdim)
+      REAL*8 s13carg(nxydim, sdzdim)
+      REAL*8 s14carg(nxydim, sdzdim)
 
 !-- Weight percent [%] :
-      REAL*8 PCLA(NXY, SDZ)
-      REAL*8 PPOM(NXY, SDZ)
-      REAL*8 PCAR(NXY, SDZ)
-      REAL*8 POPA(NXY, SDZ)
-      REAL*8 WT(NXY, SDZ)
-      REAL*8 PCLAG(NXYDIM, SDZDIM)
-      REAL*8 PPOMG(NXYDIM, SDZDIM)
-      REAL*8 PCARG(NXYDIM, SDZDIM)
-      REAL*8 POPAG(NXYDIM, SDZDIM)
-      REAL*8 WTG(NXYDIM, SDZDIM)
+      REAL*8 pcla(nxy, sdz)
+      REAL*8 ppom(nxy, sdz)
+      REAL*8 pcar(nxy, sdz)
+      REAL*8 popa(nxy, sdz)
+      REAL*8 wt(nxy, sdz)
+      REAL*8 pclag(nxydim, sdzdim)
+      REAL*8 ppomg(nxydim, sdzdim)
+      REAL*8 pcarg(nxydim, sdzdim)
+      REAL*8 popag(nxydim, sdzdim)
+      REAL*8 wtg(nxydim, sdzdim)
 
 !-- Dissolution rate [1/s], Dissolution term [mMol/m^3/s] :
-      REAL*8 RCLA(NXY, SDZ),   TRCLA(NXY, SDZ)
-      REAL*8 RPOM(NXY, SDZ),   TRPOM(NXY, SDZ)
-      REAL*8 RCAR(NXY, SDZ),   TRCAR(NXY, SDZ)
-      REAL*8 ROPA(NXY, SDZ),   TROPA(NXY, SDZ)
-      REAL*8 R13POM(NXY, SDZ), TR13POM(NXY, SDZ)
-      REAL*8 R14POM(NXY, SDZ), TR14POM(NXY, SDZ)
-      REAL*8 R13CAR(NXY, SDZ), TR13CAR(NXY, SDZ)
-      REAL*8 R14CAR(NXY, SDZ), TR14CAR(NXY, SDZ)
+      REAL*8 rcla(nxy, sdz),   trcla(nxy, sdz)
+      REAL*8 rpom(nxy, sdz),   trpom(nxy, sdz)
+      REAL*8 rcar(nxy, sdz),   trcar(nxy, sdz)
+      REAL*8 ropa(nxy, sdz),   tropa(nxy, sdz)
+      REAL*8 r13pom(nxy, sdz), tr13pom(nxy, sdz)
+      REAL*8 r14pom(nxy, sdz), tr14pom(nxy, sdz)
+      REAL*8 r13car(nxy, sdz), tr13car(nxy, sdz)
+      REAL*8 r14car(nxy, sdz), tr14car(nxy, sdz)
 
 ! --------------------------------------------------
 !   Dissolved material
@@ -116,140 +116,140 @@ module globals_digda_cprdc
 ! --------------------------------------------------
 
 !-- Concentration [mMol/m^3] :
-      REAL*8 CNIT(NXY, SDZ),   CNNIT(NXY, SDZ)
-      REAL*8 CDIC(NXY, SDZ),   CNDIC(NXY, SDZ)
-      REAL*8 CALK(NXY, SDZ),   CNALK(NXY, SDZ)
-      REAL*8 CDO2(NXY, SDZ),   CNDO2(NXY, SDZ)
-      REAL*8 CSIL(NXY, SDZ),   CNSIL(NXY, SDZ)
-      REAL*8 C13DIC(NXY, SDZ), CN13DIC(NXY, SDZ)
-      REAL*8 C14DIC(NXY, SDZ), CN14DIC(NXY, SDZ)
-      REAL*8 CDC13(NXY, SDZ),  CDC14(NXY, SDZ)
-      REAL*8 CCO32(NXY, SDZ)
-      REAL*8 SATCO32(NXY)
-      REAL*8 SATSIL(NXY,SDZ)
-      REAL*8 CNITG(NXYDIM, SDZDIM)
-      REAL*8 CDICG(NXYDIM, SDZDIM)
-      REAL*8 CALKG(NXYDIM, SDZDIM)
-      REAL*8 CDO2G(NXYDIM, SDZDIM)
-      REAL*8 CSILG(NXYDIM, SDZDIM)
-      REAL*8 C13DICG(NXYDIM, SDZDIM)
-      REAL*8 C14DICG(NXYDIM, SDZDIM)
-      REAL*8 CDC13G(NXYDIM, SDZDIM)
-      REAL*8 CDC14G(NXYDIM, SDZDIM)
-      REAL*8 CCO32G(NXYDIM, SDZDIM)
-      REAL*8 SATCO32G(NXYDIM)
-      REAL*8 SATSILG(NXYDIM,SDZDIM)
+      REAL*8 cnit(nxy, sdz),   cnnit(nxy, sdz)
+      REAL*8 cdic(nxy, sdz),   cndic(nxy, sdz)
+      REAL*8 calk(nxy, sdz),   cnalk(nxy, sdz)
+      REAL*8 cdo2(nxy, sdz),   cndo2(nxy, sdz)
+      REAL*8 csil(nxy, sdz),   cnsil(nxy, sdz)
+      REAL*8 c13dic(nxy, sdz), cn13dic(nxy, sdz)
+      REAL*8 c14dic(nxy, sdz), cn14dic(nxy, sdz)
+      REAL*8 cdc13(nxy, sdz),  cdc14(nxy, sdz)
+      REAL*8 cco32(nxy, sdz)
+      REAL*8 satco32(nxy)
+      REAL*8 satsil(nxy,sdz)
+      REAL*8 cnitg(nxydim, sdzdim)
+      REAL*8 cdicg(nxydim, sdzdim)
+      REAL*8 calkg(nxydim, sdzdim)
+      REAL*8 cdo2g(nxydim, sdzdim)
+      REAL*8 csilg(nxydim, sdzdim)
+      REAL*8 c13dicg(nxydim, sdzdim)
+      REAL*8 c14dicg(nxydim, sdzdim)
+      REAL*8 cdc13g(nxydim, sdzdim)
+      REAL*8 cdc14g(nxydim, sdzdim)
+      REAL*8 cco32g(nxydim, sdzdim)
+      REAL*8 satco32g(nxydim)
+      REAL*8 satsilg(nxydim,sdzdim)
 
 !-- Concentration (bottom water) :
 !      temp [C], salinity [psu], the others [mMol/m^3]
-      REAL*8 BWTEM(NXY)
-      REAL*8 BWSAL(NXY)
-      REAL*8 BWNIT(NXY)
-      REAL*8 BWDIC(NXY)
-      REAL*8 BWALK(NXY)
-      REAL*8 BWDO2(NXY)
-      REAL*8 BWSIL(NXY)
-      REAL*8 BW13DIC(NXY)
-      REAL*8 BW14DIC(NXY)
-      REAL*8 BWTEMG(NXYDIM)
-      REAL*8 BWSALG(NXYDIM)
-      REAL*8 BWNITG(NXYDIM)
-      REAL*8 BWDICG(NXYDIM)
-      REAL*8 BWALKG(NXYDIM)
-      REAL*8 BWDO2G(NXYDIM)
-      REAL*8 BWSILG(NXYDIM)
-      REAL*8 BW13DICG(NXYDIM)
-      REAL*8 BW14DICG(NXYDIM)
+      REAL*8 bwtem(nxy)
+      REAL*8 bwsal(nxy)
+      REAL*8 bwnit(nxy)
+      REAL*8 bwdic(nxy)
+      REAL*8 bwalk(nxy)
+      REAL*8 bwdo2(nxy)
+      REAL*8 bwsil(nxy)
+      REAL*8 bw13dic(nxy)
+      REAL*8 bw14dic(nxy)
+      REAL*8 bwtemg(nxydim)
+      REAL*8 bwsalg(nxydim)
+      REAL*8 bwnitg(nxydim)
+      REAL*8 bwdicg(nxydim)
+      REAL*8 bwalkg(nxydim)
+      REAL*8 bwdo2g(nxydim)
+      REAL*8 bwsilg(nxydim)
+      REAL*8 bw13dicg(nxydim)
+      REAL*8 bw14dicg(nxydim)
 
 !-- Concentration (total) :
 !      total phosphorous [mMol/m^3], total silicon [mMol/m^3]
-      REAL*8 PT(NXY)
-      REAL*8 SIT(NXY)
+      REAL*8 PT(nxy)
+      REAL*8 SIT(nxy)
 
 !-- Dissolution term [mMol/m^3/s] :
-      REAL*8 TRNIT(NXY, SDZ)
-      REAL*8 TRDIC(NXY, SDZ)
-      REAL*8 TRALK(NXY, SDZ)
-      REAL*8 TRDO2(NXY, SDZ)
-      REAL*8 TRSIL(NXY, SDZ)
-      REAL*8 TR13DIC(NXY, SDZ)
-      REAL*8 TR14DIC(NXY, SDZ)
+      REAL*8 trnit(nxy, sdz)
+      REAL*8 trdic(nxy, sdz)
+      REAL*8 tralk(nxy, sdz)
+      REAL*8 trdo2(nxy, sdz)
+      REAL*8 trsil(nxy, sdz)
+      REAL*8 tr13dic(nxy, sdz)
+      REAL*8 tr14dic(nxy, sdz)
 
 !-- Sea-bottom Flux :
 !      clay [g/m^3*cm/s], the others [mMol/m^3*cm/s]
-      REAL*8 FICLA(NXY),   FOCLA(NXY)
-      REAL*8 FIPOM(NXY),   FOPOM(NXY)
-      REAL*8 FICAR(NXY),   FOCAR(NXY)
-      REAL*8 FIOPA(NXY),   FOOPA(NXY)
-      REAL*8 FIAGE(NXY)
-      REAL*8 FI13POM(NXY), FO13POM(NXY)
-      REAL*8 FI14POM(NXY), FO14POM(NXY)
-      REAL*8 FI13CAR(NXY), FO13CAR(NXY)
-      REAL*8 FI14CAR(NXY), FO14CAR(NXY)
-      REAL*8 FICLAG(NXYDIM), FOCLAG(NXYDIM)
-      REAL*8 FIPOMG(NXYDIM), FOPOMG(NXYDIM)
-      REAL*8 FICARG(NXYDIM), FOCARG(NXYDIM)
-      REAL*8 FIOPAG(NXYDIM), FOOPAG(NXYDIM)
-      REAL*8 FIAGEG(NXYDIM), FOAGEG(NXYDIM)
-      REAL*8 FI13POMG(NXYDIM), FO13POMG(NXYDIM)
-      REAL*8 FI14POMG(NXYDIM), FO14POMG(NXYDIM)
-      REAL*8 FI13CARG(NXYDIM), FO13CARG(NXYDIM)
-      REAL*8 FI14CARG(NXYDIM), FO14CARG(NXYDIM)
+      REAL*8 ficla(nxy),   focla(nxy)
+      REAL*8 fipom(nxy),   fopom(nxy)
+      REAL*8 ficar(nxy),   focar(nxy)
+      REAL*8 fiopa(nxy),   foopa(nxy)
+      REAL*8 fiage(nxy)
+      REAL*8 fi13pom(nxy), fo13pom(nxy)
+      REAL*8 fi14pom(nxy), fo14pom(nxy)
+      REAL*8 fi13car(nxy), fo13car(nxy)
+      REAL*8 fi14car(nxy), fo14car(nxy)
+      REAL*8 ficlag(nxydim), foclag(nxydim)
+      REAL*8 fipomg(nxydim), fopomg(nxydim)
+      REAL*8 ficarg(nxydim), focarg(nxydim)
+      REAL*8 fiopag(nxydim), foopag(nxydim)
+      REAL*8 fiageg(nxydim), foageg(nxydim)
+      REAL*8 fi13pomg(nxydim), fo13pomg(nxydim)
+      REAL*8 fi14pomg(nxydim), fo14pomg(nxydim)
+      REAL*8 fi13carg(nxydim), fo13carg(nxydim)
+      REAL*8 fi14carg(nxydim), fo14carg(nxydim)
 
 !-- Sea-bottom Flux [mMol/m^3*cm/s] :
-      REAL*8 FINIT(NXY),   FONIT(NXY)
-      REAL*8 FIDIC(NXY),   FODIC(NXY)
-      REAL*8 FIALK(NXY),   FOALK(NXY)
-      REAL*8 FIDO2(NXY),   FODO2(NXY)
-      REAL*8 FISIL(NXY),   FOSIL(NXY)
-      REAL*8 FI13DIC(NXY), FO13DIC(NXY)
-      REAL*8 FI14DIC(NXY), FO14DIC(NXY)
+      REAL*8 finit(nxy),   fonit(nxy)
+      REAL*8 fidic(nxy),   fodic(nxy)
+      REAL*8 fialk(nxy),   foalk(nxy)
+      REAL*8 fido2(nxy),   fodo2(nxy)
+      REAL*8 fisil(nxy),   fosil(nxy)
+      REAL*8 fi13dic(nxy), fo13dic(nxy)
+      REAL*8 fi14dic(nxy), fo14dic(nxy)
 
 !-- Sediment-bottom Flux :
 !      clay [g/m^3*cm/s], the others [mMol/m^3*cm/s]
-      REAL*8 BFCLA(NXY)
-      REAL*8 BFPOM(NXY)
-      REAL*8 BFCAR(NXY)
-      REAL*8 BFOPA(NXY)
-      REAL*8 BF13POM(NXY)
-      REAL*8 BF14POM(NXY)
-      REAL*8 BF13CAR(NXY)
-      REAL*8 BF14CAR(NXY)
-      REAL*8 BFCLAG(NXYDIM)
-      REAL*8 BFPOMG(NXYDIM)
-      REAL*8 BFCARG(NXYDIM)
-      REAL*8 BFOPAG(NXYDIM)
-      REAL*8 BF13POMG(NXYDIM)
-      REAL*8 BF14POMG(NXYDIM)
-      REAL*8 BF13CARG(NXYDIM)
-      REAL*8 BF14CARG(NXYDIM)
+      REAL*8 bfcla(nxy)
+      REAL*8 bfpom(nxy)
+      REAL*8 bfcar(nxy)
+      REAL*8 bfopa(nxy)
+      REAL*8 bf13pom(nxy)
+      REAL*8 bf14pom(nxy)
+      REAL*8 bf13car(nxy)
+      REAL*8 bf14car(nxy)
+      REAL*8 bfclag(nxydim)
+      REAL*8 bfpomg(nxydim)
+      REAL*8 bfcarg(nxydim)
+      REAL*8 bfopag(nxydim)
+      REAL*8 bf13pomg(nxydim)
+      REAL*8 bf14pomg(nxydim)
+      REAL*8 bf13carg(nxydim)
+      REAL*8 bf14carg(nxydim)
 
 !-- Density, Molar mass :
 !      Density [g/cm^3], Molar mass [g/Mol],
 !      Molar mass / Density [cm^3/Mol]
-      REAL*8 RHOCLA, RHOPOM, RHOCAR, RHOOPA
-      REAL*8 MOLCLA, MOLPOM, MOLCAR, MOLOPA
-      REAL*8 MCLA,   MPOM,   MCAR,   MOPA
-      SAVE   RHOCLA, RHOPOM, RHOCAR, RHOOPA
-      SAVE   MOLCLA, MOLPOM, MOLCAR, MOLOPA
-      SAVE   MCLA,   MPOM,   MCAR,   MOPA
-      DATA   RHOCLA, RHOPOM, RHOCAR, RHOOPA &
-     &    / 2.60D0, 2.60D0, 2.60D0, 2.60D0 /
+      REAL*8 rhocla, rhopom, rhocar, rhoopa
+      REAL*8 molcla, molpom, molcar, molopa
+      REAL*8 mcla,   mpom,   mcar,   mopa
+      SAVE   rhocla, rhopom, rhocar, rhoopa
+      SAVE   molcla, molpom, molcar, molopa
+      SAVE   mcla,   mpom,   mcar,   mopa
+      DATA   rhocla, rhopom, rhocar, rhoopa &
+     &    / 2.60d0, 2.60d0, 2.60d0, 2.60d0 /
           !! 2.6, 2.6, 2.6, 2.6 [g/cm^3]
-      DATA   MOLCLA, MOLPOM, MOLCAR, MOLOPA &
-     &    / 430.0D0, 12.0D0, 100.0D0,  60.0D0 /
+      DATA   molcla, molpom, molcar, molopa &
+     &    / 430.0d0, 12.0d0, 100.0d0,  60.0d0 /
           !! 430, 12, 100, 60 [g/Mol]
-      REAL*8 RHO13POM, RHO14POM, RHO13CAR, RHO14CAR
-      REAL*8 MOL13POM, MOL14POM, MOL13CAR, MOL14CAR
-      REAL*8 M13POM,   M14POM,   M13CAR,   M14CAR
-      SAVE   RHO13POM, RHO14POM, RHO13CAR, RHO14CAR
-      SAVE   MOL13POM, MOL14POM, MOL13CAR, MOL14CAR
-      SAVE   M13POM,   M14POM,   M13CAR,   M14CAR
-      DATA   RHO13POM, RHO14POM, RHO13CAR, RHO14CAR &
-     &    / 2.60D0, 2.60D0, 2.60D0, 2.60D0 /
+      REAL*8 rho13pom, rho14pom, rho13car, rho14car
+      REAL*8 mol13pom, mol14pom, mol13car, mol14car
+      REAL*8 m13pom,   m14pom,   m13car,   m14car
+      SAVE   rho13pom, rho14pom, rho13car, rho14car
+      SAVE   mol13pom, mol14pom, mol13car, mol14car
+      SAVE   m13pom,   m14pom,   m13car,   m14car
+      DATA   rho13pom, rho14pom, rho13car, rho14car &
+     &    / 2.60d0, 2.60d0, 2.60d0, 2.60d0 /
           !! 2.6, 2.6, 2.6, 2.6 [g/cm^3]
-      DATA   MOL13POM, MOL14POM, MOL13CAR, MOL14CAR &
-     &    /  13.0D0, 14.0D0, 101.0D0, 102.0D0 /
+      DATA   mol13pom, mol14pom, mol13car, mol14car &
+     &    /  13.0d0, 14.0d0, 101.0d0, 102.0d0 /
           !! 13, 14, 101, 102 [g/Mol]
 
 !-- Redfield ratio :
@@ -257,87 +257,87 @@ module globals_digda_cprdc
           !! Fe:P, P:P, N:P, C:P, O:P
       SAVE   FP, PP, NP, CP, OP
       DATA   FP, PP, NP, CP, OP &
-     &    / 4.70D-4, 1.0D0, 16.0D0, 117.0D0, 170.0D0 /
+     &    / 4.70d-4, 1.0d0, 16.0d0, 117.0d0, 170.0d0 /
           !! 0.00047, 1, 16, 117, 170
 
 !-- Advection, Diffusion :
 !      Sedimentation rate
-      REAL*8 W(NXY, SDZ+1)
-      REAL*8 WG(NXYDIM, SDZDIM+1)
+      REAL*8 w(nxy, sdz+1)
+      REAL*8 WG(nxydim, sdzdim+1)
 !      Porosity
-      REAL*8 PHI0, Z0
-      SAVE   PHI0, Z0
-      DATA   PHI0, Z0 &
-     &    / 0.9D0, 1.823D0 /
+      REAL*8 phi0, z0
+      SAVE   phi0, z0
+      DATA   phi0, z0 &
+     &    / 0.9d0, 1.823d0 /
           !! 0.9, 1.823 [m]
-      REAL*8 PHI(SDZ), PHII(SDZ+1)
-      SAVE   PHI, PHII
+      REAL*8 phi(sdz), phii(sdz+1)
+      SAVE   phi, phii
 !      Bioturbation diffusivity
-      REAL*8 DB0, ZB
-      SAVE   DB0, ZB
-      DATA   DB0, ZB &
-     &    / 3.0D-5, 1.0D-1 /
+      REAL*8 db0, zb
+      SAVE   db0, zb
+      DATA   db0, zb &
+     &    / 3.0d-5, 1.0d-1 /
           !! 3.0*10-5 [m^2/yr], 0.10 [m]
-      REAL*8 DBI(SDZ+1)
-      SAVE   DBI
+      REAL*8 dbi(sdz+1)
+      SAVE   dbi
 !      Pw Effective molecular diffusivity
-      REAL*8 DSW
-      REAL*8 DSWNIT, DSWDIC, DSWALK, DSWDO2, DSWSIL
-      REAL*8 DSW13DIC, DSW14DIC
-      REAL*8 NOPA
-      SAVE   DSW
-      SAVE   DSWNIT, DSWDIC, DSWALK, DSWDO2, DSWSIL
-      SAVE   DSW13DIC, DSW14DIC
-      SAVE   NOPA
-      DATA   DSW &
-     &    / 4.59D-10 /
+      REAL*8 dsw
+      REAL*8 dswnit, dswdic, dswalk, dswdo2, dswsil
+      REAL*8 dsw13dic, dsw14dic
+      REAL*8 nopa
+      SAVE   dsw
+      SAVE   dswnit, dswdic, dswalk, dswdo2, dswsil
+      SAVE   dsw13dic, dsw14dic
+      SAVE   nopa
+      DATA   dsw &
+     &    / 4.59d-10 /
           !! 4.59*10-10 [m^2/s]
-      DATA   DSWNIT, DSWDIC, DSWALK, DSWDO2, DSWSIL &
-     &    / 5.0D-10, 6.4D-10, 6.4D-10, 1.2D-9, 5.0D-10 /
+      DATA   dswnit, dswdic, dswalk, dswdo2, dswsil &
+     &    / 5.0d-10, 6.4d-10, 6.4d-10, 1.2d-9, 5.0d-10 /
           !! 5.0*10-10, 6.4*10-10, 6.4*10-10, 1.2*10-9, 5.0*10-10  [m^2/s]
-      DATA   DSW13DIC, DSW14DIC &
-     &    / 6.4D-10, 6.4D-10 /
+      DATA   dsw13dic, dsw14dic &
+     &    / 6.4d-10, 6.4d-10 /
           !! 6.4*10-10, 6.4*10-10 [m^2/s]
-      DATA   NOPA &
-     &    / 2.50D0 /
-      REAL*8 DEINIT(SDZ+1)
-      REAL*8 DEIDIC(SDZ+1)
-      REAL*8 DEIALK(SDZ+1)
-      REAL*8 DEIDO2(SDZ+1)
-      REAL*8 DEISIL(SDZ+1)
-      REAL*8 DEI13DIC(SDZ+1)
-      REAL*8 DEI14DIC(SDZ+1)
-      SAVE   DEINIT, DEIDIC, DEIALK, DEIDO2, DEISIL
-      SAVE   DEI13DIC, DEI14DIC
+      DATA   nopa &
+     &    / 2.50d0 /
+      REAL*8 deinit(sdz+1)
+      REAL*8 deidic(sdz+1)
+      REAL*8 deialk(sdz+1)
+      REAL*8 deido2(sdz+1)
+      REAL*8 deisil(sdz+1)
+      REAL*8 dei13dic(sdz+1)
+      REAL*8 dei14dic(sdz+1)
+      SAVE   deinit, deidic, deialk, deido2, deisil
+      SAVE   dei13dic, dei14dic
 
 !-- 13C, 14C :
-      REAL*8 PDB              !! standard 13C/12C
-      REAL*8 DSTD             !! standard 14C/12C
-      REAL*8 EOPH, EOSH, EPS  !! fractionaton factor
-      REAL*8 FEOPH, FEOSH, R13, R14
-      REAL*8 THALF, ADCAY     !! half decay time [yr], decay constant
-      REAL*8 DLTC13, DLTC14
-      SAVE   PDB
-      SAVE   DSTD
-      SAVE   EOPH, EOSH
-      SAVE   FEOPH, FEOSH
-      SAVE   THALF, ADCAY
-      DATA   PDB &
-     &    / 0.0112372D0 /
-      DATA   DSTD &
-     &    / 1.1892D-12 /
-      DATA   EOPH, EOSH &
+      REAL*8 pdb              !! standard 13C/12C
+      REAL*8 dstd             !! standard 14C/12C
+      REAL*8 eoph, eosh, eps  !! fractionaton factor
+      REAL*8 feoph, feosh, r13, r14
+      REAL*8 thalf, adcay     !! half decay time [yr], decay constant
+      REAL*8 dltc13, dltc14
+      SAVE   pdb
+      SAVE   dstd
+      SAVE   eoph, eosh
+      SAVE   feoph, feosh
+      SAVE   thalf, adcay
+      DATA   pdb &
+     &    / 0.0112372d0 /
+      DATA   dstd &
+     &    / 1.1892d-12 /
+      DATA   eoph, eosh &
      &    / -22.0, 0.0 /
-      DATA   EPS &
-     &    / 1.0D-10 /
-      DATA   THALF &
-     &    / 5370.D0 /
+      DATA   eps &
+     &    / 1.0d-10 /
+      DATA   thalf &
+     &    / 5370.d0 /
 
 !-- MASK :
-      REAL*8 ZW(NZ)
+      REAL*8 ZW(nz)
       SAVE ZW
-      REAL*8 BDEP(NXY), BDEPG(NXYDIM) !! ocean depth [m]
-      SAVE BDEP, BDEPG
+      REAL*8 bdep(nxy), bdepg(nxydim) !! ocean depth [m]
+      SAVE bdep, bdepg
 
 !-- Parallel computing :
       INTEGER, ALLOCATABLE :: nrcvct2d(:),  ndispt2d(:)
@@ -362,34 +362,34 @@ module globals_digda_cprdc
       REAL*8,  ALLOCATABLE :: DUMMY57(:), DUMMY58(:)
 
 !-- Option :
-      LOGICAL SDFIRST
-      SAVE SDFIRST
-      DATA SDFIRST / .true. /
-      LOGICAL SDOFIRST
-      SAVE SDOFIRST
-      DATA SDOFIRST / .true.  /
+      LOGICAL SDFIrst
+      SAVE SDFIrst
+      DATA SDFIrst / .true. /
+      LOGICAL SDofirst
+      SAVE SDofirst
+      DATA SDofirst / .true.  /
 
       LOGICAL DEIARC
       SAVE DEIARC
       namelist /NMSDDEAR/ DEIARC
       DATA DEIARC / .true. /  !! Archer's DEI formulation ?
 
-      LOGICAL  CALC13, CALC14
-      SAVE     CALC13, CALC14
-      namelist /NMSDISO/ CALC13, CALC14
-      DATA CALC13, CALC14 / .true., .true. /  !! carbon isotopes ?
+      LOGICAL  CALc13, CALc14
+      SAVE     CALc13, CALc14
+      namelist /NMSDISO/ CALc13, CALc14
+      DATA CALc13, CALc14 / .true., .true. /  !! carbon isotopes ?
 
 !-- etc :
-      INTEGER I, J, IJ, K, L, IC
-      CHARACTER SEDTNM(SEDTDM)*16
+      INTEGER I, J, ij, k, L, IC
+      CHARACTER SEDTNM(sedtdm)*16
       SAVE SEDTNM
       INTEGER TT
 
-      LOGICAL  WOTSTP
-      SAVE     WOTSTP
-      DATA     WOTSTP / .true. /  !! writeout time step ?
-      INTEGER     NFSOTS
-      PARAMETER ( NFSOTS = 999 )
+      LOGICAL  wotstp
+      SAVE     wotstp
+      DATA     wotstp / .true. /  !! writeout time step ?
+      INTEGER     nfsots
+      PARAMETER ( nfsots = 999 )
 
       CHARACTER CFILE*128, CTITLE*128, CUNIT*128
 
@@ -402,7 +402,7 @@ module module_digda_cprdc
       use module_digda_clay
       use module_digda_pom
       use module_digda_carbonate
-      use module_digda_sio2l
+      use module_digda_silicate
       use module_digda_step_solid
       use module_digda_step_liquid
       use module_digda_chemeq
@@ -417,59 +417,59 @@ contains
 
 !-- SEDIMENT TRACERS : setup --
 
-IF (use_mpi) THEN
+if (use_mpi) then
       call MPI_INIT(IERR)
-      call MPI_COMM_SIZE(mpi_comm_world, NPROCS, IERR)
-      call MPI_COMM_RANK(mpi_comm_world, MYRANK, IERR)
+      call MPI_COMM_SIZE(mpi_comm_world, nprocs, IERR)
+      call MPI_COMM_RANK(mpi_comm_world, myrank, IERR)
 
-      IF ( NPROCS /= NCPU ) THEN
-         IF ( MYRANK == 0 ) THEN
+      if ( nprocs /= ncpu ) then
+         if ( myrank == 0 ) then
             PRINT *, '=== ERROR ==='
             call MPI_FINALIZE(IERR)
             STOP
-         END IF
-      END IF
+         end if
+      end if
 
-      DO IRANK = 0, NPROCS-1
+      do irank = 0, nprocs-1
          call set_parallel_range( &
-     &                    1, NXYDIM, NPROCS, IRANK, &
-     &                    JJSTR(IRANK), JJEND(IRANK) &
+     &                    1, nxydim, nprocs, irank, &
+     &                    jjstr(irank), jjend(irank) &
      &                  )
-      END DO
-END IF
+      end do
+end if
 
-      OPEN(NFPARM, file="PARAMET")
-      OPEN(NFSTDO, file="STDOUT")
+      OPEN(nfparm, file="PARAMET")
+      OPEN(nfstdo, file="STDOUT")
 
-      WRITE(NFSTDO, *) '-----------------------------'
-      WRITE(NFSTDO, *) '-- Setup of Sediment Model --'
-      WRITE(NFSTDO, *) '-----------------------------'
-      REWIND(NFPARM)
-      READ (NFPARM, NMSDDEAR, END=99)
+      write(nfstdo, *) '-----------------------------'
+      write(nfstdo, *) '-- Setup of Sediment Model --'
+      write(nfstdo, *) '-----------------------------'
+      rewind(nfparm)
+      read(nfparm, NMSDDEAR, end=99)
 99 continue
-      WRITE(NFSTDO, NMSDDEAR)
-      REWIND(NFPARM)
-      READ (NFPARM, NMSDISO, END=98)
+      write(nfstdo, NMSDDEAR)
+      rewind(nfparm)
+      read(nfparm, NMSDISO, end=98)
 98 continue
-      WRITE(NFSTDO, NMSDISO)
+      write(nfstdo, NMSDISO)
 
 !     ### for Sediment Model ###
-      SEDTNM(1)  = 'SCLA'
-      SEDTNM(2)  = 'SPOM'
-      SEDTNM(3)  = 'SCAR'
-      SEDTNM(4)  = 'SOPA'
-      SEDTNM(5)  = 'SAGE'
-      SEDTNM(6)  = 'CNIT'
-      SEDTNM(7)  = 'CDIC'
-      SEDTNM(8)  = 'CALK'
-      SEDTNM(9)  = 'CSIL'
-      SEDTNM(10) = 'CDO2'
-      SEDTNM(11) = 'S13POM'
-      SEDTNM(12) = 'S13CAR'
-      SEDTNM(13) = 'C13DIC'
-      SEDTNM(14) = 'S14POM'
-      SEDTNM(15) = 'S14CAR'
-      SEDTNM(16) = 'C14DIC'
+      SEDTNM(1)  = 'scla'
+      SEDTNM(2)  = 'spom'
+      SEDTNM(3)  = 'scar'
+      SEDTNM(4)  = 'sopa'
+      SEDTNM(5)  = 'sage'
+      SEDTNM(6)  = 'cnit'
+      SEDTNM(7)  = 'cdic'
+      SEDTNM(8)  = 'calk'
+      SEDTNM(9)  = 'csil'
+      SEDTNM(10) = 'cdo2'
+      SEDTNM(11) = 's13pom'
+      SEDTNM(12) = 's13car'
+      SEDTNM(13) = 'c13dic'
+      SEDTNM(14) = 's14pom'
+      SEDTNM(15) = 's14car'
+      SEDTNM(16) = 'c14dic'
 
 !CCCCCcall SDFILESET
       call set_digda_clay
@@ -484,1315 +484,1315 @@ END IF
 
 !     -- Ocean depth --
       CFILE="bound/bdep"
-      call read_gtool( CFILE, NXYDIM,  BDEPG )
-IF (use_mpi) THEN
-      DO IJ = 1, NXY
-         BDEP(IJ) = MAX( BDEPG(MYRANK*NXY+IJ), 0.0D0 )
-      END DO
-ELSE
-      DO IJ = 1, NXY
-         BDEP(IJ) = MAX( BDEPG(IJ), 0.0D0 )
-      END DO
-END IF
+      call read_gtool( CFILE, nxydim,  bdepg )
+if (use_mpi) then
+      do ij = 1, nxy
+         bdep(ij) = max( bdepg(myrank*nxy+ij), 0.0d0 )
+      end do
+else
+      do ij = 1, nxy
+         bdep(ij) = max( bdepg(ij), 0.0d0 )
+      end do
+end if
 
 !     -- Convert unit --
 
-      Z0  = Z0  * 1.0D+2                       !! [m] --> [cm]
+      z0  = z0  * 1.0d+2                       !! [m] --> [cm]
 
-      DB0 = DB0 * 1.0D+4 / 3.1536D+7           !! [m^2/yr] --> [cm^2/s]
-      ZB  = ZB  * 1.0D+2                       !! [m] --> [cm]
+      db0 = db0 * 1.0d+4 / 3.1536d+7           !! [m^2/yr] --> [cm^2/s]
+      zb  = zb  * 1.0d+2                       !! [m] --> [cm]
 
-      DO K = SKST, SKEN
-         LZ(K)   = LZ(K)   * 1.0D+2            !! [m] --> [cm]
-         DLZ(K)  = DLZ(K)  * 1.0D+2            !! [m] --> [cm]
-      END DO
-      DO K = SKST, SKEN+1
-         LZI(K)  = LZI(K)  * 1.0D+2            !! [m] --> [cm]
-         DLZI(K) = DLZI(K) * 1.0D+2            !! [m] --> [cm]
-      END DO
+      do k = skst, sken
+         lz(k)   = lz(k)   * 1.0d+2            !! [m] --> [cm]
+         dlz(k)  = dlz(k)  * 1.0d+2            !! [m] --> [cm]
+      end do
+      do k = skst, sken+1
+         lzi(k)  = lzi(k)  * 1.0d+2            !! [m] --> [cm]
+         dlzi(k) = dlzi(k) * 1.0d+2            !! [m] --> [cm]
+      end do
 
-      DSWNIT   = DSWNIT   * 1.0D+4             !! [m^2/s] --> [cm^2/s]
-      DSWDIC   = DSWDIC   * 1.0D+4             !! [m^2/s] --> [cm^2/s]
-      DSWALK   = DSWALK   * 1.0D+4             !! [m^2/s] --> [cm^2/s]
-      DSWDO2   = DSWDO2   * 1.0D+4             !! [m^2/s] --> [cm^2/s]
-      DSWSIL   = DSWSIL   * 1.0D+4             !! [m^2/s] --> [cm^2/s]
-      IF ( CALC13 ) THEN
-      DSW13DIC = DSW13DIC * 1.0D+4             !! [m^2/s] --> [cm^2/s]
-      END IF
-      IF ( CALC14 ) THEN
-      DSW14DIC = DSW14DIC * 1.0D+4             !! [m^2/s] --> [cm^2/s]
-      END IF
-      DSW    = DSW        * 1.0D+4             !! [m^2/s] --> [cm^2/s]
+      dswnit   = dswnit   * 1.0d+4             !! [m^2/s] --> [cm^2/s]
+      dswdic   = dswdic   * 1.0d+4             !! [m^2/s] --> [cm^2/s]
+      dswalk   = dswalk   * 1.0d+4             !! [m^2/s] --> [cm^2/s]
+      dswdo2   = dswdo2   * 1.0d+4             !! [m^2/s] --> [cm^2/s]
+      dswsil   = dswsil   * 1.0d+4             !! [m^2/s] --> [cm^2/s]
+      if ( CALc13 ) then
+      dsw13dic = dsw13dic * 1.0d+4             !! [m^2/s] --> [cm^2/s]
+      end if
+      if ( CALc14 ) then
+      dsw14dic = dsw14dic * 1.0d+4             !! [m^2/s] --> [cm^2/s]
+      end if
+      dsw    = dsw        * 1.0d+4             !! [m^2/s] --> [cm^2/s]
 
-      MCLA   = 1.0D-6 /  RHOCLA                !! [m^3/g]
-      MPOM   = 1.0D-9 / ( RHOPOM / MOLPOM )    !! [m^3/mMol]
-      MCAR   = 1.0D-9 / ( RHOCAR / MOLCAR )    !! [m^3/mMol]
-      MOPA   = 1.0D-9 / ( RHOOPA / MOLOPA )    !! [m^3/mMol]
-      IF ( CALC13 ) THEN
-      M13POM = 1.0D-9 / ( RHOPOM / MOL13POM )  !! [m^3/mMol]
-      M13CAR = 1.0D-9 / ( RHOCAR / MOL13CAR )  !! [m^3/mMol]
-      END IF
-      IF ( CALC14 ) THEN
-      M14POM = 1.0D-9 / ( RHOPOM / MOL14POM )  !! [m^3/mMol]
-      M14CAR = 1.0D-9 / ( RHOCAR / MOL14CAR )  !! [m^3/mMol]
-      THALF  = THALF * 3.1536D+7               !! [yr] --> [s]
-      ADCAY  = LOG( 2.0D0 ) / THALF / 365.0D0 / 8.64D4
-      END IF
-      IF ( CALC13 .or. CALC14 ) THEN
-      FEOPH  = 1.0D0 + EOPH * 1.0D-3
-      FEOSH  = 1.0D0 + EOSH * 1.0D-3
-      END IF
+      mcla   = 1.0d-6 /  rhocla                !! [m^3/g]
+      mpom   = 1.0d-9 / ( rhopom / molpom )    !! [m^3/mMol]
+      mcar   = 1.0d-9 / ( rhocar / molcar )    !! [m^3/mMol]
+      mopa   = 1.0d-9 / ( rhoopa / molopa )    !! [m^3/mMol]
+      if ( CALc13 ) then
+      m13pom = 1.0d-9 / ( rhopom / mol13pom )  !! [m^3/mMol]
+      m13car = 1.0d-9 / ( rhocar / mol13car )  !! [m^3/mMol]
+      end if
+      if ( CALc14 ) then
+      m14pom = 1.0d-9 / ( rhopom / mol14pom )  !! [m^3/mMol]
+      m14car = 1.0d-9 / ( rhocar / mol14car )  !! [m^3/mMol]
+      thalf  = thalf * 3.1536d+7               !! [yr] --> [s]
+      adcay  = log( 2.0d0 ) / thalf / 365.0d0 / 8.64d+4
+      end if
+      if ( CALc13 .or. CALc14 ) then
+      feoph  = 1.0d0 + eoph * 1.0d-3
+      feosh  = 1.0d0 + eosh * 1.0d-3
+      end if
 
-      DO IJ = 1, NXY
-         BDEP(IJ) = BDEP(IJ) * 1.0D+2          !! [m] --> [cm]
-      END DO
+      do ij = 1, nxy
+         bdep(ij) = bdep(ij) * 1.0d+2          !! [m] --> [cm]
+      end do
 
 !     -- Porosity, Diffusivity --
 
-      DO K = SKST, SKEN
-         PHI(K) = PHI0 * EXP( - LZ(K)  / Z0 )
-      END DO
+      do k = skst, sken
+         phi(k) = phi0 * exp( - lz(k)  / z0 )
+      end do
 
-      DO K = SKST, SKEN+1
-         PHII(K) = PHI0 * EXP( - LZI(K) / Z0 )
-         DBI(K)  = ( DB0 / ( 1.0D0 + EXP( 2.0D0 * ( LZI(K) - ZB ) ) ) )
-      END DO
+      do k = skst, sken+1
+         phii(k) = phi0 * exp( - lzi(k) / z0 )
+         dbi(k)  = ( db0 / ( 1.0d0 + exp( 2.0d0 * ( lzi(k) - zb ) ) ) )
+      end do
 
-      DO K = SKST, SKEN+1
-         IF (DEIARC) THEN
-            DEINIT(K)   = DSWNIT   * ( PHII(K) ** 3.0D0 )
-            DEIDIC(K)   = DSWDIC   * ( PHII(K) ** 3.0D0 )
-            DEIALK(K)   = DSWALK   * ( PHII(K) ** 3.0D0 )
-            DEIDO2(K)   = DSWDO2   * ( PHII(K) ** 3.0D0 )
-            DEISIL(K)   = DSWSIL   * ( PHII(K) ** 3.0D0 )
-            IF ( CALC13 ) THEN
-            DEI13DIC(K) = DSW13DIC * ( PHII(K) ** 3.0D0 )
-            END IF
-            IF ( CALC14 ) THEN
-            DEI14DIC(K) = DSW14DIC * ( PHII(K) ** 3.0D0 )
-            END IF
-         ELSE
-            DEINIT(K)   = ( PHII(K) ** ( NOPA - 1.0D0 ) ) * DSW
-            DEIDIC(K)   = ( PHII(K) ** ( NOPA - 1.0D0 ) ) * DSW
-            DEIALK(K)   = ( PHII(K) ** ( NOPA - 1.0D0 ) ) * DSW
-            DEIDO2(K)   = ( PHII(K) ** ( NOPA - 1.0D0 ) ) * DSW
-            DEISIL(K)   = ( PHII(K) ** ( NOPA - 1.0D0 ) ) * DSW
-            IF ( CALC13 ) THEN
-            DEI13DIC(K) = ( PHII(K) ** ( NOPA - 1.0D0 ) ) * DSW
-            END IF
-            IF ( CALC14 ) THEN
-            DEI14DIC(K) = ( PHII(K) ** ( NOPA - 1.0D0 ) ) * DSW
-            END IF
-         END IF
-      END DO
+      do k = skst, sken+1
+         if (DEIARC) then
+            deinit(k)   = dswnit   * ( phii(k) ** 3.0d0 )
+            deidic(k)   = dswdic   * ( phii(k) ** 3.0d0 )
+            deialk(k)   = dswalk   * ( phii(k) ** 3.0d0 )
+            deido2(k)   = dswdo2   * ( phii(k) ** 3.0d0 )
+            deisil(k)   = dswsil   * ( phii(k) ** 3.0d0 )
+            if ( CALc13 ) then
+            dei13dic(k) = dsw13dic * ( phii(k) ** 3.0d0 )
+            end if
+            if ( CALc14 ) then
+            dei14dic(k) = dsw14dic * ( phii(k) ** 3.0d0 )
+            end if
+         else
+            deinit(k)   = ( phii(k) ** ( nopa - 1.0d0 ) ) * dsw
+            deidic(k)   = ( phii(k) ** ( nopa - 1.0d0 ) ) * dsw
+            deialk(k)   = ( phii(k) ** ( nopa - 1.0d0 ) ) * dsw
+            deido2(k)   = ( phii(k) ** ( nopa - 1.0d0 ) ) * dsw
+            deisil(k)   = ( phii(k) ** ( nopa - 1.0d0 ) ) * dsw
+            if ( CALc13 ) then
+            dei13dic(k) = ( phii(k) ** ( nopa - 1.0d0 ) ) * dsw
+            end if
+            if ( CALc14 ) then
+            dei14dic(k) = ( phii(k) ** ( nopa - 1.0d0 ) ) * dsw
+            end if
+         end if
+      end do
 
 !     -- Set boundary conditions --
 
       CFILE="bound/ficla"
-      call read_gtool( CFILE, NXYDIM,  FICLAG )
+      call read_gtool( CFILE, nxydim,  ficlag )
       CFILE="bound/fipom"
-      call read_gtool( CFILE, NXYDIM,  FIPOMG )
+      call read_gtool( CFILE, nxydim,  fipomg )
       CFILE="bound/ficar"
-      call read_gtool( CFILE, NXYDIM,  FICARG )
+      call read_gtool( CFILE, nxydim,  ficarg )
       CFILE="bound/fiopa"
-      call read_gtool( CFILE, NXYDIM,  FIOPAG )
-IF (use_mpi) THEN
-      DO IJ = 1, NXY
-         FICLA(IJ) = MAX( FICLAG(MYRANK*NXY+IJ), 0.0D0 )
-         FIPOM(IJ) = MAX( FIPOMG(MYRANK*NXY+IJ), 0.0D0 )
-         FICAR(IJ) = MAX( FICARG(MYRANK*NXY+IJ), 0.0D0 )
-         FIOPA(IJ) = MAX( FIOPAG(MYRANK*NXY+IJ), 0.0D0 )
-         FIAGE(IJ) = 0.0D0
-      END DO
-ELSE
-      DO IJ = 1, NXY
-         FICLA(IJ) = MAX( FICLAG(IJ), 0.0D0 )
-         FIPOM(IJ) = MAX( FIPOMG(IJ), 0.0D0 )
-         FICAR(IJ) = MAX( FICARG(IJ), 0.0D0 )
-         FIOPA(IJ) = MAX( FIOPAG(IJ), 0.0D0 )
-         FIAGE(IJ) = 0.0D0
-      END DO
-END IF
+      call read_gtool( CFILE, nxydim,  fiopag )
+if (use_mpi) then
+      do ij = 1, nxy
+         ficla(ij) = max( ficlag(myrank*nxy+ij), 0.0d0 )
+         fipom(ij) = max( fipomg(myrank*nxy+ij), 0.0d0 )
+         ficar(ij) = max( ficarg(myrank*nxy+ij), 0.0d0 )
+         fiopa(ij) = max( fiopag(myrank*nxy+ij), 0.0d0 )
+         fiage(ij) = 0.0d0
+      end do
+else
+      do ij = 1, nxy
+         ficla(ij) = max( ficlag(ij), 0.0d0 )
+         fipom(ij) = max( fipomg(ij), 0.0d0 )
+         ficar(ij) = max( ficarg(ij), 0.0d0 )
+         fiopa(ij) = max( fiopag(ij), 0.0d0 )
+         fiage(ij) = 0.0d0
+      end do
+end if
       CFILE="bound/btem"
-      call read_gtool( CFILE, NXYDIM,  BWTEMG )
+      call read_gtool( CFILE, nxydim,  bwtemg )
       CFILE="bound/bsal"
-      call read_gtool( CFILE, NXYDIM,  BWSALG )
+      call read_gtool( CFILE, nxydim,  bwsalg )
       CFILE="bound/bnit"
-      call read_gtool( CFILE, NXYDIM,  BWNITG )
+      call read_gtool( CFILE, nxydim,  bwnitg )
       CFILE="bound/bdic"
-      call read_gtool( CFILE, NXYDIM,  BWDICG )
+      call read_gtool( CFILE, nxydim,  bwdicg )
       CFILE="bound/balk"
-      call read_gtool( CFILE, NXYDIM,  BWALKG )
+      call read_gtool( CFILE, nxydim,  bwalkg )
       CFILE="bound/bdo2"
-      call read_gtool( CFILE, NXYDIM,  BWDO2G )
+      call read_gtool( CFILE, nxydim,  bwdo2g )
       CFILE="bound/bsil"
-      call read_gtool( CFILE, NXYDIM,  BWSILG )
-IF (use_mpi) THEN
-      DO IJ = 1, NXY
-         BWTEM(IJ)   = BWTEMG(MYRANK*NXY+IJ)
-         BWSAL(IJ)   = BWSALG(MYRANK*NXY+IJ)
-         BWNIT(IJ)   = MAX( BWNITG(MYRANK*NXY+IJ), 0.0D0 )
-         BWDIC(IJ)   = MAX( BWDICG(MYRANK*NXY+IJ), 0.0D0 )
-         BWALK(IJ)   = MAX( BWALKG(MYRANK*NXY+IJ), 0.0D0 )
-         BWDO2(IJ)   = MAX( BWDO2G(MYRANK*NXY+IJ), 0.0D0 )
-         BWSIL(IJ)   = MAX( BWSILG(MYRANK*NXY+IJ), 0.0D0 )
-      END DO
-ELSE
-      DO IJ = 1, NXY
-         BWTEM(IJ)   = BWTEMG(IJ)
-         BWSAL(IJ)   = BWSALG(IJ)
-         BWNIT(IJ)   = MAX( BWNITG(IJ), 0.0D0 )
-         BWDIC(IJ)   = MAX( BWDICG(IJ), 0.0D0 )
-         BWALK(IJ)   = MAX( BWALKG(IJ), 0.0D0 )
-         BWDO2(IJ)   = MAX( BWDO2G(IJ), 0.0D0 )
-         BWSIL(IJ)   = MAX( BWSILG(IJ), 0.0D0 )
-      END DO
-END IF
+      call read_gtool( CFILE, nxydim,  bwsilg )
+if (use_mpi) then
+      do ij = 1, nxy
+         bwtem(ij)   = bwtemg(myrank*nxy+ij)
+         bwsal(ij)   = bwsalg(myrank*nxy+ij)
+         bwnit(ij)   = max( bwnitg(myrank*nxy+ij), 0.0d0 )
+         bwdic(ij)   = max( bwdicg(myrank*nxy+ij), 0.0d0 )
+         bwalk(ij)   = max( bwalkg(myrank*nxy+ij), 0.0d0 )
+         bwdo2(ij)   = max( bwdo2g(myrank*nxy+ij), 0.0d0 )
+         bwsil(ij)   = max( bwsilg(myrank*nxy+ij), 0.0d0 )
+      end do
+else
+      do ij = 1, nxy
+         bwtem(ij)   = bwtemg(ij)
+         bwsal(ij)   = bwsalg(ij)
+         bwnit(ij)   = max( bwnitg(ij), 0.0d0 )
+         bwdic(ij)   = max( bwdicg(ij), 0.0d0 )
+         bwalk(ij)   = max( bwalkg(ij), 0.0d0 )
+         bwdo2(ij)   = max( bwdo2g(ij), 0.0d0 )
+         bwsil(ij)   = max( bwsilg(ij), 0.0d0 )
+      end do
+end if
 
-      IF ( CALC13 ) THEN
-      DO IJ = IJTSTR, IJTEND
-         FI13POM(IJ) = FEOPH * PDB  * FIPOM(IJ)
-         FI13CAR(IJ) = FEOSH * PDB  * FICAR(IJ)
-      END DO
+      if ( CALc13 ) then
+      do ij = ijtstr, ijtend
+         fi13pom(ij) = feoph * pdb  * fipom(ij)
+         fi13car(ij) = feosh * pdb  * ficar(ij)
+      end do
       CFILE="bound/bc13"
-      call read_gtool( CFILE, NXYDIM,  BW13DICG )
-IF (use_mpi) THEN
-      DO IJ = 1, NXY
-         BW13DIC(IJ) = MAX( BW13DICG(MYRANK*NXY+IJ), 0.0D0 )
-      END DO
-ELSE
-      DO IJ = 1, NXY
-         BW13DIC(IJ) = MAX( BW13DICG(IJ), 0.0D0 )
-      END DO
-END IF
-      END IF
+      call read_gtool( CFILE, nxydim,  bw13dicg )
+if (use_mpi) then
+      do ij = 1, nxy
+         bw13dic(ij) = max( bw13dicg(myrank*nxy+ij), 0.0d0 )
+      end do
+else
+      do ij = 1, nxy
+         bw13dic(ij) = max( bw13dicg(ij), 0.0d0 )
+      end do
+end if
+      end if
 
-      IF ( CALC14 ) THEN
-      DO IJ = IJTSTR, IJTEND
-         FI14POM(IJ) = FEOPH * DSTD * FIPOM(IJ)
-         FI14CAR(IJ) = FEOSH * DSTD * FICAR(IJ)
-      END DO
+      if ( CALc14 ) then
+      do ij = ijtstr, ijtend
+         fi14pom(ij) = feoph * dstd * fipom(ij)
+         fi14car(ij) = feosh * dstd * ficar(ij)
+      end do
       CFILE="bound/bc14"
-      call read_gtool( CFILE, NXYDIM,  BW14DICG )
-IF (use_mpi) THEN
-      DO IJ = 1, NXY
-         BW14DIC(IJ) = MAX( BW14DICG(MYRANK*NXY+IJ), 0.0D0 )
-      END DO
-ELSE
-      DO IJ = 1, NXY
-         BW14DIC(IJ) = MAX( BW14DICG(IJ), 0.0D0 )
-      END DO
-END IF
-      END IF
+      call read_gtool( CFILE, nxydim,  bw14dicg )
+if (use_mpi) then
+      do ij = 1, nxy
+         bw14dic(ij) = max( bw14dicg(myrank*nxy+ij), 0.0d0 )
+      end do
+else
+      do ij = 1, nxy
+         bw14dic(ij) = max( bw14dicg(ij), 0.0d0 )
+      end do
+end if
+      end if
 
-      DO IJ = 1, NXY
-         SIT(IJ) = 0.51D0
-         PT(IJ)  = 7.70D0
-      END DO
+      do ij = 1, nxy
+         SIT(ij) = 0.51d0
+         PT(ij)  = 7.70d0
+      end do
 
-!     DO L = 1, SEDTDM
-!        DO K = 1, SDZDIM
-!           DO J = 1, NYDIM
-!              DO I = 1, NXDIM
-!                 IJ = I + (J - 1) * NXDIM
-!                 SDTXBUF(I, J, K, L) = SDTX(IJ, K, L)
-!              END DO
-!           END DO
-!        END DO
-!     END DO
-!     DO L = 1, SEDTDM
-!        DO K = SKST, SKEN
-!           DO J = JSTR, JEND
-!              DO I = 1, ISTR-1
-!                 SDTXBUF(I, J, K, L) = SDTXBUF(IEND-ISTR+1+I, J, K, L)
-!              END DO
-!              DO I = IEND+1, NXDIM
-!                 SDTXBUF(I, J, K, L) = SDTXBUF(ISTR-1+I-IEND, J, K, L)
-!              END DO
-!           END DO
-!        END DO
-!     END DO
-!     DO L = 1, SEDTDM
-!        DO K = 1, SDZDIM
-!           DO J = 1, NYDIM
-!              DO I = 1, NXDIM
-!                 IJ = I + (J - 1) * NXDIM
-!                 SDTX(IJ, K, L) = SDTXBUF(I, J, K, L)
-!              END DO
-!           END DO
-!        END DO
-!     END DO
-!     DO L = 1, SEDTDM
-!        DO K = 1, SKST-1
-!           DO IJ = 1, NXY
-!              SDTX(IJ, K, L) = SDTX(IJ, SKST, L)
-!           END DO
-!        END DO
-!     END DO
+!     do l = 1, sedtdm
+!        do k = 1, sdzdim
+!           DO J = 1, nydim
+!              DO I = 1, nxdim
+!                 ij = i + (j - 1) * nxdim
+!                 SDTXBUF(i, j, k, l) = SDTX(ij, k, l)
+!              end do
+!           end do
+!        end do
+!     end do
+!     do l = 1, sedtdm
+!        do k = skst, sken
+!           DO J = jstr, jend
+!              DO I = 1, istr-1
+!                 SDTXBUF(i, j, k, l) = SDTXBUF(iend-istr+1+I, j, k, l)
+!              end do
+!              DO I = iend+1, nxdim
+!                 SDTXBUF(i, j, k, l) = SDTXBUF(istr-1+I-iend, j, k, l)
+!              end do
+!           end do
+!        end do
+!     end do
+!     do l = 1, sedtdm
+!        do k = 1, sdzdim
+!           DO J = 1, nydim
+!              DO I = 1, nxdim
+!                 ij = i + (j - 1) * nxdim
+!                 SDTX(ij, k, l) = SDTXBUF(i, j, k, l)
+!              end do
+!           end do
+!        end do
+!     end do
+!     do l = 1, sedtdm
+!        do k = 1, skst-1
+!           do ij = 1, nxy
+!              SDTX(ij, k, l) = SDTX(ij, skst, l)
+!           end do
+!        end do
+!     end do
 
 !     -- Time Integration --
 
-      DO TT = TSTR, TEND
+      do tt = tstr, tend
 
-         YY = INT( TSYR * TT )
+         YY = int( tsyr * TT )
 
-      IF (SDFIRST) THEN
-         DO K = SKST, SKEN
-            DO IJ = IJTSTR, IJTEND
-               SCLA(IJ, K) = RHOCLA * 1.0D+6
-               SPOM(IJ, K) = 0.0D0
-               SCAR(IJ, K) = 0.0D0
-               SOPA(IJ, K) = 0.0D0
-               SAGE(IJ, K) = 0.0D0
-               CNIT(IJ, K) = BWNIT(IJ)
-               CDIC(IJ, K) = BWDIC(IJ)
-               CALK(IJ, K) = BWALK(IJ)
-               CDO2(IJ, K) = BWDO2(IJ)
-               CSIL(IJ, K) = BWSIL(IJ)
-               IF ( CALC13 ) THEN
-               S13POM(IJ, K) = 0.0D0
-               S13CAR(IJ, K) = 0.0D0
-               C13DIC(IJ, K) = BW13DIC(IJ)
-               END IF
-               IF ( CALC14 ) THEN
-               S14POM(IJ, K) = 0.0D0
-               S14CAR(IJ, K) = 0.0D0
-               C14DIC(IJ, K) = BW14DIC(IJ)
-               END IF
-               PCLA(IJ, K) = 1.00+2
-               PPOM(IJ, K) = 0.0D0
-               PCAR(IJ, K) = 0.0D0
-               POPA(IJ, K) = 0.0D0
-            END DO
-         END DO
-         SDFIRST = .false.
-      ELSE
-IF (use_mpi) THEN
-         DO K = SKST, SKEN
-            DO IJ = 1, NXY
-               SCLA(IJ, K) = SDTX(MYRANK*NXY+IJ, K,  1)
-               SPOM(IJ, K) = SDTX(MYRANK*NXY+IJ, K,  2)
-               SCAR(IJ, K) = SDTX(MYRANK*NXY+IJ, K,  3)
-               SOPA(IJ, K) = SDTX(MYRANK*NXY+IJ, K,  4)
-               SAGE(IJ, K) = SDTX(MYRANK*NXY+IJ, K,  5)
-               CNIT(IJ, K) = SDTX(MYRANK*NXY+IJ, K,  6)
-               CDIC(IJ, K) = SDTX(MYRANK*NXY+IJ, K,  7)
-               CALK(IJ, K) = SDTX(MYRANK*NXY+IJ, K,  8)
-               CSIL(IJ, K) = SDTX(MYRANK*NXY+IJ, K,  9)
-               CDO2(IJ, K) = SDTX(MYRANK*NXY+IJ, K, 10)
-            END DO
-         END DO
-         IF ( CALC13 ) THEN
-         DO K = SKST, SKEN
-            DO IJ = 1, NXY
-               S13POM(IJ, K) = SDTX(MYRANK*NXY+IJ, K, 11)
-               S13CAR(IJ, K) = SDTX(MYRANK*NXY+IJ, K, 12)
-               C13DIC(IJ, K) = SDTX(MYRANK*NXY+IJ, K, 13)
-            END DO
-         END DO
-         END IF
-         IF ( CALC14 ) THEN
-         DO K = SKST, SKEN
-            DO IJ = 1, NXY
-               S14POM(IJ, K) = SDTX(MYRANK*NXY+IJ, K, 14)
-               S14CAR(IJ, K) = SDTX(MYRANK*NXY+IJ, K, 15)
-               C14DIC(IJ, K) = SDTX(MYRANK*NXY+IJ, K, 16)
-            END DO
-         END DO
-         END IF
-ELSE
-         DO K = SKST, SKEN
-            DO IJ = 1, NXY
-               SCLA(IJ, K) = SDTX(IJ, K,  1)
-               SPOM(IJ, K) = SDTX(IJ, K,  2)
-               SCAR(IJ, K) = SDTX(IJ, K,  3)
-               SOPA(IJ, K) = SDTX(IJ, K,  4)
-               SAGE(IJ, K) = SDTX(IJ, K,  5)
-               CNIT(IJ, K) = SDTX(IJ, K,  6)
-               CDIC(IJ, K) = SDTX(IJ, K,  7)
-               CALK(IJ, K) = SDTX(IJ, K,  8)
-               CSIL(IJ, K) = SDTX(IJ, K,  9)
-               CDO2(IJ, K) = SDTX(IJ, K, 10)
-            END DO
-         END DO
-         IF ( CALC13 ) THEN
-         DO K = SKST, SKEN
-            DO IJ = 1, NXY
-               S13POM(IJ, K) = SDTX(IJ, K, 11)
-               S13CAR(IJ, K) = SDTX(IJ, K, 12)
-               C13DIC(IJ, K) = SDTX(IJ, K, 13)
-            END DO
-         END DO
-         END IF
-         IF ( CALC14 ) THEN
-         DO K = SKST, SKEN
-            DO IJ = 1, NXY
-               S14POM(IJ, K) = SDTX(IJ, K, 14)
-               S14CAR(IJ, K) = SDTX(IJ, K, 15)
-               C14DIC(IJ, K) = SDTX(IJ, K, 16)
-            END DO
-         END DO
-         END IF
-END IF
-      END IF
+      if (SDFIrst) then
+         do k = skst, sken
+            do ij = ijtstr, ijtend
+               scla(ij, k) = rhocla * 1.0d+6
+               spom(ij, k) = 0.0d0
+               scar(ij, k) = 0.0d0
+               sopa(ij, k) = 0.0d0
+               sage(ij, k) = 0.0d0
+               cnit(ij, k) = bwnit(ij)
+               cdic(ij, k) = bwdic(ij)
+               calk(ij, k) = bwalk(ij)
+               cdo2(ij, k) = bwdo2(ij)
+               csil(ij, k) = bwsil(ij)
+               if ( CALc13 ) then
+               s13pom(ij, k) = 0.0d0
+               s13car(ij, k) = 0.0d0
+               c13dic(ij, k) = bw13dic(ij)
+               end if
+               if ( CALc14 ) then
+               s14pom(ij, k) = 0.0d0
+               s14car(ij, k) = 0.0d0
+               c14dic(ij, k) = bw14dic(ij)
+               end if
+               pcla(ij, k) = 1.00+2
+               ppom(ij, k) = 0.0d0
+               pcar(ij, k) = 0.0d0
+               popa(ij, k) = 0.0d0
+            end do
+         end do
+         SDFIrst = .false.
+      else
+if (use_mpi) then
+         do k = skst, sken
+            do ij = 1, nxy
+               scla(ij, k) = SDTX(myrank*nxy+ij, k,  1)
+               spom(ij, k) = SDTX(myrank*nxy+ij, k,  2)
+               scar(ij, k) = SDTX(myrank*nxy+ij, k,  3)
+               sopa(ij, k) = SDTX(myrank*nxy+ij, k,  4)
+               sage(ij, k) = SDTX(myrank*nxy+ij, k,  5)
+               cnit(ij, k) = SDTX(myrank*nxy+ij, k,  6)
+               cdic(ij, k) = SDTX(myrank*nxy+ij, k,  7)
+               calk(ij, k) = SDTX(myrank*nxy+ij, k,  8)
+               csil(ij, k) = SDTX(myrank*nxy+ij, k,  9)
+               cdo2(ij, k) = SDTX(myrank*nxy+ij, k, 10)
+            end do
+         end do
+         if ( CALc13 ) then
+         do k = skst, sken
+            do ij = 1, nxy
+               s13pom(ij, k) = SDTX(myrank*nxy+ij, k, 11)
+               s13car(ij, k) = SDTX(myrank*nxy+ij, k, 12)
+               c13dic(ij, k) = SDTX(myrank*nxy+ij, k, 13)
+            end do
+         end do
+         end if
+         if ( CALc14 ) then
+         do k = skst, sken
+            do ij = 1, nxy
+               s14pom(ij, k) = SDTX(myrank*nxy+ij, k, 14)
+               s14car(ij, k) = SDTX(myrank*nxy+ij, k, 15)
+               c14dic(ij, k) = SDTX(myrank*nxy+ij, k, 16)
+            end do
+         end do
+         end if
+else
+         do k = skst, sken
+            do ij = 1, nxy
+               scla(ij, k) = SDTX(ij, k,  1)
+               spom(ij, k) = SDTX(ij, k,  2)
+               scar(ij, k) = SDTX(ij, k,  3)
+               sopa(ij, k) = SDTX(ij, k,  4)
+               sage(ij, k) = SDTX(ij, k,  5)
+               cnit(ij, k) = SDTX(ij, k,  6)
+               cdic(ij, k) = SDTX(ij, k,  7)
+               calk(ij, k) = SDTX(ij, k,  8)
+               csil(ij, k) = SDTX(ij, k,  9)
+               cdo2(ij, k) = SDTX(ij, k, 10)
+            end do
+         end do
+         if ( CALc13 ) then
+         do k = skst, sken
+            do ij = 1, nxy
+               s13pom(ij, k) = SDTX(ij, k, 11)
+               s13car(ij, k) = SDTX(ij, k, 12)
+               c13dic(ij, k) = SDTX(ij, k, 13)
+            end do
+         end do
+         end if
+         if ( CALc14 ) then
+         do k = skst, sken
+            do ij = 1, nxy
+               s14pom(ij, k) = SDTX(ij, k, 14)
+               s14car(ij, k) = SDTX(ij, k, 15)
+               c14dic(ij, k) = SDTX(ij, k, 16)
+            end do
+         end do
+         end if
+end if
+      end if
 
 !     -- Saturated carbonate ion concentration --
 
       call calc_digda_chemeq( &
-     &    BWTEM, BWSAL, CDIC, CALK, &
+     &    bwtem, bwsal, cdic, calk, &
      &    SIT, PT, &
-     &    CCO32 )
+     &    cco32 )
 
       call calc_carbonate_saturation( &
-     &    BWTEM, BWSAL, BDEP, &
-     &    SATCO32 )
+     &    bwtem, bwsal, bdep, &
+     &    satco32 )
 
 !     -- Dissolution term --
 
       call calc_clay_dissolution( &
-     &    SCLA, &
-     &    RCLA )
+     &    scla, &
+     &    rcla )
 
       call calc_pom_dissolution( &
-     &    SPOM, CDO2, CP, OP, PHI, &
-     &    RPOM )
+     &    spom, cdo2, CP, OP, phi, &
+     &    rpom )
 
       call calc_carbonate_dissolution( &
-     &    SCAR, CCO32, SATCO32, PHI, &
-     &    RCAR )
+     &    scar, cco32, satco32, phi, &
+     &    rcar )
 
       call calc_silicate_dissolution( &
-     &    SOPA, CSIL, PCLA, POPA, BWTEM, &
-     &    ROPA, SATSIL )
+     &    sopa, csil, pcla, popa, bwtem, &
+     &    ropa, satsil )
 
 !     -- Dissolution rate --
 !        CLA, POM, CAR, OPA
 
-      DO K = SKST, SKEN
-         DO IJ = IJTSTR, IJTEND
-            TRCLA(IJ, K)   = ( 1.0D0 - PHI(K) ) * RCLA(IJ, K) &
-     &                     * SCLA(IJ, K)
-            TRPOM(IJ, K)   = ( 1.0D0 - PHI(K) ) * RPOM(IJ, K) &
-     &                     * SPOM(IJ, K)
-            TRCAR(IJ, K)   = ( 1.0D0 - PHI(K) ) * RCAR(IJ, K) &
-     &                     * SCAR(IJ, K)
-            TROPA(IJ, K)   = ( 1.0D0 - PHI(K) ) * ROPA(IJ, K) &
-     &                     * SOPA(IJ, K)
-         END DO
-      END DO
+      do k = skst, sken
+         do ij = ijtstr, ijtend
+            trcla(ij, k)   = ( 1.0d0 - phi(k) ) * rcla(ij, k) &
+     &                     * scla(ij, k)
+            trpom(ij, k)   = ( 1.0d0 - phi(k) ) * rpom(ij, k) &
+     &                     * spom(ij, k)
+            trcar(ij, k)   = ( 1.0d0 - phi(k) ) * rcar(ij, k) &
+     &                     * scar(ij, k)
+            tropa(ij, k)   = ( 1.0d0 - phi(k) ) * ropa(ij, k) &
+     &                     * sopa(ij, k)
+         end do
+      end do
 
-      IF ( CALC13 ) THEN
-      DO K = SKST, SKEN
-         DO IJ = IJTSTR, IJTEND
-            TR13POM(IJ, K) = ( 1.0D0 - PHI(K) ) * RPOM(IJ, K) &
-     &                     * S13POM(IJ, K)
-            TR13CAR(IJ, K) = ( 1.0D0 - PHI(K) ) * RCAR(IJ, K) &
-     &                     * S13CAR(IJ, K)
-         END DO
-      END DO
-      END IF
+      if ( CALc13 ) then
+      do k = skst, sken
+         do ij = ijtstr, ijtend
+            tr13pom(ij, k) = ( 1.0d0 - phi(k) ) * rpom(ij, k) &
+     &                     * s13pom(ij, k)
+            tr13car(ij, k) = ( 1.0d0 - phi(k) ) * rcar(ij, k) &
+     &                     * s13car(ij, k)
+         end do
+      end do
+      end if
 
-      IF ( CALC14 ) THEN
-      DO K = SKST, SKEN
-         DO IJ = IJTSTR, IJTEND
-            TR14POM(IJ, K) = ( 1.0D0 - PHI(K) ) * RPOM(IJ, K) &
-     &                     * S14POM(IJ, K)
-            TR14CAR(IJ, K) = ( 1.0D0 - PHI(K) ) * RCAR(IJ, K) &
-     &                     * S14CAR(IJ, K)
-         END DO
-      END DO
-      END IF
+      if ( CALc14 ) then
+      do k = skst, sken
+         do ij = ijtstr, ijtend
+            tr14pom(ij, k) = ( 1.0d0 - phi(k) ) * rpom(ij, k) &
+     &                     * s14pom(ij, k)
+            tr14car(ij, k) = ( 1.0d0 - phi(k) ) * rcar(ij, k) &
+     &                     * s14car(ij, k)
+         end do
+      end do
+      end if
 
 !     -- Sedimentation rate --
 
-      DO IJ = IJTSTR, IJTEND
-         W(IJ, SKST) = ( ( ( FICLA(IJ) * MCLA ) &
-     &                   + ( FIPOM(IJ) * MPOM ) &
-     &                   + ( FICAR(IJ) * MCAR ) &
-     &                   + ( FIOPA(IJ) * MOPA ) ) &
-     &               / ( 1.0D0 - PHII(SKST) ) )
-         DO K = SKST, SKEN
-            W(IJ, K+1) = ( ( 1.0D0 - PHII(K) ) / ( 1.0D0 - PHII(K+1) ) &
-     &                   * W(IJ, K) ) &
-     &                 - ( DLZ(K) * ( ( TRPOM(IJ, K) * MPOM ) &
-     &                              + ( TRCAR(IJ, K) * MCAR ) &
-     &                              + ( TROPA(IJ, K) * MOPA ) ) &
-     &                   / ( 1.0D0 - PHII(K+1) ) )
-         END DO
-      END DO
+      do ij = ijtstr, ijtend
+         w(ij, skst) = ( ( ( ficla(ij) * mcla ) &
+     &                   + ( fipom(ij) * mpom ) &
+     &                   + ( ficar(ij) * mcar ) &
+     &                   + ( fiopa(ij) * mopa ) ) &
+     &               / ( 1.0d0 - phii(skst) ) )
+         do k = skst, sken
+            w(ij, k+1) = ( ( 1.0d0 - phii(k) ) / ( 1.0d0 - phii(k+1) ) &
+     &                   * w(ij, k) ) &
+     &                 - ( dlz(k) * ( ( trpom(ij, k) * mpom ) &
+     &                              + ( trcar(ij, k) * mcar ) &
+     &                              + ( tropa(ij, k) * mopa ) ) &
+     &                   / ( 1.0d0 - phii(k+1) ) )
+         end do
+      end do
 
 !     -- Particles (t --> t+dt) --
 !        Clay, POM, CaCO3, Opal
 
       call calc_step_solid_clay( &
-     &    FICLA, TRCLA, W, PHI, PHII, DBI, SCLA, RHOCLA, &
-     &    SNCLA, BFCLA )
+     &    ficla, trcla, w, phi, phii, dbi, scla, rhocla, &
+     &    sncla, bfcla )
 
       call calc_step_solid( &
-     &    FIPOM, TRPOM, W, PHI, PHII, DBI, SPOM, &
-     &    SNPOM, BFPOM )
+     &    fipom, trpom, w, phi, phii, dbi, spom, &
+     &    snpom, bfpom )
 
       call calc_step_solid( &
-     &    FICAR, TRCAR, W, PHI, PHII, DBI, SCAR, &
-     &    SNCAR, BFCAR )
+     &    ficar, trcar, w, phi, phii, dbi, scar, &
+     &    sncar, bfcar )
 
       call calc_step_solid( &
-     &    FIOPA, TROPA, W, PHI, PHII, DBI, SOPA, &
-     &    SNOPA, BFOPA )
+     &    fiopa, tropa, w, phi, phii, dbi, sopa, &
+     &    snopa, bfopa )
 
       call calc_step_solid_age( &
-     &    FIAGE, W, PHI, PHII, DBI, SAGE, &
-     &    SNAGE )
+     &    fiage, w, phi, phii, dbi, sage, &
+     &    snage )
 
-      IF ( CALC13 ) THEN
+      if ( CALc13 ) then
       call calc_step_solid( &
-     &    FI13POM, TR13POM, W, PHI, PHII, DBI, S13POM, &
-     &    SN13POM, BF13POM )
-
-      call calc_step_solid( &
-     &    FI13CAR, TR13CAR, W, PHI, PHII, DBI, S13CAR, &
-     &    SN13CAR, BF13CAR )
-      END IF
-
-      IF ( CALC14 ) THEN
-      call calc_step_solid( &
-     &    FI14POM, TR14POM, W, PHI, PHII, DBI, S14POM, &
-     &    SN14POM, BF14POM )
+     &    fi13pom, tr13pom, w, phi, phii, dbi, s13pom, &
+     &    sn13pom, bf13pom )
 
       call calc_step_solid( &
-     &    FI14CAR, TR14CAR, W, PHI, PHII, DBI, S14CAR, &
-     &    SN14CAR, BF14CAR )
-      DO K = SKST, SKEN
-         DO IJ = IJTSTR, IJTEND
-            SN14POM(IJ, K) = SN14POM(IJ, K) &
-     &                     - ADCAY * TS * S14POM(IJ, K)
-            SN14CAR(IJ, K) = SN14CAR(IJ, K) &
-     &                     - ADCAY * TS * S14CAR(IJ, K)
-         END DO
-      END DO
-      END IF
+     &    fi13car, tr13car, w, phi, phii, dbi, s13car, &
+     &    sn13car, bf13car )
+      end if
+
+      if ( CALc14 ) then
+      call calc_step_solid( &
+     &    fi14pom, tr14pom, w, phi, phii, dbi, s14pom, &
+     &    sn14pom, bf14pom )
+
+      call calc_step_solid( &
+     &    fi14car, tr14car, w, phi, phii, dbi, s14car, &
+     &    sn14car, bf14car )
+      do k = skst, sken
+         do ij = ijtstr, ijtend
+            sn14pom(ij, k) = sn14pom(ij, k) &
+     &                     - adcay * ts * s14pom(ij, k)
+            sn14car(ij, k) = sn14car(ij, k) &
+     &                     - adcay * ts * s14car(ij, k)
+         end do
+      end do
+      end if
 
 !     -- Dissolution rate --
-!        NIT, DIC, ALK, DO2, SIL
+!        Phosphate, DIC, Alkalinity, Oxygen, Silicate
 
-      DO K = SKST, SKEN
-         DO IJ = IJTSTR, IJTEND
-            TRNIT(IJ, K)   = ( ( PP / CP ) * TRPOM(IJ, K) )
-            TRDIC(IJ, K)   = ( TRPOM(IJ, K) + TRCAR(IJ, K) )
-            TRALK(IJ, K)   = ( - ( NP / CP ) * TRPOM(IJ, K) &
-     &                         + ( 2.0D0 * TRCAR(IJ, K) ) )
-            TRDO2(IJ, K)   = - ( ( OP / CP ) * TRPOM(IJ, K) )
-            IF ( CDO2(IJ, K) <= 0.0D0 ) THEN
-               TRDO2(IJ, K) = 0.0D0
-            END IF
-            TRSIL(IJ, K)   = TROPA(IJ, K)
-         END DO
-      END DO
+      do k = skst, sken
+         do ij = ijtstr, ijtend
+            trnit(ij, k)   = ( ( PP / CP ) * trpom(ij, k) )
+            trdic(ij, k)   = ( trpom(ij, k) + trcar(ij, k) )
+            tralk(ij, k)   = ( - ( NP / CP ) * trpom(ij, k) &
+     &                         + ( 2.0d0 * trcar(ij, k) ) )
+            trdo2(ij, k)   = - ( ( OP / CP ) * trpom(ij, k) )
+            if ( cdo2(ij, k) <= 0.0d0 ) then
+               trdo2(ij, k) = 0.0d0
+            end if
+            trsil(ij, k)   = tropa(ij, k)
+         end do
+      end do
 
-      IF ( CALC13 ) THEN
-      DO K = SKST, SKEN
-         DO IJ = IJTSTR, IJTEND
-            TR13DIC(IJ, K) = ( TR13POM(IJ, K) + TR13CAR(IJ, K) )
-         END DO
-      END DO
-      END IF
+      if ( CALc13 ) then
+      do k = skst, sken
+         do ij = ijtstr, ijtend
+            tr13dic(ij, k) = ( tr13pom(ij, k) + tr13car(ij, k) )
+         end do
+      end do
+      end if
 
-      IF ( CALC14 ) THEN
-      DO K = SKST, SKEN
-         DO IJ = IJTSTR, IJTEND
-            TR14DIC(IJ, K) = ( TR14POM(IJ, K) + TR14CAR(IJ, K) )
-         END DO
-      END DO
-      END IF
+      if ( CALc14 ) then
+      do k = skst, sken
+         do ij = ijtstr, ijtend
+            tr14dic(ij, k) = ( tr14pom(ij, k) + tr14car(ij, k) )
+         end do
+      end do
+      end if
 
 !     -- Dissolved material (t --> t+dt) --
-!        NIT, DIC, ALK, DO2, SIL
+!        Phosphate, DIC, Alkalinity, Oxygen, Silicate
 
       call calc_step_liquid( &
-     &    BWNIT, TRNIT, PHI, PHII, DEINIT, CNIT, &
-     &    CNNIT )
+     &    bwnit, trnit, phi, phii, deinit, cnit, &
+     &    cnnit )
 
       call calc_step_liquid( &
-     &    BWDIC, TRDIC, PHI, PHII, DEIDIC, CDIC, &
-     &    CNDIC )
+     &    bwdic, trdic, phi, phii, deidic, cdic, &
+     &    cndic )
 
       call calc_step_liquid( &
-     &    BWALK, TRALK, PHI, PHII, DEIALK, CALK, &
-     &    CNALK )
+     &    bwalk, tralk, phi, phii, deialk, calk, &
+     &    cnalk )
 
       call calc_step_liquid_o2( &
-     &    BWDO2, TRDO2, PHI, PHII, DEIDO2, CDO2, &
-     &    CNDO2 )
+     &    bwdo2, trdo2, phi, phii, deido2, cdo2, &
+     &    cndo2 )
 
       call calc_step_liquid( &
-     &    BWSIL, TRSIL, PHI, PHII, DEISIL, CSIL, &
-     &    CNSIL )
+     &    bwsil, trsil, phi, phii, deisil, csil, &
+     &    cnsil )
 
-      IF ( CALC13 ) THEN
+      if ( CALc13 ) then
       call calc_step_liquid( &
-     &    BW13DIC, TR13DIC, PHI, PHII, DEI13DIC, C13DIC, &
-     &    CN13DIC )
-      END IF
+     &    bw13dic, tr13dic, phi, phii, dei13dic, c13dic, &
+     &    cn13dic )
+      end if
 
-      IF ( CALC14 ) THEN
+      if ( CALc14 ) then
       call calc_step_liquid( &
-     &    BW14DIC, TR14DIC, PHI, PHII, DEI14DIC, C14DIC, &
-     &    CN14DIC )
-      END IF
-      DO K = SKST, SKEN
-         DO IJ = IJTSTR, IJTEND
-            CN14DIC(IJ, K) = CN14DIC(IJ, K) &
-     &                     - ADCAY * TS * C14DIC(IJ, K)
-         END DO
-      END DO
+     &    bw14dic, tr14dic, phi, phii, dei14dic, c14dic, &
+     &    cn14dic )
+      end if
+      do k = skst, sken
+         do ij = ijtstr, ijtend
+            cn14dic(ij, k) = cn14dic(ij, k) &
+     &                     - adcay * ts * c14dic(ij, k)
+         end do
+      end do
 
 !     -- Particles weight percent --
 
-      DO K = SKST, SKEN
-         DO IJ = IJTSTR, IJTEND
-            WT(IJ, K) = SNCLA(IJ, K) &
-     &                + ( SNPOM(IJ, K) * MOLPOM * 1.0D-3 ) &
-     &                + ( SNCAR(IJ, K) * MOLCAR * 1.0D-3 ) &
-     &                + ( SNOPA(IJ, K) * MOLOPA * 1.0D-3 )
-            IF ( WT(IJ, K) == 0.0D0 ) THEN
-               PCLA(IJ, K) = 0.0D0
-               PPOM(IJ, K) = 0.0D0
-               PCAR(IJ, K) = 0.0D0
-               POPA(IJ, K) = 0.0D0
-            ELSE
-               PCLA(IJ, K) = &
-     &            ( SNCLA(IJ, K) / WT(IJ, K) ) &
-     &            * 1.0D+2
-               PPOM(IJ, K) = &
-     &            ( SNPOM(IJ, K) * MOLPOM * 1.0D-3 / WT(IJ, K) ) &
-     &            * 1.0D+2
-               PCAR(IJ, K) = &
-     &            ( SNCAR(IJ, K) * MOLCAR * 1.0D-3 / WT(IJ, K) ) &
-     &            * 1.0D+2
-               POPA(IJ, K) = &
-     &            ( SNOPA(IJ, K) * MOLOPA * 1.0D-3 / WT(IJ, K) ) &
-     &            * 1.0D+2
-            END IF
-         END DO
-      END DO
+      do k = skst, sken
+         do ij = ijtstr, ijtend
+            wt(ij, k) = sncla(ij, k) &
+     &                + ( snpom(ij, k) * molpom * 1.0d-3 ) &
+     &                + ( sncar(ij, k) * molcar * 1.0d-3 ) &
+     &                + ( snopa(ij, k) * molopa * 1.0d-3 )
+            if ( wt(ij, k) == 0.0d0 ) then
+               pcla(ij, k) = 0.0d0
+               ppom(ij, k) = 0.0d0
+               pcar(ij, k) = 0.0d0
+               popa(ij, k) = 0.0d0
+            else
+               pcla(ij, k) = &
+     &            ( sncla(ij, k) / wt(ij, k) ) &
+     &            * 1.0d+2
+               ppom(ij, k) = &
+     &            ( snpom(ij, k) * molpom * 1.0d-3 / wt(ij, k) ) &
+     &            * 1.0d+2
+               pcar(ij, k) = &
+     &            ( sncar(ij, k) * molcar * 1.0d-3 / wt(ij, k) ) &
+     &            * 1.0d+2
+               popa(ij, k) = &
+     &            ( snopa(ij, k) * molopa * 1.0d-3 / wt(ij, k) ) &
+     &            * 1.0d+2
+            end if
+         end do
+      end do
 
 !     -- Isotopic fractionation --
 
-      IF ( CALC13 ) THEN
-      DO K = SKST, SKEN
-         DO IJ = IJTSTR, IJTEND
-            IF ( CNDIC(IJ, K) /= 0.0D0 ) THEN
-               R13 = CN13DIC(IJ, K) / MAX( CNDIC(IJ, K), EPS )
-               CDC13(IJ, K) = &
-     &            ( 1.0D0 / 0.0112372D0 &
-     &              * R13 / ( 1.0D0 - R13 ) - 1.0D0 ) * 1.0D3
-            ELSE
-               CDC13(IJ, K) = 0.0D0
-            END IF
-         END DO
-      END DO
-      END IF
+      if ( CALc13 ) then
+      do k = skst, sken
+         do ij = ijtstr, ijtend
+            if ( cndic(ij, k) /= 0.0d0 ) then
+               r13 = cn13dic(ij, k) / max( cndic(ij, k), eps )
+               cdc13(ij, k) = &
+     &            ( 1.0d0 / 0.0112372d0 &
+     &              * r13 / ( 1.0d0 - r13 ) - 1.0d0 ) * 1.0d+3
+            else
+               cdc13(ij, k) = 0.0d0
+            end if
+         end do
+      end do
+      end if
 
-      IF ( CALC14 ) THEN
-      DO K = SKST, SKEN
-         DO IJ = IJTSTR, IJTEND
-            IF ( CNDIC(IJ, K) /= 0.0D0 ) THEN
-               R14 = CN14DIC(IJ, K) / MAX( CNDIC(IJ, K), EPS )
-               CDC14(IJ, K) = &
-     &            ( 1.0D0 / 1.1892D-12 &
-     &              * R14 / ( 1.0D0 - R14 ) - 1.0D0 ) * 1.0D3
-            ELSE
-               CDC14(IJ, K) = 0.0D0
-            END IF
-         END DO
-      END DO
-      DO K = SKST, SKEN
-         DO IJ = IJTSTR, IJTEND
-            DLTC13 = CDC13(IJ, K) * 1.0D-3  !! [permil]
-            DLTC14 = CDC14(IJ, K) * 1.0D-3  !! [permil]
-            CDC14(IJ, K) = &
-     &         ( DLTC14 - 2.0D0 * ( DLTC13 + 0.025D0 ) &
-     &                          * ( 1.0D0 + DLTC14 ) &
-     &         ) * 1.0D+3   !! [permil]
-         END DO
-      END DO
-      END IF
+      if ( CALc14 ) then
+      do k = skst, sken
+         do ij = ijtstr, ijtend
+            if ( cndic(ij, k) /= 0.0d0 ) then
+               r14 = cn14dic(ij, k) / max( cndic(ij, k), eps )
+               cdc14(ij, k) = &
+     &            ( 1.0d0 / 1.1892d-12 &
+     &              * r14 / ( 1.0d0 - r14 ) - 1.0d0 ) * 1.0d+3
+            else
+               cdc14(ij, k) = 0.0d0
+            end if
+         end do
+      end do
+      do k = skst, sken
+         do ij = ijtstr, ijtend
+            dltc13 = cdc13(ij, k) * 1.0d-3  !! [permil]
+            dltc14 = cdc14(ij, k) * 1.0d-3  !! [permil]
+            cdc14(ij, k) = &
+     &         ( dltc14 - 2.0d0 * ( dltc13 + 0.025d0 ) &
+     &                          * ( 1.0d0 + dltc14 ) &
+     &         ) * 1.0d+3   !! [permil]
+         end do
+      end do
+      end if
 
 !     -- Sea-bottom flux --
 
-      DO IJ = IJTSTR, IJTEND
-         FONIT(IJ) = - ( PHII(SKST) * DEINIT(SKST) &
-     &      * ( BWNIT(IJ) - CNNIT(IJ, SKST) ) / DLZI(SKST) )
-         FODIC(IJ) = - ( PHII(SKST) * DEIDIC(SKST) &
-     &      * ( BWDIC(IJ) - CNDIC(IJ, SKST) ) / DLZI(SKST) )
-         FOALK(IJ) = - ( PHII(SKST) * DEIALK(SKST) &
-     &      * ( BWALK(IJ) - CNALK(IJ, SKST) ) / DLZI(SKST) )
-         FODO2(IJ) = - ( PHII(SKST) * DEIDO2(SKST) &
-     &      * ( BWDO2(IJ) - CNDO2(IJ, SKST) ) / DLZI(SKST) )
-         FOSIL(IJ) = - ( PHII(SKST) * DEISIL(SKST) &
-     &      * ( BWSIL(IJ) - CNSIL(IJ, SKST) ) / DLZI(SKST) )
-         FINIT(IJ)  = FIPOM(IJ) * ( PP / CP )
-         FIDIC(IJ)  = FIPOM(IJ) + FICAR(IJ)
-         FIALK(IJ)  = - FIPOM(IJ) * ( NP / CP ) + 2.0D0 * FICAR(IJ)
-         FIDO2(IJ)  = FIPOM(IJ) * ( OP / CP )
-         FISIL(IJ)  = FIOPA(IJ)
-         IF ( CALC13 ) THEN
-         FO13DIC(IJ) = - ( PHII(SKST) * DEI13DIC(SKST) &
-     &      * ( BW13DIC(IJ) - CN13DIC(IJ, SKST) ) / DLZI(SKST) )
-         FI13DIC(IJ)  = FI13POM(IJ) + FI13CAR(IJ)
-         END IF
-         IF ( CALC14 ) THEN
-         FO14DIC(IJ) = - ( PHII(SKST) * DEI14DIC(SKST) &
-     &      * ( BW14DIC(IJ) - CN14DIC(IJ, SKST) ) / DLZI(SKST) )
-         FI14DIC(IJ)  = FI14POM(IJ) + FI14CAR(IJ)
-         END IF
-      END DO
+      do ij = ijtstr, ijtend
+         fonit(ij) = - ( phii(skst) * deinit(skst) &
+     &      * ( bwnit(ij) - cnnit(ij, skst) ) / dlzi(skst) )
+         fodic(ij) = - ( phii(skst) * deidic(skst) &
+     &      * ( bwdic(ij) - cndic(ij, skst) ) / dlzi(skst) )
+         foalk(ij) = - ( phii(skst) * deialk(skst) &
+     &      * ( bwalk(ij) - cnalk(ij, skst) ) / dlzi(skst) )
+         fodo2(ij) = - ( phii(skst) * deido2(skst) &
+     &      * ( bwdo2(ij) - cndo2(ij, skst) ) / dlzi(skst) )
+         fosil(ij) = - ( phii(skst) * deisil(skst) &
+     &      * ( bwsil(ij) - cnsil(ij, skst) ) / dlzi(skst) )
+         finit(ij)  = fipom(ij) * ( PP / CP )
+         fidic(ij)  = fipom(ij) + ficar(ij)
+         fialk(ij)  = - fipom(ij) * ( NP / CP ) + 2.0d0 * ficar(ij)
+         fido2(ij)  = fipom(ij) * ( OP / CP )
+         fisil(ij)  = fiopa(ij)
+         if ( CALc13 ) then
+         fo13dic(ij) = - ( phii(skst) * dei13dic(skst) &
+     &      * ( bw13dic(ij) - cn13dic(ij, skst) ) / dlzi(skst) )
+         fi13dic(ij)  = fi13pom(ij) + fi13car(ij)
+         end if
+         if ( CALc14 ) then
+         fo14dic(ij) = - ( phii(skst) * dei14dic(skst) &
+     &      * ( bw14dic(ij) - cn14dic(ij, skst) ) / dlzi(skst) )
+         fi14dic(ij)  = fi14pom(ij) + fi14car(ij)
+         end if
+      end do
 
-      DO IJ = IJTSTR, IJTEND
-         FOPOM(IJ) = CP * FONIT(IJ)
-         FOCAR(IJ) = 0.5D0 * ( + NP * FONIT(IJ) + FOALK(IJ) )
-!         FOPOM(IJ) = ( CP / ( NP + 2.0D0 * CP ) ) &
-!     &      * ( 2.0D0 * FODIC(IJ) - FOALK(IJ) )
-!         FOCAR(IJ) = ( CP / ( NP + 2.0D0 * CP ) ) &
-!     &      * ( ( NP / CP ) * FODIC(IJ) + FOALK(IJ) )
-         FOOPA(IJ) = FOSIL(IJ)
-      END DO
+      do ij = ijtstr, ijtend
+         fopom(ij) = CP * fonit(ij)
+         focar(ij) = 0.5d0 * ( + NP * fonit(ij) + foalk(ij) )
+!         fopom(ij) = ( CP / ( NP + 2.0d0 * CP ) ) &
+!     &      * ( 2.0d0 * fodic(ij) - foalk(ij) )
+!         focar(ij) = ( CP / ( NP + 2.0d0 * CP ) ) &
+!     &      * ( ( NP / CP ) * fodic(ij) + foalk(ij) )
+         foopa(ij) = fosil(ij)
+      end do
 
 !     -- OUTPUT --
-IF (use_mpi) THEN
-      DO K = SKST, SKEN
-         DO IJ = 1, NXY
-            SDTX(MYRANK*NXY+IJ, K,  1) = SNCLA(IJ, K)
-            SDTX(MYRANK*NXY+IJ, K,  2) = SNPOM(IJ, K)
-            SDTX(MYRANK*NXY+IJ, K,  3) = SNCAR(IJ, K)
-            SDTX(MYRANK*NXY+IJ, K,  4) = SNOPA(IJ, K)
-            SDTX(MYRANK*NXY+IJ, K,  5) = SNAGE(IJ, K)
-            SDTX(MYRANK*NXY+IJ, K,  6) = CNNIT(IJ, K)
-            SDTX(MYRANK*NXY+IJ, K,  7) = CNDIC(IJ, K)
-            SDTX(MYRANK*NXY+IJ, K,  8) = CNALK(IJ, K)
-            SDTX(MYRANK*NXY+IJ, K,  9) = CNSIL(IJ, K)
-            SDTX(MYRANK*NXY+IJ, K, 10) = CNDO2(IJ, K)
-         END DO
-      END DO
-      IF ( CALC13 ) THEN
-      DO K = SKST, SKEN
-         DO IJ = 1, NXY
-            SDTX(MYRANK*NXY+IJ, K, 11) = SN13POM(IJ, K)
-            SDTX(MYRANK*NXY+IJ, K, 12) = SN13CAR(IJ, K)
-            SDTX(MYRANK*NXY+IJ, K, 13) = CN13DIC(IJ, K)
-         END DO
-      END DO
-      END IF
-      IF ( CALC14 ) THEN
-      DO K = SKST, SKEN
-         DO IJ = 1, NXY
-            SDTX(MYRANK*NXY+IJ, K, 14) = SN14POM(IJ, K)
-            SDTX(MYRANK*NXY+IJ, K, 15) = SN14CAR(IJ, K)
-            SDTX(MYRANK*NXY+IJ, K, 16) = CN14DIC(IJ, K)
-         END DO
-      END DO
-      END IF
-ELSE
-      DO K = SKST, SKEN
-         DO IJ = 1, NXY
-            SDTX(IJ, K,  1) = SNCLA(IJ, K)
-            SDTX(IJ, K,  2) = SNPOM(IJ, K)
-            SDTX(IJ, K,  3) = SNCAR(IJ, K)
-            SDTX(IJ, K,  4) = SNOPA(IJ, K)
-            SDTX(IJ, K,  5) = SNAGE(IJ, K)
-            SDTX(IJ, K,  6) = CNNIT(IJ, K)
-            SDTX(IJ, K,  7) = CNDIC(IJ, K)
-            SDTX(IJ, K,  8) = CNALK(IJ, K)
-            SDTX(IJ, K,  9) = CNSIL(IJ, K)
-            SDTX(IJ, K, 10) = CNDO2(IJ, K)
-         END DO
-      END DO
-      IF ( CALC13 ) THEN
-      DO K = SKST, SKEN
-         DO IJ = 1, NXY
-            SDTX(IJ, K, 11) = SN13POM(IJ, K)
-            SDTX(IJ, K, 12) = SN13CAR(IJ, K)
-            SDTX(IJ, K, 13) = CN13DIC(IJ, K)
-         END DO
-      END DO
-      END IF
-      IF ( CALC14 ) THEN
-      DO K = SKST, SKEN
-         DO IJ = 1, NXY
-            SDTX(IJ, K, 14) = SN14POM(IJ, K)
-            SDTX(IJ, K, 15) = SN14CAR(IJ, K)
-            SDTX(IJ, K, 16) = CN14DIC(IJ, K)
-         END DO
-      END DO
-      END IF
-END IF
+if (use_mpi) then
+      do k = skst, sken
+         do ij = 1, nxy
+            SDTX(myrank*nxy+ij, k,  1) = sncla(ij, k)
+            SDTX(myrank*nxy+ij, k,  2) = snpom(ij, k)
+            SDTX(myrank*nxy+ij, k,  3) = sncar(ij, k)
+            SDTX(myrank*nxy+ij, k,  4) = snopa(ij, k)
+            SDTX(myrank*nxy+ij, k,  5) = snage(ij, k)
+            SDTX(myrank*nxy+ij, k,  6) = cnnit(ij, k)
+            SDTX(myrank*nxy+ij, k,  7) = cndic(ij, k)
+            SDTX(myrank*nxy+ij, k,  8) = cnalk(ij, k)
+            SDTX(myrank*nxy+ij, k,  9) = cnsil(ij, k)
+            SDTX(myrank*nxy+ij, k, 10) = cndo2(ij, k)
+         end do
+      end do
+      if ( CALc13 ) then
+      do k = skst, sken
+         do ij = 1, nxy
+            SDTX(myrank*nxy+ij, k, 11) = sn13pom(ij, k)
+            SDTX(myrank*nxy+ij, k, 12) = sn13car(ij, k)
+            SDTX(myrank*nxy+ij, k, 13) = cn13dic(ij, k)
+         end do
+      end do
+      end if
+      if ( CALc14 ) then
+      do k = skst, sken
+         do ij = 1, nxy
+            SDTX(myrank*nxy+ij, k, 14) = sn14pom(ij, k)
+            SDTX(myrank*nxy+ij, k, 15) = sn14car(ij, k)
+            SDTX(myrank*nxy+ij, k, 16) = cn14dic(ij, k)
+         end do
+      end do
+      end if
+else
+      do k = skst, sken
+         do ij = 1, nxy
+            SDTX(ij, k,  1) = sncla(ij, k)
+            SDTX(ij, k,  2) = snpom(ij, k)
+            SDTX(ij, k,  3) = sncar(ij, k)
+            SDTX(ij, k,  4) = snopa(ij, k)
+            SDTX(ij, k,  5) = snage(ij, k)
+            SDTX(ij, k,  6) = cnnit(ij, k)
+            SDTX(ij, k,  7) = cndic(ij, k)
+            SDTX(ij, k,  8) = cnalk(ij, k)
+            SDTX(ij, k,  9) = cnsil(ij, k)
+            SDTX(ij, k, 10) = cndo2(ij, k)
+         end do
+      end do
+      if ( CALc13 ) then
+      do k = skst, sken
+         do ij = 1, nxy
+            SDTX(ij, k, 11) = sn13pom(ij, k)
+            SDTX(ij, k, 12) = sn13car(ij, k)
+            SDTX(ij, k, 13) = cn13dic(ij, k)
+         end do
+      end do
+      end if
+      if ( CALc14 ) then
+      do k = skst, sken
+         do ij = 1, nxy
+            SDTX(ij, k, 14) = sn14pom(ij, k)
+            SDTX(ij, k, 15) = sn14car(ij, k)
+            SDTX(ij, k, 16) = cn14dic(ij, k)
+         end do
+      end do
+      end if
+end if
 
 !     -- Time step --
-      IF ( WOTSTP ) THEN
-         WRITE(NFSOTS, *), 'Time Step :', TT, 'step', YY, 'year'
-      END IF
+      if ( wotstp ) then
+         write(nfsots, *), 'Time Step :', TT, 'step', YY, 'year'
+      end if
 
 !     -- Conclude --
 
-!CCCCCIF ( TT == TEND ) THEN
-      IF ( TT == TEND .OR. MOD(TT, TOUT) == 0 ) THEN
+!CCCCCif ( TT == tend ) then
+      if ( TT == tend .OR. mod(TT, tout) == 0 ) then
 
-IF (use_mpi) THEN
+if (use_mpi) then
 
-      IF (SDOFIRST) THEN
-      ALLOCATE(nrcvct2d(0:NPROCS-1))
-      ALLOCATE(ndispt2d(0:NPROCS-1))
-      ALLOCATE(nrcvct3d(0:NPROCS-1))
-      ALLOCATE(ndispt3d(0:NPROCS-1))
-      ALLOCATE(nrcvcw3d(0:NPROCS-1))
-      ALLOCATE(ndispw3d(0:NPROCS-1))
+      if (SDofirst) then
+      allocate(nrcvct2d(0:nprocs-1))
+      allocate(ndispt2d(0:nprocs-1))
+      allocate(nrcvct3d(0:nprocs-1))
+      allocate(ndispt3d(0:nprocs-1))
+      allocate(nrcvcw3d(0:nprocs-1))
+      allocate(ndispw3d(0:nprocs-1))
 
-      ALLOCATE(DUMMY01(NXYZDM+NPROCS))
-      ALLOCATE(DUMMY02(NXYZDM+NPROCS))
-      ALLOCATE(DUMMY03(NXYZDM+NPROCS))
-      ALLOCATE(DUMMY04(NXYZDM+NPROCS))
-      ALLOCATE(DUMMY05(NXYZDM+NPROCS))
-      ALLOCATE(DUMMY11(NXYZDM+NPROCS))
-      ALLOCATE(DUMMY12(NXYZDM+NPROCS))
-      ALLOCATE(DUMMY13(NXYZDM+NPROCS))
-      ALLOCATE(DUMMY14(NXYZDM+NPROCS))
-      ALLOCATE(DUMMY15(NXYZDM+NPROCS))
-      ALLOCATE(DUMMY16(NXYZDM+NPROCS))
-      ALLOCATE(DUMMY21(NXYZDM+NPROCS))
-      ALLOCATE(DUMMY22(NXYDIM+NPROCS))
-      ALLOCATE(DUMMY23(NXYZDM+NXYDIM+NPROCS))
-      ALLOCATE(DUMMY31(NXYDIM+NPROCS))
-      ALLOCATE(DUMMY32(NXYDIM+NPROCS))
-      ALLOCATE(DUMMY33(NXYDIM+NPROCS))
-      ALLOCATE(DUMMY34(NXYDIM+NPROCS))
-      ALLOCATE(DUMMY41(NXYDIM+NPROCS))
-      ALLOCATE(DUMMY42(NXYDIM+NPROCS))
-      ALLOCATE(DUMMY43(NXYDIM+NPROCS))
-      ALLOCATE(DUMMY44(NXYDIM+NPROCS))
-      ALLOCATE(DUMMY51(NXYDIM+NPROCS))
-      ALLOCATE(DUMMY52(NXYDIM+NPROCS))
-      ALLOCATE(DUMMY53(NXYDIM+NPROCS))
-      ALLOCATE(DUMMY54(NXYDIM+NPROCS))
-      IF ( CALC13 ) THEN
-      ALLOCATE(DUMMY06(NXYZDM+NPROCS))
-      ALLOCATE(DUMMY08(NXYZDM+NPROCS))
-      ALLOCATE(DUMMY17(NXYZDM+NPROCS))
-      ALLOCATE(DUMMY19(NXYZDM+NPROCS))
-      ALLOCATE(DUMMY35(NXYDIM+NPROCS))
-      ALLOCATE(DUMMY37(NXYDIM+NPROCS))
-      ALLOCATE(DUMMY45(NXYDIM+NPROCS))
-      ALLOCATE(DUMMY47(NXYDIM+NPROCS))
-      ALLOCATE(DUMMY55(NXYDIM+NPROCS))
-      ALLOCATE(DUMMY57(NXYDIM+NPROCS))
-      END IF
-      IF ( CALC14 ) THEN
-      ALLOCATE(DUMMY07(NXYZDM+NPROCS))
-      ALLOCATE(DUMMY09(NXYZDM+NPROCS))
-      ALLOCATE(DUMMY18(NXYZDM+NPROCS))
-      ALLOCATE(DUMMY20(NXYZDM+NPROCS))
-      ALLOCATE(DUMMY36(NXYDIM+NPROCS))
-      ALLOCATE(DUMMY38(NXYDIM+NPROCS))
-      ALLOCATE(DUMMY46(NXYDIM+NPROCS))
-      ALLOCATE(DUMMY48(NXYDIM+NPROCS))
-      ALLOCATE(DUMMY56(NXYDIM+NPROCS))
-      ALLOCATE(DUMMY58(NXYDIM+NPROCS))
-      END IF
+      allocate(DUMMY01(nxyzdm+nprocs))
+      allocate(DUMMY02(nxyzdm+nprocs))
+      allocate(DUMMY03(nxyzdm+nprocs))
+      allocate(DUMMY04(nxyzdm+nprocs))
+      allocate(DUMMY05(nxyzdm+nprocs))
+      allocate(DUMMY11(nxyzdm+nprocs))
+      allocate(DUMMY12(nxyzdm+nprocs))
+      allocate(DUMMY13(nxyzdm+nprocs))
+      allocate(DUMMY14(nxyzdm+nprocs))
+      allocate(DUMMY15(nxyzdm+nprocs))
+      allocate(DUMMY16(nxyzdm+nprocs))
+      allocate(DUMMY21(nxyzdm+nprocs))
+      allocate(DUMMY22(nxydim+nprocs))
+      allocate(DUMMY23(nxyzdm+nxydim+nprocs))
+      allocate(DUMMY31(nxydim+nprocs))
+      allocate(DUMMY32(nxydim+nprocs))
+      allocate(DUMMY33(nxydim+nprocs))
+      allocate(DUMMY34(nxydim+nprocs))
+      allocate(DUMMY41(nxydim+nprocs))
+      allocate(DUMMY42(nxydim+nprocs))
+      allocate(DUMMY43(nxydim+nprocs))
+      allocate(DUMMY44(nxydim+nprocs))
+      allocate(DUMMY51(nxydim+nprocs))
+      allocate(DUMMY52(nxydim+nprocs))
+      allocate(DUMMY53(nxydim+nprocs))
+      allocate(DUMMY54(nxydim+nprocs))
+      if ( CALc13 ) then
+      allocate(DUMMY06(nxyzdm+nprocs))
+      allocate(DUMMY08(nxyzdm+nprocs))
+      allocate(DUMMY17(nxyzdm+nprocs))
+      allocate(DUMMY19(nxyzdm+nprocs))
+      allocate(DUMMY35(nxydim+nprocs))
+      allocate(DUMMY37(nxydim+nprocs))
+      allocate(DUMMY45(nxydim+nprocs))
+      allocate(DUMMY47(nxydim+nprocs))
+      allocate(DUMMY55(nxydim+nprocs))
+      allocate(DUMMY57(nxydim+nprocs))
+      end if
+      if ( CALc14 ) then
+      allocate(DUMMY07(nxyzdm+nprocs))
+      allocate(DUMMY09(nxyzdm+nprocs))
+      allocate(DUMMY18(nxyzdm+nprocs))
+      allocate(DUMMY20(nxyzdm+nprocs))
+      allocate(DUMMY36(nxydim+nprocs))
+      allocate(DUMMY38(nxydim+nprocs))
+      allocate(DUMMY46(nxydim+nprocs))
+      allocate(DUMMY48(nxydim+nprocs))
+      allocate(DUMMY56(nxydim+nprocs))
+      allocate(DUMMY58(nxydim+nprocs))
+      end if
 
-      nsndct2d = NXY
-      DO IRANK = 0, NPROCS-1
-         nrcvct2d(IRANK) = NXY
-         ndispt2d(IRANK) = NXY * IRANK
-      END DO
-      nsndct3d = NXYZ
-      DO IRANK = 0, NPROCS-1
-         nrcvct3d(IRANK) = NXYZ
-         ndispt3d(IRANK) = NXYZ * IRANK
-      END DO
-      nsndcw3d = ( NXYZ + NXY )
-      DO IRANK = 0, NPROCS-1
-         nrcvcw3d(IRANK) = ( NXYZ + NXY )
-         ndispw3d(IRANK) = ( NXYZ + NXY ) * IRANK
-      END DO
+      nsndct2d = nxy
+      do irank = 0, nprocs-1
+         nrcvct2d(irank) = nxy
+         ndispt2d(irank) = nxy * irank
+      end do
+      nsndct3d = nxyz
+      do irank = 0, nprocs-1
+         nrcvct3d(irank) = nxyz
+         ndispt3d(irank) = nxyz * irank
+      end do
+      nsndcw3d = ( nxyz + nxy )
+      do irank = 0, nprocs-1
+         nrcvcw3d(irank) = ( nxyz + nxy )
+         ndispw3d(irank) = ( nxyz + nxy ) * irank
+      end do
 
-      SDOFIRST = .false.
-      END IF
+      SDofirst = .false.
+      end if
 
-      call MPI_GATHERV( SCLA,    nsndct3d, mpi_real8, &
+      call mpi_gatherv( scla,    nsndct3d, mpi_real8, &
      &                  DUMMY01, nrcvct3d, ndispt3d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      call MPI_GATHERV( SPOM,    nsndct3d, mpi_real8, &
+      call mpi_gatherv( spom,    nsndct3d, mpi_real8, &
      &                  DUMMY02, nrcvct3d, ndispt3d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      call MPI_GATHERV( SCAR,    nsndct3d, mpi_real8, &
+      call mpi_gatherv( scar,    nsndct3d, mpi_real8, &
      &                  DUMMY03, nrcvct3d, ndispt3d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      call MPI_GATHERV( SOPA,    nsndct3d, mpi_real8, &
+      call mpi_gatherv( sopa,    nsndct3d, mpi_real8, &
      &                  DUMMY04, nrcvct3d, ndispt3d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      call MPI_GATHERV( SAGE,    nsndct3d, mpi_real8, &
+      call mpi_gatherv( sage,    nsndct3d, mpi_real8, &
      &                  DUMMY05, nrcvct3d, ndispt3d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      call MPI_GATHERV( CNIT,    nsndct3d, mpi_real8, &
+      call mpi_gatherv( cnit,    nsndct3d, mpi_real8, &
      &                  DUMMY11, nrcvct3d, ndispt3d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      call MPI_GATHERV( CDIC,    nsndct3d, mpi_real8, &
+      call mpi_gatherv( cdic,    nsndct3d, mpi_real8, &
      &                  DUMMY12, nrcvct3d, ndispt3d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      call MPI_GATHERV( CALK,    nsndct3d, mpi_real8, &
+      call mpi_gatherv( calk,    nsndct3d, mpi_real8, &
      &                  DUMMY13, nrcvct3d, ndispt3d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      call MPI_GATHERV( CDO2,    nsndct3d, mpi_real8, &
+      call mpi_gatherv( cdo2,    nsndct3d, mpi_real8, &
      &                  DUMMY14, nrcvct3d, ndispt3d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      call MPI_GATHERV( CSIL,    nsndct3d, mpi_real8, &
+      call mpi_gatherv( csil,    nsndct3d, mpi_real8, &
      &                  DUMMY15, nrcvct3d, ndispt3d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      call MPI_GATHERV( CCO32,   nsndct3d, mpi_real8, &
+      call mpi_gatherv( cco32,   nsndct3d, mpi_real8, &
      &                  DUMMY16, nrcvct3d, ndispt3d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      call MPI_GATHERV( SATSIL,  nsndct3d, mpi_real8, &
+      call mpi_gatherv( satsil,  nsndct3d, mpi_real8, &
      &                  DUMMY21, nrcvct3d, ndispt3d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      call MPI_GATHERV( SATCO32, nsndct2d, mpi_real8, &
+      call mpi_gatherv( satco32, nsndct2d, mpi_real8, &
      &                  DUMMY22, nrcvct2d, ndispt2d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      call MPI_GATHERV( W,       nsndcw3d, mpi_real8, &
+      call mpi_gatherv( W,       nsndcw3d, mpi_real8, &
      &                  DUMMY23, nrcvcw3d, ndispw3d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      call MPI_GATHERV( FICLA,   nsndct2d, mpi_real8, &
+      call mpi_gatherv( ficla,   nsndct2d, mpi_real8, &
      &                  DUMMY31, nrcvct2d, ndispt2d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      call MPI_GATHERV( FIPOM,   nsndct2d, mpi_real8, &
+      call mpi_gatherv( fipom,   nsndct2d, mpi_real8, &
      &                  DUMMY32, nrcvct2d, ndispt2d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      call MPI_GATHERV( FICAR,   nsndct2d, mpi_real8, &
+      call mpi_gatherv( ficar,   nsndct2d, mpi_real8, &
      &                  DUMMY33, nrcvct2d, ndispt2d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      call MPI_GATHERV( FIOPA,   nsndct2d, mpi_real8, &
+      call mpi_gatherv( fiopa,   nsndct2d, mpi_real8, &
      &                  DUMMY34, nrcvct2d, ndispt2d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      call MPI_GATHERV( FOCLA,   nsndct2d, mpi_real8, &
+      call mpi_gatherv( focla,   nsndct2d, mpi_real8, &
      &                  DUMMY41, nrcvct2d, ndispt2d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      call MPI_GATHERV( FOPOM,   nsndct2d, mpi_real8, &
+      call mpi_gatherv( fopom,   nsndct2d, mpi_real8, &
      &                  DUMMY42, nrcvct2d, ndispt2d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      call MPI_GATHERV( FOCAR,   nsndct2d, mpi_real8, &
+      call mpi_gatherv( focar,   nsndct2d, mpi_real8, &
      &                  DUMMY43, nrcvct2d, ndispt2d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      call MPI_GATHERV( FOOPA,   nsndct2d, mpi_real8, &
+      call mpi_gatherv( foopa,   nsndct2d, mpi_real8, &
      &                  DUMMY44, nrcvct2d, ndispt2d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      call MPI_GATHERV( BFCLA,   nsndct2d, mpi_real8, &
+      call mpi_gatherv( bfcla,   nsndct2d, mpi_real8, &
      &                  DUMMY51, nrcvct2d, ndispt2d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      call MPI_GATHERV( BFPOM,   nsndct2d, mpi_real8, &
+      call mpi_gatherv( bfpom,   nsndct2d, mpi_real8, &
      &                  DUMMY52, nrcvct2d, ndispt2d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      call MPI_GATHERV( BFCAR,   nsndct2d, mpi_real8, &
+      call mpi_gatherv( bfcar,   nsndct2d, mpi_real8, &
      &                  DUMMY53, nrcvct2d, ndispt2d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      call MPI_GATHERV( BFOPA,   nsndct2d, mpi_real8, &
+      call mpi_gatherv( bfopa,   nsndct2d, mpi_real8, &
      &                  DUMMY54, nrcvct2d, ndispt2d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
 
-      IF ( CALC13 ) THEN
-      call MPI_GATHERV( S13POM,  nsndct3d, mpi_real8, &
+      if ( CALc13 ) then
+      call mpi_gatherv( s13pom,  nsndct3d, mpi_real8, &
      &                  DUMMY06, nrcvct3d, ndispt3d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      call MPI_GATHERV( S13CAR,  nsndct3d, mpi_real8, &
+      call mpi_gatherv( s13car,  nsndct3d, mpi_real8, &
      &                  DUMMY08, nrcvct3d, ndispt3d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      call MPI_GATHERV( C13DIC,  nsndct3d, mpi_real8, &
+      call mpi_gatherv( c13dic,  nsndct3d, mpi_real8, &
      &                  DUMMY17, nrcvct3d, ndispt3d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      call MPI_GATHERV( CDC13,   nsndct3d, mpi_real8, &
+      call mpi_gatherv( cdc13,   nsndct3d, mpi_real8, &
      &                  DUMMY19, nrcvct3d, ndispt3d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      call MPI_GATHERV( FI13POM, nsndct2d, mpi_real8, &
+      call mpi_gatherv( fi13pom, nsndct2d, mpi_real8, &
      &                  DUMMY35, nrcvct2d, ndispt2d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      call MPI_GATHERV( FI13CAR, nsndct2d, mpi_real8, &
+      call mpi_gatherv( fi13car, nsndct2d, mpi_real8, &
      &                  DUMMY37, nrcvct2d, ndispt2d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      call MPI_GATHERV( FO13POM, nsndct2d, mpi_real8, &
+      call mpi_gatherv( fo13pom, nsndct2d, mpi_real8, &
      &                  DUMMY45, nrcvct2d, ndispt2d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      call MPI_GATHERV( FO13CAR, nsndct2d, mpi_real8, &
+      call mpi_gatherv( fo13car, nsndct2d, mpi_real8, &
      &                  DUMMY47, nrcvct2d, ndispt2d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      call MPI_GATHERV( BF13POM, nsndct2d, mpi_real8, &
+      call mpi_gatherv( bf13pom, nsndct2d, mpi_real8, &
      &                  DUMMY55, nrcvct2d, ndispt2d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      call MPI_GATHERV( BF13CAR, nsndct2d, mpi_real8, &
+      call mpi_gatherv( bf13car, nsndct2d, mpi_real8, &
      &                  DUMMY57, nrcvct2d, ndispt2d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      END IF
+      end if
 
-      IF ( CALC14 ) THEN
-      call MPI_GATHERV( S14POM,  nsndct3d, mpi_real8, &
+      if ( CALc14 ) then
+      call mpi_gatherv( s14pom,  nsndct3d, mpi_real8, &
      &                  DUMMY07, nrcvct3d, ndispt3d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      call MPI_GATHERV( S14CAR,  nsndct3d, mpi_real8, &
+      call mpi_gatherv( s14car,  nsndct3d, mpi_real8, &
      &                  DUMMY09, nrcvct3d, ndispt3d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      call MPI_GATHERV( C14DIC,  nsndct3d, mpi_real8, &
+      call mpi_gatherv( c14dic,  nsndct3d, mpi_real8, &
      &                  DUMMY18, nrcvct3d, ndispt3d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      call MPI_GATHERV( CDC14,   nsndct3d, mpi_real8, &
+      call mpi_gatherv( cdc14,   nsndct3d, mpi_real8, &
      &                  DUMMY20, nrcvct3d, ndispt3d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      call MPI_GATHERV( FI14POM, nsndct2d, mpi_real8, &
+      call mpi_gatherv( fi14pom, nsndct2d, mpi_real8, &
      &                  DUMMY36, nrcvct2d, ndispt2d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      call MPI_GATHERV( FO14POM, nsndct2d, mpi_real8, &
+      call mpi_gatherv( fo14pom, nsndct2d, mpi_real8, &
      &                  DUMMY46, nrcvct2d, ndispt2d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      call MPI_GATHERV( FO14CAR, nsndct2d, mpi_real8, &
+      call mpi_gatherv( fo14car, nsndct2d, mpi_real8, &
      &                  DUMMY48, nrcvct2d, ndispt2d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      call MPI_GATHERV( BF14POM, nsndct2d, mpi_real8, &
+      call mpi_gatherv( bf14pom, nsndct2d, mpi_real8, &
      &                  DUMMY56, nrcvct2d, ndispt2d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      call MPI_GATHERV( BF14CAR, nsndct2d, mpi_real8, &
+      call mpi_gatherv( bf14car, nsndct2d, mpi_real8, &
      &                  DUMMY58, nrcvct2d, ndispt2d, mpi_real8, &
      &                  IROOT, mpi_COMM_WORLD, IERR     )
-      END IF
+      end if
 
-      IF ( MYRANK .EQ. IROOT ) THEN
-         DO IRANK = 0, NPROCS-1
-            IJKG = ndispt3d(IRANK)
-            DO K = SKST, SKEN
-               DO IJ = JJSTR(IRANK), JJEND(IRANK)
-                  IJKG = IJKG + 1
-                  SCLAG(IJ, K)   = DUMMY01(IJKG)
-                  SPOMG(IJ, K)   = DUMMY02(IJKG)
-                  SCARG(IJ, K)   = DUMMY03(IJKG)
-                  SOPAG(IJ, K)   = DUMMY04(IJKG)
-                  SAGEG(IJ, K)   = DUMMY05(IJKG)
-                  CNITG(IJ, K)   = DUMMY11(IJKG)
-                  CDICG(IJ, K)   = DUMMY12(IJKG)
-                  CALKG(IJ, K)   = DUMMY13(IJKG)
-                  CDO2G(IJ, K)   = DUMMY14(IJKG)
-                  CSILG(IJ, K)   = DUMMY15(IJKG)
-                  CCO32G(IJ, K)  = DUMMY16(IJKG)
-               IF ( CALC13 ) THEN
-                  S13POMG(IJ, K) = DUMMY06(IJKG)
-                  S13CARG(IJ, K) = DUMMY08(IJKG)
-                  C13DICG(IJ, K) = DUMMY17(IJKG)
-                  CDC13G(IJ, K)  = DUMMY19(IJKG)
-               END IF
-               IF ( CALC14 ) THEN
-                  S14POMG(IJ, K) = DUMMY07(IJKG)
-                  S14CARG(IJ, K) = DUMMY09(IJKG)
-                  C14DICG(IJ, K) = DUMMY18(IJKG)
-                  CDC14G(IJ, K)  = DUMMY20(IJKG)
-               END IF
-                  SATSILG(IJ, K) = DUMMY21(IJKG)
-               END DO
-            END DO
-            IJKG = ndispw3d(IRANK)
-            DO K = SKST, SKEN+1
-               DO IJ = JJSTR(IRANK), JJEND(IRANK)
-                  IJKG = IJKG + 1
-                  WG(IJ, K)      = DUMMY23(IJKG)
-               END DO
-            END DO
-            DO IJ = JJSTR(IRANK), JJEND(IRANK)
-               SATCO32G(IJ) = DUMMY22(IJ)
-               FICLAG(IJ)   = DUMMY31(IJ)
-               FIPOMG(IJ)   = DUMMY32(IJ)
-               FICARG(IJ)   = DUMMY33(IJ)
-               FIOPAG(IJ)   = DUMMY34(IJ)
-               FOCLAG(IJ)   = DUMMY41(IJ)
-               FOPOMG(IJ)   = DUMMY42(IJ)
-               FOCARG(IJ)   = DUMMY43(IJ)
-               FOOPAG(IJ)   = DUMMY44(IJ)
-               BFCLAG(IJ)   = DUMMY51(IJ)
-               BFPOMG(IJ)   = DUMMY52(IJ)
-               BFCARG(IJ)   = DUMMY53(IJ)
-               BFOPAG(IJ)   = DUMMY54(IJ)
-               IF ( CALC13 ) THEN
-               FI13POMG(IJ) = DUMMY35(IJ)
-               FI13CARG(IJ) = DUMMY37(IJ)
-               FO13POMG(IJ) = DUMMY45(IJ)
-               FO13CARG(IJ) = DUMMY47(IJ)
-               BF13POMG(IJ) = DUMMY55(IJ)
-               BF13CARG(IJ) = DUMMY57(IJ)
-               END IF
-               IF ( CALC14 ) THEN
-               FI14POMG(IJ) = DUMMY36(IJ)
-               FI14CARG(IJ) = DUMMY38(IJ)
-               FO14POMG(IJ) = DUMMY46(IJ)
-               FO14CARG(IJ) = DUMMY48(IJ)
-               BF14POMG(IJ) = DUMMY56(IJ)
-               BF14CARG(IJ) = DUMMY58(IJ)
-               END IF
-            END DO
-         END DO
+      if ( myrank .eq. IROOT ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispt3d(irank)
+            do k = skst, sken
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  sclag(ij, k)   = DUMMY01(ijkg)
+                  spomg(ij, k)   = DUMMY02(ijkg)
+                  scarg(ij, k)   = DUMMY03(ijkg)
+                  sopag(ij, k)   = DUMMY04(ijkg)
+                  sageg(ij, k)   = DUMMY05(ijkg)
+                  cnitg(ij, k)   = DUMMY11(ijkg)
+                  cdicg(ij, k)   = DUMMY12(ijkg)
+                  calkg(ij, k)   = DUMMY13(ijkg)
+                  cdo2g(ij, k)   = DUMMY14(ijkg)
+                  csilg(ij, k)   = DUMMY15(ijkg)
+                  cco32g(ij, k)  = DUMMY16(ijkg)
+               if ( CALc13 ) then
+                  s13pomg(ij, k) = DUMMY06(ijkg)
+                  s13carg(ij, k) = DUMMY08(ijkg)
+                  c13dicg(ij, k) = DUMMY17(ijkg)
+                  cdc13g(ij, k)  = DUMMY19(ijkg)
+               end if
+               if ( CALc14 ) then
+                  s14pomg(ij, k) = DUMMY07(ijkg)
+                  s14carg(ij, k) = DUMMY09(ijkg)
+                  c14dicg(ij, k) = DUMMY18(ijkg)
+                  cdc14g(ij, k)  = DUMMY20(ijkg)
+               end if
+                  satsilg(ij, k) = DUMMY21(ijkg)
+               end do
+            end do
+            ijkg = ndispw3d(irank)
+            do k = skst, sken+1
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  WG(ij, k)      = DUMMY23(ijkg)
+               end do
+            end do
+            do ij = jjstr(irank), jjend(irank)
+               satco32g(ij) = DUMMY22(ij)
+               ficlag(ij)   = DUMMY31(ij)
+               fipomg(ij)   = DUMMY32(ij)
+               ficarg(ij)   = DUMMY33(ij)
+               fiopag(ij)   = DUMMY34(ij)
+               foclag(ij)   = DUMMY41(ij)
+               fopomg(ij)   = DUMMY42(ij)
+               focarg(ij)   = DUMMY43(ij)
+               foopag(ij)   = DUMMY44(ij)
+               bfclag(ij)   = DUMMY51(ij)
+               bfpomg(ij)   = DUMMY52(ij)
+               bfcarg(ij)   = DUMMY53(ij)
+               bfopag(ij)   = DUMMY54(ij)
+               if ( CALc13 ) then
+               fi13pomg(ij) = DUMMY35(ij)
+               fi13carg(ij) = DUMMY37(ij)
+               fo13pomg(ij) = DUMMY45(ij)
+               fo13carg(ij) = DUMMY47(ij)
+               bf13pomg(ij) = DUMMY55(ij)
+               bf13carg(ij) = DUMMY57(ij)
+               end if
+               if ( CALc14 ) then
+               fi14pomg(ij) = DUMMY36(ij)
+               fi14carg(ij) = DUMMY38(ij)
+               fo14pomg(ij) = DUMMY46(ij)
+               fo14carg(ij) = DUMMY48(ij)
+               bf14pomg(ij) = DUMMY56(ij)
+               bf14carg(ij) = DUMMY58(ij)
+               end if
+            end do
+         end do
 
-         DO K = SKST, SKEN
-            DO IJ = 1, NXYDIM
-               WTG(IJ, K)   = SCLAG(IJ, K) &
-     &                      + ( SPOMG(IJ, K) * MOLPOM * 1.0D-3 ) &
-     &                      + ( SCARG(IJ, K) * MOLCAR * 1.0D-3 ) &
-     &                      + ( SOPAG(IJ, K) * MOLOPA * 1.0D-3 )
-               PCLAG(IJ, K) = SCLAG(IJ, K) &
-     &                      / WTG(IJ, K) * 1.0D+2
-               PPOMG(IJ, K) = SPOMG(IJ, K) * MOLPOM * 1.0D-3 &
-     &                      / WTG(IJ, K) * 1.0D+2
-               PCARG(IJ, K) = SCARG(IJ, K) * MOLCAR * 1.0D-3 &
-     &                      / WTG(IJ, K) * 1.0D+2
-               POPAG(IJ, K) = SOPAG(IJ, K) * MOLOPA * 1.0D-3 &
-     &                      / WTG(IJ, K) * 1.0D+2
-            END DO
-         END DO
+         do k = skst, sken
+            do ij = 1, nxydim
+               wtg(ij, k)   = sclag(ij, k) &
+     &                      + ( spomg(ij, k) * molpom * 1.0d-3 ) &
+     &                      + ( scarg(ij, k) * molcar * 1.0d-3 ) &
+     &                      + ( sopag(ij, k) * molopa * 1.0d-3 )
+               pclag(ij, k) = sclag(ij, k) &
+     &                      / wtg(ij, k) * 1.0d+2
+               ppomg(ij, k) = spomg(ij, k) * molpom * 1.0d-3 &
+     &                      / wtg(ij, k) * 1.0d+2
+               pcarg(ij, k) = scarg(ij, k) * molcar * 1.0d-3 &
+     &                      / wtg(ij, k) * 1.0d+2
+               popag(ij, k) = sopag(ij, k) * molopa * 1.0d-3 &
+     &                      / wtg(ij, k) * 1.0d+2
+            end do
+         end do
 
-      END IF
+      end if
       call mpi_barrier(mpi_comm_world, IERR)
 
-ELSE
+else
 
-         DO K = SKST, SKEN
-            DO IJ = 1, NXYDIM
-               SCLAG(IJ, K) = SCLA(IJ, K)
-               SPOMG(IJ, K) = SPOM(IJ, K)
-               SCARG(IJ, K) = SCAR(IJ, K)
-               SOPAG(IJ, K) = SOPA(IJ, K)
-               SAGEG(IJ, K) = SAGE(IJ, K)
-            END DO
-         END DO
+         do k = skst, sken
+            do ij = 1, nxydim
+               sclag(ij, k) = scla(ij, k)
+               spomg(ij, k) = spom(ij, k)
+               scarg(ij, k) = scar(ij, k)
+               sopag(ij, k) = sopa(ij, k)
+               sageg(ij, k) = sage(ij, k)
+            end do
+         end do
 
-         DO K = SKST, SKEN
-            DO IJ = 1, NXYDIM
-               PCLAG(IJ, K) = PCLA(IJ, K)
-               PPOMG(IJ, K) = PPOM(IJ, K)
-               PCARG(IJ, K) = PCAR(IJ, K)
-               POPAG(IJ, K) = POPA(IJ, K)
-            END DO
-         END DO
+         do k = skst, sken
+            do ij = 1, nxydim
+               pclag(ij, k) = pcla(ij, k)
+               ppomg(ij, k) = ppom(ij, k)
+               pcarg(ij, k) = pcar(ij, k)
+               popag(ij, k) = popa(ij, k)
+            end do
+         end do
 
-         DO K = SKST, SKEN
-            DO IJ = 1, NXYDIM
-                CNITG(IJ, K)   = CNIT(IJ, K)
-                CDICG(IJ, K)   = CDIC(IJ, K)
-                CALKG(IJ, K)   = CALK(IJ, K)
-                CDO2G(IJ, K)   = CDO2(IJ, K)
-                CSILG(IJ, K)   = CSIL(IJ, K)
-                CCO32G(IJ, K)  = CCO32(IJ, K)
-            END DO
-         END DO
+         do k = skst, sken
+            do ij = 1, nxydim
+                cnitg(ij, k)   = cnit(ij, k)
+                cdicg(ij, k)   = cdic(ij, k)
+                calkg(ij, k)   = calk(ij, k)
+                cdo2g(ij, k)   = cdo2(ij, k)
+                csilg(ij, k)   = csil(ij, k)
+                cco32g(ij, k)  = cco32(ij, k)
+            end do
+         end do
 
-         DO K = SKST, SKEN
-            DO IJ = 1, NXYDIM
-                SATSILG(IJ, K) = SATSIL(IJ, K)
-            END DO
-         END DO
+         do k = skst, sken
+            do ij = 1, nxydim
+                satsilg(ij, k) = satsil(ij, k)
+            end do
+         end do
 
-         DO IJ = 1, NXYDIM
-            SATCO32G(IJ) = SATCO32(IJ)
-         END DO
+         do ij = 1, nxydim
+            satco32g(ij) = satco32(ij)
+         end do
 
-         DO K = SKST, SKEN
-            DO IJ = 1, NXYDIM
-                WG(IJ, K) = W(IJ, K)
-            END DO
-         END DO
+         do k = skst, sken
+            do ij = 1, nxydim
+                WG(ij, k) = w(ij, k)
+            end do
+         end do
 
-         IF ( CALC13 ) THEN
-         DO K = SKST, SKEN
-            DO IJ = 1, NXYDIM
-                S13POMG(IJ, K) = S13POM(IJ, K)
-                S13CARG(IJ, K) = S13CAR(IJ, K)
-                C13DICG(IJ, K) = C13DIC(IJ, K)
-                CDC13G(IJ, K)  = CDC13(IJ, K)
-            END DO
-         END DO
-         END IF
+         if ( CALc13 ) then
+         do k = skst, sken
+            do ij = 1, nxydim
+                s13pomg(ij, k) = s13pom(ij, k)
+                s13carg(ij, k) = s13car(ij, k)
+                c13dicg(ij, k) = c13dic(ij, k)
+                cdc13g(ij, k)  = cdc13(ij, k)
+            end do
+         end do
+         end if
 
-         IF ( CALC14 ) THEN
-         DO K = SKST, SKEN
-            DO IJ = 1, NXYDIM
-                S14POMG(IJ, K) = S14POM(IJ, K)
-                S14CARG(IJ, K) = S14CAR(IJ, K)
-                C14DICG(IJ, K) = C14DIC(IJ, K)
-                CDC14G(IJ, K)  = CDC14(IJ, K)
-            END DO
-         END DO
-         END IF
+         if ( CALc14 ) then
+         do k = skst, sken
+            do ij = 1, nxydim
+                s14pomg(ij, k) = s14pom(ij, k)
+                s14carg(ij, k) = s14car(ij, k)
+                c14dicg(ij, k) = c14dic(ij, k)
+                cdc14g(ij, k)  = cdc14(ij, k)
+            end do
+         end do
+         end if
 
-         DO IJ = 1, NXYDIM
-            FICLAG(IJ)     = FICLA(IJ)
-            FIPOMG(IJ)     = FIPOM(IJ)
-            FICARG(IJ)     = FICAR(IJ)
-            FIOPAG(IJ)     = FIOPA(IJ)
-            FOCLAG(IJ)     = FOCLA(IJ)
-            FOPOMG(IJ)     = FOPOM(IJ)
-            FOCARG(IJ)     = FOCAR(IJ)
-            FOOPAG(IJ)     = FOOPA(IJ)
-            BFCLAG(IJ)     = BFCLA(IJ)
-            BFPOMG(IJ)     = BFPOM(IJ)
-            BFCARG(IJ)     = BFCAR(IJ)
-            BFOPAG(IJ)     = BFOPA(IJ)
-         END DO
+         do ij = 1, nxydim
+            ficlag(ij)     = ficla(ij)
+            fipomg(ij)     = fipom(ij)
+            ficarg(ij)     = ficar(ij)
+            fiopag(ij)     = fiopa(ij)
+            foclag(ij)     = focla(ij)
+            fopomg(ij)     = fopom(ij)
+            focarg(ij)     = focar(ij)
+            foopag(ij)     = foopa(ij)
+            bfclag(ij)     = bfcla(ij)
+            bfpomg(ij)     = bfpom(ij)
+            bfcarg(ij)     = bfcar(ij)
+            bfopag(ij)     = bfopa(ij)
+         end do
 
-         IF ( CALC13 ) THEN
-         DO IJ = 1, NXYDIM
-            FI13POMG(IJ)   = FI13POM(IJ)
-            FI13CARG(IJ)   = FI13CAR(IJ)
-            FO13POMG(IJ)   = FO13POM(IJ)
-            FO13CARG(IJ)   = FO13CAR(IJ)
-            BF13POMG(IJ)   = BF13POM(IJ)
-            BF13CARG(IJ)   = BF13CAR(IJ)
-         END DO
-         END IF
+         if ( CALc13 ) then
+         do ij = 1, nxydim
+            fi13pomg(ij)   = fi13pom(ij)
+            fi13carg(ij)   = fi13car(ij)
+            fo13pomg(ij)   = fo13pom(ij)
+            fo13carg(ij)   = fo13car(ij)
+            bf13pomg(ij)   = bf13pom(ij)
+            bf13carg(ij)   = bf13car(ij)
+         end do
+         end if
 
-         IF ( CALC14 ) THEN
-         DO IJ = 1, NXYDIM
-            FI14POMG(IJ)   = FI14POM(IJ)
-            FI14CARG(IJ)   = FI14CAR(IJ)
-            FO14POMG(IJ)   = FO14POM(IJ)
-            FO14CARG(IJ)   = FO14CAR(IJ)
-            BF14POMG(IJ)   = BF14POM(IJ)
-            BF14CARG(IJ)   = BF14CAR(IJ)
-         END DO
-         END IF
+         if ( CALc14 ) then
+         do ij = 1, nxydim
+            fi14pomg(ij)   = fi14pom(ij)
+            fi14carg(ij)   = fi14car(ij)
+            fo14pomg(ij)   = fo14pom(ij)
+            fo14carg(ij)   = fo14car(ij)
+            bf14pomg(ij)   = bf14pom(ij)
+            bf14carg(ij)   = bf14car(ij)
+         end do
+         end if
 
-END IF
+end if
 
-IF (use_mpi) THEN
-      IF ( MYRANK .EQ. IROOT ) THEN
+if (use_mpi) then
+      if ( myrank .eq. IROOT ) then
          CFILE  = 'scla'
          CTITLE = 'Clay'
          CUNIT  = 'g/m^3'
-         call write_gtoolfile(      YY,   SCLAG,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,  SDZDIM  )
+         call write_gtoolfile(      YY,   sclag,   CFILE,  CTITLE,   CUNIT, &
+     &                   nxdim,   nydim,  sdzdim  )
          CFILE  = 'spom'
          CTITLE = 'OrgM'
          CUNIT  = 'mmol/m^3'
-         call write_gtoolfile(      YY,   SPOMG,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,  SDZDIM  )
+         call write_gtoolfile(      YY,   spomg,   CFILE,  CTITLE,   CUNIT, &
+     &                   nxdim,   nydim,  sdzdim  )
          CFILE  = 'scar'
          CTITLE = 'CaCO3'
          CUNIT  = 'mmol/m^3'
-         call write_gtoolfile(      YY,   SCARG,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,  SDZDIM  )
+         call write_gtoolfile(      YY,   scarg,   CFILE,  CTITLE,   CUNIT, &
+     &                   nxdim,   nydim,  sdzdim  )
          CFILE  = 'sopa'
          CTITLE = 'SiO2'
          CUNIT  = 'mmol/m^3'
-         call write_gtoolfile(      YY,   SOPAG,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,  SDZDIM  )
+         call write_gtoolfile(      YY,   sopag,   CFILE,  CTITLE,   CUNIT, &
+     &                   nxdim,   nydim,  sdzdim  )
          CFILE  = 'sage'
          CTITLE = 'Age tracer'
          CUNIT  = 'ND'
-         call write_gtoolfile(      YY,   SAGEG,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,  SDZDIM  )
+         call write_gtoolfile(      YY,   sageg,   CFILE,  CTITLE,   CUNIT, &
+     &                   nxdim,   nydim,  sdzdim  )
          CFILE  = 'cnit'
          CTITLE = 'Phosphate'
          CUNIT  = 'mmol/m^3'
-         call write_gtoolfile(      YY,   CNITG,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,  SDZDIM  )
+         call write_gtoolfile(      YY,   cnitg,   CFILE,  CTITLE,   CUNIT, &
+     &                   nxdim,   nydim,  sdzdim  )
          CFILE  = 'cdic'
-         CTITLE = 'DIC'
+         CTITLE = 'dic'
          CUNIT  = 'mmol/m^3'
-         call write_gtoolfile(      YY,   CDICG,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,  SDZDIM  )
+         call write_gtoolfile(      YY,   cdicg,   CFILE,  CTITLE,   CUNIT, &
+     &                   nxdim,   nydim,  sdzdim  )
          CFILE  = 'calk'
          CTITLE = 'Alkalinity'
          CUNIT  = 'mmol/m^3'
-         call write_gtoolfile(      YY,   CALKG,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,  SDZDIM  )
+         call write_gtoolfile(      YY,   calkg,   CFILE,  CTITLE,   CUNIT, &
+     &                   nxdim,   nydim,  sdzdim  )
          CFILE  = 'cdo2'
          CTITLE = 'Oxygen'
          CUNIT  = 'mmol/m^3'
-         call write_gtoolfile(      YY,   CDO2G,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,  SDZDIM  )
+         call write_gtoolfile(      YY,   cdo2g,   CFILE,  CTITLE,   CUNIT, &
+     &                   nxdim,   nydim,  sdzdim  )
          CFILE  = 'csil'
          CTITLE = 'Silicate'
          CUNIT  = 'mmol/m^3'
-         call write_gtoolfile(      YY,   CSILG,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,  SDZDIM  )
+         call write_gtoolfile(      YY,   csilg,   CFILE,  CTITLE,   CUNIT, &
+     &                   nxdim,   nydim,  sdzdim  )
          CFILE  = 'ficla'
          CTITLE = 'Clay Bottom Flux'
          CUNIT  = 'g/m^3*cm/s'
-         call write_gtoolfile(      YY,  FICLAG,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,       1  )
+         call write_gtoolfile(      YY,  ficlag,   CFILE,  CTITLE,   CUNIT, &
+     &                   nxdim,   nydim,       1  )
          CFILE  = 'fipom'
          CTITLE = 'OrgM Bottom Flux'
          CUNIT  = 'mMol/m^3*cm/s'
-         call write_gtoolfile(      YY,  FIPOMG,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,       1  )
+         call write_gtoolfile(      YY,  fipomg,   CFILE,  CTITLE,   CUNIT, &
+     &                   nxdim,   nydim,       1  )
          CFILE  = 'ficar'
          CTITLE = 'CaCO3 Bottom Flux'
          CUNIT  = 'mMol/m^3*cm/s'
-         call write_gtoolfile(      YY,  FICARG,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,       1  )
+         call write_gtoolfile(      YY,  ficarg,   CFILE,  CTITLE,   CUNIT, &
+     &                   nxdim,   nydim,       1  )
          CFILE  = 'fiopa'
          CTITLE = 'SiO2 Bottom Flux'
          CUNIT  = 'mMol/m^3*cm/s'
-         call write_gtoolfile(      YY,  FIOPAG,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,       1  )
+         call write_gtoolfile(      YY,  fiopag,   CFILE,  CTITLE,   CUNIT, &
+     &                   nxdim,   nydim,       1  )
          CFILE  = 'fopom'
          CTITLE = 'OrgM Diffusion'
          CUNIT  = 'mMol/m^3*cm/s'
-         call write_gtoolfile(      YY,  FOPOMG,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,       1  )
+         call write_gtoolfile(      YY,  fopomg,   CFILE,  CTITLE,   CUNIT, &
+     &                   nxdim,   nydim,       1  )
          CFILE  = 'focar'
          CTITLE = 'CaCO3 Diffusion'
          CUNIT  = 'mMol/m^3*cm/s'
-         call write_gtoolfile(      YY,  FOCARG,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,       1  )
+         call write_gtoolfile(      YY,  focarg,   CFILE,  CTITLE,   CUNIT, &
+     &                   nxdim,   nydim,       1  )
          CFILE  = 'foopa'
          CTITLE = 'SiO2 Diffusion'
          CUNIT  = 'mMol/m^3*cm/s'
-         call write_gtoolfile(      YY,  FOOPAG,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,       1  )
+         call write_gtoolfile(      YY,  foopag,   CFILE,  CTITLE,   CUNIT, &
+     &                   nxdim,   nydim,       1  )
          CFILE  = 'bfcla'
          CTITLE = 'Clay Burial'
          CUNIT  = 'g/m^3*cm/s'
-         call write_gtoolfile(      YY,  BFCLAG,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,  SDZDIM  )
+         call write_gtoolfile(      YY,  bfclag,   CFILE,  CTITLE,   CUNIT, &
+     &                   nxdim,   nydim,  sdzdim  )
          CFILE  = 'bfpom'
          CTITLE = 'OrgM Burial'
          CUNIT  = 'mMol/m^3*cm/s'
-         call write_gtoolfile(      YY,  BFPOMG,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,       1  )
+         call write_gtoolfile(      YY,  bfpomg,   CFILE,  CTITLE,   CUNIT, &
+     &                   nxdim,   nydim,       1  )
          CFILE  = 'bfcar'
          CTITLE = 'CaCO3 Burial'
          CUNIT  = 'mMol/m^3*cm/s'
-         call write_gtoolfile(      YY,  BFCARG,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,       1  )
+         call write_gtoolfile(      YY,  bfcarg,   CFILE,  CTITLE,   CUNIT, &
+     &                   nxdim,   nydim,       1  )
          CFILE  = 'bfopa'
          CTITLE = 'SiO2 Burial'
          CUNIT  = 'mMol/m^3*cm/s'
-         call write_gtoolfile(      YY,  BFOPAG,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,       1  )
+         call write_gtoolfile(      YY,  bfopag,   CFILE,  CTITLE,   CUNIT, &
+     &                   nxdim,   nydim,       1  )
          CFILE  = 'w'
          CTITLE = 'Sediment Rate'
          CUNIT  = 'cm/s'
          call write_gtoolfile(      YY,      WG,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM, SDZDIM+1 )
+     &                   nxdim,   nydim, sdzdim+1 )
          CFILE  = 'cdc13'
          CTITLE = 'delta carbon-13'
          CUNIT  = 'permil'
-         call write_gtoolfile(      YY,  CDC13G,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,  SDZDIM  )
+         call write_gtoolfile(      YY,  cdc13g,   CFILE,  CTITLE,   CUNIT, &
+     &                   nxdim,   nydim,  sdzdim  )
          CFILE  = 'cdc14'
          CTITLE = 'Delta carbon-14'
          CUNIT  = 'permil'
-         call write_gtoolfile(      YY,  CDC14G,   CFILE,  CTITLE,   CUNIT, &
-     &                   NXDIM,   NYDIM,  SDZDIM  )
-      END IF
+         call write_gtoolfile(      YY,  cdc14g,   CFILE,  CTITLE,   CUNIT, &
+     &                   nxdim,   nydim,  sdzdim  )
+      end if
       call mpi_barrier(mpi_comm_world, IERR)
-END IF
+end if
 
-      END IF ! -- End of Output
+      end if ! -- End of Output
 
 !     call SDwrite_gtoolfile(
 !    I     SEDTNM,
 !    I     SDTX )
 
-      END DO ! -- End of Time integration
+      end do ! -- End of Time integration
 
       end subroutine digda_cprdc
 
@@ -1804,7 +1804,7 @@ end module module_digda_cprdc
       IMPLICIT NONE
 
       INTEGER NSIZE
-      REAL*8  FLX(NSIZE)
+      REAL*8  flx(NSIZE)
       CHARACTER CFILE*128
       CHARACTER CHEAD(64)*16
 
@@ -1818,20 +1818,20 @@ end module module_digda_cprdc
 ! =====================================================================
       subroutine write_gtoolfile( &
      &           YY,    DAT3,  CFILE, CTITLE,  CUNIT, &
-     &           NX,    NY,    NZ     )
+     &           nx,    ny,    nz     )
 
       IMPLICIT NONE
 
       INTEGER I, J, K
-      INTEGER NX, NY, NZ
-      REAL*8  DAT3(NX,NY,NZ)
+      INTEGER nx, ny, nz
+      REAL*8  DAT3(nx,ny,nz)
       CHARACTER CFILE*128, CTITLE*128, CUNIT*128
       CHARACTER CHEAD(64)*16
       CHARACTER YEAR*8
       INTEGER YY
 
       DATA CHEAD / 64*'' /
-      WRITE(YEAR, 900) YY
+      write(YEAR, 900) YY
  900  FORMAT(I8.8)
 
       CHEAD(1) = '9010'    !!  1 : IDFM  : I10   :   GTOOL3 version                 : 9010
@@ -1863,14 +1863,14 @@ end module module_digda_cprdc
 !     CHEAD(27) = ''       !! 27 : DATE  : A16   :   Time (yyyymmddhhmmss)          :
       CHEAD(28) = ''       !! 28 : TDUR  : I10   :   Data representative time       : 0
 !     CHEAD(29) = ''       !! 29 : AITM1 : A16   :   Axis grid identification name  :
-!     CHEAD(30) = ''       !! 30 : ASTR1 : I10   :   Start of axis grid number      : 1
-!     CHEAD(31) = ''       !! 31 : AEND1 : I10   :   End of axis grid number        :
+!     CHEAD(30) = ''       !! 30 : AStr1 : I10   :   Start of axis grid number      : 1
+!     CHEAD(31) = ''       !! 31 : Aend1 : I10   :   End of axis grid number        :
 !     CHEAD(32) = ''       !! 32 : AITM2 : A16   :   Axis grid identification name  :
 !     CHEAD(33) = ''       !! 33 : ASTR2 : I10   :   Start of axis grid number      : 1
-!     CHEAD(34) = ''       !! 34 : AEND2 : I10   :   End of axis grid number        :
+!     CHEAD(34) = ''       !! 34 : Aend2 : I10   :   End of axis grid number        :
 !     CHEAD(35) = ''       !! 35 : AITM3 : A16   :   Axis grid identification name  :
 !     CHEAD(36) = ''       !! 36 : ASTR3 : I10   :   Start of axis grid number      : 1
-!     CHEAD(37) = ''       !! 37 : AEND3 : I10   :   End of axis grid number        :
+!     CHEAD(37) = ''       !! 37 : Aend+3 : I10   :   End of axis grid number        :
 !     CHEAD(38) = ''       !! 38 : DFMT  : A16   :   Data format                    : UR4
 !     CHEAD(39) = ''       !! 39 : MISS  : E15.7 :   Missing value                  : -999.
 !     CHEAD(40) = ''       !! 40 : DMIN  : E15.7 :   Range (minimum)                : -999.
@@ -1883,7 +1883,7 @@ end module module_digda_cprdc
       CHEAD(47) = ''       !! 47 : ROPTN : E16.7 :   Option (real)                  : 0
       CHEAD(48) = ''       !! 48 : DATE1 : I16   :   Time (auxiliary)               :
       CHEAD(49) = ''       !! 49 : DATE2 : A16   :   Time unit (auxiliary)          :
-!     CHEAD(50) = ''       !! 50 : MEMO1 : A16   :   Memo O1                        :
+!     CHEAD(50) = ''       !! 50 : MEMbf1 : A16   :   Memo bf1                        :
       CHEAD(51) = ''       !! 51 : MEMO2 : A16   :   Memo O2                        :
       CHEAD(52) = ''       !! 52 : MEMO3 : A16   :   Memo O3                        :
       CHEAD(53) = ''       !! 53 : MEMO4 : A16   :   Memo O4                        :
@@ -1898,31 +1898,31 @@ end module module_digda_cprdc
       CHEAD(62) = ''       !! 62 : MDATE : A16   :   Data change date               :
       CHEAD(63) = ''       !! 63 : MSIGN : A16   :   Data modified by               :
       CHEAD(64) = ''       !! 64 : SIZE  : I10   :   Array size                     : 0
-      WRITE(CHEAD(39), '(E15.7)') -999.0
-      WRITE(CHEAD(40), '(E15.7)') -999.0
-      WRITE(CHEAD(41), '(E15.7)') -999.0
-      WRITE(CHEAD(42), '(E15.7)') -999.0
-      WRITE(CHEAD(43), '(E15.7)') -999.0
-      WRITE(CHEAD(44), '(I10)') 1
-      WRITE(CHEAD(29), '(A16)') 'TX'
-      WRITE(CHEAD(32), '(A16)') 'TY'
-      WRITE(CHEAD(35), '(A16)') 'TZ'
-      WRITE(CHEAD(30), '(I10)') 1
-      WRITE(CHEAD(31), '(I10)') NX
-      WRITE(CHEAD(33), '(I10)') 1
-      WRITE(CHEAD(34), '(I10)') NY
-      WRITE(CHEAD(36), '(I10)') 1
-      WRITE(CHEAD(37), '(I10)') NZ
-      WRITE(CHEAD(64), '(I10)') NX*NY*NZ
+      write(CHEAD(39), '(E15.7)') -999.0
+      write(CHEAD(40), '(E15.7)') -999.0
+      write(CHEAD(41), '(E15.7)') -999.0
+      write(CHEAD(42), '(E15.7)') -999.0
+      write(CHEAD(43), '(E15.7)') -999.0
+      write(CHEAD(44), '(I10)') 1
+      write(CHEAD(29), '(A16)') 'TX'
+      write(CHEAD(32), '(A16)') 'TY'
+      write(CHEAD(35), '(A16)') 'TZ'
+      write(CHEAD(30), '(I10)') 1
+      write(CHEAD(31), '(I10)') nx
+      write(CHEAD(33), '(I10)') 1
+      write(CHEAD(34), '(I10)') ny
+      write(CHEAD(36), '(I10)') 1
+      write(CHEAD(37), '(I10)') nz
+      write(CHEAD(64), '(I10)') nx*ny*nz
       CHEAD(27) = '09990101 000000 '
       CHEAD(50) = '  09990101000000'
       CHEAD(27) = YEAR//' 000000 '
       CHEAD(50) = '  '//YEAR//'000000'
       CHEAD(38) = 'UR4'
 
-      OPEN(13, FILE=CFILE, FORM='UNFORMATTED', ACCESS='APPEND')
-      WRITE(13) CHEAD
-      WRITE(13) (((REAL(DAT3(I,J,K)),I=1,NX),J=1,NY),K=1,NZ)
+      OPEN(13, FILE=CFILE, FORM='UNFORMATTED', ACCESS='APPend')
+      write(13) CHEAD
+      write(13) (((Real(DAT3(I,J,K)),I=1,nx),J=1,ny),K=1,nz)
       CLOSE(13)
 
       end subroutine write_gtoolfile
@@ -1935,11 +1935,11 @@ end module module_digda_cprdc
       INTEGER IWORK1, IWORK2
 
       IWORK1 = ( N2 - N1 + 1 ) / NPR
-      IWORK2 = MOD( N2 - N1 + 1, NPR )
-      IST = IRA*IWORK1 + N1 + MIN( IRA, IWORK2 )
+      IWORK2 = mod( N2 - N1 + 1, NPR )
+      IST = IRA*IWORK1 + N1 + min( IRA, IWORK2 )
       IEN = IST + IWORK1 - 1
-      IF ( IWORK2 > IRA ) THEN
+      if ( IWORK2 > IRA ) then
         IEN = IEN + 1
-      END IF
+      end if
 
       end subroutine set_parallel_range

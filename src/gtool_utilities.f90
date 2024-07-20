@@ -214,7 +214,7 @@ contains
     chead(47) = ''                 !! 47 : ROPTN : E16.7 :   Option (real)                  : 0
     chead(48) = ''                 !! 48 : DATE1 : I16   :   Time (auxiliary)               :
     chead(49) = ''                 !! 49 : DATE2 : A16   :   Time unit (auxiliary)          :
-!   chead(50) = ''                 !! 50 : MEMO1 : A16   :   Memo O1                        :
+!   chead(50) = ''                 !! 50 : MEMbf1 : A16   :   Memo bf1                        :
     chead(51) = ''                 !! 51 : MEMO2 : A16   :   Memo O2                        :
     chead(52) = ''                 !! 52 : MEMO3 : A16   :   Memo O3                        :
     chead(53) = ''                 !! 53 : MEMO4 : A16   :   Memo O4                        :
@@ -252,7 +252,7 @@ contains
     chead(38) = 'UR8'
 
     write(unit) chead
-   !write(unit) (((REAL(var(i,j,k)),i=1,nx),j=1,ny),k=1,nz)
+   !write(unit) (((Real(var(i,j,k)),i=1,nx),j=1,ny),k=1,nz)
    !write(unit) var(:, t)
     write(unit) vartmp(:, t)
 

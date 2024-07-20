@@ -2,7 +2,7 @@
 
 ! --- information -----------------------------------------------------
 !
-!  Calculate [CO2(g)] from chemical equilibrium in ocean
+!  Calculate [co2(g)] from chemical equilibrium in ocean
 !
 !  HISTORY
 !     '04.04.23  A.Oka :
@@ -17,14 +17,14 @@ module globals_digda_chemeq
   use module_zchem
   implicit none
 
-  double precision :: PHINI = 8.0
-  double precision :: DPHINI = 8.0
-  double precision :: DPH = 3.0
-  double precision :: ALKERR = 0.1
-  double precision :: ROCN = 1.0245 !! ocean density [kg/L]
-  integer :: ITRMAX = 10000
+  double precision :: phini = 8.0
+  double precision :: dphini = 8.0
+  double precision :: dph = 3.0
+  double precision :: alkerr = 0.1
+  double precision :: rocn = 1.0245 !! ocean density [kg/L]
+  integer :: itrmax = 10000
 
-  namelist /NMSDCHEM/ PHINI, DPHINI, DPH, ALKERR, ROCN, ITRMAX
+  namelist /nmsdchem/ phini, dphini, dph, alkerr, rocn, itrmax
 
 end module globals_digda_chemeq
 
@@ -34,206 +34,205 @@ module module_digda_chemeq
   use globals_digda_chemeq
   implicit none
 
-  double precision :: PH(NXY, SDZDIM)
-  double precision :: CU, RCU, PM
-  logical :: OFIRST
+  double precision :: ph(nxy, sdzdim)
+  double precision :: cu, rcu, pm
+  logical :: ofirst
 
 contains
 
   subroutine set_digda_chemeq
 
-    integer :: IJ, K
+    integer :: ij, k
 
-    WRITE(NFSTDO, *) '*** Sediment : set_digda_chemeq ***'
-    REWIND(NFPARM)
-    READ (NFPARM, NMSDCHEM, END=99)
-99 CONTINUE
-    WRITE(NFSTDO, NMSDCHEM)
+    write(nfstdo, *) '*** Sediment : set_digda_chemeq ***'
+    rewind(nfparm)
+    read(nfparm, nmsdchem, end=99)
+99 continue
+    write(nfstdo, nmsdchem)
 
-    DO IJ = 1, NXY
-      DO K = 1, SDZDIM
-        PH(IJ, K) = PHINI
-      END DO
-    END DO
+    do ij = 1, nxy
+      do k = 1, sdzdim
+        ph(ij, k) = phini
+      end do
+    end do
 
-    PM  = 1.0D+6          !! [atm] --> [ppmv]
+    pm  = 1.0d+6          !! [atm] --> [ppmv]
 
-    CU  = 1.0D-6 / ROCN   !! [mMol/m^3] --> [Mol/kg]
-    RCU = 1.0D+6 * ROCN   !! [Mol/kg] --> [mMol/m^3]
-    ALKERR = ALKERR * CU
+    cu  = 1.0d-6 / rocn   !! [mMol/m^3] --> [Mol/kg]
+    rcu = 1.0d+6 * rocn   !! [Mol/kg] --> [mMol/m^3]
+    alkerr = alkerr * cu
 
-    OFIRST = .true.
+    ofirst = .true.
 
   end subroutine set_digda_chemeq
 
-  subroutine calc_digda_chemeq( &
-&   TEM, SAL, CTIN, ATIN, &
-&   SITIN, PTIN, &
-&   CO32 )
+  subroutine calc_digda_chemeq( temp, salt, ctin, atin, & !! IN
+                              & sitin, ptin,            & !! IN
+                              & co32                    ) !! OUT
 
-    double precision, intent(in)  :: TEM(NXY)          !! Temperature
-    double precision, intent(in)  :: SAL(NXY)          !! Salinity
-    double precision, intent(in)  :: CTIN(NXY, SDZDIM) !! Total carbon [mMol/m^3]
-    double precision, intent(in)  :: ATIN(NXY, SDZDIM) !! Alkalinity [mMol/m^3]
-    double precision, intent(in)  :: SITIN(NXY)        !! Total silicon [mMol/m^3]
-    double precision, intent(in)  :: PTIN(NXY)         !! Total phosphorous [mMol/m^3]
-    double precision, intent(out) :: CO32(NXY, SDZDIM) !! [CO32-] [mMol/m^3]
+    double precision, intent(in)  :: temp(nxy)         !! Temperature
+    double precision, intent(in)  :: salt(nxy)         !! Salinity
+    double precision, intent(in)  :: ctin(nxy, sdzdim) !! Total carbon [mMol/m^3]
+    double precision, intent(in)  :: atin(nxy, sdzdim) !! Alkalinity [mMol/m^3]
+    double precision, intent(in)  :: sitin(nxy)        !! Total silicon [mMol/m^3]
+    double precision, intent(in)  :: ptin(nxy)         !! Total phosphorous [mMol/m^3]
+    double precision, intent(out) :: co32(nxy, sdzdim) !! [co32-] [mMol/m^3]
 
-    double precision :: PCO2O(NXY)        !! [CO2(g)] [ppmv]
-    double precision :: ALP(NXY)          !! Solubility of CO2 [mMol/m^3/ppmv]
-    double precision :: CT(NXY, SDZDIM)   !! Total carbon [Mol/kg]
-    double precision :: AT(NXY, SDZDIM)   !! Alkalinity [Mol/kg]
-    double precision :: SIT(NXY)          !! Total silicon [Mol/kg]
-    double precision :: PT(NXY)           !! Total phosphorous [Mol/kg]
-    double precision :: BT(NXY)           !! Total boric acid [Mol/kg]
-    double precision :: SO4T(NXY)         !! Total SO4 [Mol/kg]
-    double precision :: FLT(NXY)          !! Total fluorosis [Mol/kg]
-    double precision :: CO2(NXY, SDZDIM)  !! [CO2]   [mMol/m^3]
-    double precision :: HCO3(NXY, SDZDIM) !! [HCO3-] [mMol/m^3]
+    double precision :: pco2o(nxy)        !! [co2(g)] [ppmv]
+    double precision :: alp(nxy)          !! Solubility of co2 [mMol/m^3/ppmv]
+    double precision :: ct(nxy, sdzdim)   !! Total carbon [Mol/kg]
+    double precision :: at(nxy, sdzdim)   !! Alkalinity [Mol/kg]
+    double precision :: sit(nxy)          !! Total silicon [Mol/kg]
+    double precision :: pt(nxy)           !! Total phosphorous [Mol/kg]
+    double precision :: bt(nxy)           !! Total boric acid [Mol/kg]
+    double precision :: so4t(nxy)         !! Total SO4 [Mol/kg]
+    double precision :: flt(nxy)          !! Total fluorosis [Mol/kg]
+    double precision :: co2(nxy, sdzdim)  !! [co2]   [mMol/m^3]
+    double precision :: hco3(nxy, sdzdim) !! [hco3-] [mMol/m^3]
 
-    double precision :: K0(NXY),  K1(NXY),   K2(NXY)
-    double precision :: KB(NXY),  KW(NXY)
-    double precision :: K1P(NXY), K2P(NXY),  K3P(NXY)
-    double precision :: KSI(NXY), KSO4(NXY), KF(NXY)
+    double precision :: k0(nxy),  k1(nxy),   k2(nxy)
+    double precision :: kb(nxy),  kw(nxy)
+    double precision :: k1p(nxy), k2p(nxy),  k3p(nxy)
+    double precision :: ksi(nxy), kso4(nxy), kf(nxy)
 
-    double precision :: H, X, XLW, XHI, F, DELT
+    double precision :: h, x, xlw, xhi, f, delt
 
-    integer :: IJ, K, ITR
+    integer :: ij, k, itr
 
-    DO IJ = IJTSTR, IJTEND
+    do ij = ijtstr, ijtend
     ! -- [mMol/m^3]-->[Mol/kg] --
-      DO K = SKST, SKEN
-        CT(IJ, K)  = CTIN(IJ, K)  * CU
-        AT(IJ, K)  = ATIN(IJ, K)  * CU
-      END DO
-      SIT(IJ) = SITIN(IJ) * CU
-      PT(IJ)  = PTIN(IJ)  * CU
-    END DO
+      do k = skst, sken
+        ct(ij, k)  = ctin(ij, k)  * cu
+        at(ij, k)  = atin(ij, k)  * cu
+      end do
+      sit(ij) = sitin(ij) * cu
+      pt(ij)  = ptin(ij)  * cu
+    end do
 
-    DO IJ = IJTSTR, IJTEND
-   !IF ( TEM(IJ) /= 0.0D0 .and. SAL(IJ) /= 0.0D0 ) THEN
-    IF ( TEM(IJ) /= rmiss .and. SAL(IJ) /= rmiss ) THEN
+    do ij = ijtstr, ijtend
+   !if ( temp(ij) /= 0.0d0 .and. salt(ij) /= 0.0d0 ) then
+    if ( temp(ij) /= rmiss .and. salt(ij) /= rmiss ) then
     ! -- Chemical equilibrium constant --
-      K0(IJ)   = FK0( TEM(IJ)+kelvin, SAL(IJ) )
-      K1(IJ)   = FK1( TEM(IJ)+kelvin, SAL(IJ) )
-      K2(IJ)   = FK2( TEM(IJ)+kelvin, SAL(IJ) )
-      KB(IJ)   = FKB( TEM(IJ)+kelvin, SAL(IJ) )
-      KW(IJ)   = FKW( TEM(IJ)+kelvin, SAL(IJ) )
-      K1P(IJ)  = FK1P( TEM(IJ)+kelvin, SAL(IJ) )
-      K2P(IJ)  = FK2P( TEM(IJ)+kelvin, SAL(IJ) )
-      K3P(IJ)  = FK3P( TEM(IJ)+kelvin, SAL(IJ) )
-      KSI(IJ)  = FKSI( TEM(IJ)+kelvin, SAL(IJ) )
-      KSO4(IJ) = FKSO4( TEM(IJ)+kelvin, SAL(IJ) )
-      KF(IJ)   = FKF( TEM(IJ)+kelvin, SAL(IJ), KSO4(IJ) )
+      k0(ij)   = fk0( temp(ij)+kelvin, salt(ij) )
+      k1(ij)   = fk1( temp(ij)+kelvin, salt(ij) )
+      k2(ij)   = fk2( temp(ij)+kelvin, salt(ij) )
+      kb(ij)   = fkb( temp(ij)+kelvin, salt(ij) )
+      kw(ij)   = fkw( temp(ij)+kelvin, salt(ij) )
+      k1p(ij)  = fk1p( temp(ij)+kelvin, salt(ij) )
+      k2p(ij)  = fk2p( temp(ij)+kelvin, salt(ij) )
+      k3p(ij)  = fk3p( temp(ij)+kelvin, salt(ij) )
+      ksi(ij)  = fksi( temp(ij)+kelvin, salt(ij) )
+      kso4(ij) = fkso4( temp(ij)+kelvin, salt(ij) )
+      kf(ij)   = fkf( temp(ij)+kelvin, salt(ij), kso4(ij) )
 !     -- Total [Mol/kg] --
-      BT(IJ)   = FBT( SAL(IJ) )
-      SO4T(IJ) = FSO4T( SAL(IJ) )
-      FLT(IJ)  = FFLT( SAL(IJ) )
-    END IF
-    END DO
+      bt(ij)   = fbt( salt(ij) )
+      so4t(ij) = fso4t( salt(ij) )
+      flt(ij)  = fflt( salt(ij) )
+    end if
+    end do
 
-    IF (OFIRST) THEN
-      DELT = DPHINI
-      OFIRST = .false.
-    ELSE
-      DELT = DPH
-    END IF
+    if (ofirst) then
+      delt = dphini
+      ofirst = .false.
+    else
+      delt = dph
+    end if
 
-    DO K = SKST, SKEN
-    DO IJ = IJTSTR, IJTEND
-   !IF ( TEM(IJ) /= 0.0D0 .and. SAL(IJ) /= 0.0D0 ) THEN
-    IF ( TEM(IJ) /= rmiss .and. SAL(IJ) /= rmiss ) THEN
+    do k = skst, sken
+    do ij = ijtstr, ijtend
+   !if ( temp(ij) /= 0.0d0 .and. salt(ij) /= 0.0d0 ) then
+    if ( temp(ij) /= rmiss .and. salt(ij) /= rmiss ) then
 
-      XLW = PH(IJ, K) - DELT
-      XHI = PH(IJ, K) + DELT
+      xlw = ph(ij, k) - delt
+      xhi = ph(ij, k) + delt
 
       !-- Iteration : bisection method --
-      DO ITR = 1, ITRMAX
-        X = 0.5D0 * ( XLW + XHI )
-        H = 10.0D0 ** ( - X )
-       !IF ( AMSKT(IJ, KSTR). EQ. 0.0D0 ) GOTO 999
-       !IF ( TEM(IJ) .EQ. 0.0D0 .and. SAL(IJ) .EQ. 0.0D0 ) GOTO 999
-        IF ( TEM(IJ) .EQ. rmiss .and. SAL(IJ) .EQ. rmiss ) GOTO 999
-        F = FALK( &
-     &      H, &
-     &      K1(IJ),  K2(IJ), &
-     &      KB(IJ),  KW(IJ), &
-     &      K1P(IJ), K2P(IJ),  K3P(IJ), &
-     &      KSI(IJ), KSO4(IJ), KF(IJ), &
-     &      CT(IJ, K),  BT(IJ),   PT(IJ), &
-     &      SIT(IJ), SO4T(IJ), FLT(IJ) )
-        IF ( ABS(F-AT(IJ, K)).LT.ALKERR ) GOTO 999
-        IF ( ( F - AT(IJ, K) ).GT.0.D0 ) THEN
-          XHI = X
-        ELSE
-          XLW = X
-        END IF
-      END DO
+      do itr = 1, itrmax
+        x = 0.5d0 * ( xlw + xhi )
+        h = 10.0d0 ** ( - x )
+       !if ( AMSKT(ij, kstr). eq. 0.0d0 ) goto 999
+       !if ( temp(ij) .eq. 0.0d0 .and. salt(ij) .eq. 0.0d0 ) goto 999
+        if ( temp(ij) .eq. rmiss .and. salt(ij) .eq. rmiss ) goto 999
+        f = falk( &
+     &      h, &
+     &      k1(ij),  k2(ij), &
+     &      kb(ij),  kw(ij), &
+     &      k1p(ij), k2p(ij),  k3p(ij), &
+     &      ksi(ij), kso4(ij), kf(ij), &
+     &      ct(ij, k),  bt(ij),   pt(ij), &
+     &      sit(ij), so4t(ij), flt(ij) )
+        if ( abs(f-at(ij, k)).lt.alkerr ) goto 999
+        if ( ( f - at(ij, k) ).gt.0.d0 ) then
+          xhi = x
+        else
+          xlw = x
+        end if
+      end do
 
-      WRITE(NFSTDO,*) ' ITERATION COUNT OVER (SEDIMENT) :', IJ
-      WRITE(NFSTDO,*) '    PH  = ', X
-      WRITE(NFSTDO,*) '    F   = ', F * RCU
-      WRITE(NFSTDO,*) '    ALK = ', ATIN(IJ, K)
-      WRITE(NFSTDO,*) '    F - ALK = ', F * RCU - ATIN(IJ, K)
-      WRITE(NFSTDO,*) '            < ALKERR = ', ALKERR * RCU
-      WRITE(NFSTDO,*) '   [Info] '
-     !WRITE(NFSTDO,*) '    at  I = ', MOD(IJ,NXDIM) - ISTR + 1
-     !WRITE(NFSTDO,*) '        J = ', IJ/NXDIM - JSTR + 2
-     !WRITE(NFSTDO,*) '        K = ', K - SKST + 1
-      WRITE(NFSTDO,*) '    TEM = ', TEM(IJ)
-      WRITE(NFSTDO,*) '    SAL = ', SAL(IJ)
-      WRITE(NFSTDO,*) '    DIC = ', CTIN(IJ, K)
+      write(nfstdo,*) ' ITERATION COUNT OVER (SEDIMENT) :', IJ
+      write(nfstdo,*) '    PH  = ', x
+      write(nfstdo,*) '    F   = ', f * rcu
+      write(nfstdo,*) '    ALK = ', atin(ij, k)
+      write(nfstdo,*) '    F - ALK = ', f * rcu - atin(ij, k)
+      write(nfstdo,*) '            < ALKERR = ', alkerr * rcu
+      write(nfstdo,*) '   [Info] '
+     !write(nfstdo,*) '    at  I = ', mod(IJ,nxdim) - istr + 1
+     !write(nfstdo,*) '        J = ', IJ/nxdim - jstr + 2
+     !write(nfstdo,*) '        K = ', K - skst + 1
+      write(nfstdo,*) '    TEM = ', temp(ij)
+      write(nfstdo,*) '    SAL = ', salt(ij)
+      write(nfstdo,*) '    DIC = ', ctin(ij, k)
 
-      XLW = PH(IJ, K) - DELT
-      XHI = PH(IJ, K) + DELT
-      DO ITR = 1, ITRMAX
-        X = 0.5D0 * ( XLW + XHI )
-        H = 10.0D0 ** ( - X )
-        F = FALK( &
-     &      H, &
-     &      K1(IJ),  K2(IJ), &
-     &      KB(IJ),  KW(IJ), &
-     &      K1P(IJ), K2P(IJ),  K3P(IJ), &
-     &      KSI(IJ), KSO4(IJ), KF(IJ), &
-     &      CT(IJ, K),  BT(IJ),   PT(IJ), &
-     &      SIT(IJ), SO4T(IJ), FLT(IJ) )
-        IF ( ABS(F-AT(IJ, K)).LT.ALKERR ) GOTO 999
-        IF ( ( F - AT(IJ, K) ).GT.0.D0 ) THEN
-          XHI = X
-        ELSE
-          XLW = X
-        END IF
-      END DO
+      xlw = ph(ij, k) - delt
+      xhi = ph(ij, k) + delt
+      do itr = 1, itrmax
+        x = 0.5d0 * ( xlw + xhi )
+        h = 10.0d0 ** ( - x )
+        f = falk( &
+     &      h, &
+     &      k1(ij),  k2(ij), &
+     &      kb(ij),  kw(ij), &
+     &      k1p(ij), k2p(ij),  k3p(ij), &
+     &      ksi(ij), kso4(ij), kf(ij), &
+     &      ct(ij, k),  bt(ij),   pt(ij), &
+     &      sit(ij), so4t(ij), flt(ij) )
+        if ( abs(f-at(ij, k)).lt.alkerr ) goto 999
+        if ( ( f - at(ij, k) ).gt.0.d0 ) then
+          xhi = x
+        else
+          xlw = x
+        end if
+      end do
 
 !     STOP
 
-999 CONTINUE
-      PH(IJ, K) = X
+999 continue
+      ph(ij, k) = x
 
-    END IF
-    END DO
-    END DO
+    end if
+    end do
+    end do
 
-    DO K = SKST, SKEN
-    DO IJ = IJTSTR, IJTEND
-   !IF ( TEM(IJ) /= 0.0D0 .and. SAL(IJ) /= 0.0D0 ) THEN
-    IF ( TEM(IJ) /= rmiss .and. SAL(IJ) /= rmiss ) THEN
-      X = 10.D0 ** ( - PH(IJ, K) )
-!     PCO2O(IJ) = CT(IJ) *X*X &
-!  &            / ( X*X + X*K1(IJ) + K1(IJ)*K2(IJ) ) &
-!  &            / K0(IJ) &
-!  &            * PM      !! [atm]-->[ppmv]
-!     ALP(IJ) = K0(IJ)      !! [Mol/kg/atm] = [mMol/m^3/ppmv]
-      ! -- CO2 --
-      CO2(IJ, K)  = CT(IJ, K) *X*X &
-   &              / ( X*X + X*K1(IJ) + K1(IJ)*K2(IJ) ) / CU
+    do k = skst, sken
+    do ij = ijtstr, ijtend
+   !if ( temp(ij) /= 0.0d0 .and. salt(ij) /= 0.0d0 ) then
+    if ( temp(ij) /= rmiss .and. salt(ij) /= rmiss ) then
+      x = 10.d0 ** ( - ph(ij, k) )
+!     pco2o(ij) = ct(ij) *x*x &
+!  &            / ( x*x + x*k1(ij) + k1(ij)*k2(ij) ) &
+!  &            / k0(ij) &
+!  &            * pm      !! [atm]-->[ppmv]
+!     alp(ij) = k0(ij)      !! [Mol/kg/atm] = [mMol/m^3/ppmv]
+      ! -- co2 --
+      co2(ij, k)  = ct(ij, k) *x*x &
+   &              / ( x*x + x*k1(ij) + k1(ij)*k2(ij) ) / cu
       ! -- BI-CARBONATE ION --
-      HCO3(IJ, K) = K1(IJ) * CO2(IJ, K) / X
+      hco3(ij, k) = k1(ij) * co2(ij, k) / x
       ! -- CARBONATE ION --
-      CO32(IJ, K) = K2(IJ) * HCO3(IJ, K) / X
-    END IF
-    END DO
-    END DO
+      co32(ij, k) = k2(ij) * hco3(ij, k) / x
+    end if
+    end do
+    end do
 
   end subroutine calc_digda_chemeq
 

@@ -25,24 +25,23 @@ contains
 
   subroutine set_digda_clay
 
-    WRITE(NFSTDO, *) '*** Sediment : set_digda_clay ***'
+    write(nfstdo, *) '*** Sediment : set_digda_clay ***'
 
   end subroutine set_digda_clay
 
-  subroutine calc_clay_dissolution( &
- &  SCLA, &
- &  RCLA )
+  subroutine calc_clay_dissolution( scla, & !! IN
+                                  & rcla  ) !! OUT
 
-    double precision, intent(in) :: SCLA(NXY, SDZDIM)
-    double precision, intent(out) :: RCLA(NXY, SDZDIM)
+    double precision, intent(in) :: scla(nxy, sdzdim)
+    double precision, intent(out) :: rcla(nxy, sdzdim)
 
-    integer :: IJ, K
+    integer :: ij, k
 
-    DO K = SKST, SKEN
-      DO IJ = IJTSTR, IJTEND
-        RCLA(IJ, K)  = 0.0D0
-      END DO
-    END DO
+    do k = skst, sken
+      do ij = ijtstr, ijtend
+        rcla(ij, k)  = 0.0d0
+      end do
+    end do
 
   end subroutine calc_clay_dissolution
 

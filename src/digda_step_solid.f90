@@ -15,30 +15,30 @@ module globals_digda_step_solid
   use module_digda_timestep
   implicit none
 
-  double precision :: SI(NXY, SDZDIM+1)
+  double precision :: si(nxy, sdzdim+1)
 
-  double precision :: C0(NXY, SDZDIM+1)
-  double precision :: C1(NXY, SDZDIM+1)
-  double precision :: C2(NXY, SDZDIM+1)
-  double precision :: FLX(NXY, SDZDIM+1), DFLX(NXY, SDZDIM+1)
+  double precision :: c0(nxy, sdzdim+1)
+  double precision :: c1(nxy, sdzdim+1)
+  double precision :: c2(nxy, sdzdim+1)
+  double precision :: flx(nxy, sdzdim+1), dflx(nxy, sdzdim+1)
 
-  double precision :: EA(SDZDIM), EB(SDZDIM), EC(SDZDIM)
-  double precision :: EAL(SDZDIM), EBE(SDZDIM), EGA(SDZDIM), EEP(NXY, SDZDIM)
-  double precision :: ED(NXY, SDZDIM),  EX(NXY, SDZDIM)
-  double precision :: FLGAM(SDZDIM+1),  FLDEL(SDZDIM+1)
-  double precision :: FLTMP
+  double precision :: ea(sdzdim), eb(sdzdim), ec(sdzdim)
+  double precision :: eal(sdzdim), ebe(sdzdim), ega(sdzdim), eep(nxy, sdzdim)
+  double precision :: ed(nxy, sdzdim),  ex(nxy, sdzdim)
+  double precision :: flgam(sdzdim+1),  fldel(sdzdim+1)
+  double precision :: fltmp
 
-  integer :: IUNIT = 1
-  double precision ::  AUNIT
+  integer :: iunit = 1
+  double precision ::  aunit
 
   ! Advection choice
-  logical :: SADU = .false. !! Upwind ?
-  logical :: SADQ = .true.  !! Quickest ?
-  logical :: SADQF = .true. !!   + Flux limiter ?
+  logical :: sadu = .false. !! Upwind ?
+  logical :: sadq = .true.  !! Quickest ?
+  logical :: sadqf = .true. !!   + Flux limiter ?
   ! Diffusion choice
-  logical :: SDIC = .false. !! Crank nicolson ?
-  logical :: SDII = .true.  !! Implicit ?
-  namelist /NMSDSO/ SADU, SADQ, SADQF, SDIC, SDII
+  logical :: sdic = .false. !! Crank nicolson ?
+  logical :: sdii = .true.  !! Implicit ?
+  namelist /nmsdso/ sadu, sadq, sadqf, sdic, sdii
 
 end module globals_digda_step_solid
 
@@ -51,1407 +51,1405 @@ contains
 
   subroutine set_digda_step_solid
 
-    integer :: IJ, K
+    integer :: ij, k
 
-    WRITE(NFSTDO, *) '*** Sediment : set_digda_step_solid ***'
-    REWIND(NFPARM)
-    READ (NFPARM, NMSDSO, END=99)
+    write(nfstdo, *) '*** Sediment : set_digda_step_solid ***'
+    rewind(nfparm)
+    read(nfparm, nmsdso, end=99)
 99 continue
-    WRITE(NFSTDO, NMSDSO)
+    write(nfstdo, nmsdso)
 
-    IF (IUNIT.EQ.1) THEN
-      AUNIT = 1.0D0 / 8.64D4 / 365.0D0
-    ELSE IF (IUNIT.EQ.2) THEN
-      AUNIT = 1.0D0 / 8.64D4 / 30.0D0
-    ELSE IF (IUNIT.EQ.3) THEN
-      AUNIT = 1.0D0 / 8.64D4
-    ELSE IF (IUNIT.EQ.4) THEN
-      AUNIT = 1.0D0 / 3600.0D0
-    ELSE IF (IUNIT.EQ.5) THEN
-      AUNIT = 1.0D0 / 60.0D0
-    ELSE IF (IUNIT.EQ.6) THEN
-      AUNIT = 1.0D0
-    ELSE
-      AUNIT = 0.0D0
-    END IF
+    if (iunit.eq.1) then
+      aunit = 1.0d0 / 8.64d+4 / 365.0d0
+    else if (iunit.eq.2) then
+      aunit = 1.0d0 / 8.64d+4 / 30.0d0
+    else if (iunit.eq.3) then
+      aunit = 1.0d0 / 8.64d+4
+    else if (iunit.eq.4) then
+      aunit = 1.0d0 / 3600.0d0
+    else if (iunit.eq.5) then
+      aunit = 1.0d0 / 60.0d0
+    else if (iunit.eq.6) then
+      aunit = 1.0d0
+    else
+      aunit = 0.0d0
+    end if
 
   end subroutine set_digda_step_solid
 
 ! =====================================================================
 
-      subroutine calc_step_solid( &
-     &      FF, RST, W, PHI, PHII, DBI, S, &
-     &      SN, BFZ )
+      subroutine calc_step_solid( ff, rst, w, phi, phii, dbi, s, & !! IN
+                                & sn, bfz                        ) !! OUT
 
-      double precision, intent(in)  :: FF(NXY)
-      double precision, intent(in)  :: RST(NXY,SDZDIM)
-      double precision, intent(in)  :: W(NXY,SDZDIM+1)
-      double precision, intent(in)  :: PHI(SDZDIM)
-      double precision, intent(in)  :: PHII(SDZDIM+1)
-      double precision, intent(in)  :: DBI(SDZDIM+1)
-      double precision, intent(in)  :: S(NXY,SDZDIM)
-      double precision, intent(out) :: SN(NXY,SDZDIM)
-      double precision, intent(out) :: BFZ(NXY)
+      double precision, intent(in)  :: ff(nxy)
+      double precision, intent(in)  :: rst(nxy,sdzdim)
+      double precision, intent(in)  :: w(nxy,sdzdim+1)
+      double precision, intent(in)  :: phi(sdzdim)
+      double precision, intent(in)  :: phii(sdzdim+1)
+      double precision, intent(in)  :: dbi(sdzdim+1)
+      double precision, intent(in)  :: s(nxy,sdzdim)
+      double precision, intent(out) :: sn(nxy,sdzdim)
+      double precision, intent(out) :: bfz(nxy)
 
-      integer :: IJ, K
+      integer :: ij, k
 
-      DO IJ = IJTSTR, IJTEND
-         FLX(IJ, SKST) = FF(IJ)
-      END DO
+      do ij = ijtstr, ijtend
+         flx(ij, skst) = ff(ij)
+      end do
 
 !     -- Advection : Upwind --
 
-      IF (SADU) THEN
+      if (sadu) then
 
-      DO K = SKST+1, SKEN
-      DO IJ = IJTSTR, IJTEND
-         IF ( W(IJ, K) >= 0.0D0 ) THEN
-            SI(IJ, K) = S(IJ, K-1)
-         ELSE IF ( W(IJ, K) < 0.0D0 ) THEN
-            SI(IJ, K) = S(IJ, K)
-         END IF
-         FLX(IJ, K)   = ( 1.0D0 - PHII(K) ) * W(IJ, K) * SI(IJ, K)
-      END DO
-      END DO
+      do k = skst+1, sken
+      do ij = ijtstr, ijtend
+         if ( w(ij, k) >= 0.0d0 ) then
+            si(ij, k) = s(ij, k-1)
+         else if ( w(ij, k) < 0.0d0 ) then
+            si(ij, k) = s(ij, k)
+         end if
+         flx(ij, k)   = ( 1.0d0 - phii(k) ) * w(ij, k) * si(ij, k)
+      end do
+      end do
 
-      DO IJ = IJTSTR, IJTEND
-      IF ( W(IJ, SKEN+1) >= 0.0D0 ) THEN
-         SI(IJ, SKEN+1) = S(IJ, SKEN)
-      ELSE IF ( W(IJ, SKEN+1) < 0.0D0 ) THEN
-         SI(IJ, SKEN+1) = 0.0D0
-      END IF
-         FLX(IJ, SKEN+1) = ( 1.0D0 - PHII(SKEN+1) ) &
-     &                   * W(IJ, SKEN+1) * SI(IJ, SKEN+1)
-      END DO
+      do ij = ijtstr, ijtend
+      if ( w(ij, sken+1) >= 0.0d0 ) then
+         si(ij, sken+1) = s(ij, sken)
+      else if ( w(ij, sken+1) < 0.0d0 ) then
+         si(ij, sken+1) = 0.0d0
+      end if
+         flx(ij, sken+1) = ( 1.0d0 - phii(sken+1) ) &
+     &                   * w(ij, sken+1) * si(ij, sken+1)
+      end do
 
-      END IF
+      end if
 
 !     -- Advection : Quickest --
 
-      IF (SADQ) THEN
+      if (sadq) then
 
-      DO K = SKST+2, SKEN-1
-      DO IJ = IJTSTR, IJTEND
-         IF ( W(IJ, K) >= 0.0D0 ) THEN
-            C2(IJ, K) = ( 1.0D0 / ( DLZI(K-1) + DLZI(K) ) ) &
-     &         * ( ( ( S(IJ, K-2) - S(IJ, K-1) ) / DLZI(K-1) ) &
-     &           - ( ( S(IJ, K-1) - S(IJ, K)   ) / DLZI(K)   ) )
-         ELSE IF ( W(IJ, K) < 0.0D0 ) THEN
-            C2(IJ, K) = ( 1.0D0 / ( DLZI(K) + DLZI(K+1) ) ) &
-     &         * ( ( ( S(IJ, K-1) - S(IJ, K) ) / DLZI(K)   ) &
-     &           - ( ( S(IJ, K) - S(IJ, K+1) ) / DLZI(K+1) ) )
-         END IF
-            C1(IJ, K) = ( ( S(IJ, K) - S(IJ, K-1) ) / DLZI(K) ) &
-     &         + ( ( ( DLZ(K-1) - DLZ(K) ) / 2.0D0 ) * C2(IJ, K) )
-            C0(IJ, K) = ( ( DLZ(K) * S(IJ, K-1) + DLZ(K-1) * S(IJ, K) ) &
-     &                / ( 2.0D0 * DLZI(K) ) ) &
-     &         - ( ( ( DLZ(K-1) * DLZ(K) ) / 4.0D0 ) * C2(IJ, K) )
-      END DO
-      END DO
+      do k = skst+2, sken-1
+      do ij = ijtstr, ijtend
+         if ( w(ij, k) >= 0.0d0 ) then
+            c2(ij, k) = ( 1.0d0 / ( dlzi(k-1) + dlzi(k) ) ) &
+     &         * ( ( ( s(ij, k-2) - s(ij, k-1) ) / dlzi(k-1) ) &
+     &           - ( ( s(ij, k-1) - s(ij, k)   ) / dlzi(k)   ) )
+         else if ( w(ij, k) < 0.0d0 ) then
+            c2(ij, k) = ( 1.0d0 / ( dlzi(k) + dlzi(k+1) ) ) &
+     &         * ( ( ( s(ij, k-1) - s(ij, k) ) / dlzi(k)   ) &
+     &           - ( ( s(ij, k) - s(ij, k+1) ) / dlzi(k+1) ) )
+         end if
+            c1(ij, k) = ( ( s(ij, k) - s(ij, k-1) ) / dlzi(k) ) &
+     &         + ( ( ( dlz(k-1) - dlz(k) ) / 2.0d0 ) * c2(ij, k) )
+            c0(ij, k) = ( ( dlz(k) * s(ij, k-1) + dlz(k-1) * s(ij, k) ) &
+     &                / ( 2.0d0 * dlzi(k) ) ) &
+     &         - ( ( ( dlz(k-1) * dlz(k) ) / 4.0d0 ) * c2(ij, k) )
+      end do
+      end do
 
-      DO IJ = IJTSTR, IJTEND
-      IF ( W(IJ, SKST+1) >= 0.0D0 ) THEN
-         C2(IJ, SKST+1) = ( 1.0D0 / ( DLZI(SKST) + DLZI(SKST+1) ) ) &
-     &      * ( ( ( 0.0D0       - S(IJ, SKST)   ) / DLZI(SKST) ) &
-     &        - ( ( S(IJ, SKST) - S(IJ, SKST+1) ) / DLZI(SKST+1) ) )
-      ELSE IF ( W(IJ, SKST+1) < 0.0D0 ) THEN
-         C2(IJ, SKST+1) = ( 1.0D0 / ( DLZI(SKST+1) + DLZI(SKST+2) ) ) &
-     &      * ( ( ( S(IJ, SKST)   - S(IJ, SKST+1) ) / DLZI(SKST+1) ) &
-     &        - ( ( S(IJ, SKST+1) - S(IJ, SKST+2) ) / DLZI(SKST+2) ) )
-      END IF
-         C1(IJ, SKST+1) = ( ( S(IJ, SKST+1) - S(IJ, SKST) ) &
-     &                      / DLZI(SKST+1) ) &
-     &      + ( ( ( DLZ(SKST) - DLZ(SKST+1) ) / 2.0D0 ) &
-     &          * C2(IJ, SKST+1) )
-         C0(IJ, SKST+1) = ( ( DLZ(SKST+1) * S(IJ, SKST) &
-     &                      + DLZ(SKST)   * S(IJ, SKST+1) ) &
-     &                  / ( 2.0D0 * DLZI(SKST+1) ) ) &
-     &      - ( ( ( DLZ(SKST) * DLZ(SKST+1) ) / 4.0D0 ) &
-     &          * C2(IJ, SKST+1) )
-      END DO
+      do ij = ijtstr, ijtend
+      if ( w(ij, skst+1) >= 0.0d0 ) then
+         c2(ij, skst+1) = ( 1.0d0 / ( dlzi(skst) + dlzi(skst+1) ) ) &
+     &      * ( ( ( 0.0d0       - s(ij, skst)   ) / dlzi(skst) ) &
+     &        - ( ( s(ij, skst) - s(ij, skst+1) ) / dlzi(skst+1) ) )
+      else if ( w(ij, skst+1) < 0.0d0 ) then
+         c2(ij, skst+1) = ( 1.0d0 / ( dlzi(skst+1) + dlzi(skst+2) ) ) &
+     &      * ( ( ( s(ij, skst)   - s(ij, skst+1) ) / dlzi(skst+1) ) &
+     &        - ( ( s(ij, skst+1) - s(ij, skst+2) ) / dlzi(skst+2) ) )
+      end if
+         c1(ij, skst+1) = ( ( s(ij, skst+1) - s(ij, skst) ) &
+     &                      / dlzi(skst+1) ) &
+     &      + ( ( ( dlz(skst) - dlz(skst+1) ) / 2.0d0 ) &
+     &          * c2(ij, skst+1) )
+         c0(ij, skst+1) = ( ( dlz(skst+1) * s(ij, skst) &
+     &                      + dlz(skst)   * s(ij, skst+1) ) &
+     &                  / ( 2.0d0 * dlzi(skst+1) ) ) &
+     &      - ( ( ( dlz(skst) * dlz(skst+1) ) / 4.0d0 ) &
+     &          * c2(ij, skst+1) )
+      end do
 
-      DO IJ = IJTSTR, IJTEND
-      IF ( W(IJ, SKEN) >= 0.0D0 ) THEN
-         C2(IJ, SKEN) = ( 1.0D0 / ( DLZI(SKEN-1) + DLZI(SKEN) ) ) &
-     &      * ( ( ( S(IJ, SKEN-2) - S(IJ, SKEN-1) ) / DLZI(SKEN-1) ) &
-     &        - ( ( S(IJ, SKEN-1) - S(IJ, SKEN)   ) / DLZI(SKEN)   ) )
-      ELSE IF ( W(IJ, SKEN) < 0.0D0 ) THEN
-         C2(IJ, SKEN) = ( 1.0D0 / ( DLZI(SKEN) + DLZI(SKEN+1) ) ) &
-     &      * ( ( ( S(IJ, SKEN-1) - S(IJ, SKEN) ) / DLZI(SKEN)   ) &
-     &        - ( ( S(IJ, SKEN)   - 0.0D0       ) / DLZI(SKEN+1) ) )
-      END IF
-         C1(IJ, SKEN) = ( ( S(IJ, SKEN) - S(IJ, SKEN-1) ) / DLZI(SKEN) ) &
-     &      + ( ( ( DLZ(SKEN-1) - DLZ(SKEN) ) / 2.0D0 ) &
-     &          * C2(IJ, SKEN) )
-         C0(IJ, SKEN) = ( ( DLZ(SKEN)   * S(IJ, SKEN-1) &
-     &                    + DLZ(SKEN-1) * S(IJ, SKEN)   ) &
-     &                / ( 2.0D0 * DLZI(SKEN) ) ) &
-     &      - ( ( ( DLZ(SKEN-1) * DLZ(SKEN) ) / 4.0D0 ) &
-     &          * C2(IJ, SKEN) )
-      END DO
+      do ij = ijtstr, ijtend
+      if ( w(ij, sken) >= 0.0d0 ) then
+         c2(ij, sken) = ( 1.0d0 / ( dlzi(sken-1) + dlzi(sken) ) ) &
+     &      * ( ( ( s(ij, sken-2) - s(ij, sken-1) ) / dlzi(sken-1) ) &
+     &        - ( ( s(ij, sken-1) - s(ij, sken)   ) / dlzi(sken)   ) )
+      else if ( w(ij, sken) < 0.0d0 ) then
+         c2(ij, sken) = ( 1.0d0 / ( dlzi(sken) + dlzi(sken+1) ) ) &
+     &      * ( ( ( s(ij, sken-1) - s(ij, sken) ) / dlzi(sken)   ) &
+     &        - ( ( s(ij, sken)   - 0.0d0       ) / dlzi(sken+1) ) )
+      end if
+         c1(ij, sken) = ( ( s(ij, sken) - s(ij, sken-1) ) / dlzi(sken) ) &
+     &      + ( ( ( dlz(sken-1) - dlz(sken) ) / 2.0d0 ) &
+     &          * c2(ij, sken) )
+         c0(ij, sken) = ( ( dlz(sken)   * s(ij, sken-1) &
+     &                    + dlz(sken-1) * s(ij, sken)   ) &
+     &                / ( 2.0d0 * dlzi(sken) ) ) &
+     &      - ( ( ( dlz(sken-1) * dlz(sken) ) / 4.0d0 ) &
+     &          * c2(ij, sken) )
+      end do
 
-      DO IJ = IJTSTR, IJTEND
-      IF ( W(IJ, SKEN+1) >= 0.0D0 ) THEN
-         C2(IJ, SKEN+1) = ( 1.0D0 / ( DLZI(SKEN) + DLZI(SKEN+1) ) ) &
-     &      * ( ( ( S(IJ, SKEN-1) - S(IJ, SKEN) ) / DLZI(SKEN)   ) &
-     &        - ( ( S(IJ, SKEN)   - S(IJ, SKEN) ) / DLZI(SKEN+1) ) )
-      ELSE IF ( W(IJ, SKEN+1) < 0.0D0 ) THEN
-         C2(IJ, SKEN) = ( 1.0D0 / ( DLZI(SKEN+1) + DLZI(SKEN+1) ) ) &
-     &      * ( ( ( S(IJ, SKEN) - 0.0D0 ) / DLZI(SKEN+1) ) &
-     &        - ( ( 0.0D0       - 0.0D0 ) / DLZI(SKEN+1) ) )
-      END IF
-      IF ( W(IJ, SKEN+1) >= 0.0D0 ) THEN
-         C1(IJ, SKEN+1) = ( ( S(IJ, SKEN) - S(IJ, SKEN) ) &
-     &                    / DLZI(SKEN+1) )
-         C0(IJ, SKEN+1) = ( ( DLZ(SKEN) * S(IJ, SKEN) &
-     &                      + DLZ(SKEN) * S(IJ, SKEN) ) &
-     &                  / ( 2.0D0 * DLZI(SKEN+1) ) ) &
-     &      - ( ( ( DLZ(SKEN) * DLZ(SKEN) ) / 4.0D0 ) &
-     &          * C2(IJ, SKEN+1) )
-      ELSE IF ( W(IJ, SKEN+1) < 0.0D0 ) THEN
-         C1(IJ, SKEN+1) = ( ( 0.0D0 - S(IJ, SKEN) ) &
-     &                    / DLZI(SKEN+1) )
-         C0(IJ, SKEN+1) = ( ( DLZ(SKEN) * S(IJ, SKEN) &
-     &                      + DLZ(SKEN) * 0.0D0 ) &
-     &                  / ( 2.0D0 * DLZI(SKEN+1) ) ) &
-     &      - ( ( ( DLZ(SKEN) * DLZ(SKEN) ) / 4.0D0 ) &
-     &          * C2(IJ, SKEN+1) )
-      END IF
-      END DO
+      do ij = ijtstr, ijtend
+      if ( w(ij, sken+1) >= 0.0d0 ) then
+         c2(ij, sken+1) = ( 1.0d0 / ( dlzi(sken) + dlzi(sken+1) ) ) &
+     &      * ( ( ( s(ij, sken-1) - s(ij, sken) ) / dlzi(sken)   ) &
+     &        - ( ( s(ij, sken)   - s(ij, sken) ) / dlzi(sken+1) ) )
+      else if ( w(ij, sken+1) < 0.0d0 ) then
+         c2(ij, sken) = ( 1.0d0 / ( dlzi(sken+1) + dlzi(sken+1) ) ) &
+     &      * ( ( ( s(ij, sken) - 0.0d0 ) / dlzi(sken+1) ) &
+     &        - ( ( 0.0d0       - 0.0d0 ) / dlzi(sken+1) ) )
+      end if
+      if ( w(ij, sken+1) >= 0.0d0 ) then
+         c1(ij, sken+1) = ( ( s(ij, sken) - s(ij, sken) ) &
+     &                    / dlzi(sken+1) )
+         c0(ij, sken+1) = ( ( dlz(sken) * s(ij, sken) &
+     &                      + dlz(sken) * s(ij, sken) ) &
+     &                  / ( 2.0d0 * dlzi(sken+1) ) ) &
+     &      - ( ( ( dlz(sken) * dlz(sken) ) / 4.0d0 ) &
+     &          * c2(ij, sken+1) )
+      else if ( w(ij, sken+1) < 0.0d0 ) then
+         c1(ij, sken+1) = ( ( 0.0d0 - s(ij, sken) ) &
+     &                    / dlzi(sken+1) )
+         c0(ij, sken+1) = ( ( dlz(sken) * s(ij, sken) &
+     &                      + dlz(sken) * 0.0d0 ) &
+     &                  / ( 2.0d0 * dlzi(sken+1) ) ) &
+     &      - ( ( ( dlz(sken) * dlz(sken) ) / 4.0d0 ) &
+     &          * c2(ij, sken+1) )
+      end if
+      end do
 
-      DO K = SKST+1, SKEN+1
-      DO IJ = IJTSTR, IJTEND
-         SI(IJ, K) = C0(IJ, K) &
-     &   - ( C1(IJ, K) * ( ( W(IJ, K) * TS ) / 2.0D0 ) ) &
-     &   + ( C2(IJ, K) * ( ( ( ( W(IJ, K) * TS ) ** 2.0D0 ) / 3.0D0 ) &
-     &             - ( ( ( DLZI(K) ** 2.0D0 ) / 12.0D0 ) ) ) )
-      END DO
-      END DO
+      do k = skst+1, sken+1
+      do ij = ijtstr, ijtend
+         si(ij, k) = c0(ij, k) &
+     &   - ( c1(ij, k) * ( ( w(ij, k) * ts ) / 2.0d0 ) ) &
+     &   + ( c2(ij, k) * ( ( ( ( w(ij, k) * ts ) ** 2.0d0 ) / 3.0d0 ) &
+     &             - ( ( ( dlzi(k) ** 2.0d0 ) / 12.0d0 ) ) ) )
+      end do
+      end do
 
 !     -- Advection : Quickest Flux limiter --
 
-      IF (SADQF) THEN
+      if (sadqf) then
 
-      DO IJ = IJTSTR, IJTEND
-      IF ( W(IJ, SKST+1) >= 0.0D0 ) THEN
-      FLDEL(SKST+1) = S(IJ, SKST+1) - 0.0D0
-      FLGAM(SKST+1) = ( ( S(IJ, SKST+1) - S(IJ, SKST) ) &
-     &                  / DLZI(SKST+1) ) &
-     &              - ( ( S(IJ, SKST)   - 0.0D0       ) &
-     &                  / DLZI(SKST)   )
-      IF ( ABS( FLGAM(SKST+1)*DLZ(SKST) ) >= ABS( FLDEL(SKST+1) ) ) THEN
-         SI(IJ, SKST+1) = S(IJ, SKST)
-      ELSE IF ( FLDEL(SKST+1) >= 0 ) THEN
-         FLTMP = 0.0D0 &
-     &         + ( S(IJ, SKST) - 0.0D0 ) / W(IJ, SKST+1) * DLZI(SKST+1)
-         SI(IJ, SKST+1) = &
-     &      MIN( SI(IJ, SKST+1), MIN( FLTMP, S(IJ, SKST+1) ) )
-         SI(IJ, SKST+1) = MAX( SI(IJ, SKST+1), S(IJ, SKST) )
-      ELSE IF ( FLDEL(SKST+1) <  0 ) THEN
-         FLTMP = 0.0D0 &
-     &         + ( S(IJ, SKST) - 0.0D0 ) / W(IJ, SKST+1) * DLZI(SKST+1)
-         SI(IJ, SKST+1) = &
-     &      MAX( SI(IJ, SKST+1), MAX( FLTMP, S(IJ, SKST+1) ) )
-         SI(IJ, SKST+1) = MIN( SI(IJ, SKST+1), S(IJ, SKST) )
-      END IF
-      ELSE IF ( W(IJ, SKST+1) < 0.0D0 ) THEN
-      FLDEL(SKST+1) = S(IJ, SKST) - S(IJ, SKST+2)
-      FLGAM(SKST+1) = ( ( S(IJ, SKST)   - S(IJ, SKST+1) ) &
-     &                  / DLZI(SKST+1) ) &
-     &              - ( ( S(IJ, SKST+1) - S(IJ, SKST+2) ) &
-     &                  / DLZI(SKST+2) )
-      IF ( ABS( FLGAM(SKST+1)*DLZ(SKST+1) ) &
-     &  >= ABS( FLDEL(SKST+1) ) ) THEN
-         SI(IJ, SKST+1) = S(IJ, SKST+1)
-      ELSE IF ( FLDEL(SKST+1) >= 0 ) THEN
-         FLTMP = S(IJ, SKST+2) &
-     &- ( S(IJ, SKST+1) - S(IJ, SKST+2) ) / W(IJ, SKST+1) * DLZI(SKST+1)
-         SI(IJ, SKST+1) = &
-     &      MIN( SI(IJ, SKST+1), MIN( FLTMP, S(IJ, SKST) ) )
-         SI(IJ, SKST+1) = MAX( SI(IJ, SKST+1), S(IJ, SKST+1) )
-      ELSE IF ( FLDEL(SKST+1) <  0 ) THEN
-         FLTMP = S(IJ, SKST+2) &
-     &- ( S(IJ, SKST+1) - S(IJ, SKST+2) ) / W(IJ, SKST+1) * DLZI(SKST+1)
-         SI(IJ, SKST+1) = &
-     &      MAX( SI(IJ, SKST+1), MAX( FLTMP, S(IJ, SKST) ) )
-         SI(IJ, SKST+1) = MIN( SI(IJ, SKST+1), S(IJ, SKST+1) )
-      END IF
-      END IF
-      END DO
+      do ij = ijtstr, ijtend
+      if ( w(ij, skst+1) >= 0.0d0 ) then
+      fldel(skst+1) = s(ij, skst+1) - 0.0d0
+      flgam(skst+1) = ( ( s(ij, skst+1) - s(ij, skst) ) &
+     &                  / dlzi(skst+1) ) &
+     &              - ( ( s(ij, skst)   - 0.0d0       ) &
+     &                  / dlzi(skst)   )
+      if ( abs( flgam(skst+1)*dlz(skst) ) >= abs( fldel(skst+1) ) ) then
+         si(ij, skst+1) = s(ij, skst)
+      else if ( fldel(skst+1) >= 0 ) then
+         fltmp = 0.0d0 &
+     &         + ( s(ij, skst) - 0.0d0 ) / w(ij, skst+1) * dlzi(skst+1)
+         si(ij, skst+1) = &
+     &      min( si(ij, skst+1), min( fltmp, s(ij, skst+1) ) )
+         si(ij, skst+1) = max( si(ij, skst+1), s(ij, skst) )
+      else if ( fldel(skst+1) <  0 ) then
+         fltmp = 0.0d0 &
+     &         + ( s(ij, skst) - 0.0d0 ) / w(ij, skst+1) * dlzi(skst+1)
+         si(ij, skst+1) = &
+     &      max( si(ij, skst+1), max( fltmp, s(ij, skst+1) ) )
+         si(ij, skst+1) = min( si(ij, skst+1), s(ij, skst) )
+      end if
+      else if ( w(ij, skst+1) < 0.0d0 ) then
+      fldel(skst+1) = s(ij, skst) - s(ij, skst+2)
+      flgam(skst+1) = ( ( s(ij, skst)   - s(ij, skst+1) ) &
+     &                  / dlzi(skst+1) ) &
+     &              - ( ( s(ij, skst+1) - s(ij, skst+2) ) &
+     &                  / dlzi(skst+2) )
+      if ( abs( flgam(skst+1)*dlz(skst+1) ) &
+     &  >= abs( fldel(skst+1) ) ) then
+         si(ij, skst+1) = s(ij, skst+1)
+      else if ( fldel(skst+1) >= 0 ) then
+         fltmp = s(ij, skst+2) &
+     &- ( s(ij, skst+1) - s(ij, skst+2) ) / w(ij, skst+1) * dlzi(skst+1)
+         si(ij, skst+1) = &
+     &      min( si(ij, skst+1), min( fltmp, s(ij, skst) ) )
+         si(ij, skst+1) = max( si(ij, skst+1), s(ij, skst+1) )
+      else if ( fldel(skst+1) <  0 ) then
+         fltmp = s(ij, skst+2) &
+     &- ( s(ij, skst+1) - s(ij, skst+2) ) / w(ij, skst+1) * dlzi(skst+1)
+         si(ij, skst+1) = &
+     &      max( si(ij, skst+1), max( fltmp, s(ij, skst) ) )
+         si(ij, skst+1) = min( si(ij, skst+1), s(ij, skst+1) )
+      end if
+      end if
+      end do
 
-      DO K = SKST+2, SKEN-1
-      DO IJ = IJTSTR, IJTEND
-      IF ( W(IJ, K) >= 0.0D0 ) THEN
-         FLDEL(K) = S(IJ, K) - S(IJ, K-2)
-         FLGAM(K) = ( ( S(IJ, K)   - S(IJ, K-1) ) / DLZI(K)   ) &
-     &            - ( ( S(IJ, K-1) - S(IJ, K-2) ) / DLZI(K-1) )
-         IF ( ABS( FLGAM(K)*DLZ(K-1) ) >= ABS( FLDEL(K) ) ) THEN
-            SI(IJ, K) = S(IJ, K-1)
-         ELSE IF ( FLDEL(K) >= 0 ) THEN
-            FLTMP = S(IJ, K-2) &
-     &            + ( S(IJ, K-1) - S(IJ, K-2) ) / W(IJ, K) * DLZI(K)
-            SI(IJ, K) = &
-     &         MIN( SI(IJ, K), MIN( FLTMP, S(IJ, K) ) )
-            SI(IJ, K) = MAX( SI(IJ, K), S(IJ, K-1) )
-         ELSE IF ( FLDEL(K) <  0 ) THEN
-            FLTMP = S(IJ, K-2) &
-     &            + ( S(IJ, K-1) - S(IJ, K-2) ) / W(IJ, K) * DLZI(K)
-            SI(IJ, K) = &
-     &         MAX( SI(IJ, K), MAX( FLTMP, S(IJ, K) ) )
-            SI(IJ, K) = MIN( SI(IJ, K), S(IJ, K-1) )
-         END IF
-      ELSE IF ( W(IJ, K) < 0.0D0 ) THEN
-         FLDEL(K) = S(IJ, K-1) - S(IJ, K+1)
-         FLGAM(K) = ( ( S(IJ, K-1) - S(IJ, K)   ) / DLZI(K)   ) &
-     &            - ( ( S(IJ, K)   - S(IJ, K+1) ) / DLZI(K+1) )
-         IF ( ABS( FLGAM(K)*DLZ(K) ) >= ABS( FLDEL(K) ) ) THEN
-            SI(IJ, K) = S(IJ, K)
-         ELSE IF ( FLDEL(K) >= 0 ) THEN
-            FLTMP = S(IJ, K+1) &
-     &            - ( S(IJ, K) - S(IJ, K+1) ) / W(IJ, K) * DLZI(K)
-            SI(IJ, K) = &
-     &         MIN( SI(IJ, K), MIN( FLTMP, S(IJ, K-1) ) )
-            SI(IJ, K) = MAX( SI(IJ, K), S(IJ, K) )
-         ELSE IF ( FLDEL(K) <  0 ) THEN
-            FLTMP = S(IJ, K+1) &
-     &            - ( S(IJ, K) - S(IJ, K+1) ) / W(IJ, K) * DLZI(K)
-            SI(IJ, K) = &
-     &         MAX( SI(IJ, K), MAX( FLTMP, S(IJ, K-1) ) )
-            SI(IJ, K) = MIN( SI(IJ, K), S(IJ, K) )
-         END IF
-      END IF
-      END DO
-      END DO
+      do k = skst+2, sken-1
+      do ij = ijtstr, ijtend
+      if ( w(ij, k) >= 0.0d0 ) then
+         fldel(k) = s(ij, k) - s(ij, k-2)
+         flgam(k) = ( ( s(ij, k)   - s(ij, k-1) ) / dlzi(k)   ) &
+     &            - ( ( s(ij, k-1) - s(ij, k-2) ) / dlzi(k-1) )
+         if ( abs( flgam(k)*dlz(k-1) ) >= abs( fldel(k) ) ) then
+            si(ij, k) = s(ij, k-1)
+         else if ( fldel(k) >= 0 ) then
+            fltmp = s(ij, k-2) &
+     &            + ( s(ij, k-1) - s(ij, k-2) ) / w(ij, k) * dlzi(k)
+            si(ij, k) = &
+     &         min( si(ij, k), min( fltmp, s(ij, k) ) )
+            si(ij, k) = max( si(ij, k), s(ij, k-1) )
+         else if ( fldel(k) <  0 ) then
+            fltmp = s(ij, k-2) &
+     &            + ( s(ij, k-1) - s(ij, k-2) ) / w(ij, k) * dlzi(k)
+            si(ij, k) = &
+     &         max( si(ij, k), max( fltmp, s(ij, k) ) )
+            si(ij, k) = min( si(ij, k), s(ij, k-1) )
+         end if
+      else if ( w(ij, k) < 0.0d0 ) then
+         fldel(k) = s(ij, k-1) - s(ij, k+1)
+         flgam(k) = ( ( s(ij, k-1) - s(ij, k)   ) / dlzi(k)   ) &
+     &            - ( ( s(ij, k)   - s(ij, k+1) ) / dlzi(k+1) )
+         if ( abs( flgam(k)*dlz(k) ) >= abs( fldel(k) ) ) then
+            si(ij, k) = s(ij, k)
+         else if ( fldel(k) >= 0 ) then
+            fltmp = s(ij, k+1) &
+     &            - ( s(ij, k) - s(ij, k+1) ) / w(ij, k) * dlzi(k)
+            si(ij, k) = &
+     &         min( si(ij, k), min( fltmp, s(ij, k-1) ) )
+            si(ij, k) = max( si(ij, k), s(ij, k) )
+         else if ( fldel(k) <  0 ) then
+            fltmp = s(ij, k+1) &
+     &            - ( s(ij, k) - s(ij, k+1) ) / w(ij, k) * dlzi(k)
+            si(ij, k) = &
+     &         max( si(ij, k), max( fltmp, s(ij, k-1) ) )
+            si(ij, k) = min( si(ij, k), s(ij, k) )
+         end if
+      end if
+      end do
+      end do
 
-      DO IJ = IJTSTR, IJTEND
-      IF ( W(IJ, SKEN) >= 0.0D0 ) THEN
-      FLDEL(SKEN) = S(IJ, SKEN) - S(IJ, SKEN-2)
-      FLGAM(SKEN) = ( ( S(IJ, SKEN)   - S(IJ, SKEN-1) ) / DLZI(SKEN)   ) &
-     &            - ( ( S(IJ, SKEN-1) - S(IJ, SKEN-2) ) / DLZI(SKEN-1) )
-      IF ( ABS( FLGAM(SKEN)*DLZ(SKEN-1) ) >= ABS( FLDEL(SKEN) ) ) THEN
-         SI(IJ, SKEN) = S(IJ, SKEN-1)
-      ELSE IF ( FLDEL(SKEN) >= 0 ) THEN
-         FLTMP = S(IJ, SKEN-2) &
-     &+ ( S(IJ, SKEN-1) - S(IJ, SKEN-2) ) / W(IJ, SKEN) * DLZI(SKEN)
-         SI(IJ, SKEN) = &
-     &      MIN( SI(IJ, SKEN), MIN( FLTMP, S(IJ, SKEN) ) )
-         SI(IJ, SKEN) = MAX( SI(IJ, SKEN), S(IJ, SKEN-1) )
-      ELSE IF ( FLDEL(SKEN) <  0 ) THEN
-         FLTMP = S(IJ, SKEN-2) &
-     &+ ( S(IJ, SKEN-1) - S(IJ, SKEN-2) ) / W(IJ, SKEN) * DLZI(SKEN)
-         SI(IJ, SKEN) = &
-     &      MAX( SI(IJ, SKEN), MAX( FLTMP, S(IJ, SKEN) ) )
-         SI(IJ, SKEN) = MIN( SI(IJ, SKEN), S(IJ, SKEN-1) )
-      END IF
-      ELSE IF ( W(IJ, SKEN) < 0.0D0 ) THEN
-      FLDEL(SKEN) = S(IJ, SKEN-1) - 0.0D0
-      FLGAM(SKEN) = ( ( S(IJ, SKEN-1) - S(IJ, SKEN) ) / DLZI(SKEN)   ) &
-     &            - ( ( S(IJ, SKEN)   - 0.0D0       ) / DLZI(SKEN+1) )
-      IF ( ABS( FLGAM(SKEN)*DLZ(SKEN) ) >= ABS( FLDEL(SKEN) ) ) THEN
-         SI(IJ, SKEN) = S(IJ, SKEN)
-      ELSE IF ( FLDEL(SKEN) >= 0 ) THEN
-         FLTMP = 0.0D0 &
-     &- ( S(IJ, SKEN) - 0.0D0 ) / W(IJ, SKEN) * DLZI(SKEN)
-         SI(IJ, SKEN) = &
-     &      MIN( SI(IJ, SKEN), MIN( FLTMP, S(IJ, SKEN-1) ) )
-         SI(IJ, SKEN) = MAX( SI(IJ, SKEN), S(IJ, SKEN) )
-      ELSE IF ( FLDEL(SKEN) <  0 ) THEN
-         FLTMP = 0.0D0 &
-     &- ( S(IJ, SKEN) - 0.0D0 ) / W(IJ, SKEN) * DLZI(SKEN)
-         SI(IJ, SKEN) = &
-     &      MAX( SI(IJ, SKEN), MAX( FLTMP, S(IJ, SKEN-1) ) )
-         SI(IJ, SKEN) = MIN( SI(IJ, SKEN), S(IJ, SKEN) )
-      END IF
-      END IF
-      END DO
+      do ij = ijtstr, ijtend
+      if ( w(ij, sken) >= 0.0d0 ) then
+      fldel(sken) = s(ij, sken) - s(ij, sken-2)
+      flgam(sken) = ( ( s(ij, sken)   - s(ij, sken-1) ) / dlzi(sken)   ) &
+     &            - ( ( s(ij, sken-1) - s(ij, sken-2) ) / dlzi(sken-1) )
+      if ( abs( flgam(sken)*dlz(sken-1) ) >= abs( fldel(sken) ) ) then
+         si(ij, sken) = s(ij, sken-1)
+      else if ( fldel(sken) >= 0 ) then
+         fltmp = s(ij, sken-2) &
+     &+ ( s(ij, sken-1) - s(ij, sken-2) ) / w(ij, sken) * dlzi(sken)
+         si(ij, sken) = &
+     &      min( si(ij, sken), min( fltmp, s(ij, sken) ) )
+         si(ij, sken) = max( si(ij, sken), s(ij, sken-1) )
+      else if ( fldel(sken) <  0 ) then
+         fltmp = s(ij, sken-2) &
+     &+ ( s(ij, sken-1) - s(ij, sken-2) ) / w(ij, sken) * dlzi(sken)
+         si(ij, sken) = &
+     &      max( si(ij, sken), max( fltmp, s(ij, sken) ) )
+         si(ij, sken) = min( si(ij, sken), s(ij, sken-1) )
+      end if
+      else if ( w(ij, sken) < 0.0d0 ) then
+      fldel(sken) = s(ij, sken-1) - 0.0d0
+      flgam(sken) = ( ( s(ij, sken-1) - s(ij, sken) ) / dlzi(sken)   ) &
+     &            - ( ( s(ij, sken)   - 0.0d0       ) / dlzi(sken+1) )
+      if ( abs( flgam(sken)*dlz(sken) ) >= abs( fldel(sken) ) ) then
+         si(ij, sken) = s(ij, sken)
+      else if ( fldel(sken) >= 0 ) then
+         fltmp = 0.0d0 &
+     &- ( s(ij, sken) - 0.0d0 ) / w(ij, sken) * dlzi(sken)
+         si(ij, sken) = &
+     &      min( si(ij, sken), min( fltmp, s(ij, sken-1) ) )
+         si(ij, sken) = max( si(ij, sken), s(ij, sken) )
+      else if ( fldel(sken) <  0 ) then
+         fltmp = 0.0d0 &
+     &- ( s(ij, sken) - 0.0d0 ) / w(ij, sken) * dlzi(sken)
+         si(ij, sken) = &
+     &      max( si(ij, sken), max( fltmp, s(ij, sken-1) ) )
+         si(ij, sken) = min( si(ij, sken), s(ij, sken) )
+      end if
+      end if
+      end do
 
-      DO IJ = IJTSTR, IJTEND
-      IF ( W(IJ, SKEN+1) >= 0.0D0 ) THEN
-      FLDEL(SKEN+1) = S(IJ, SKEN) - S(IJ, SKEN-1)
-      FLGAM(SKEN+1) = ( ( S(IJ, SKEN) - S(IJ, SKEN)   ) / DLZI(SKEN+1) ) &
-     &              - ( ( S(IJ, SKEN) - S(IJ, SKEN-1) ) / DLZI(SKEN)   )
-      IF ( ABS( FLGAM(SKEN+1)*DLZ(SKEN) ) >= ABS( FLDEL(SKEN+1) ) ) THEN
-         SI(IJ, SKEN+1) = S(IJ, SKEN)
-      ELSE IF ( FLDEL(SKEN+1) >= 0 ) THEN
-         FLTMP = S(IJ, SKEN-1) &
-     &+ ( S(IJ, SKEN) - S(IJ, SKEN-1) ) / W(IJ, SKEN+1) * DLZI(SKEN+1)
-         SI(IJ, SKEN+1) = &
-     &      MIN( SI(IJ, SKEN+1), MIN( FLTMP, S(IJ, SKEN) ) )
-         SI(IJ, SKEN+1) = MAX( SI(IJ, SKEN+1), S(IJ, SKEN) )
-      ELSE IF ( FLDEL(SKEN+1) <  0 ) THEN
-         FLTMP = S(IJ, SKEN-1) &
-     &+ ( S(IJ, SKEN) - S(IJ, SKEN-1) ) / W(IJ, SKEN+1) * DLZI(SKEN+1)
-         SI(IJ, SKEN+1) = &
-     &      MAX( SI(IJ, SKEN+1), MAX( FLTMP, S(IJ, SKEN) ) )
-         SI(IJ, SKEN+1) = MIN( SI(IJ, SKEN+1), S(IJ, SKEN) )
-      END IF
-      ELSE IF ( W(IJ, SKEN+1) < 0.0D0 ) THEN
-      FLDEL(SKEN+1) = S(IJ, SKEN) - 0.0D0
-      FLGAM(SKEN+1) = ( ( S(IJ, SKEN) - 0.0D0 ) / DLZI(SKEN+1) ) &
-     &              - ( ( 0.0D0       - 0.0D0 ) / DLZI(SKEN+1) )
-      IF ( ABS( FLGAM(SKEN+1)*DLZ(SKEN) ) >= ABS( FLDEL(SKEN+1) ) ) THEN
-         SI(IJ, SKEN+1) = 0.0D0
-      ELSE IF ( FLDEL(SKEN+1) >= 0 ) THEN
-         FLTMP = 0.0D0 &
-     &- ( 0.0D0 - 0.0D0 ) / W(IJ, SKEN+1) * DLZI(SKEN+1)
-         SI(IJ, SKEN+1) = &
-     &      MIN( SI(IJ, SKEN+1), MIN( FLTMP, S(IJ, SKEN) ) )
-         SI(IJ, SKEN+1) = MAX( SI(IJ, SKEN+1), 0.0D0 )
-      ELSE IF ( FLDEL(SKEN+1) <  0 ) THEN
-         FLTMP = 0.0D0 &
-     &- ( 0.0D0 - 0.0D0 ) / W(IJ, SKEN+1) * DLZI(SKEN+1)
-         SI(IJ, SKEN+1) = &
-     &      MAX( SI(IJ, SKEN+1), MAX( FLTMP, S(IJ, SKEN) ) )
-         SI(IJ, SKEN+1) = MIN( SI(IJ, SKEN+1), 0.0D0 )
-      END IF
-      END IF
-      END DO
+      do ij = ijtstr, ijtend
+      if ( w(ij, sken+1) >= 0.0d0 ) then
+      fldel(sken+1) = s(ij, sken) - s(ij, sken-1)
+      flgam(sken+1) = ( ( s(ij, sken) - s(ij, sken)   ) / dlzi(sken+1) ) &
+     &              - ( ( s(ij, sken) - s(ij, sken-1) ) / dlzi(sken)   )
+      if ( abs( flgam(sken+1)*dlz(sken) ) >= abs( fldel(sken+1) ) ) then
+         si(ij, sken+1) = s(ij, sken)
+      else if ( fldel(sken+1) >= 0 ) then
+         fltmp = s(ij, sken-1) &
+     &+ ( s(ij, sken) - s(ij, sken-1) ) / w(ij, sken+1) * dlzi(sken+1)
+         si(ij, sken+1) = &
+     &      min( si(ij, sken+1), min( fltmp, s(ij, sken) ) )
+         si(ij, sken+1) = max( si(ij, sken+1), s(ij, sken) )
+      else if ( fldel(sken+1) <  0 ) then
+         fltmp = s(ij, sken-1) &
+     &+ ( s(ij, sken) - s(ij, sken-1) ) / w(ij, sken+1) * dlzi(sken+1)
+         si(ij, sken+1) = &
+     &      max( si(ij, sken+1), max( fltmp, s(ij, sken) ) )
+         si(ij, sken+1) = min( si(ij, sken+1), s(ij, sken) )
+      end if
+      else if ( w(ij, sken+1) < 0.0d0 ) then
+      fldel(sken+1) = s(ij, sken) - 0.0d0
+      flgam(sken+1) = ( ( s(ij, sken) - 0.0d0 ) / dlzi(sken+1) ) &
+     &              - ( ( 0.0d0       - 0.0d0 ) / dlzi(sken+1) )
+      if ( abs( flgam(sken+1)*dlz(sken) ) >= abs( fldel(sken+1) ) ) then
+         si(ij, sken+1) = 0.0d0
+      else if ( fldel(sken+1) >= 0 ) then
+         fltmp = 0.0d0 &
+     &- ( 0.0d0 - 0.0d0 ) / w(ij, sken+1) * dlzi(sken+1)
+         si(ij, sken+1) = &
+     &      min( si(ij, sken+1), min( fltmp, s(ij, sken) ) )
+         si(ij, sken+1) = max( si(ij, sken+1), 0.0d0 )
+      else if ( fldel(sken+1) <  0 ) then
+         fltmp = 0.0d0 &
+     &- ( 0.0d0 - 0.0d0 ) / w(ij, sken+1) * dlzi(sken+1)
+         si(ij, sken+1) = &
+     &      max( si(ij, sken+1), max( fltmp, s(ij, sken) ) )
+         si(ij, sken+1) = min( si(ij, sken+1), 0.0d0 )
+      end if
+      end if
+      end do
 
-      END IF
+      end if
 
-      DO K = SKST+1, SKEN+1
-      DO IJ = IJTSTR, IJTEND
-         FLX(IJ, K) = ( 1.0D0 - PHII(K) ) * W(IJ, K) * SI(IJ, K)
-      END DO
-      END DO
+      do k = skst+1, sken+1
+      do ij = ijtstr, ijtend
+         flx(ij, k) = ( 1.0d0 - phii(k) ) * w(ij, k) * si(ij, k)
+      end do
+      end do
 
-      END IF
+      end if
 
 !     -- Diffusion : Crank nicolson
 
-      IF (SDIC) THEN
+      if (sdic) then
 
-      DO K = SKST, SKEN
-         EAL(K) = ( ( 1.0D0 - PHI(K) ) / TS )
-         EBE(K) = ( ( ( 1.0D0 - PHII(K) )   * DBI(K) ) &
-     &            / ( 2.0D0 * DLZ(K) * DLZI(K)   ) )
-         EGA(K) = ( ( ( 1.0D0 - PHII(K+1) ) * DBI(K+1) ) &
-     &            / ( 2.0D0 * DLZ(K) * DLZI(K+1) ) )
-      END DO
+      do k = skst, sken
+         eal(k) = ( ( 1.0d0 - phi(k) ) / ts )
+         ebe(k) = ( ( ( 1.0d0 - phii(k) )   * dbi(k) ) &
+     &            / ( 2.0d0 * dlz(k) * dlzi(k)   ) )
+         ega(k) = ( ( ( 1.0d0 - phii(k+1) ) * dbi(k+1) ) &
+     &            / ( 2.0d0 * dlz(k) * dlzi(k+1) ) )
+      end do
 
-      DO K = SKST+1, SKEN-1
-         EA(K)     = - EBE(K)
-         EB(K)     = EAL(K) + EBE(K) + EGA(K)
-         EC(K)     = - EGA(K)
-      END DO
+      do k = skst+1, sken-1
+         ea(k)     = - ebe(k)
+         eb(k)     = eal(k) + ebe(k) + ega(k)
+         ec(k)     = - ega(k)
+      end do
 
-         EA(SKST)  = - EBE(SKST)
-         EB(SKST)  = EAL(SKST) + EGA(SKST)
-         EC(SKST)  = - EGA(SKST)
-         EA(SKEN)  = - EBE(SKEN)
-         EB(SKEN)  = EAL(SKEN) + EBE(SKEN)
-         EC(SKEN)  = - EGA(SKEN)
+         ea(skst)  = - ebe(skst)
+         eb(skst)  = eal(skst) + ega(skst)
+         ec(skst)  = - ega(skst)
+         ea(sken)  = - ebe(sken)
+         eb(sken)  = eal(sken) + ebe(sken)
+         ec(sken)  = - ega(sken)
 
-      DO IJ = IJTSTR, IJTEND
-         ED(IJ, SKST) = &
-     &      + ( EAL(SKST) - EGA(SKST) ) * S(IJ, SKST) &
-     &      + EGA(SKST) * S(IJ, SKST+1) &
-     &      + ( ( FLX(IJ, SKST) - FLX(IJ, SKST+1) ) / DLZ(SKST) ) &
-     &      - RST(IJ, SKST)
-      END DO
+      do ij = ijtstr, ijtend
+         ed(ij, skst) = &
+     &      + ( eal(skst) - ega(skst) ) * s(ij, skst) &
+     &      + ega(skst) * s(ij, skst+1) &
+     &      + ( ( flx(ij, skst) - flx(ij, skst+1) ) / dlz(skst) ) &
+     &      - rst(ij, skst)
+      end do
 
-      DO K = SKST+1, SKEN-1
-      DO IJ = IJTSTR, IJTEND
-         ED(IJ, K) = &
-     &      + EBE(K) * S(IJ, K-1) &
-     &      + ( EAL(K) - EBE(K) - EGA(K) ) * S(IJ, K) &
-     &      + EGA(K) * S(IJ, K+1) &
-     &      + ( ( FLX(IJ, K) - FLX(IJ, K+1) ) / DLZ(K) ) &
-     &      - RST(IJ, K)
-      END DO
-      END DO
+      do k = skst+1, sken-1
+      do ij = ijtstr, ijtend
+         ed(ij, k) = &
+     &      + ebe(k) * s(ij, k-1) &
+     &      + ( eal(k) - ebe(k) - ega(k) ) * s(ij, k) &
+     &      + ega(k) * s(ij, k+1) &
+     &      + ( ( flx(ij, k) - flx(ij, k+1) ) / dlz(k) ) &
+     &      - rst(ij, k)
+      end do
+      end do
 
-      DO IJ = IJTSTR, IJTEND
-         ED(IJ, SKEN) = &
-     &      + EBE(SKEN) * S(IJ, SKEN-1) &
-     &      + ( EAL(SKEN) - EBE(SKEN) ) * S(IJ, SKEN) &
-     &      + ( ( FLX(IJ, SKEN) - FLX(IJ, SKEN+1) ) / DLZ(SKEN) ) &
-     &      - RST(IJ, SKEN)
-      END DO
+      do ij = ijtstr, ijtend
+         ed(ij, sken) = &
+     &      + ebe(sken) * s(ij, sken-1) &
+     &      + ( eal(sken) - ebe(sken) ) * s(ij, sken) &
+     &      + ( ( flx(ij, sken) - flx(ij, sken+1) ) / dlz(sken) ) &
+     &      - rst(ij, sken)
+      end do
 
-      call calc_tridiagonal_solid( EA, EB, EC, ED, EX )
+      call calc_tridiagonal_solid( ea, eb, ec, ed, ex )
 
-      END IF
+      end if
 
 !     -- Diffusion : Implicit
 
-      IF (SDII) THEN
+      if (sdii) then
 
-      DO K = SKST, SKEN
-         EAL(K) = ( ( 1.0D0 - PHI(K) ) / TS )
-         EBE(K) = ( ( ( 1.0D0 - PHII(K) )   * DBI(K) ) &
-     &            / ( DLZ(K) * DLZI(K)   ) )
-         EGA(K) = ( ( ( 1.0D0 - PHII(K+1) ) * DBI(K+1) ) &
-     &            / ( DLZ(K) * DLZI(K+1) ) )
-      END DO
+      do k = skst, sken
+         eal(k) = ( ( 1.0d0 - phi(k) ) / ts )
+         ebe(k) = ( ( ( 1.0d0 - phii(k) )   * dbi(k) ) &
+     &            / ( dlz(k) * dlzi(k)   ) )
+         ega(k) = ( ( ( 1.0d0 - phii(k+1) ) * dbi(k+1) ) &
+     &            / ( dlz(k) * dlzi(k+1) ) )
+      end do
 
-      DO K = SKST+1, SKEN-1
-         EA(K)     = - EBE(K)
-         EB(K)     = EAL(K) + EBE(K) + EGA(K)
-         EC(K)     = - EGA(K)
-      END DO
+      do k = skst+1, sken-1
+         ea(k)     = - ebe(k)
+         eb(k)     = eal(k) + ebe(k) + ega(k)
+         ec(k)     = - ega(k)
+      end do
 
-         EA(SKST)  = - EBE(SKST)
-         EB(SKST)  = EAL(SKST) + EGA(SKST)
-         EC(SKST)  = - EGA(SKST)
-         EA(SKEN)  = - EBE(SKEN)
-         EB(SKEN)  = EAL(SKEN) + EBE(SKEN)
-         EC(SKEN)  = - EGA(SKEN)
+         ea(skst)  = - ebe(skst)
+         eb(skst)  = eal(skst) + ega(skst)
+         ec(skst)  = - ega(skst)
+         ea(sken)  = - ebe(sken)
+         eb(sken)  = eal(sken) + ebe(sken)
+         ec(sken)  = - ega(sken)
 
-      DO K = SKST, SKEN
-      DO IJ = IJTSTR, IJTEND
-         ED(IJ, K) = &
-     &      + EAL(K) * S(IJ, K) &
-     &      + ( ( FLX(IJ, K) - FLX(IJ, K+1) ) / DLZ(K) ) &
-     &      - RST(IJ, K)
-      END DO
-      END DO
+      do k = skst, sken
+      do ij = ijtstr, ijtend
+         ed(ij, k) = &
+     &      + eal(k) * s(ij, k) &
+     &      + ( ( flx(ij, k) - flx(ij, k+1) ) / dlz(k) ) &
+     &      - rst(ij, k)
+      end do
+      end do
 
-      call calc_tridiagonal_solid( EA, EB, EC, ED, EX )
+      call calc_tridiagonal_solid( ea, eb, ec, ed, ex )
 
-      END IF
+      end if
 
 !     -- t = t + dt --
 
-      DO K = SKST, SKEN
-      DO IJ = IJTSTR, IJTEND
-         SN(IJ, K) = MAX( EX(IJ, K), 0.0D0 )
-         EX(IJ, K) = 0.0D0
-      END DO
-      END DO
+      do k = skst, sken
+      do ij = ijtstr, ijtend
+         sn(ij, k) = max( ex(ij, k), 0.0d0 )
+         ex(ij, k) = 0.0d0
+      end do
+      end do
 
-      DO IJ = IJTSTR, IJTEND
-         BFZ(IJ) = FLX(IJ, SKEN+1)
-      END DO
+      do ij = ijtstr, ijtend
+         bfz(ij) = flx(ij, sken+1)
+      end do
 
       end subroutine calc_step_solid
 
 ! =====================================================================
 
-      subroutine calc_step_solid_CLAY( &
-     &      FF, RST, W, PHI, PHII, DBI, S, RHOCLA, &
-     &      SN, BFZ )
+      subroutine calc_step_solid_clay( ff, rst, w, phi, phii, dbi, S, rhocla, & !! IN
+                                     & sn, bfz                                ) !! OUT
 
-      double precision, intent(in)  :: FF(NXY)
-      double precision, intent(in)  :: RST(NXY,SDZDIM)
-      double precision, intent(in)  :: W(NXY,SDZDIM+1)
-      double precision, intent(in)  :: PHI(SDZDIM)
-      double precision, intent(in)  :: PHII(SDZDIM+1)
-      double precision, intent(in)  :: DBI(SDZDIM+1)
-      double precision, intent(in)  :: S(NXY,SDZDIM)
-      double precision, intent(in)  :: RHOCLA
-      double precision, intent(out) :: SN(NXY,SDZDIM)
-      double precision, intent(out) :: BFZ(NXY)
+      double precision, intent(in)  :: ff(nxy)
+      double precision, intent(in)  :: rst(nxy,sdzdim)
+      double precision, intent(in)  :: w(nxy,sdzdim+1)
+      double precision, intent(in)  :: phi(sdzdim)
+      double precision, intent(in)  :: phii(sdzdim+1)
+      double precision, intent(in)  :: dbi(sdzdim+1)
+      double precision, intent(in)  :: s(nxy,sdzdim)
+      double precision, intent(in)  :: rhocla
+      double precision, intent(out) :: sn(nxy,sdzdim)
+      double precision, intent(out) :: bfz(nxy)
 
-      integer :: IJ, K
+      integer :: ij, k
 
-      DO IJ = IJTSTR, IJTEND
-         FLX(IJ, SKST) = FF(IJ)
-      END DO
+      do ij = ijtstr, ijtend
+         flx(ij, skst) = ff(ij)
+      end do
 
 !     -- Advection : Upwind --
 
-      IF (SADU) THEN
+      if (sadu) then
 
-      DO K = SKST+1, SKEN
-      DO IJ = IJTSTR, IJTEND
-         IF ( W(IJ, K) >= 0.0D0 ) THEN
-            SI(IJ, K) = S(IJ, K-1)
-         ELSE IF ( W(IJ, K) < 0.0D0 ) THEN
-            SI(IJ, K) = S(IJ, K)
-         END IF
-         FLX(IJ, K)   = ( 1.0D0 - PHII(K) ) * W(IJ, K) * SI(IJ, K)
-      END DO
-      END DO
+      do k = skst+1, sken
+      do ij = ijtstr, ijtend
+         if ( w(ij, k) >= 0.0d0 ) then
+            si(ij, k) = s(ij, k-1)
+         else if ( w(ij, k) < 0.0d0 ) then
+            si(ij, k) = s(ij, k)
+         end if
+         flx(ij, k)   = ( 1.0d0 - phii(k) ) * w(ij, k) * si(ij, k)
+      end do
+      end do
 
-      DO IJ = IJTSTR, IJTEND
-      IF ( W(IJ, SKEN+1) >= 0.0D0 ) THEN
-         SI(IJ, SKEN+1) = S(IJ, SKEN)
-      ELSE IF ( W(IJ, SKEN+1) < 0.0D0 ) THEN
-         SI(IJ, SKEN+1) = 1.0D+6 * RHOCLA
-      END IF
-         FLX(IJ, SKEN+1) = ( 1.0D0 - PHII(SKEN+1) ) &
-     &                   * W(IJ, SKEN+1) * SI(IJ, SKEN+1)
-      END DO
+      do ij = ijtstr, ijtend
+      if ( w(ij, sken+1) >= 0.0d0 ) then
+         si(ij, sken+1) = s(ij, sken)
+      else if ( w(ij, sken+1) < 0.0d0 ) then
+         si(ij, sken+1) = 1.0d+6 * rhocla
+      end if
+         flx(ij, sken+1) = ( 1.0d0 - phii(sken+1) ) &
+     &                   * w(ij, sken+1) * si(ij, sken+1)
+      end do
 
-      END IF
+      end if
 
 !     -- Advection : Quickest --
 
-      IF (SADQ) THEN
+      if (sadq) then
 
-      DO K = SKST+2, SKEN-1
-      DO IJ = IJTSTR, IJTEND
-         IF ( W(IJ, K) >= 0.0D0 ) THEN
-            C2(IJ, K) = ( 1.0D0 / ( DLZI(K-1) + DLZI(K) ) ) &
-     &         * ( ( ( S(IJ, K-2) - S(IJ, K-1) ) / DLZI(K-1) ) &
-     &           - ( ( S(IJ, K-1) - S(IJ, K)   ) / DLZI(K)   ) )
-         ELSE IF ( W(IJ, K) < 0.0D0 ) THEN
-            C2(IJ, K) = ( 1.0D0 / ( DLZI(K) + DLZI(K+1) ) ) &
-     &         * ( ( ( S(IJ, K-1) - S(IJ, K) ) / DLZI(K)   ) &
-     &           - ( ( S(IJ, K) - S(IJ, K+1) ) / DLZI(K+1) ) )
-         END IF
-            C1(IJ, K) = ( ( S(IJ, K) - S(IJ, K-1) ) / DLZI(K) ) &
-     &         + ( ( ( DLZ(K-1) - DLZ(K) ) / 2.0D0 ) * C2(IJ, K) )
-            C0(IJ, K) = ( ( DLZ(K) * S(IJ, K-1) + DLZ(K-1) * S(IJ, K) ) &
-     &                / ( 2.0D0 * DLZI(K) ) ) &
-     &         - ( ( ( DLZ(K-1) * DLZ(K) ) / 4.0D0 ) * C2(IJ, K) )
-      END DO
-      END DO
+      do k = skst+2, sken-1
+      do ij = ijtstr, ijtend
+         if ( w(ij, k) >= 0.0d0 ) then
+            c2(ij, k) = ( 1.0d0 / ( dlzi(k-1) + dlzi(k) ) ) &
+     &         * ( ( ( s(ij, k-2) - s(ij, k-1) ) / dlzi(k-1) ) &
+     &           - ( ( s(ij, k-1) - s(ij, k)   ) / dlzi(k)   ) )
+         else if ( w(ij, k) < 0.0d0 ) then
+            c2(ij, k) = ( 1.0d0 / ( dlzi(k) + dlzi(k+1) ) ) &
+     &         * ( ( ( s(ij, k-1) - s(ij, k) ) / dlzi(k)   ) &
+     &           - ( ( s(ij, k) - s(ij, k+1) ) / dlzi(k+1) ) )
+         end if
+            c1(ij, k) = ( ( s(ij, k) - s(ij, k-1) ) / dlzi(k) ) &
+     &         + ( ( ( dlz(k-1) - dlz(k) ) / 2.0d0 ) * c2(ij, k) )
+            c0(ij, k) = ( ( dlz(k) * s(ij, k-1) + dlz(k-1) * s(ij, k) ) &
+     &                / ( 2.0d0 * dlzi(k) ) ) &
+     &         - ( ( ( dlz(k-1) * dlz(k) ) / 4.0d0 ) * c2(ij, k) )
+      end do
+      end do
 
-      DO IJ = IJTSTR, IJTEND
-      IF ( W(IJ, SKST+1) >= 0.0D0 ) THEN
-         C2(IJ, SKST+1) = ( 1.0D0 / ( DLZI(SKST) + DLZI(SKST+1) ) ) &
-     &      * ( ( ( 0.0D0       - S(IJ, SKST)   ) / DLZI(SKST) ) &
-     &        - ( ( S(IJ, SKST) - S(IJ, SKST+1) ) / DLZI(SKST+1) ) )
-      ELSE IF ( W(IJ, SKST+1) < 0.0D0 ) THEN
-         C2(IJ, SKST+1) = ( 1.0D0 / ( DLZI(SKST+1) + DLZI(SKST+2) ) ) &
-     &      * ( ( ( S(IJ, SKST)   - S(IJ, SKST+1) ) / DLZI(SKST+1) ) &
-     &        - ( ( S(IJ, SKST+1) - S(IJ, SKST+2) ) / DLZI(SKST+2) ) )
-      END IF
-         C1(IJ, SKST+1) = ( ( S(IJ, SKST+1) - S(IJ, SKST) ) &
-     &                      / DLZI(SKST+1) ) &
-     &      + ( ( ( DLZ(SKST) - DLZ(SKST+1) ) / 2.0D0 ) &
-     &          * C2(IJ, SKST+1) )
-         C0(IJ, SKST+1) = ( ( DLZ(SKST+1) * S(IJ, SKST) &
-     &                      + DLZ(SKST)   * S(IJ, SKST+1) ) &
-     &                  / ( 2.0D0 * DLZI(SKST+1) ) ) &
-     &      - ( ( ( DLZ(SKST) * DLZ(SKST+1) ) / 4.0D0 ) &
-     &          * C2(IJ, SKST+1) )
-      END DO
+      do ij = ijtstr, ijtend
+      if ( w(ij, skst+1) >= 0.0d0 ) then
+         c2(ij, skst+1) = ( 1.0d0 / ( dlzi(skst) + dlzi(skst+1) ) ) &
+     &      * ( ( ( 0.0d0       - s(ij, skst)   ) / dlzi(skst) ) &
+     &        - ( ( s(ij, skst) - s(ij, skst+1) ) / dlzi(skst+1) ) )
+      else if ( w(ij, skst+1) < 0.0d0 ) then
+         c2(ij, skst+1) = ( 1.0d0 / ( dlzi(skst+1) + dlzi(skst+2) ) ) &
+     &      * ( ( ( s(ij, skst)   - s(ij, skst+1) ) / dlzi(skst+1) ) &
+     &        - ( ( s(ij, skst+1) - s(ij, skst+2) ) / dlzi(skst+2) ) )
+      end if
+         c1(ij, skst+1) = ( ( s(ij, skst+1) - s(ij, skst) ) &
+     &                      / dlzi(skst+1) ) &
+     &      + ( ( ( dlz(skst) - dlz(skst+1) ) / 2.0d0 ) &
+     &          * c2(ij, skst+1) )
+         c0(ij, skst+1) = ( ( dlz(skst+1) * s(ij, skst) &
+     &                      + dlz(skst)   * s(ij, skst+1) ) &
+     &                  / ( 2.0d0 * dlzi(skst+1) ) ) &
+     &      - ( ( ( dlz(skst) * dlz(skst+1) ) / 4.0d0 ) &
+     &          * c2(ij, skst+1) )
+      end do
 
-      DO IJ = IJTSTR, IJTEND
-      IF ( W(IJ, SKEN) >= 0.0D0 ) THEN
-         C2(IJ, SKEN) = ( 1.0D0 / ( DLZI(SKEN-1) + DLZI(SKEN) ) ) &
-     &      * ( ( ( S(IJ, SKEN-2) - S(IJ, SKEN-1) ) / DLZI(SKEN-1) ) &
-     &        - ( ( S(IJ, SKEN-1) - S(IJ, SKEN)   ) / DLZI(SKEN)   ) )
-      ELSE IF ( W(IJ, SKEN) < 0.0D0 ) THEN
-         C2(IJ, SKEN) = ( 1.0D0 / ( DLZI(SKEN) + DLZI(SKEN+1) ) ) &
-     &      * ( ( ( S(IJ, SKEN-1) - S(IJ, SKEN) ) / DLZI(SKEN)   ) &
-     &        - ( ( S(IJ, SKEN)   - 1.0D+6 * RHOCLA ) / DLZI(SKEN+1) ) )
-      END IF
-         C1(IJ, SKEN) = ( ( S(IJ, SKEN) - S(IJ, SKEN-1) ) / DLZI(SKEN) ) &
-     &      + ( ( ( DLZ(SKEN-1) - DLZ(SKEN) ) / 2.0D0 ) &
-     &          * C2(IJ, SKEN) )
-         C0(IJ, SKEN) = ( ( DLZ(SKEN)   * S(IJ, SKEN-1) &
-     &                    + DLZ(SKEN-1) * S(IJ, SKEN)   ) &
-     &                / ( 2.0D0 * DLZI(SKEN) ) ) &
-     &      - ( ( ( DLZ(SKEN-1) * DLZ(SKEN) ) / 4.0D0 ) &
-     &          * C2(IJ, SKEN) )
-      END DO
+      do ij = ijtstr, ijtend
+      if ( w(ij, sken) >= 0.0d0 ) then
+         c2(ij, sken) = ( 1.0d0 / ( dlzi(sken-1) + dlzi(sken) ) ) &
+     &      * ( ( ( s(ij, sken-2) - s(ij, sken-1) ) / dlzi(sken-1) ) &
+     &        - ( ( s(ij, sken-1) - s(ij, sken)   ) / dlzi(sken)   ) )
+      else if ( w(ij, sken) < 0.0d0 ) then
+         c2(ij, sken) = ( 1.0d0 / ( dlzi(sken) + dlzi(sken+1) ) ) &
+     &      * ( ( ( s(ij, sken-1) - s(ij, sken) ) / dlzi(sken)   ) &
+     &        - ( ( s(ij, sken)   - 1.0d+6 * rhocla ) / dlzi(sken+1) ) )
+      end if
+         c1(ij, sken) = ( ( s(ij, sken) - s(ij, sken-1) ) / dlzi(sken) ) &
+     &      + ( ( ( dlz(sken-1) - dlz(sken) ) / 2.0d0 ) &
+     &          * c2(ij, sken) )
+         c0(ij, sken) = ( ( dlz(sken)   * s(ij, sken-1) &
+     &                    + dlz(sken-1) * s(ij, sken)   ) &
+     &                / ( 2.0d0 * dlzi(sken) ) ) &
+     &      - ( ( ( dlz(sken-1) * dlz(sken) ) / 4.0d0 ) &
+     &          * c2(ij, sken) )
+      end do
 
-      DO IJ = IJTSTR, IJTEND
-      IF ( W(IJ, SKEN+1) >= 0.0D0 ) THEN
-         C2(IJ, SKEN+1) = ( 1.0D0 / ( DLZI(SKEN) + DLZI(SKEN+1) ) ) &
-     &      * ( ( ( S(IJ, SKEN-1) - S(IJ, SKEN) ) / DLZI(SKEN)   ) &
-     &        - ( ( S(IJ, SKEN)   - S(IJ, SKEN) ) / DLZI(SKEN+1) ) )
-      ELSE IF ( W(IJ, SKEN+1) < 0.0D0 ) THEN
-         C2(IJ, SKEN) = ( 1.0D0 / ( DLZI(SKEN+1) + DLZI(SKEN+1) ) ) &
-     &      * ( ( ( S(IJ, SKEN) - 1.0D+6 * RHOCLA ) / DLZI(SKEN+1) ) &
-     &    - ( ( 1.0D+6 * RHOCLA - 1.0D+6 * RHOCLA ) / DLZI(SKEN+1) ) )
-      END IF
-      IF ( W(IJ, SKEN+1) >= 0.0D0 ) THEN
-         C1(IJ, SKEN+1) = ( ( S(IJ, SKEN) - S(IJ, SKEN) ) &
-     &                    / DLZI(SKEN+1) )
-         C0(IJ, SKEN+1) = ( ( DLZ(SKEN) * S(IJ, SKEN) &
-     &                      + DLZ(SKEN) * S(IJ, SKEN) ) &
-     &                  / ( 2.0D0 * DLZI(SKEN+1) ) ) &
-     &      - ( ( ( DLZ(SKEN) * DLZ(SKEN) ) / 4.0D0 ) &
-     &          * C2(IJ, SKEN+1) )
-      ELSE IF ( W(IJ, SKEN+1) < 0.0D0 ) THEN
-         C1(IJ, SKEN+1) = ( ( 1.0D+6 * RHOCLA - S(IJ, SKEN) ) &
-     &                    / DLZI(SKEN+1) )
-         C0(IJ, SKEN+1) = ( ( DLZ(SKEN) * S(IJ, SKEN) &
-     &                      + DLZ(SKEN) * 1.0D+6 * RHOCLA ) &
-     &                  / ( 2.0D0 * DLZI(SKEN+1) ) ) &
-     &      - ( ( ( DLZ(SKEN) * DLZ(SKEN) ) / 4.0D0 ) &
-     &          * C2(IJ, SKEN+1) )
-      END IF
-      END DO
+      do ij = ijtstr, ijtend
+      if ( w(ij, sken+1) >= 0.0d0 ) then
+         c2(ij, sken+1) = ( 1.0d0 / ( dlzi(sken) + dlzi(sken+1) ) ) &
+     &      * ( ( ( s(ij, sken-1) - s(ij, sken) ) / dlzi(sken)   ) &
+     &        - ( ( s(ij, sken)   - s(ij, sken) ) / dlzi(sken+1) ) )
+      else if ( w(ij, sken+1) < 0.0d0 ) then
+         c2(ij, sken) = ( 1.0d0 / ( dlzi(sken+1) + dlzi(sken+1) ) ) &
+     &      * ( ( ( s(ij, sken) - 1.0d+6 * rhocla ) / dlzi(sken+1) ) &
+     &    - ( ( 1.0d+6 * rhocla - 1.0d+6 * rhocla ) / dlzi(sken+1) ) )
+      end if
+      if ( w(ij, sken+1) >= 0.0d0 ) then
+         c1(ij, sken+1) = ( ( s(ij, sken) - s(ij, sken) ) &
+     &                    / dlzi(sken+1) )
+         c0(ij, sken+1) = ( ( dlz(sken) * s(ij, sken) &
+     &                      + dlz(sken) * s(ij, sken) ) &
+     &                  / ( 2.0d0 * dlzi(sken+1) ) ) &
+     &      - ( ( ( dlz(sken) * dlz(sken) ) / 4.0d0 ) &
+     &          * c2(ij, sken+1) )
+      else if ( w(ij, sken+1) < 0.0d0 ) then
+         c1(ij, sken+1) = ( ( 1.0d+6 * rhocla - s(ij, sken) ) &
+     &                    / dlzi(sken+1) )
+         c0(ij, sken+1) = ( ( dlz(sken) * s(ij, sken) &
+     &                      + dlz(sken) * 1.0d+6 * rhocla ) &
+     &                  / ( 2.0d0 * dlzi(sken+1) ) ) &
+     &      - ( ( ( dlz(sken) * dlz(sken) ) / 4.0d0 ) &
+     &          * c2(ij, sken+1) )
+      end if
+      end do
 
-      DO K = SKST+1, SKEN+1
-      DO IJ = IJTSTR, IJTEND
-         SI(IJ, K) = C0(IJ, K) &
-     &   - ( C1(IJ, K) * ( ( W(IJ, K) * TS ) / 2.0D0 ) ) &
-     &   + ( C2(IJ, K) * ( ( ( ( W(IJ, K) * TS ) ** 2.0D0 ) / 3.0D0 ) &
-     &             - ( ( ( DLZI(K) ** 2.0D0 ) / 12.0D0 ) ) ) )
-      END DO
-      END DO
+      do k = skst+1, sken+1
+      do ij = ijtstr, ijtend
+         si(ij, k) = c0(ij, k) &
+     &   - ( c1(ij, k) * ( ( w(ij, k) * ts ) / 2.0d0 ) ) &
+     &   + ( c2(ij, k) * ( ( ( ( w(ij, k) * ts ) ** 2.0d0 ) / 3.0d0 ) &
+     &             - ( ( ( dlzi(k) ** 2.0d0 ) / 12.0d0 ) ) ) )
+      end do
+      end do
 
 !     -- Advection : Quickest Flux limiter --
 
-      IF (SADQF) THEN
+      if (sadqf) then
 
-      DO IJ = IJTSTR, IJTEND
-      IF ( W(IJ, SKST+1) >= 0.0D0 ) THEN
-      FLDEL(SKST+1) = S(IJ, SKST+1) - 0.0D0
-      FLGAM(SKST+1) = ( ( S(IJ, SKST+1) - S(IJ, SKST) ) &
-     &                  / DLZI(SKST+1) ) &
-     &              - ( ( S(IJ, SKST)   - 0.0D0       ) &
-     &                  / DLZI(SKST)   )
-      IF ( ABS( FLGAM(SKST+1)*DLZ(SKST) ) >= ABS( FLDEL(SKST+1) ) ) THEN
-         SI(IJ, SKST+1) = S(IJ, SKST)
-      ELSE IF ( FLDEL(SKST+1) >= 0 ) THEN
-         FLTMP = 0.0D0 &
-     &         + ( S(IJ, SKST) - 0.0D0 ) / W(IJ, SKST+1) * DLZI(SKST+1)
-         SI(IJ, SKST+1) = &
-     &      MIN( SI(IJ, SKST+1), MIN( FLTMP, S(IJ, SKST+1) ) )
-         SI(IJ, SKST+1) = MAX( SI(IJ, SKST+1), S(IJ, SKST) )
-      ELSE IF ( FLDEL(SKST+1) <  0 ) THEN
-         FLTMP = 0.0D0 &
-     &         + ( S(IJ, SKST) - 0.0D0 ) / W(IJ, SKST+1) * DLZI(SKST+1)
-         SI(IJ, SKST+1) = &
-     &      MAX( SI(IJ, SKST+1), MAX( FLTMP, S(IJ, SKST+1) ) )
-         SI(IJ, SKST+1) = MIN( SI(IJ, SKST+1), S(IJ, SKST) )
-      END IF
-      ELSE IF ( W(IJ, SKST+1) < 0.0D0 ) THEN
-      FLDEL(SKST+1) = S(IJ, SKST) - S(IJ, SKST+2)
-      FLGAM(SKST+1) = ( ( S(IJ, SKST)   - S(IJ, SKST+1) ) &
-     &                  / DLZI(SKST+1) ) &
-     &              - ( ( S(IJ, SKST+1) - S(IJ, SKST+2) ) &
-     &                  / DLZI(SKST+2) )
-      IF ( ABS( FLGAM(SKST+1)*DLZ(SKST+1) ) &
-     &  >= ABS( FLDEL(SKST+1) ) ) THEN
-         SI(IJ, SKST+1) = S(IJ, SKST+1)
-      ELSE IF ( FLDEL(SKST+1) >= 0 ) THEN
-         FLTMP = S(IJ, SKST+2) &
-     &- ( S(IJ, SKST+1) - S(IJ, SKST+2) ) / W(IJ, SKST+1) * DLZI(SKST+1)
-         SI(IJ, SKST+1) = &
-     &      MIN( SI(IJ, SKST+1), MIN( FLTMP, S(IJ, SKST) ) )
-         SI(IJ, SKST+1) = MAX( SI(IJ, SKST+1), S(IJ, SKST+1) )
-      ELSE IF ( FLDEL(SKST+1) <  0 ) THEN
-         FLTMP = S(IJ, SKST+2) &
-     &- ( S(IJ, SKST+1) - S(IJ, SKST+2) ) / W(IJ, SKST+1) * DLZI(SKST+1)
-         SI(IJ, SKST+1) = &
-     &      MAX( SI(IJ, SKST+1), MAX( FLTMP, S(IJ, SKST) ) )
-         SI(IJ, SKST+1) = MIN( SI(IJ, SKST+1), S(IJ, SKST+1) )
-      END IF
-      END IF
-      END DO
+      do ij = ijtstr, ijtend
+      if ( w(ij, skst+1) >= 0.0d0 ) then
+      fldel(skst+1) = s(ij, skst+1) - 0.0d0
+      flgam(skst+1) = ( ( s(ij, skst+1) - s(ij, skst) ) &
+     &                  / dlzi(skst+1) ) &
+     &              - ( ( s(ij, skst)   - 0.0d0       ) &
+     &                  / dlzi(skst)   )
+      if ( abs( flgam(skst+1)*dlz(skst) ) >= abs( fldel(skst+1) ) ) then
+         si(ij, skst+1) = s(ij, skst)
+      else if ( fldel(skst+1) >= 0 ) then
+         fltmp = 0.0d0 &
+     &         + ( s(ij, skst) - 0.0d0 ) / w(ij, skst+1) * dlzi(skst+1)
+         si(ij, skst+1) = &
+     &      min( si(ij, skst+1), min( fltmp, s(ij, skst+1) ) )
+         si(ij, skst+1) = max( si(ij, skst+1), s(ij, skst) )
+      else if ( fldel(skst+1) <  0 ) then
+         fltmp = 0.0d0 &
+     &         + ( s(ij, skst) - 0.0d0 ) / w(ij, skst+1) * dlzi(skst+1)
+         si(ij, skst+1) = &
+     &      max( si(ij, skst+1), max( fltmp, s(ij, skst+1) ) )
+         si(ij, skst+1) = min( si(ij, skst+1), s(ij, skst) )
+      end if
+      else if ( w(ij, skst+1) < 0.0d0 ) then
+      fldel(skst+1) = s(ij, skst) - s(ij, skst+2)
+      flgam(skst+1) = ( ( s(ij, skst)   - s(ij, skst+1) ) &
+     &                  / dlzi(skst+1) ) &
+     &              - ( ( s(ij, skst+1) - s(ij, skst+2) ) &
+     &                  / dlzi(skst+2) )
+      if ( abs( flgam(skst+1)*dlz(skst+1) ) &
+     &  >= abs( fldel(skst+1) ) ) then
+         si(ij, skst+1) = s(ij, skst+1)
+      else if ( fldel(skst+1) >= 0 ) then
+         fltmp = s(ij, skst+2) &
+     &- ( s(ij, skst+1) - s(ij, skst+2) ) / w(ij, skst+1) * dlzi(skst+1)
+         si(ij, skst+1) = &
+     &      min( si(ij, skst+1), min( fltmp, s(ij, skst) ) )
+         si(ij, skst+1) = max( si(ij, skst+1), s(ij, skst+1) )
+      else if ( fldel(skst+1) <  0 ) then
+         fltmp = s(ij, skst+2) &
+     &- ( s(ij, skst+1) - s(ij, skst+2) ) / w(ij, skst+1) * dlzi(skst+1)
+         si(ij, skst+1) = &
+     &      max( si(ij, skst+1), max( fltmp, s(ij, skst) ) )
+         si(ij, skst+1) = min( si(ij, skst+1), s(ij, skst+1) )
+      end if
+      end if
+      end do
 
-      DO K = SKST+2, SKEN-1
-      DO IJ = IJTSTR, IJTEND
-      IF ( W(IJ, K) >= 0.0D0 ) THEN
-         FLDEL(K) = S(IJ, K) - S(IJ, K-2)
-         FLGAM(K) = ( ( S(IJ, K)   - S(IJ, K-1) ) / DLZI(K)   ) &
-     &            - ( ( S(IJ, K-1) - S(IJ, K-2) ) / DLZI(K-1) )
-         IF ( ABS( FLGAM(K)*DLZ(K-1) ) >= ABS( FLDEL(K) ) ) THEN
-            SI(IJ, K) = S(IJ, K-1)
-         ELSE IF ( FLDEL(K) >= 0 ) THEN
-            FLTMP = S(IJ, K-2) &
-     &            + ( S(IJ, K-1) - S(IJ, K-2) ) / W(IJ, K) * DLZI(K)
-            SI(IJ, K) = &
-     &         MIN( SI(IJ, K), MIN( FLTMP, S(IJ, K) ) )
-            SI(IJ, K) = MAX( SI(IJ, K), S(IJ, K-1) )
-         ELSE IF ( FLDEL(K) <  0 ) THEN
-            FLTMP = S(IJ, K-2) &
-     &            + ( S(IJ, K-1) - S(IJ, K-2) ) / W(IJ, K) * DLZI(K)
-            SI(IJ, K) = &
-     &         MAX( SI(IJ, K), MAX( FLTMP, S(IJ, K) ) )
-            SI(IJ, K) = MIN( SI(IJ, K), S(IJ, K-1) )
-         END IF
-      ELSE IF ( W(IJ, K) < 0.0D0 ) THEN
-         FLDEL(K) = S(IJ, K-1) - S(IJ, K+1)
-         FLGAM(K) = ( ( S(IJ, K-1) - S(IJ, K)   ) / DLZI(K)   ) &
-     &            - ( ( S(IJ, K)   - S(IJ, K+1) ) / DLZI(K+1) )
-         IF ( ABS( FLGAM(K)*DLZ(K) ) >= ABS( FLDEL(K) ) ) THEN
-            SI(IJ, K) = S(IJ, K)
-         ELSE IF ( FLDEL(K) >= 0 ) THEN
-            FLTMP = S(IJ, K+1) &
-     &            - ( S(IJ, K) - S(IJ, K+1) ) / W(IJ, K) * DLZI(K)
-            SI(IJ, K) = &
-     &         MIN( SI(IJ, K), MIN( FLTMP, S(IJ, K-1) ) )
-            SI(IJ, K) = MAX( SI(IJ, K), S(IJ, K) )
-         ELSE IF ( FLDEL(K) <  0 ) THEN
-            FLTMP = S(IJ, K+1) &
-     &            - ( S(IJ, K) - S(IJ, K+1) ) / W(IJ, K) * DLZI(K)
-            SI(IJ, K) = &
-     &         MAX( SI(IJ, K), MAX( FLTMP, S(IJ, K-1) ) )
-            SI(IJ, K) = MIN( SI(IJ, K), S(IJ, K) )
-         END IF
-      END IF
-      END DO
-      END DO
+      do k = skst+2, sken-1
+      do ij = ijtstr, ijtend
+      if ( w(ij, k) >= 0.0d0 ) then
+         fldel(k) = s(ij, k) - s(ij, k-2)
+         flgam(k) = ( ( s(ij, k)   - s(ij, k-1) ) / dlzi(k)   ) &
+     &            - ( ( s(ij, k-1) - s(ij, k-2) ) / dlzi(k-1) )
+         if ( abs( flgam(k)*dlz(k-1) ) >= abs( fldel(k) ) ) then
+            si(ij, k) = s(ij, k-1)
+         else if ( fldel(k) >= 0 ) then
+            fltmp = s(ij, k-2) &
+     &            + ( s(ij, k-1) - s(ij, k-2) ) / w(ij, k) * dlzi(k)
+            si(ij, k) = &
+     &         min( si(ij, k), min( fltmp, s(ij, k) ) )
+            si(ij, k) = max( si(ij, k), s(ij, k-1) )
+         else if ( fldel(k) <  0 ) then
+            fltmp = s(ij, k-2) &
+     &            + ( s(ij, k-1) - s(ij, k-2) ) / w(ij, k) * dlzi(k)
+            si(ij, k) = &
+     &         max( si(ij, k), max( fltmp, s(ij, k) ) )
+            si(ij, k) = min( si(ij, k), s(ij, k-1) )
+         end if
+      else if ( w(ij, k) < 0.0d0 ) then
+         fldel(k) = s(ij, k-1) - s(ij, k+1)
+         flgam(k) = ( ( s(ij, k-1) - s(ij, k)   ) / dlzi(k)   ) &
+     &            - ( ( s(ij, k)   - s(ij, k+1) ) / dlzi(k+1) )
+         if ( abs( flgam(k)*dlz(k) ) >= abs( fldel(k) ) ) then
+            si(ij, k) = s(ij, k)
+         else if ( fldel(k) >= 0 ) then
+            fltmp = s(ij, k+1) &
+     &            - ( s(ij, k) - s(ij, k+1) ) / w(ij, k) * dlzi(k)
+            si(ij, k) = &
+     &         min( si(ij, k), min( fltmp, s(ij, k-1) ) )
+            si(ij, k) = max( si(ij, k), s(ij, k) )
+         else if ( fldel(k) <  0 ) then
+            fltmp = s(ij, k+1) &
+     &            - ( s(ij, k) - s(ij, k+1) ) / w(ij, k) * dlzi(k)
+            si(ij, k) = &
+     &         max( si(ij, k), max( fltmp, s(ij, k-1) ) )
+            si(ij, k) = min( si(ij, k), s(ij, k) )
+         end if
+      end if
+      end do
+      end do
 
-      DO IJ = IJTSTR, IJTEND
-      IF ( W(IJ, SKEN) >= 0.0D0 ) THEN
-      FLDEL(SKEN) = S(IJ, SKEN) - S(IJ, SKEN-2)
-      FLGAM(SKEN) = ( ( S(IJ, SKEN)   - S(IJ, SKEN-1) ) / DLZI(SKEN)   ) &
-     &            - ( ( S(IJ, SKEN-1) - S(IJ, SKEN-2) ) / DLZI(SKEN-1) )
-      IF ( ABS( FLGAM(SKEN)*DLZ(SKEN-1) ) >= ABS( FLDEL(SKEN) ) ) THEN
-         SI(IJ, SKEN) = S(IJ, SKEN-1)
-      ELSE IF ( FLDEL(SKEN) >= 0 ) THEN
-         FLTMP = S(IJ, SKEN-2) &
-     &+ ( S(IJ, SKEN-1) - S(IJ, SKEN-2) ) / W(IJ, SKEN) * DLZI(SKEN)
-         SI(IJ, SKEN) = &
-     &      MIN( SI(IJ, SKEN), MIN( FLTMP, S(IJ, SKEN) ) )
-         SI(IJ, SKEN) = MAX( SI(IJ, SKEN), S(IJ, SKEN-1) )
-      ELSE IF ( FLDEL(SKEN) <  0 ) THEN
-         FLTMP = S(IJ, SKEN-2) &
-     &+ ( S(IJ, SKEN-1) - S(IJ, SKEN-2) ) / W(IJ, SKEN) * DLZI(SKEN)
-         SI(IJ, SKEN) = &
-     &      MAX( SI(IJ, SKEN), MAX( FLTMP, S(IJ, SKEN) ) )
-         SI(IJ, SKEN) = MIN( SI(IJ, SKEN), S(IJ, SKEN-1) )
-      END IF
-      ELSE IF ( W(IJ, SKEN) < 0.0D0 ) THEN
-      FLDEL(SKEN) = S(IJ, SKEN-1) - 1.0D+6 * RHOCLA
-      FLGAM(SKEN) = ( ( S(IJ, SKEN-1) - S(IJ, SKEN) ) / DLZI(SKEN)   ) &
-     &            - ( ( S(IJ, SKEN) - 1.0D+6 * RHOCLA ) / DLZI(SKEN+1) )
-      IF ( ABS( FLGAM(SKEN)*DLZ(SKEN) ) >= ABS( FLDEL(SKEN) ) ) THEN
-         SI(IJ, SKEN) = S(IJ, SKEN)
-      ELSE IF ( FLDEL(SKEN) >= 0 ) THEN
-         FLTMP = 1.0D+6 * RHOCLA &
-     &- ( S(IJ, SKEN) - 1.0D+6 * RHOCLA ) / W(IJ, SKEN) * DLZI(SKEN)
-         SI(IJ, SKEN) = &
-     &      MIN( SI(IJ, SKEN), MIN( FLTMP, S(IJ, SKEN-1) ) )
-         SI(IJ, SKEN) = MAX( SI(IJ, SKEN), S(IJ, SKEN) )
-      ELSE IF ( FLDEL(SKEN) <  0 ) THEN
-         FLTMP = 1.0D+6 * RHOCLA &
-     &- ( S(IJ, SKEN) - 1.0D+6 * RHOCLA ) / W(IJ, SKEN) * DLZI(SKEN)
-         SI(IJ, SKEN) = &
-     &      MAX( SI(IJ, SKEN), MAX( FLTMP, S(IJ, SKEN-1) ) )
-         SI(IJ, SKEN) = MIN( SI(IJ, SKEN), S(IJ, SKEN) )
-      END IF
-      END IF
-      END DO
+      do ij = ijtstr, ijtend
+      if ( w(ij, sken) >= 0.0d0 ) then
+      fldel(sken) = s(ij, sken) - s(ij, sken-2)
+      flgam(sken) = ( ( s(ij, sken)   - s(ij, sken-1) ) / dlzi(sken)   ) &
+     &            - ( ( s(ij, sken-1) - s(ij, sken-2) ) / dlzi(sken-1) )
+      if ( abs( flgam(sken)*dlz(sken-1) ) >= abs( fldel(sken) ) ) then
+         si(ij, sken) = s(ij, sken-1)
+      else if ( fldel(sken) >= 0 ) then
+         fltmp = s(ij, sken-2) &
+     &+ ( s(ij, sken-1) - s(ij, sken-2) ) / w(ij, sken) * dlzi(sken)
+         si(ij, sken) = &
+     &      min( si(ij, sken), min( fltmp, s(ij, sken) ) )
+         si(ij, sken) = max( si(ij, sken), s(ij, sken-1) )
+      else if ( fldel(sken) <  0 ) then
+         fltmp = s(ij, sken-2) &
+     &+ ( s(ij, sken-1) - s(ij, sken-2) ) / w(ij, sken) * dlzi(sken)
+         si(ij, sken) = &
+     &      max( si(ij, sken), max( fltmp, s(ij, sken) ) )
+         si(ij, sken) = min( si(ij, sken), s(ij, sken-1) )
+      end if
+      else if ( w(ij, sken) < 0.0d0 ) then
+      fldel(sken) = s(ij, sken-1) - 1.0d+6 * rhocla
+      flgam(sken) = ( ( s(ij, sken-1) - s(ij, sken) ) / dlzi(sken)   ) &
+     &            - ( ( s(ij, sken) - 1.0d+6 * rhocla ) / dlzi(sken+1) )
+      if ( abs( flgam(sken)*dlz(sken) ) >= abs( fldel(sken) ) ) then
+         si(ij, sken) = s(ij, sken)
+      else if ( fldel(sken) >= 0 ) then
+         fltmp = 1.0d+6 * rhocla &
+     &- ( s(ij, sken) - 1.0d+6 * rhocla ) / w(ij, sken) * dlzi(sken)
+         si(ij, sken) = &
+     &      min( si(ij, sken), min( fltmp, s(ij, sken-1) ) )
+         si(ij, sken) = max( si(ij, sken), s(ij, sken) )
+      else if ( fldel(sken) <  0 ) then
+         fltmp = 1.0d+6 * rhocla &
+     &- ( s(ij, sken) - 1.0d+6 * rhocla ) / w(ij, sken) * dlzi(sken)
+         si(ij, sken) = &
+     &      max( si(ij, sken), max( fltmp, s(ij, sken-1) ) )
+         si(ij, sken) = min( si(ij, sken), s(ij, sken) )
+      end if
+      end if
+      end do
 
-      DO IJ = IJTSTR, IJTEND
-      IF ( W(IJ, SKEN+1) >= 0.0D0 ) THEN
-      FLDEL(SKEN+1) = S(IJ, SKEN) - S(IJ, SKEN-1)
-      FLGAM(SKEN+1) = ( ( S(IJ, SKEN) - S(IJ, SKEN)   ) / DLZI(SKEN+1) ) &
-     &              - ( ( S(IJ, SKEN) - S(IJ, SKEN-1) ) / DLZI(SKEN)   )
-      IF ( ABS( FLGAM(SKEN+1)*DLZ(SKEN) ) >= ABS( FLDEL(SKEN+1) ) ) THEN
-         SI(IJ, SKEN+1) = S(IJ, SKEN)
-      ELSE IF ( FLDEL(SKEN+1) >= 0 ) THEN
-         FLTMP = S(IJ, SKEN-1) &
-     &+ ( S(IJ, SKEN) - S(IJ, SKEN-1) ) / W(IJ, SKEN+1) * DLZI(SKEN+1)
-         SI(IJ, SKEN+1) = &
-     &      MIN( SI(IJ, SKEN+1), MIN( FLTMP, S(IJ, SKEN) ) )
-         SI(IJ, SKEN+1) = MAX( SI(IJ, SKEN+1), S(IJ, SKEN) )
-      ELSE IF ( FLDEL(SKEN+1) <  0 ) THEN
-         FLTMP = S(IJ, SKEN-1) &
-     &+ ( S(IJ, SKEN) - S(IJ, SKEN-1) ) / W(IJ, SKEN+1) * DLZI(SKEN+1)
-         SI(IJ, SKEN+1) = &
-     &      MAX( SI(IJ, SKEN+1), MAX( FLTMP, S(IJ, SKEN) ) )
-         SI(IJ, SKEN+1) = MIN( SI(IJ, SKEN+1), S(IJ, SKEN) )
-      END IF
-      ELSE IF ( W(IJ, SKEN+1) < 0.0D0 ) THEN
-      FLDEL(SKEN+1) = S(IJ, SKEN) - 1.0D+6 * RHOCLA
-      FLGAM(SKEN+1) &
-     &= ( ( S(IJ, SKEN)     - 1.0D+6 * RHOCLA ) / DLZI(SKEN+1) ) &
-     &- ( ( 1.0D+6 * RHOCLA - 1.0D+6 * RHOCLA ) / DLZI(SKEN+1) )
-      IF ( ABS( FLGAM(SKEN+1)*DLZ(SKEN) ) >= ABS( FLDEL(SKEN+1) ) ) THEN
-         SI(IJ, SKEN+1) = 1.0D+6 * RHOCLA
-      ELSE IF ( FLDEL(SKEN+1) >= 0 ) THEN
-         FLTMP = 1.0D+6 * RHOCLA &
-     &         - ( 1.0D+6 * RHOCLA - 1.0D+6 * RHOCLA ) &
-     &         / W(IJ, SKEN+1) * DLZI(SKEN+1)
-         SI(IJ, SKEN+1) = &
-     &      MIN( SI(IJ, SKEN+1), MIN( FLTMP, S(IJ, SKEN) ) )
-         SI(IJ, SKEN+1) = MAX( SI(IJ, SKEN+1), 1.0D+6 * RHOCLA )
-      ELSE IF ( FLDEL(SKEN+1) <  0 ) THEN
-         FLTMP = 1.0D+6 * RHOCLA &
-     &         - ( 1.0D+6 * RHOCLA - 1.0D+6 * RHOCLA ) &
-     &         / W(IJ, SKEN+1) * DLZI(SKEN+1)
-         SI(IJ, SKEN+1) = &
-     &      MAX( SI(IJ, SKEN+1), MAX( FLTMP, S(IJ, SKEN) ) )
-         SI(IJ, SKEN+1) = MIN( SI(IJ, SKEN+1), 1.0D+6 * RHOCLA )
-      END IF
-      END IF
-      END DO
+      do ij = ijtstr, ijtend
+      if ( w(ij, sken+1) >= 0.0d0 ) then
+      fldel(sken+1) = s(ij, sken) - s(ij, sken-1)
+      flgam(sken+1) = ( ( s(ij, sken) - s(ij, sken)   ) / dlzi(sken+1) ) &
+     &              - ( ( s(ij, sken) - s(ij, sken-1) ) / dlzi(sken)   )
+      if ( abs( flgam(sken+1)*dlz(sken) ) >= abs( fldel(sken+1) ) ) then
+         si(ij, sken+1) = s(ij, sken)
+      else if ( fldel(sken+1) >= 0 ) then
+         fltmp = s(ij, sken-1) &
+     &+ ( s(ij, sken) - s(ij, sken-1) ) / w(ij, sken+1) * dlzi(sken+1)
+         si(ij, sken+1) = &
+     &      min( si(ij, sken+1), min( fltmp, s(ij, sken) ) )
+         si(ij, sken+1) = max( si(ij, sken+1), s(ij, sken) )
+      else if ( fldel(sken+1) <  0 ) then
+         fltmp = s(ij, sken-1) &
+     &+ ( s(ij, sken) - s(ij, sken-1) ) / w(ij, sken+1) * dlzi(sken+1)
+         si(ij, sken+1) = &
+     &      max( si(ij, sken+1), max( fltmp, s(ij, sken) ) )
+         si(ij, sken+1) = min( si(ij, sken+1), s(ij, sken) )
+      end if
+      else if ( w(ij, sken+1) < 0.0d0 ) then
+      fldel(sken+1) = s(ij, sken) - 1.0d+6 * rhocla
+      flgam(sken+1) &
+     &= ( ( s(ij, sken)     - 1.0d+6 * rhocla ) / dlzi(sken+1) ) &
+     &- ( ( 1.0d+6 * rhocla - 1.0d+6 * rhocla ) / dlzi(sken+1) )
+      if ( abs( flgam(sken+1)*dlz(sken) ) >= abs( fldel(sken+1) ) ) then
+         si(ij, sken+1) = 1.0d+6 * rhocla
+      else if ( fldel(sken+1) >= 0 ) then
+         fltmp = 1.0d+6 * rhocla &
+     &         - ( 1.0d+6 * rhocla - 1.0d+6 * rhocla ) &
+     &         / w(ij, sken+1) * dlzi(sken+1)
+         si(ij, sken+1) = &
+     &      min( si(ij, sken+1), min( fltmp, s(ij, sken) ) )
+         si(ij, sken+1) = max( si(ij, sken+1), 1.0d+6 * rhocla )
+      else if ( fldel(sken+1) <  0 ) then
+         fltmp = 1.0d+6 * rhocla &
+     &         - ( 1.0d+6 * rhocla - 1.0d+6 * rhocla ) &
+     &         / w(ij, sken+1) * dlzi(sken+1)
+         si(ij, sken+1) = &
+     &      max( si(ij, sken+1), max( fltmp, s(ij, sken) ) )
+         si(ij, sken+1) = min( si(ij, sken+1), 1.0d+6 * rhocla )
+      end if
+      end if
+      end do
 
-      END IF
+      end if
 
-      DO K = SKST+1, SKEN+1
-      DO IJ = IJTSTR, IJTEND
-         FLX(IJ, K) = ( 1.0D0 - PHII(K) ) * W(IJ, K) * SI(IJ, K)
-      END DO
-      END DO
+      do k = skst+1, sken+1
+      do ij = ijtstr, ijtend
+         flx(ij, k) = ( 1.0d0 - phii(k) ) * w(ij, k) * si(ij, k)
+      end do
+      end do
 
-      END IF
+      end if
 
 !     -- Diffusion : Crank nicolson
 
-      IF (SDIC) THEN
+      if (sdic) then
 
-      DO K = SKST, SKEN
-         EAL(K) = ( ( 1.0D0 - PHI(K) ) / TS )
-         EBE(K) = ( ( ( 1.0D0 - PHII(K) )   * DBI(K) ) &
-     &            / ( 2.0D0 * DLZ(K) * DLZI(K)   ) )
-         EGA(K) = ( ( ( 1.0D0 - PHII(K+1) ) * DBI(K+1) ) &
-     &            / ( 2.0D0 * DLZ(K) * DLZI(K+1) ) )
-      END DO
+      do k = skst, sken
+         eal(k) = ( ( 1.0d0 - phi(k) ) / ts )
+         ebe(k) = ( ( ( 1.0d0 - phii(k) )   * dbi(k) ) &
+     &            / ( 2.0d0 * dlz(k) * dlzi(k)   ) )
+         ega(k) = ( ( ( 1.0d0 - phii(k+1) ) * dbi(k+1) ) &
+     &            / ( 2.0d0 * dlz(k) * dlzi(k+1) ) )
+      end do
 
-      DO K = SKST+1, SKEN-1
-         EA(K)     = - EBE(K)
-         EB(K)     = EAL(K) + EBE(K) + EGA(K)
-         EC(K)     = - EGA(K)
-      END DO
+      do k = skst+1, sken-1
+         ea(k)     = - ebe(k)
+         eb(k)     = eal(k) + ebe(k) + ega(k)
+         ec(k)     = - ega(k)
+      end do
 
-         EA(SKST)  = - EBE(SKST)
-         EB(SKST)  = EAL(SKST) + EGA(SKST)
-         EC(SKST)  = - EGA(SKST)
-         EA(SKEN)  = - EBE(SKEN)
-         EB(SKEN)  = EAL(SKEN) + EBE(SKEN)
-         EC(SKEN)  = - EGA(SKEN)
+         ea(skst)  = - ebe(skst)
+         eb(skst)  = eal(skst) + ega(skst)
+         ec(skst)  = - ega(skst)
+         ea(sken)  = - ebe(sken)
+         eb(sken)  = eal(sken) + ebe(sken)
+         ec(sken)  = - ega(sken)
 
-      DO IJ = IJTSTR, IJTEND
-         ED(IJ, SKST) = &
-     &      + ( EAL(SKST) - EGA(SKST) ) * S(IJ, SKST) &
-     &      + EGA(SKST) * S(IJ, SKST+1) &
-     &      + ( ( FLX(IJ, SKST) - FLX(IJ, SKST+1) ) / DLZ(SKST) ) &
-     &      - RST(IJ, SKST)
-      END DO
+      do ij = ijtstr, ijtend
+         ed(ij, skst) = &
+     &      + ( eal(skst) - ega(skst) ) * s(ij, skst) &
+     &      + ega(skst) * s(ij, skst+1) &
+     &      + ( ( flx(ij, skst) - flx(ij, skst+1) ) / dlz(skst) ) &
+     &      - rst(ij, skst)
+      end do
 
-      DO K = SKST+1, SKEN-1
-      DO IJ = IJTSTR, IJTEND
-         ED(IJ, K) = &
-     &      + EBE(K) * S(IJ, K-1) &
-     &      + ( EAL(K) - EBE(K) - EGA(K) ) * S(IJ, K) &
-     &      + EGA(K) * S(IJ, K+1) &
-     &      + ( ( FLX(IJ, K) - FLX(IJ, K+1) ) / DLZ(K) ) &
-     &      - RST(IJ, K)
-      END DO
-      END DO
+      do k = skst+1, sken-1
+      do ij = ijtstr, ijtend
+         ed(ij, k) = &
+     &      + ebe(k) * s(ij, k-1) &
+     &      + ( eal(k) - ebe(k) - ega(k) ) * s(ij, k) &
+     &      + ega(k) * s(ij, k+1) &
+     &      + ( ( flx(ij, k) - flx(ij, k+1) ) / dlz(k) ) &
+     &      - rst(ij, k)
+      end do
+      end do
 
-      DO IJ = IJTSTR, IJTEND
-         ED(IJ, SKEN) = &
-     &      + EBE(SKEN) * S(IJ, SKEN-1) &
-     &      + ( EAL(SKEN) - EBE(SKEN) ) * S(IJ, SKEN) &
-     &      + ( ( FLX(IJ, SKEN) - FLX(IJ, SKEN+1) ) / DLZ(SKEN) ) &
-     &      - RST(IJ, SKEN)
-      END DO
+      do ij = ijtstr, ijtend
+         ed(ij, sken) = &
+     &      + ebe(sken) * s(ij, sken-1) &
+     &      + ( eal(sken) - ebe(sken) ) * s(ij, sken) &
+     &      + ( ( flx(ij, sken) - flx(ij, sken+1) ) / dlz(sken) ) &
+     &      - rst(ij, sken)
+      end do
 
-      call calc_tridiagonal_solid( EA, EB, EC, ED, EX )
+      call calc_tridiagonal_solid( ea, eb, ec, ed, ex )
 
-      END IF
+      end if
 
 !     -- Diffusion : Implicit
 
-      IF (SDII) THEN
+      if (sdii) then
 
-      DO K = SKST, SKEN
-         EAL(K) = ( ( 1.0D0 - PHI(K) ) / TS )
-         EBE(K) = ( ( ( 1.0D0 - PHII(K) )   * DBI(K) ) &
-     &            / ( DLZ(K) * DLZI(K)   ) )
-         EGA(K) = ( ( ( 1.0D0 - PHII(K+1) ) * DBI(K+1) ) &
-     &            / ( DLZ(K) * DLZI(K+1) ) )
-      END DO
+      do k = skst, sken
+         eal(k) = ( ( 1.0d0 - phi(k) ) / ts )
+         ebe(k) = ( ( ( 1.0d0 - phii(k) )   * dbi(k) ) &
+     &            / ( dlz(k) * dlzi(k)   ) )
+         ega(k) = ( ( ( 1.0d0 - phii(k+1) ) * dbi(k+1) ) &
+     &            / ( dlz(k) * dlzi(k+1) ) )
+      end do
 
-      DO K = SKST+1, SKEN-1
-         EA(K)     = - EBE(K)
-         EB(K)     = EAL(K) + EBE(K) + EGA(K)
-         EC(K)     = - EGA(K)
-      END DO
+      do k = skst+1, sken-1
+         ea(k)     = - ebe(k)
+         eb(k)     = eal(k) + ebe(k) + ega(k)
+         ec(k)     = - ega(k)
+      end do
 
-         EA(SKST)  = - EBE(SKST)
-         EB(SKST)  = EAL(SKST) + EGA(SKST)
-         EC(SKST)  = - EGA(SKST)
-         EA(SKEN)  = - EBE(SKEN)
-         EB(SKEN)  = EAL(SKEN) + EBE(SKEN)
-         EC(SKEN)  = - EGA(SKEN)
+         ea(skst)  = - ebe(skst)
+         eb(skst)  = eal(skst) + ega(skst)
+         ec(skst)  = - ega(skst)
+         ea(sken)  = - ebe(sken)
+         eb(sken)  = eal(sken) + ebe(sken)
+         ec(sken)  = - ega(sken)
 
-      DO K = SKST, SKEN
-      DO IJ = IJTSTR, IJTEND
-         ED(IJ, K) = &
-     &      + EAL(K) * S(IJ, K) &
-     &      + ( ( FLX(IJ, K) - FLX(IJ, K+1) ) / DLZ(K) ) &
-     &      - RST(IJ, K)
-      END DO
-      END DO
+      do k = skst, sken
+      do ij = ijtstr, ijtend
+         ed(ij, k) = &
+     &      + eal(k) * s(ij, k) &
+     &      + ( ( flx(ij, k) - flx(ij, k+1) ) / dlz(k) ) &
+     &      - rst(ij, k)
+      end do
+      end do
 
-      call calc_tridiagonal_solid( EA, EB, EC, ED, EX )
+      call calc_tridiagonal_solid( ea, eb, ec, ed, ex )
 
-      END IF
+      end if
 
 !     -- t = t + dt --
 
-      DO K = SKST, SKEN
-      DO IJ = IJTSTR, IJTEND
-         SN(IJ, K) = MAX( EX(IJ, K), 0.0D0 )
-         EX(IJ, K) = 0.0D0
-      END DO
-      END DO
+      do k = skst, sken
+      do ij = ijtstr, ijtend
+         sn(ij, k) = max( ex(ij, k), 0.0d0 )
+         ex(ij, k) = 0.0d0
+      end do
+      end do
 
-      DO IJ = IJTSTR, IJTEND
-         BFZ(IJ) = FLX(IJ, SKEN+1)
-      END DO
+      do ij = ijtstr, ijtend
+         bfz(ij) = flx(ij, sken+1)
+      end do
 
-      end subroutine calc_step_solid_CLAY
+      end subroutine calc_step_solid_clay
 
 ! =====================================================================
       subroutine calc_step_solid_age( &
-     &      FF, W, PHI, PHII, DBI, S, &
+     &      ff, w, phi, phii, dbi, S, &
      &      SN )
 
-      double precision, intent(in)  :: FF(NXY)
-      double precision, intent(in)  :: W(NXY,SDZDIM+1)
-      double precision, intent(in)  :: PHI(SDZDIM)
-      double precision, intent(in)  :: PHII(SDZDIM+1)
-      double precision, intent(in)  :: DBI(SDZDIM+1)
-      double precision, intent(in)  :: S(NXY,SDZDIM)
-      double precision, intent(out) :: SN(NXY,SDZDIM)
+      double precision, intent(in)  :: ff(nxy)
+      double precision, intent(in)  :: w(nxy,sdzdim+1)
+      double precision, intent(in)  :: phi(sdzdim)
+      double precision, intent(in)  :: phii(sdzdim+1)
+      double precision, intent(in)  :: dbi(sdzdim+1)
+      double precision, intent(in)  :: s(nxy,sdzdim)
+      double precision, intent(out) :: sn(nxy,sdzdim)
 
-      integer :: IJ, K
+      integer :: ij, k
 
-      DO IJ = IJTSTR, IJTEND
-         FLX(IJ, SKST) = FF(IJ)
-      END DO
+      do ij = ijtstr, ijtend
+         flx(ij, skst) = ff(ij)
+      end do
 
 !     -- Advection : Upwind --
 
-      IF (SADU) THEN
+      if (sadu) then
 
-      DO K = SKST+1, SKEN
-      DO IJ = IJTSTR, IJTEND
-         IF ( W(IJ, K) >= 0.0D0 ) THEN
-            SI(IJ, K) = S(IJ, K-1)
-         ELSE IF ( W(IJ, K) < 0.0D0 ) THEN
-            SI(IJ, K) = S(IJ, K)
-         END IF
-         FLX(IJ, K)   = ( 1.0D0 - PHII(K) ) * W(IJ, K) * SI(IJ, K)
-      END DO
-      END DO
+      do k = skst+1, sken
+      do ij = ijtstr, ijtend
+         if ( w(ij, k) >= 0.0d0 ) then
+            si(ij, k) = s(ij, k-1)
+         else if ( w(ij, k) < 0.0d0 ) then
+            si(ij, k) = s(ij, k)
+         end if
+         flx(ij, k)   = ( 1.0d0 - phii(k) ) * w(ij, k) * si(ij, k)
+      end do
+      end do
 
-      DO IJ = IJTSTR, IJTEND
-      IF ( W(IJ, SKEN+1) >= 0.0D0 ) THEN
-         SI(IJ, SKEN+1) = S(IJ, SKEN)
-      ELSE IF ( W(IJ, SKEN+1) < 0.0D0 ) THEN
-         SI(IJ, SKEN+1) = 0.0D0
-      END IF
-         FLX(IJ, SKEN+1) = ( 1.0D0 - PHII(SKEN+1) ) &
-     &                   * W(IJ, SKEN+1) * SI(IJ, SKEN+1)
-      END DO
+      do ij = ijtstr, ijtend
+      if ( w(ij, sken+1) >= 0.0d0 ) then
+         si(ij, sken+1) = s(ij, sken)
+      else if ( w(ij, sken+1) < 0.0d0 ) then
+         si(ij, sken+1) = 0.0d0
+      end if
+         flx(ij, sken+1) = ( 1.0d0 - phii(sken+1) ) &
+     &                   * w(ij, sken+1) * si(ij, sken+1)
+      end do
 
-      END IF
+      end if
 
 !     -- Advection : Quickest --
 
-      IF (SADQ) THEN
+      if (sadq) then
 
-      DO K = SKST+2, SKEN-1
-      DO IJ = IJTSTR, IJTEND
-         IF ( W(IJ, K) >= 0.0D0 ) THEN
-            C2(IJ, K) = ( 1.0D0 / ( DLZI(K-1) + DLZI(K) ) ) &
-     &         * ( ( ( S(IJ, K-2) - S(IJ, K-1) ) / DLZI(K-1) ) &
-     &           - ( ( S(IJ, K-1) - S(IJ, K)   ) / DLZI(K)   ) )
-         ELSE IF ( W(IJ, K) < 0.0D0 ) THEN
-            C2(IJ, K) = ( 1.0D0 / ( DLZI(K) + DLZI(K+1) ) ) &
-     &         * ( ( ( S(IJ, K-1) - S(IJ, K) ) / DLZI(K)   ) &
-     &           - ( ( S(IJ, K) - S(IJ, K+1) ) / DLZI(K+1) ) )
-         END IF
-            C1(IJ, K) = ( ( S(IJ, K) - S(IJ, K-1) ) / DLZI(K) ) &
-     &         + ( ( ( DLZ(K-1) - DLZ(K) ) / 2.0D0 ) * C2(IJ, K) )
-            C0(IJ, K) = ( ( DLZ(K) * S(IJ, K-1) + DLZ(K-1) * S(IJ, K) ) &
-     &                / ( 2.0D0 * DLZI(K) ) ) &
-     &         - ( ( ( DLZ(K-1) * DLZ(K) ) / 4.0D0 ) * C2(IJ, K) )
-      END DO
-      END DO
+      do k = skst+2, sken-1
+      do ij = ijtstr, ijtend
+         if ( w(ij, k) >= 0.0d0 ) then
+            c2(ij, k) = ( 1.0d0 / ( dlzi(k-1) + dlzi(k) ) ) &
+     &         * ( ( ( s(ij, k-2) - s(ij, k-1) ) / dlzi(k-1) ) &
+     &           - ( ( s(ij, k-1) - s(ij, k)   ) / dlzi(k)   ) )
+         else if ( w(ij, k) < 0.0d0 ) then
+            c2(ij, k) = ( 1.0d0 / ( dlzi(k) + dlzi(k+1) ) ) &
+     &         * ( ( ( s(ij, k-1) - s(ij, k) ) / dlzi(k)   ) &
+     &           - ( ( s(ij, k) - s(ij, k+1) ) / dlzi(k+1) ) )
+         end if
+            c1(ij, k) = ( ( s(ij, k) - s(ij, k-1) ) / dlzi(k) ) &
+     &         + ( ( ( dlz(k-1) - dlz(k) ) / 2.0d0 ) * c2(ij, k) )
+            c0(ij, k) = ( ( dlz(k) * s(ij, k-1) + dlz(k-1) * s(ij, k) ) &
+     &                / ( 2.0d0 * dlzi(k) ) ) &
+     &         - ( ( ( dlz(k-1) * dlz(k) ) / 4.0d0 ) * c2(ij, k) )
+      end do
+      end do
 
-      DO IJ = IJTSTR, IJTEND
-      IF ( W(IJ, SKST+1) >= 0.0D0 ) THEN
-         C2(IJ, SKST+1) = ( 1.0D0 / ( DLZI(SKST) + DLZI(SKST+1) ) ) &
-     &      * ( ( ( 0.0D0       - S(IJ, SKST)   ) / DLZI(SKST) ) &
-     &        - ( ( S(IJ, SKST) - S(IJ, SKST+1) ) / DLZI(SKST+1) ) )
-      ELSE IF ( W(IJ, SKST+1) < 0.0D0 ) THEN
-         C2(IJ, SKST+1) = ( 1.0D0 / ( DLZI(SKST+1) + DLZI(SKST+2) ) ) &
-     &      * ( ( ( S(IJ, SKST)   - S(IJ, SKST+1) ) / DLZI(SKST+1) ) &
-     &        - ( ( S(IJ, SKST+1) - S(IJ, SKST+2) ) / DLZI(SKST+2) ) )
-      END IF
-         C1(IJ, SKST+1) = ( ( S(IJ, SKST+1) - S(IJ, SKST) ) &
-     &                      / DLZI(SKST+1) ) &
-     &      + ( ( ( DLZ(SKST) - DLZ(SKST+1) ) / 2.0D0 ) &
-     &          * C2(IJ, SKST+1) )
-         C0(IJ, SKST+1) = ( ( DLZ(SKST+1) * S(IJ, SKST) &
-     &                      + DLZ(SKST)   * S(IJ, SKST+1) ) &
-     &                  / ( 2.0D0 * DLZI(SKST+1) ) ) &
-     &      - ( ( ( DLZ(SKST) * DLZ(SKST+1) ) / 4.0D0 ) &
-     &          * C2(IJ, SKST+1) )
-      END DO
+      do ij = ijtstr, ijtend
+      if ( w(ij, skst+1) >= 0.0d0 ) then
+         c2(ij, skst+1) = ( 1.0d0 / ( dlzi(skst) + dlzi(skst+1) ) ) &
+     &      * ( ( ( 0.0d0       - s(ij, skst)   ) / dlzi(skst) ) &
+     &        - ( ( s(ij, skst) - s(ij, skst+1) ) / dlzi(skst+1) ) )
+      else if ( w(ij, skst+1) < 0.0d0 ) then
+         c2(ij, skst+1) = ( 1.0d0 / ( dlzi(skst+1) + dlzi(skst+2) ) ) &
+     &      * ( ( ( s(ij, skst)   - s(ij, skst+1) ) / dlzi(skst+1) ) &
+     &        - ( ( s(ij, skst+1) - s(ij, skst+2) ) / dlzi(skst+2) ) )
+      end if
+         c1(ij, skst+1) = ( ( s(ij, skst+1) - s(ij, skst) ) &
+     &                      / dlzi(skst+1) ) &
+     &      + ( ( ( dlz(skst) - dlz(skst+1) ) / 2.0d0 ) &
+     &          * c2(ij, skst+1) )
+         c0(ij, skst+1) = ( ( dlz(skst+1) * s(ij, skst) &
+     &                      + dlz(skst)   * s(ij, skst+1) ) &
+     &                  / ( 2.0d0 * dlzi(skst+1) ) ) &
+     &      - ( ( ( dlz(skst) * dlz(skst+1) ) / 4.0d0 ) &
+     &          * c2(ij, skst+1) )
+      end do
 
-      DO IJ = IJTSTR, IJTEND
-      IF ( W(IJ, SKEN) >= 0.0D0 ) THEN
-         C2(IJ, SKEN) = ( 1.0D0 / ( DLZI(SKEN-1) + DLZI(SKEN) ) ) &
-     &      * ( ( ( S(IJ, SKEN-2) - S(IJ, SKEN-1) ) / DLZI(SKEN-1) ) &
-     &        - ( ( S(IJ, SKEN-1) - S(IJ, SKEN)   ) / DLZI(SKEN)   ) )
-      ELSE IF ( W(IJ, SKEN) < 0.0D0 ) THEN
-         C2(IJ, SKEN) = ( 1.0D0 / ( DLZI(SKEN) + DLZI(SKEN+1) ) ) &
-     &      * ( ( ( S(IJ, SKEN-1) - S(IJ, SKEN) ) / DLZI(SKEN)   ) &
-     &        - ( ( S(IJ, SKEN)   - 0.0D0       ) / DLZI(SKEN+1) ) )
-      END IF
-         C1(IJ, SKEN) = ( ( S(IJ, SKEN) - S(IJ, SKEN-1) ) / DLZI(SKEN) ) &
-     &      + ( ( ( DLZ(SKEN-1) - DLZ(SKEN) ) / 2.0D0 ) &
-     &          * C2(IJ, SKEN) )
-         C0(IJ, SKEN) = ( ( DLZ(SKEN)   * S(IJ, SKEN-1) &
-     &                    + DLZ(SKEN-1) * S(IJ, SKEN)   ) &
-     &                / ( 2.0D0 * DLZI(SKEN) ) ) &
-     &      - ( ( ( DLZ(SKEN-1) * DLZ(SKEN) ) / 4.0D0 ) &
-     &          * C2(IJ, SKEN) )
-      END DO
+      do ij = ijtstr, ijtend
+      if ( w(ij, sken) >= 0.0d0 ) then
+         c2(ij, sken) = ( 1.0d0 / ( dlzi(sken-1) + dlzi(sken) ) ) &
+     &      * ( ( ( s(ij, sken-2) - s(ij, sken-1) ) / dlzi(sken-1) ) &
+     &        - ( ( s(ij, sken-1) - s(ij, sken)   ) / dlzi(sken)   ) )
+      else if ( w(ij, sken) < 0.0d0 ) then
+         c2(ij, sken) = ( 1.0d0 / ( dlzi(sken) + dlzi(sken+1) ) ) &
+     &      * ( ( ( s(ij, sken-1) - s(ij, sken) ) / dlzi(sken)   ) &
+     &        - ( ( s(ij, sken)   - 0.0d0       ) / dlzi(sken+1) ) )
+      end if
+         c1(ij, sken) = ( ( s(ij, sken) - s(ij, sken-1) ) / dlzi(sken) ) &
+     &      + ( ( ( dlz(sken-1) - dlz(sken) ) / 2.0d0 ) &
+     &          * c2(ij, sken) )
+         c0(ij, sken) = ( ( dlz(sken)   * s(ij, sken-1) &
+     &                    + dlz(sken-1) * s(ij, sken)   ) &
+     &                / ( 2.0d0 * dlzi(sken) ) ) &
+     &      - ( ( ( dlz(sken-1) * dlz(sken) ) / 4.0d0 ) &
+     &          * c2(ij, sken) )
+      end do
 
-      DO IJ = IJTSTR, IJTEND
-      IF ( W(IJ, SKEN+1) >= 0.0D0 ) THEN
-         C2(IJ, SKEN+1) = ( 1.0D0 / ( DLZI(SKEN) + DLZI(SKEN+1) ) ) &
-     &      * ( ( ( S(IJ, SKEN-1) - S(IJ, SKEN) ) / DLZI(SKEN)   ) &
-     &        - ( ( S(IJ, SKEN)   - S(IJ, SKEN) ) / DLZI(SKEN+1) ) )
-      ELSE IF ( W(IJ, SKEN+1) < 0.0D0 ) THEN
-         C2(IJ, SKEN) = ( 1.0D0 / ( DLZI(SKEN+1) + DLZI(SKEN+1) ) ) &
-     &      * ( ( ( S(IJ, SKEN) - 0.0D0 ) / DLZI(SKEN+1) ) &
-     &        - ( ( 0.0D0       - 0.0D0 ) / DLZI(SKEN+1) ) )
-      END IF
-      IF ( W(IJ, SKEN+1) >= 0.0D0 ) THEN
-         C1(IJ, SKEN+1) = ( ( S(IJ, SKEN) - S(IJ, SKEN) ) &
-     &                    / DLZI(SKEN+1) )
-         C0(IJ, SKEN+1) = ( ( DLZ(SKEN) * S(IJ, SKEN) &
-     &                      + DLZ(SKEN) * S(IJ, SKEN) ) &
-     &                  / ( 2.0D0 * DLZI(SKEN+1) ) ) &
-     &      - ( ( ( DLZ(SKEN) * DLZ(SKEN) ) / 4.0D0 ) &
-     &          * C2(IJ, SKEN+1) )
-      ELSE IF ( W(IJ, SKEN+1) < 0.0D0 ) THEN
-         C1(IJ, SKEN+1) = ( ( 0.0D0 - S(IJ, SKEN) ) &
-     &                    / DLZI(SKEN+1) )
-         C0(IJ, SKEN+1) = ( ( DLZ(SKEN) * S(IJ, SKEN) &
-     &                      + DLZ(SKEN) * 0.0D0 ) &
-     &                  / ( 2.0D0 * DLZI(SKEN+1) ) ) &
-     &      - ( ( ( DLZ(SKEN) * DLZ(SKEN) ) / 4.0D0 ) &
-     &          * C2(IJ, SKEN+1) )
-      END IF
-      END DO
+      do ij = ijtstr, ijtend
+      if ( w(ij, sken+1) >= 0.0d0 ) then
+         c2(ij, sken+1) = ( 1.0d0 / ( dlzi(sken) + dlzi(sken+1) ) ) &
+     &      * ( ( ( s(ij, sken-1) - s(ij, sken) ) / dlzi(sken)   ) &
+     &        - ( ( s(ij, sken)   - s(ij, sken) ) / dlzi(sken+1) ) )
+      else if ( w(ij, sken+1) < 0.0d0 ) then
+         c2(ij, sken) = ( 1.0d0 / ( dlzi(sken+1) + dlzi(sken+1) ) ) &
+     &      * ( ( ( s(ij, sken) - 0.0d0 ) / dlzi(sken+1) ) &
+     &        - ( ( 0.0d0       - 0.0d0 ) / dlzi(sken+1) ) )
+      end if
+      if ( w(ij, sken+1) >= 0.0d0 ) then
+         c1(ij, sken+1) = ( ( s(ij, sken) - s(ij, sken) ) &
+     &                    / dlzi(sken+1) )
+         c0(ij, sken+1) = ( ( dlz(sken) * s(ij, sken) &
+     &                      + dlz(sken) * s(ij, sken) ) &
+     &                  / ( 2.0d0 * dlzi(sken+1) ) ) &
+     &      - ( ( ( dlz(sken) * dlz(sken) ) / 4.0d0 ) &
+     &          * c2(ij, sken+1) )
+      else if ( w(ij, sken+1) < 0.0d0 ) then
+         c1(ij, sken+1) = ( ( 0.0d0 - s(ij, sken) ) &
+     &                    / dlzi(sken+1) )
+         c0(ij, sken+1) = ( ( dlz(sken) * s(ij, sken) &
+     &                      + dlz(sken) * 0.0d0 ) &
+     &                  / ( 2.0d0 * dlzi(sken+1) ) ) &
+     &      - ( ( ( dlz(sken) * dlz(sken) ) / 4.0d0 ) &
+     &          * c2(ij, sken+1) )
+      end if
+      end do
 
-      DO K = SKST+1, SKEN+1
-      DO IJ = IJTSTR, IJTEND
-         SI(IJ, K) = C0(IJ, K) &
-     &   - ( C1(IJ, K) * ( ( W(IJ, K) * TS ) / 2.0D0 ) ) &
-     &   + ( C2(IJ, K) * ( ( ( ( W(IJ, K) * TS ) ** 2.0D0 ) / 3.0D0 ) &
-     &             - ( ( ( DLZI(K) ** 2.0D0 ) / 12.0D0 ) ) ) )
-      END DO
-      END DO
+      do k = skst+1, sken+1
+      do ij = ijtstr, ijtend
+         si(ij, k) = c0(ij, k) &
+     &   - ( c1(ij, k) * ( ( w(ij, k) * ts ) / 2.0d0 ) ) &
+     &   + ( c2(ij, k) * ( ( ( ( w(ij, k) * ts ) ** 2.0d0 ) / 3.0d0 ) &
+     &             - ( ( ( dlzi(k) ** 2.0d0 ) / 12.0d0 ) ) ) )
+      end do
+      end do
 
 !     -- Advection : Quickest Flux limiter --
 
-      IF (SADQF) THEN
+      if (sadqf) then
 
-      DO IJ = IJTSTR, IJTEND
-      IF ( W(IJ, SKST+1) >= 0.0D0 ) THEN
-      FLDEL(SKST+1) = S(IJ, SKST+1) - 0.0D0
-      FLGAM(SKST+1) = ( ( S(IJ, SKST+1) - S(IJ, SKST) ) &
-     &                  / DLZI(SKST+1) ) &
-     &              - ( ( S(IJ, SKST)   - 0.0D0       ) &
-     &                  / DLZI(SKST)   )
-      IF ( ABS( FLGAM(SKST+1)*DLZ(SKST) ) >= ABS( FLDEL(SKST+1) ) ) THEN
-         SI(IJ, SKST+1) = S(IJ, SKST)
-      ELSE IF ( FLDEL(SKST+1) >= 0 ) THEN
-         FLTMP = 0.0D0 &
-     &         + ( S(IJ, SKST) - 0.0D0 ) / W(IJ, SKST+1) * DLZI(SKST+1)
-         SI(IJ, SKST+1) = &
-     &      MIN( SI(IJ, SKST+1), MIN( FLTMP, S(IJ, SKST+1) ) )
-         SI(IJ, SKST+1) = MAX( SI(IJ, SKST+1), S(IJ, SKST) )
-      ELSE IF ( FLDEL(SKST+1) <  0 ) THEN
-         FLTMP = 0.0D0 &
-     &         + ( S(IJ, SKST) - 0.0D0 ) / W(IJ, SKST+1) * DLZI(SKST+1)
-         SI(IJ, SKST+1) = &
-     &      MAX( SI(IJ, SKST+1), MAX( FLTMP, S(IJ, SKST+1) ) )
-         SI(IJ, SKST+1) = MIN( SI(IJ, SKST+1), S(IJ, SKST) )
-      END IF
-      ELSE IF ( W(IJ, SKST+1) < 0.0D0 ) THEN
-      FLDEL(SKST+1) = S(IJ, SKST) - S(IJ, SKST+2)
-      FLGAM(SKST+1) = ( ( S(IJ, SKST)   - S(IJ, SKST+1) ) &
-     &                  / DLZI(SKST+1) ) &
-     &              - ( ( S(IJ, SKST+1) - S(IJ, SKST+2) ) &
-     &                  / DLZI(SKST+2) )
-      IF ( ABS( FLGAM(SKST+1)*DLZ(SKST+1) ) &
-     &  >= ABS( FLDEL(SKST+1) ) ) THEN
-         SI(IJ, SKST+1) = S(IJ, SKST+1)
-      ELSE IF ( FLDEL(SKST+1) >= 0 ) THEN
-         FLTMP = S(IJ, SKST+2) &
-     &- ( S(IJ, SKST+1) - S(IJ, SKST+2) ) / W(IJ, SKST+1) * DLZI(SKST+1)
-         SI(IJ, SKST+1) = &
-     &      MIN( SI(IJ, SKST+1), MIN( FLTMP, S(IJ, SKST) ) )
-         SI(IJ, SKST+1) = MAX( SI(IJ, SKST+1), S(IJ, SKST+1) )
-      ELSE IF ( FLDEL(SKST+1) <  0 ) THEN
-         FLTMP = S(IJ, SKST+2) &
-     &- ( S(IJ, SKST+1) - S(IJ, SKST+2) ) / W(IJ, SKST+1) * DLZI(SKST+1)
-         SI(IJ, SKST+1) = &
-     &      MAX( SI(IJ, SKST+1), MAX( FLTMP, S(IJ, SKST) ) )
-         SI(IJ, SKST+1) = MIN( SI(IJ, SKST+1), S(IJ, SKST+1) )
-      END IF
-      END IF
-      END DO
+      do ij = ijtstr, ijtend
+      if ( w(ij, skst+1) >= 0.0d0 ) then
+      fldel(skst+1) = s(ij, skst+1) - 0.0d0
+      flgam(skst+1) = ( ( s(ij, skst+1) - s(ij, skst) ) &
+     &                  / dlzi(skst+1) ) &
+     &              - ( ( s(ij, skst)   - 0.0d0       ) &
+     &                  / dlzi(skst)   )
+      if ( abs( flgam(skst+1)*dlz(skst) ) >= abs( fldel(skst+1) ) ) then
+         si(ij, skst+1) = s(ij, skst)
+      else if ( fldel(skst+1) >= 0 ) then
+         fltmp = 0.0d0 &
+     &         + ( s(ij, skst) - 0.0d0 ) / w(ij, skst+1) * dlzi(skst+1)
+         si(ij, skst+1) = &
+     &      min( si(ij, skst+1), min( fltmp, s(ij, skst+1) ) )
+         si(ij, skst+1) = max( si(ij, skst+1), s(ij, skst) )
+      else if ( fldel(skst+1) <  0 ) then
+         fltmp = 0.0d0 &
+     &         + ( s(ij, skst) - 0.0d0 ) / w(ij, skst+1) * dlzi(skst+1)
+         si(ij, skst+1) = &
+     &      max( si(ij, skst+1), max( fltmp, s(ij, skst+1) ) )
+         si(ij, skst+1) = min( si(ij, skst+1), s(ij, skst) )
+      end if
+      else if ( w(ij, skst+1) < 0.0d0 ) then
+      fldel(skst+1) = s(ij, skst) - s(ij, skst+2)
+      flgam(skst+1) = ( ( s(ij, skst)   - s(ij, skst+1) ) &
+     &                  / dlzi(skst+1) ) &
+     &              - ( ( s(ij, skst+1) - s(ij, skst+2) ) &
+     &                  / dlzi(skst+2) )
+      if ( abs( flgam(skst+1)*dlz(skst+1) ) &
+     &  >= abs( fldel(skst+1) ) ) then
+         si(ij, skst+1) = s(ij, skst+1)
+      else if ( fldel(skst+1) >= 0 ) then
+         fltmp = s(ij, skst+2) &
+     &- ( s(ij, skst+1) - s(ij, skst+2) ) / w(ij, skst+1) * dlzi(skst+1)
+         si(ij, skst+1) = &
+     &      min( si(ij, skst+1), min( fltmp, s(ij, skst) ) )
+         si(ij, skst+1) = max( si(ij, skst+1), s(ij, skst+1) )
+      else if ( fldel(skst+1) <  0 ) then
+         fltmp = s(ij, skst+2) &
+     &- ( s(ij, skst+1) - s(ij, skst+2) ) / w(ij, skst+1) * dlzi(skst+1)
+         si(ij, skst+1) = &
+     &      max( si(ij, skst+1), max( fltmp, s(ij, skst) ) )
+         si(ij, skst+1) = min( si(ij, skst+1), s(ij, skst+1) )
+      end if
+      end if
+      end do
 
-      DO K = SKST+2, SKEN-1
-      DO IJ = IJTSTR, IJTEND
-      IF ( W(IJ, K) >= 0.0D0 ) THEN
-         FLDEL(K) = S(IJ, K) - S(IJ, K-2)
-         FLGAM(K) = ( ( S(IJ, K)   - S(IJ, K-1) ) / DLZI(K)   ) &
-     &            - ( ( S(IJ, K-1) - S(IJ, K-2) ) / DLZI(K-1) )
-         IF ( ABS( FLGAM(K)*DLZ(K-1) ) >= ABS( FLDEL(K) ) ) THEN
-            SI(IJ, K) = S(IJ, K-1)
-         ELSE IF ( FLDEL(K) >= 0 ) THEN
-            FLTMP = S(IJ, K-2) &
-     &            + ( S(IJ, K-1) - S(IJ, K-2) ) / W(IJ, K) * DLZI(K)
-            SI(IJ, K) = &
-     &         MIN( SI(IJ, K), MIN( FLTMP, S(IJ, K) ) )
-            SI(IJ, K) = MAX( SI(IJ, K), S(IJ, K-1) )
-         ELSE IF ( FLDEL(K) <  0 ) THEN
-            FLTMP = S(IJ, K-2) &
-     &            + ( S(IJ, K-1) - S(IJ, K-2) ) / W(IJ, K) * DLZI(K)
-            SI(IJ, K) = &
-     &         MAX( SI(IJ, K), MAX( FLTMP, S(IJ, K) ) )
-            SI(IJ, K) = MIN( SI(IJ, K), S(IJ, K-1) )
-         END IF
-      ELSE IF ( W(IJ, K) < 0.0D0 ) THEN
-         FLDEL(K) = S(IJ, K-1) - S(IJ, K+1)
-         FLGAM(K) = ( ( S(IJ, K-1) - S(IJ, K)   ) / DLZI(K)   ) &
-     &            - ( ( S(IJ, K)   - S(IJ, K+1) ) / DLZI(K+1) )
-         IF ( ABS( FLGAM(K)*DLZ(K) ) >= ABS( FLDEL(K) ) ) THEN
-            SI(IJ, K) = S(IJ, K)
-         ELSE IF ( FLDEL(K) >= 0 ) THEN
-            FLTMP = S(IJ, K+1) &
-     &            - ( S(IJ, K) - S(IJ, K+1) ) / W(IJ, K) * DLZI(K)
-            SI(IJ, K) = &
-     &         MIN( SI(IJ, K), MIN( FLTMP, S(IJ, K-1) ) )
-            SI(IJ, K) = MAX( SI(IJ, K), S(IJ, K) )
-         ELSE IF ( FLDEL(K) <  0 ) THEN
-            FLTMP = S(IJ, K+1) &
-     &            - ( S(IJ, K) - S(IJ, K+1) ) / W(IJ, K) * DLZI(K)
-            SI(IJ, K) = &
-     &         MAX( SI(IJ, K), MAX( FLTMP, S(IJ, K-1) ) )
-            SI(IJ, K) = MIN( SI(IJ, K), S(IJ, K) )
-         END IF
-      END IF
-      END DO
-      END DO
+      do k = skst+2, sken-1
+      do ij = ijtstr, ijtend
+      if ( w(ij, k) >= 0.0d0 ) then
+         fldel(k) = s(ij, k) - s(ij, k-2)
+         flgam(k) = ( ( s(ij, k)   - s(ij, k-1) ) / dlzi(k)   ) &
+     &            - ( ( s(ij, k-1) - s(ij, k-2) ) / dlzi(k-1) )
+         if ( abs( flgam(k)*dlz(k-1) ) >= abs( fldel(k) ) ) then
+            si(ij, k) = s(ij, k-1)
+         else if ( fldel(k) >= 0 ) then
+            fltmp = s(ij, k-2) &
+     &            + ( s(ij, k-1) - s(ij, k-2) ) / w(ij, k) * dlzi(k)
+            si(ij, k) = &
+     &         min( si(ij, k), min( fltmp, s(ij, k) ) )
+            si(ij, k) = max( si(ij, k), s(ij, k-1) )
+         else if ( fldel(k) <  0 ) then
+            fltmp = s(ij, k-2) &
+     &            + ( s(ij, k-1) - s(ij, k-2) ) / w(ij, k) * dlzi(k)
+            si(ij, k) = &
+     &         max( si(ij, k), max( fltmp, s(ij, k) ) )
+            si(ij, k) = min( si(ij, k), s(ij, k-1) )
+         end if
+      else if ( w(ij, k) < 0.0d0 ) then
+         fldel(k) = s(ij, k-1) - s(ij, k+1)
+         flgam(k) = ( ( s(ij, k-1) - s(ij, k)   ) / dlzi(k)   ) &
+     &            - ( ( s(ij, k)   - s(ij, k+1) ) / dlzi(k+1) )
+         if ( abs( flgam(k)*dlz(k) ) >= abs( fldel(k) ) ) then
+            si(ij, k) = s(ij, k)
+         else if ( fldel(k) >= 0 ) then
+            fltmp = s(ij, k+1) &
+     &            - ( s(ij, k) - s(ij, k+1) ) / w(ij, k) * dlzi(k)
+            si(ij, k) = &
+     &         min( si(ij, k), min( fltmp, s(ij, k-1) ) )
+            si(ij, k) = max( si(ij, k), s(ij, k) )
+         else if ( fldel(k) <  0 ) then
+            fltmp = s(ij, k+1) &
+     &            - ( s(ij, k) - s(ij, k+1) ) / w(ij, k) * dlzi(k)
+            si(ij, k) = &
+     &         max( si(ij, k), max( fltmp, s(ij, k-1) ) )
+            si(ij, k) = min( si(ij, k), s(ij, k) )
+         end if
+      end if
+      end do
+      end do
 
-      DO IJ = IJTSTR, IJTEND
-      IF ( W(IJ, SKEN) >= 0.0D0 ) THEN
-      FLDEL(SKEN) = S(IJ, SKEN) - S(IJ, SKEN-2)
-      FLGAM(SKEN) = ( ( S(IJ, SKEN)   - S(IJ, SKEN-1) ) / DLZI(SKEN)   ) &
-     &            - ( ( S(IJ, SKEN-1) - S(IJ, SKEN-2) ) / DLZI(SKEN-1) )
-      IF ( ABS( FLGAM(SKEN)*DLZ(SKEN-1) ) >= ABS( FLDEL(SKEN) ) ) THEN
-         SI(IJ, SKEN) = S(IJ, SKEN-1)
-      ELSE IF ( FLDEL(SKEN) >= 0 ) THEN
-         FLTMP = S(IJ, SKEN-2) &
-     &+ ( S(IJ, SKEN-1) - S(IJ, SKEN-2) ) / W(IJ, SKEN) * DLZI(SKEN)
-         SI(IJ, SKEN) = &
-     &      MIN( SI(IJ, SKEN), MIN( FLTMP, S(IJ, SKEN) ) )
-         SI(IJ, SKEN) = MAX( SI(IJ, SKEN), S(IJ, SKEN-1) )
-      ELSE IF ( FLDEL(SKEN) <  0 ) THEN
-         FLTMP = S(IJ, SKEN-2) &
-     &+ ( S(IJ, SKEN-1) - S(IJ, SKEN-2) ) / W(IJ, SKEN) * DLZI(SKEN)
-         SI(IJ, SKEN) = &
-     &      MAX( SI(IJ, SKEN), MAX( FLTMP, S(IJ, SKEN) ) )
-         SI(IJ, SKEN) = MIN( SI(IJ, SKEN), S(IJ, SKEN-1) )
-      END IF
-      ELSE IF ( W(IJ, SKEN) < 0.0D0 ) THEN
-      FLDEL(SKEN) = S(IJ, SKEN-1) - 0.0D0
-      FLGAM(SKEN) = ( ( S(IJ, SKEN-1) - S(IJ, SKEN) ) / DLZI(SKEN)   ) &
-     &            - ( ( S(IJ, SKEN)   - 0.0D0       ) / DLZI(SKEN+1) )
-      IF ( ABS( FLGAM(SKEN)*DLZ(SKEN) ) >= ABS( FLDEL(SKEN) ) ) THEN
-         SI(IJ, SKEN) = S(IJ, SKEN)
-      ELSE IF ( FLDEL(SKEN) >= 0 ) THEN
-         FLTMP = 0.0D0 &
-     &- ( S(IJ, SKEN) - 0.0D0 ) / W(IJ, SKEN) * DLZI(SKEN)
-         SI(IJ, SKEN) = &
-     &      MIN( SI(IJ, SKEN), MIN( FLTMP, S(IJ, SKEN-1) ) )
-         SI(IJ, SKEN) = MAX( SI(IJ, SKEN), S(IJ, SKEN) )
-      ELSE IF ( FLDEL(SKEN) <  0 ) THEN
-         FLTMP = 0.0D0 &
-     &- ( S(IJ, SKEN) - 0.0D0 ) / W(IJ, SKEN) * DLZI(SKEN)
-         SI(IJ, SKEN) = &
-     &      MAX( SI(IJ, SKEN), MAX( FLTMP, S(IJ, SKEN-1) ) )
-         SI(IJ, SKEN) = MIN( SI(IJ, SKEN), S(IJ, SKEN) )
-      END IF
-      END IF
-      END DO
+      do ij = ijtstr, ijtend
+      if ( w(ij, sken) >= 0.0d0 ) then
+      fldel(sken) = s(ij, sken) - s(ij, sken-2)
+      flgam(sken) = ( ( s(ij, sken)   - s(ij, sken-1) ) / dlzi(sken)   ) &
+     &            - ( ( s(ij, sken-1) - s(ij, sken-2) ) / dlzi(sken-1) )
+      if ( abs( flgam(sken)*dlz(sken-1) ) >= abs( fldel(sken) ) ) then
+         si(ij, sken) = s(ij, sken-1)
+      else if ( fldel(sken) >= 0 ) then
+         fltmp = s(ij, sken-2) &
+     &+ ( s(ij, sken-1) - s(ij, sken-2) ) / w(ij, sken) * dlzi(sken)
+         si(ij, sken) = &
+     &      min( si(ij, sken), min( fltmp, s(ij, sken) ) )
+         si(ij, sken) = max( si(ij, sken), s(ij, sken-1) )
+      else if ( fldel(sken) <  0 ) then
+         fltmp = s(ij, sken-2) &
+     &+ ( s(ij, sken-1) - s(ij, sken-2) ) / w(ij, sken) * dlzi(sken)
+         si(ij, sken) = &
+     &      max( si(ij, sken), max( fltmp, s(ij, sken) ) )
+         si(ij, sken) = min( si(ij, sken), s(ij, sken-1) )
+      end if
+      else if ( w(ij, sken) < 0.0d0 ) then
+      fldel(sken) = s(ij, sken-1) - 0.0d0
+      flgam(sken) = ( ( s(ij, sken-1) - s(ij, sken) ) / dlzi(sken)   ) &
+     &            - ( ( s(ij, sken)   - 0.0d0       ) / dlzi(sken+1) )
+      if ( abs( flgam(sken)*dlz(sken) ) >= abs( fldel(sken) ) ) then
+         si(ij, sken) = s(ij, sken)
+      else if ( fldel(sken) >= 0 ) then
+         fltmp = 0.0d0 &
+     &- ( s(ij, sken) - 0.0d0 ) / w(ij, sken) * dlzi(sken)
+         si(ij, sken) = &
+     &      min( si(ij, sken), min( fltmp, s(ij, sken-1) ) )
+         si(ij, sken) = max( si(ij, sken), s(ij, sken) )
+      else if ( fldel(sken) <  0 ) then
+         fltmp = 0.0d0 &
+     &- ( s(ij, sken) - 0.0d0 ) / w(ij, sken) * dlzi(sken)
+         si(ij, sken) = &
+     &      max( si(ij, sken), max( fltmp, s(ij, sken-1) ) )
+         si(ij, sken) = min( si(ij, sken), s(ij, sken) )
+      end if
+      end if
+      end do
 
-      DO IJ = IJTSTR, IJTEND
-      IF ( W(IJ, SKEN+1) >= 0.0D0 ) THEN
-      FLDEL(SKEN+1) = S(IJ, SKEN) - S(IJ, SKEN-1)
-      FLGAM(SKEN+1) = ( ( S(IJ, SKEN) - S(IJ, SKEN)   ) / DLZI(SKEN+1) ) &
-     &              - ( ( S(IJ, SKEN) - S(IJ, SKEN-1) ) / DLZI(SKEN)   )
-      IF ( ABS( FLGAM(SKEN+1)*DLZ(SKEN) ) >= ABS( FLDEL(SKEN+1) ) ) THEN
-         SI(IJ, SKEN+1) = S(IJ, SKEN)
-      ELSE IF ( FLDEL(SKEN+1) >= 0 ) THEN
-         FLTMP = S(IJ, SKEN-1) &
-     &+ ( S(IJ, SKEN) - S(IJ, SKEN-1) ) / W(IJ, SKEN+1) * DLZI(SKEN+1)
-         SI(IJ, SKEN+1) = &
-     &      MIN( SI(IJ, SKEN+1), MIN( FLTMP, S(IJ, SKEN) ) )
-         SI(IJ, SKEN+1) = MAX( SI(IJ, SKEN+1), S(IJ, SKEN) )
-      ELSE IF ( FLDEL(SKEN+1) <  0 ) THEN
-         FLTMP = S(IJ, SKEN-1) &
-     &+ ( S(IJ, SKEN) - S(IJ, SKEN-1) ) / W(IJ, SKEN+1) * DLZI(SKEN+1)
-         SI(IJ, SKEN+1) = &
-     &      MAX( SI(IJ, SKEN+1), MAX( FLTMP, S(IJ, SKEN) ) )
-         SI(IJ, SKEN+1) = MIN( SI(IJ, SKEN+1), S(IJ, SKEN) )
-      END IF
-      ELSE IF ( W(IJ, SKEN+1) < 0.0D0 ) THEN
-      FLDEL(SKEN+1) = S(IJ, SKEN) - 0.0D0
-      FLGAM(SKEN+1) = ( ( S(IJ, SKEN) - 0.0D0 ) / DLZI(SKEN+1) ) &
-     &              - ( ( 0.0D0       - 0.0D0 ) / DLZI(SKEN+1) )
-      IF ( ABS( FLGAM(SKEN+1)*DLZ(SKEN) ) >= ABS( FLDEL(SKEN+1) ) ) THEN
-         SI(IJ, SKEN+1) = 0.0D0
-      ELSE IF ( FLDEL(SKEN+1) >= 0 ) THEN
-         FLTMP = 0.0D0 &
-     &- ( 0.0D0 - 0.0D0 ) / W(IJ, SKEN+1) * DLZI(SKEN+1)
-         SI(IJ, SKEN+1) = &
-     &      MIN( SI(IJ, SKEN+1), MIN( FLTMP, S(IJ, SKEN) ) )
-         SI(IJ, SKEN+1) = MAX( SI(IJ, SKEN+1), 0.0D0 )
-      ELSE IF ( FLDEL(SKEN+1) <  0 ) THEN
-         FLTMP = 0.0D0 &
-     &- ( 0.0D0 - 0.0D0 ) / W(IJ, SKEN+1) * DLZI(SKEN+1)
-         SI(IJ, SKEN+1) = &
-     &      MAX( SI(IJ, SKEN+1), MAX( FLTMP, S(IJ, SKEN) ) )
-         SI(IJ, SKEN+1) = MIN( SI(IJ, SKEN+1), 0.0D0 )
-      END IF
-      END IF
-      END DO
+      do ij = ijtstr, ijtend
+      if ( w(ij, sken+1) >= 0.0d0 ) then
+      fldel(sken+1) = s(ij, sken) - s(ij, sken-1)
+      flgam(sken+1) = ( ( s(ij, sken) - s(ij, sken)   ) / dlzi(sken+1) ) &
+     &              - ( ( s(ij, sken) - s(ij, sken-1) ) / dlzi(sken)   )
+      if ( abs( flgam(sken+1)*dlz(sken) ) >= abs( fldel(sken+1) ) ) then
+         si(ij, sken+1) = s(ij, sken)
+      else if ( fldel(sken+1) >= 0 ) then
+         fltmp = s(ij, sken-1) &
+     &+ ( s(ij, sken) - s(ij, sken-1) ) / w(ij, sken+1) * dlzi(sken+1)
+         si(ij, sken+1) = &
+     &      min( si(ij, sken+1), min( fltmp, s(ij, sken) ) )
+         si(ij, sken+1) = max( si(ij, sken+1), s(ij, sken) )
+      else if ( fldel(sken+1) <  0 ) then
+         fltmp = s(ij, sken-1) &
+     &+ ( s(ij, sken) - s(ij, sken-1) ) / w(ij, sken+1) * dlzi(sken+1)
+         si(ij, sken+1) = &
+     &      max( si(ij, sken+1), max( fltmp, s(ij, sken) ) )
+         si(ij, sken+1) = min( si(ij, sken+1), s(ij, sken) )
+      end if
+      else if ( w(ij, sken+1) < 0.0d0 ) then
+      fldel(sken+1) = s(ij, sken) - 0.0d0
+      flgam(sken+1) = ( ( s(ij, sken) - 0.0d0 ) / dlzi(sken+1) ) &
+     &              - ( ( 0.0d0       - 0.0d0 ) / dlzi(sken+1) )
+      if ( abs( flgam(sken+1)*dlz(sken) ) >= abs( fldel(sken+1) ) ) then
+         si(ij, sken+1) = 0.0d0
+      else if ( fldel(sken+1) >= 0 ) then
+         fltmp = 0.0d0 &
+     &- ( 0.0d0 - 0.0d0 ) / w(ij, sken+1) * dlzi(sken+1)
+         si(ij, sken+1) = &
+     &      min( si(ij, sken+1), min( fltmp, s(ij, sken) ) )
+         si(ij, sken+1) = max( si(ij, sken+1), 0.0d0 )
+      else if ( fldel(sken+1) <  0 ) then
+         fltmp = 0.0d0 &
+     &- ( 0.0d0 - 0.0d0 ) / w(ij, sken+1) * dlzi(sken+1)
+         si(ij, sken+1) = &
+     &      max( si(ij, sken+1), max( fltmp, s(ij, sken) ) )
+         si(ij, sken+1) = min( si(ij, sken+1), 0.0d0 )
+      end if
+      end if
+      end do
 
-      END IF
+      end if
 
-      DO K = SKST+1, SKEN+1
-      DO IJ = IJTSTR, IJTEND
-         FLX(IJ, K) = ( 1.0D0 - PHII(K) ) * W(IJ, K) * SI(IJ, K)
-      END DO
-      END DO
+      do k = skst+1, sken+1
+      do ij = ijtstr, ijtend
+         flx(ij, k) = ( 1.0d0 - phii(k) ) * w(ij, k) * si(ij, k)
+      end do
+      end do
 
-      END IF
+      end if
 
 !     -- Diffusion : Crank nicolson
 
-      IF (SDIC) THEN
+      if (sdic) then
 
-      DO K = SKST, SKEN
-         EAL(K) = ( ( 1.0D0 - PHI(K) ) / TS )
-         EBE(K) = ( ( ( 1.0D0 - PHII(K) )   * DBI(K) ) &
-     &            / ( 2.0D0 * DLZ(K) * DLZI(K)   ) )
-         EGA(K) = ( ( ( 1.0D0 - PHII(K+1) ) * DBI(K+1) ) &
-     &            / ( 2.0D0 * DLZ(K) * DLZI(K+1) ) )
-      END DO
+      do k = skst, sken
+         eal(k) = ( ( 1.0d0 - phi(k) ) / ts )
+         ebe(k) = ( ( ( 1.0d0 - phii(k) )   * dbi(k) ) &
+     &            / ( 2.0d0 * dlz(k) * dlzi(k)   ) )
+         ega(k) = ( ( ( 1.0d0 - phii(k+1) ) * dbi(k+1) ) &
+     &            / ( 2.0d0 * dlz(k) * dlzi(k+1) ) )
+      end do
 
-      DO K = SKST+1, SKEN-1
-         EA(K)     = - EBE(K)
-         EB(K)     = EAL(K) + EBE(K) + EGA(K)
-         EC(K)     = - EGA(K)
-      END DO
+      do k = skst+1, sken-1
+         ea(k)     = - ebe(k)
+         eb(k)     = eal(k) + ebe(k) + ega(k)
+         ec(k)     = - ega(k)
+      end do
 
-         EA(SKST)  = - EBE(SKST)
-         EB(SKST)  = EAL(SKST) + EGA(SKST)
-         EC(SKST)  = - EGA(SKST)
-         EA(SKEN)  = - EBE(SKEN)
-         EB(SKEN)  = EAL(SKEN) + EBE(SKEN)
-         EC(SKEN)  = - EGA(SKEN)
+         ea(skst)  = - ebe(skst)
+         eb(skst)  = eal(skst) + ega(skst)
+         ec(skst)  = - ega(skst)
+         ea(sken)  = - ebe(sken)
+         eb(sken)  = eal(sken) + ebe(sken)
+         ec(sken)  = - ega(sken)
 
-      DO IJ = IJTSTR, IJTEND
-         ED(IJ, SKST) = &
-     &      + ( EAL(SKST) - EGA(SKST) ) * S(IJ, SKST) &
-     &      + EGA(SKST) * S(IJ, SKST+1) &
-     &      + ( ( FLX(IJ, SKST) - FLX(IJ, SKST+1) ) / DLZ(SKST) ) &
-     &      + ( ( 1.0D0 - PHI(SKST) ) / 3.1536D+7 )
-      END DO
+      do ij = ijtstr, ijtend
+         ed(ij, skst) = &
+     &      + ( eal(skst) - ega(skst) ) * s(ij, skst) &
+     &      + ega(skst) * s(ij, skst+1) &
+     &      + ( ( flx(ij, skst) - flx(ij, skst+1) ) / dlz(skst) ) &
+     &      + ( ( 1.0d0 - phi(skst) ) / 3.1536d+7 )
+      end do
 
-      DO K = SKST+1, SKEN-1
-      DO IJ = IJTSTR, IJTEND
-         ED(IJ, K) = &
-     &      + EBE(K) * S(IJ, K-1) &
-     &      + ( EAL(K) - EBE(K) - EGA(K) ) * S(IJ, K) &
-     &      + EGA(K) * S(IJ, K+1) &
-     &      + ( ( FLX(IJ, K) - FLX(IJ, K+1) ) / DLZ(K) ) &
-     &      + ( ( 1.0D0 - PHI(K) ) / 3.1536D+7 )
-      END DO
-      END DO
+      do k = skst+1, sken-1
+      do ij = ijtstr, ijtend
+         ed(ij, k) = &
+     &      + ebe(k) * s(ij, k-1) &
+     &      + ( eal(k) - ebe(k) - ega(k) ) * s(ij, k) &
+     &      + ega(k) * s(ij, k+1) &
+     &      + ( ( flx(ij, k) - flx(ij, k+1) ) / dlz(k) ) &
+     &      + ( ( 1.0d0 - phi(k) ) / 3.1536d+7 )
+      end do
+      end do
 
-      DO IJ = IJTSTR, IJTEND
-         ED(IJ, SKEN) = &
-     &      + EBE(SKEN) * S(IJ, SKEN-1) &
-     &      + ( EAL(SKEN) - EBE(SKEN) ) * S(IJ, SKEN) &
-     &      + ( ( FLX(IJ, SKEN) - FLX(IJ, SKEN+1) ) / DLZ(SKEN) ) &
-     &      + ( ( 1.0D0 - PHI(SKEN) ) / 3.1536D+7 )
-      END DO
+      do ij = ijtstr, ijtend
+         ed(ij, sken) = &
+     &      + ebe(sken) * s(ij, sken-1) &
+     &      + ( eal(sken) - ebe(sken) ) * s(ij, sken) &
+     &      + ( ( flx(ij, sken) - flx(ij, sken+1) ) / dlz(sken) ) &
+     &      + ( ( 1.0d0 - phi(sken) ) / 3.1536d+7 )
+      end do
 
-      call calc_tridiagonal_solid( EA, EB, EC, ED, EX )
+      call calc_tridiagonal_solid( ea, eb, ec, ed, ex )
 
-      END IF
+      end if
 
 !     -- Diffusion : Implicit
 
-      IF (SDII) THEN
+      if (sdii) then
 
-      DO K = SKST, SKEN
-         EAL(K) = ( ( 1.0D0 - PHI(K) ) / TS )
-         EBE(K) = ( ( ( 1.0D0 - PHII(K) )   * DBI(K) ) &
-     &            / ( DLZ(K) * DLZI(K)   ) )
-         EGA(K) = ( ( ( 1.0D0 - PHII(K+1) ) * DBI(K+1) ) &
-     &            / ( DLZ(K) * DLZI(K+1) ) )
-      END DO
+      do k = skst, sken
+         eal(k) = ( ( 1.0d0 - phi(k) ) / ts )
+         ebe(k) = ( ( ( 1.0d0 - phii(k) )   * dbi(k) ) &
+     &            / ( dlz(k) * dlzi(k)   ) )
+         ega(k) = ( ( ( 1.0d0 - phii(k+1) ) * dbi(k+1) ) &
+     &            / ( dlz(k) * dlzi(k+1) ) )
+      end do
 
-      DO K = SKST+1, SKEN-1
-         EA(K)     = - EBE(K)
-         EB(K)     = EAL(K) + EBE(K) + EGA(K)
-         EC(K)     = - EGA(K)
-      END DO
+      do k = skst+1, sken-1
+         ea(k)     = - ebe(k)
+         eb(k)     = eal(k) + ebe(k) + ega(k)
+         ec(k)     = - ega(k)
+      end do
 
-         EA(SKST)  = - EBE(SKST)
-         EB(SKST)  = EAL(SKST) + EGA(SKST)
-         EC(SKST)  = - EGA(SKST)
-         EA(SKEN)  = - EBE(SKEN)
-         EB(SKEN)  = EAL(SKEN) + EBE(SKEN)
-         EC(SKEN)  = - EGA(SKEN)
+         ea(skst)  = - ebe(skst)
+         eb(skst)  = eal(skst) + ega(skst)
+         ec(skst)  = - ega(skst)
+         ea(sken)  = - ebe(sken)
+         eb(sken)  = eal(sken) + ebe(sken)
+         ec(sken)  = - ega(sken)
 
-      DO K = SKST, SKEN
-      DO IJ = IJTSTR, IJTEND
-         ED(IJ, K) = &
-     &      + EAL(K) * S(IJ, K) &
-     &      + ( ( FLX(IJ, K) - FLX(IJ, K+1) ) / DLZ(K) ) &
-     &      + ( ( 1.0D0 - PHI(K) ) / 3.1536D+7 )
-      END DO
-      END DO
+      do k = skst, sken
+      do ij = ijtstr, ijtend
+         ed(ij, k) = &
+     &      + eal(k) * s(ij, k) &
+     &      + ( ( flx(ij, k) - flx(ij, k+1) ) / dlz(k) ) &
+     &      + ( ( 1.0d0 - phi(k) ) / 3.1536d+7 )
+      end do
+      end do
 
-      call calc_tridiagonal_solid( EA, EB, EC, ED, EX )
+      call calc_tridiagonal_solid( ea, eb, ec, ed, ex )
 
-      END IF
+      end if
 
 !     -- t = t + dt --
 
-      DO K = SKST, SKEN
-      DO IJ = IJTSTR, IJTEND
-         SN(IJ, K) = MAX( EX(IJ, K), 0.0D0 )
-         EX(IJ, K) = 0.0D0
-      END DO
-      END DO
+      do k = skst, sken
+      do ij = ijtstr, ijtend
+         sn(ij, k) = max( ex(ij, k), 0.0d0 )
+         ex(ij, k) = 0.0d0
+      end do
+      end do
 
       end subroutine calc_step_solid_age
 
 ! =====================================================================
 
-      subroutine calc_tridiagonal_solid( EA, EB, EC, ED, EX )
+      subroutine calc_tridiagonal_solid( ea, eb, ec, ed, ex )
 
-      double precision, intent(in)  :: EA(SDZDIM), EB(SDZDIM), EC(SDZDIM)
-      double precision, intent(in)  :: ED(NXY,SDZDIM)
-      double precision, intent(out) :: EX(NXY,SDZDIM)
+      double precision, intent(in)  :: ea(sdzdim), eb(sdzdim), ec(sdzdim)
+      double precision, intent(in)  :: ed(nxy,sdzdim)
+      double precision, intent(out) :: ex(nxy,sdzdim)
 
-      double precision :: EW(NXY,SDZDIM)
-      double precision :: BET(NXY)
+      double precision :: ew(nxy,sdzdim)
+      double precision :: bet(nxy)
 
-      integer :: IJ, K
+      integer :: ij, k
 
-      DO IJ = IJTSTR, IJTEND
-         BET(IJ)      = EB(SKST)
-         EX(IJ, SKST) = ED(IJ, SKST) / BET(IJ)
-      END DO
+      do ij = ijtstr, ijtend
+         bet(ij)      = eb(skst)
+         ex(ij, skst) = ed(ij, skst) / bet(ij)
+      end do
 
-      DO K = SKST+1, SKEN
-      DO IJ = IJTSTR, IJTEND
-         EW(IJ, K) = EC(K-1) / BET(IJ)
-         BET(IJ)   = EB(K) - EA(K) * EW(IJ, K)
-         EX(IJ, K) = (ED(IJ, K) - EA(K) * EX(IJ, K-1) ) / BET(IJ)
-      END DO
-      END DO
+      do k = skst+1, sken
+      do ij = ijtstr, ijtend
+         ew(ij, k) = ec(k-1) / bet(ij)
+         bet(ij)   = eb(k) - ea(k) * ew(ij, k)
+         ex(ij, k) = (ed(ij, k) - ea(k) * ex(ij, k-1) ) / bet(ij)
+      end do
+      end do
 
-      DO K = SKEN-1, SKST, -1
-      DO IJ = IJTSTR, IJTEND
-         EX(IJ, K) = EX(IJ, K) - EW(IJ, K+1) * EX(IJ, K+1)
-      END DO
-      END DO
+      do k = sken-1, skst, -1
+      do ij = ijtstr, ijtend
+         ex(ij, k) = ex(ij, k) - ew(ij, k+1) * ex(ij, k+1)
+      end do
+      end do
 
       end subroutine calc_tridiagonal_solid
 

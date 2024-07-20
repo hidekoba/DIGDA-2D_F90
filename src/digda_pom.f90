@@ -15,9 +15,9 @@ module globals_digda_pom
   use module_digda_timestep
   implicit none
 
-  double precision :: KOX = 2.00D-9  !! 2.00D-9 [/s]
-  double precision :: KAX = 7.90D-11 !! 7.90D-11 [/s]
-  namelist /NMSDPM/ KOX, KAX
+  double precision :: kox = 2.00d-9  !! 2.00d-9 [/s]
+  double precision :: kax = 7.90d-11 !! 7.90d-11 [/s]
+  namelist /nmsdpm/ kox, kax
 
 end module globals_digda_pom
 
@@ -30,44 +30,43 @@ contains
 
   subroutine set_digda_pom
 
-    WRITE(NFSTDO, *) '*** Sediment : set_digda_pom ***'
-    REWIND(NFPARM)
-    READ (NFPARM, NMSDPM, END=99)
+    write(nfstdo, *) '*** Sediment : set_digda_pom ***'
+    rewind(nfparm)
+    read(nfparm, nmsdpm, end=99)
 99 continue
-    WRITE(NFSTDO, NMSDPM)
+    write(nfstdo, nmsdpm)
 
   end subroutine set_digda_pom
 
-  subroutine calc_pom_dissolution( &
- &  SPOM, CDO2, CP, OP, PHI, &
- &  RPOM )
+  subroutine calc_pom_dissolution( spom, cdo2, cp, op, phi, & !! IN
+                                 & rpom                     ) !! OUT
 
-    double precision, intent(in) :: SPOM(NXY, SDZDIM)
-    double precision, intent(in) :: CDO2(NXY, SDZDIM)
-    double precision, intent(in) :: CP, OP
-    double precision, intent(in) :: PHI(SDZDIM)
-    double precision, intent(out) :: RPOM(NXY, SDZDIM)
+    double precision, intent(in) :: spom(nxy, sdzdim)
+    double precision, intent(in) :: cdo2(nxy, sdzdim)
+    double precision, intent(in) :: cp, op
+    double precision, intent(in) :: phi(sdzdim)
+    double precision, intent(out) :: rpom(nxy, sdzdim)
 
-    double precision :: RPOMMAX
+    double precision :: rpommax
 
-    integer :: IJ, K
+    integer :: ij, k
 
-    DO K = SKST, SKEN
-      DO IJ = IJTSTR, IJTEND
-        IF ( SPOM(IJ, K) /= 0.0D0 ) THEN
-          IF ( CDO2(IJ, K) > 0.0D0 ) THEN
-            RPOM(IJ, K) = KOX
-          ELSE IF ( CDO2(IJ, K) == 0.0D0 ) THEN
-            RPOM(IJ, K) = KAX
-          END IF
-          RPOMMAX = ( PHI(K) / ( 1.0D0 - PHI(K) ) ) &
-         &        * ( CP / OP ) * CDO2(IJ, K) / SPOM(IJ, K) / TS
-          RPOM(IJ, K) = MAX( MIN( RPOM(IJ, K), RPOMMAX ), KAX )
-        ELSE
-          RPOM(IJ, K) = 0.0D0
-        END IF
-      END DO
-     END DO
+    do k = skst, sken
+      do ij = ijtstr, ijtend
+        if ( spom(ij, k) /= 0.0d0 ) then
+          if ( cdo2(ij, k) > 0.0d0 ) then
+            rpom(ij, k) = kox
+          else if ( cdo2(ij, k) == 0.0d0 ) then
+            rpom(ij, k) = kax
+          end if
+          rpommax = ( phi(k) / ( 1.0d0 - phi(k) ) ) &
+         &        * ( cp / op ) * cdo2(ij, k) / spom(ij, k) / ts
+          rpom(ij, k) = max( min( rpom(ij, k), rpommax ), kax )
+        else
+          rpom(ij, k) = 0.0d0
+        end if
+      end do
+     end do
 
   end subroutine calc_pom_dissolution
 end module module_digda_pom

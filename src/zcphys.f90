@@ -11,7 +11,7 @@ module module_zcphys
 ! double precision :: cpvap, rvap
 ! parameter(cpvap = 1810., rvap = 461.)
 ! double precision :: dwatr
-! parameter(dwatr = 1.d3)
+! parameter(dwatr = 1.d+3)
 ! double precision :: es0
 ! parameter(es0 = 611.)
 ! double precision :: stb

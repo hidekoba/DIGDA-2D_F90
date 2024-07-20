@@ -31,22 +31,22 @@ contains
     write(nfstdo, *) "'--------------------------------------------------'"
     write(nfstdo, *) "'-- Started reading Sed-Water boundary forcing   --'"
     write(nfstdo, *) "'--------------------------------------------------'"
-    write(nfstdo, *) "  DIGDA TRACER No.01 = SCLA"
-    write(nfstdo, *) "  DIGDA TRACER No.02 = SPOM"
-    write(nfstdo, *) "  DIGDA TRACER No.03 = SCAR"
-    write(nfstdo, *) "  DIGDA TRACER No.04 = SOPA"
-    write(nfstdo, *) "  DIGDA TRACER No.05 = SAGE"
-    write(nfstdo, *) "  DIGDA TRACER No.06 = CNIT"
-    write(nfstdo, *) "  DIGDA TRACER No.07 = CDIC"
-    write(nfstdo, *) "  DIGDA TRACER No.08 = CALK"
-    write(nfstdo, *) "  DIGDA TRACER No.09 = CSIL"
-    write(nfstdo, *) "  DIGDA TRACER No.10 = CDO2"
-    write(nfstdo, *) "  DIGDA TRACER No.11 = S13POM"
-    write(nfstdo, *) "  DIGDA TRACER No.12 = S13CAR"
-    write(nfstdo, *) "  DIGDA TRACER No.13 = C13DIC"
-    write(nfstdo, *) "  DIGDA TRACER No.14 = S14POM"
-    write(nfstdo, *) "  DIGDA TRACER No.15 = S14CAR"
-    write(nfstdo, *) "  DIGDA TRACER No.16 = C14DIC"
+    write(nfstdo, *) "  DIGDA TRACER No.01 = scla"
+    write(nfstdo, *) "  DIGDA TRACER No.02 = spom"
+    write(nfstdo, *) "  DIGDA TRACER No.03 = scar"
+    write(nfstdo, *) "  DIGDA TRACER No.04 = sopa"
+    write(nfstdo, *) "  DIGDA TRACER No.05 = sage"
+    write(nfstdo, *) "  DIGDA TRACER No.06 = cnit"
+    write(nfstdo, *) "  DIGDA TRACER No.07 = cdic"
+    write(nfstdo, *) "  DIGDA TRACER No.08 = calk"
+    write(nfstdo, *) "  DIGDA TRACER No.09 = csil"
+    write(nfstdo, *) "  DIGDA TRACER No.10 = cdo2"
+    write(nfstdo, *) "  DIGDA TRACER No.11 = s13pom"
+    write(nfstdo, *) "  DIGDA TRACER No.12 = s13car"
+    write(nfstdo, *) "  DIGDA TRACER No.13 = c13dic"
+    write(nfstdo, *) "  DIGDA TRACER No.14 = s14pom"
+    write(nfstdo, *) "  DIGDA TRACER No.15 = s14car"
+    write(nfstdo, *) "  DIGDA TRACER No.16 = c14dic"
     write(nfstdo, *) "'--------------------------------------------------'"
     rewind(nfparm)
     read(nfparm, NML=nmocbc, IOSTAT=ios)
@@ -65,9 +65,9 @@ contains
         ij = i + (j - 1) * nxdim
         bdep(ij) = vard2d(i, j)
         if (vard2d(i, j) == rmiss) then
-          omask(i, j) = 0.D0
+          omask(i, j) = 0.d0
         else
-          omask(i, j) = 1.D0
+          omask(i, j) = 1.d0
         end if
       end do
     end do
@@ -205,7 +205,7 @@ contains
     do j = 1, nydim
       do i = 1, nxdim
         ij = i + (j - 1) * nxdim
-        vard2d(i, j) = 0.D0
+        vard2d(i, j) = 0.d0
         bfrc(ij, 5) = vard2d(i, j) * omask(i, j)
       end do
     end do

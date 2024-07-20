@@ -36,7 +36,7 @@ program digda_ased
 
   !-- Initial setup --
   open( UNIT=nfparm, FILE='PARAMET', STATUS='OLD', &
-      & ACCESS='SEQUENTIAL', FORM='FORMATTED'      )
+      & ACCESS='SeqUENTIAL', FORM='FORMATTED'      )
   rewind(nfparm)
   read(nfparm, NML=nmstdo, IOSTAT=ios)
  !if (ios /= 0) then
@@ -46,7 +46,7 @@ program digda_ased
   lenstd = index(cstdo, ' ')
   write(cstdo(lenstd:lenstd+2), '(A1,I2.2)') '.', myrank
   open( UNIT=nfstdo, FILE=cstdo, STATUS='NEW', &
-      & ACCESS='SEQUENTIAL', FORM='FORMATTED' )
+      & ACCESS='SeqUENTIAL', FORM='FORMATTED' )
   write(nfstdo, *) "'--------------------------------------------------'"
   write(nfstdo, *) 'MESSAGE OUTPUT FOR RANK', myrank
   read(nfparm, NML=nmrun, IOSTAT=ios)
@@ -60,9 +60,9 @@ program digda_ased
 
 ! open(nfparm, FILE="PARAMET", STATUS="UNKNOWN")
 ! open(nfstdo, FILE="STDOUT",  STATUS="UNKNOWN")
-  if ( myrank == iroot ) then
-    open(UNIT=nfsots, FILE="TSTEP", STATUS="UNKNOWN")
-  end if
+! if ( myrank == iroot ) then
+  open(UNIT=nfsots, FILE="TSTEP", STATUS="UNKNOWN")
+! end if
 
  !!-- Read the namelist --
  !call read_namelist()

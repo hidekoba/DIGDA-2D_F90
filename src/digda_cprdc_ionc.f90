@@ -20,7 +20,7 @@ module module_digda_cprdc
   use module_digda_clay
   use module_digda_pom
   use module_digda_carbonate
-  use module_digda_sio2l
+  use module_digda_silicate
   use module_digda_step_solid
   use module_digda_step_liquid
   use module_digda_chemeq
@@ -55,11 +55,11 @@ contains
     !      Alkalinity, Dissolved Oxygen, Silicate
     ! --------------------------------------------------
 
-    double precision, intent(in) :: BDEPG(nxydim)
-    double precision, intent(in) :: BFRCG(nxydim, BENFDM)
+    double precision, intent(in) :: bdepg(nxydim)
+    double precision, intent(in) :: bfrcg(nxydim, benfdm)
 
     double precision, intent(inout) :: sdtx(nxydim, sdzdim, sedtdm)
-    double precision :: sdtxBUF(NXDIM, NYDIM, sdzdim, sedtdm)
+    double precision :: sdtxbuf(nxdim, nydim, sdzdim, sedtdm)
 
     ! --------------------------------------------------
     !   Particles
@@ -68,46 +68,46 @@ contains
 
     ! Concentration
     !   clay [g/m^3], pom, caco3, opal [mMol/m^3], agetracer [yr]
-    double precision :: SCLA(NXY, SDZ),   SNCLA(NXY, SDZ)
-    double precision :: SPOM(NXY, SDZ),   SNPOM(NXY, SDZ)
-    double precision :: SCAR(NXY, SDZ),   SNCAR(NXY, SDZ)
-    double precision :: SOPA(NXY, SDZ),   SNOPA(NXY, SDZ)
-    double precision :: SAGE(NXY, SDZ),   SNAGE(NXY, SDZ)
-    double precision :: S13POM(NXY, SDZ), SN13POM(NXY, SDZ)
-    double precision :: S14POM(NXY, SDZ), SN14POM(NXY, SDZ)
-    double precision :: S13CAR(NXY, SDZ), SN13CAR(NXY, SDZ)
-    double precision :: S14CAR(NXY, SDZ), SN14CAR(NXY, SDZ)
-    double precision :: SCLAG(nxydim, sdzdim)
-    double precision :: SPOMG(nxydim, sdzdim)
-    double precision :: SCARG(nxydim, sdzdim)
-    double precision :: SOPAG(nxydim, sdzdim)
-    double precision :: SAGEG(nxydim, sdzdim)
-    double precision :: S13POMG(nxydim, sdzdim)
-    double precision :: S14POMG(nxydim, sdzdim)
-    double precision :: S13CARG(nxydim, sdzdim)
-    double precision :: S14CARG(nxydim, sdzdim)
+    double precision :: scla(nxy, sdz),   sncla(nxy, sdz)
+    double precision :: spom(nxy, sdz),   snpom(nxy, sdz)
+    double precision :: scar(nxy, sdz),   sncar(nxy, sdz)
+    double precision :: sopa(nxy, sdz),   snopa(nxy, sdz)
+    double precision :: sage(nxy, sdz),   snage(nxy, sdz)
+    double precision :: s13pom(nxy, sdz), sn13pom(nxy, sdz)
+    double precision :: s14pom(nxy, sdz), sn14pom(nxy, sdz)
+    double precision :: s13car(nxy, sdz), sn13car(nxy, sdz)
+    double precision :: s14car(nxy, sdz), sn14car(nxy, sdz)
+    double precision :: sclag(nxydim, sdzdim)
+    double precision :: spomg(nxydim, sdzdim)
+    double precision :: scarg(nxydim, sdzdim)
+    double precision :: sopag(nxydim, sdzdim)
+    double precision :: sageg(nxydim, sdzdim)
+    double precision :: s13pomg(nxydim, sdzdim)
+    double precision :: s14pomg(nxydim, sdzdim)
+    double precision :: s13carg(nxydim, sdzdim)
+    double precision :: s14carg(nxydim, sdzdim)
 
     ! Weight percent [%]
-    double precision :: PCLA(NXY, SDZ)
-    double precision :: PPOM(NXY, SDZ)
-    double precision :: PCAR(NXY, SDZ)
-    double precision :: POPA(NXY, SDZ)
-    double precision :: WT(NXY, SDZ)
-    double precision :: PCLAG(nxydim, sdzdim)
-    double precision :: PPOMG(nxydim, sdzdim)
-    double precision :: PCARG(nxydim, sdzdim)
-    double precision :: POPAG(nxydim, sdzdim)
-    double precision :: WTG(nxydim, sdzdim)
+    double precision :: pcla(nxy, sdz)
+    double precision :: ppom(nxy, sdz)
+    double precision :: pcar(nxy, sdz)
+    double precision :: popa(nxy, sdz)
+    double precision :: wt(nxy, sdz)
+    double precision :: pclag(nxydim, sdzdim)
+    double precision :: ppomg(nxydim, sdzdim)
+    double precision :: pcarg(nxydim, sdzdim)
+    double precision :: popag(nxydim, sdzdim)
+    double precision :: wtg(nxydim, sdzdim)
 
     ! Dissolution rate [1/s], Dissolution term [mMol/m^3/s]
-    double precision :: RCLA(NXY, SDZ),   TRCLA(NXY, SDZ)
-    double precision :: RPOM(NXY, SDZ),   TRPOM(NXY, SDZ)
-    double precision :: RCAR(NXY, SDZ),   TRCAR(NXY, SDZ)
-    double precision :: ROPA(NXY, SDZ),   TROPA(NXY, SDZ)
-    double precision :: R13POM(NXY, SDZ), TR13POM(NXY, SDZ)
-    double precision :: R14POM(NXY, SDZ), TR14POM(NXY, SDZ)
-    double precision :: R13CAR(NXY, SDZ), TR13CAR(NXY, SDZ)
-    double precision :: R14CAR(NXY, SDZ), TR14CAR(NXY, SDZ)
+    double precision :: rcla(nxy, sdz),   trcla(nxy, sdz)
+    double precision :: rpom(nxy, sdz),   trpom(nxy, sdz)
+    double precision :: rcar(nxy, sdz),   trcar(nxy, sdz)
+    double precision :: ropa(nxy, sdz),   tropa(nxy, sdz)
+    double precision :: r13pom(nxy, sdz), tr13pom(nxy, sdz)
+    double precision :: r14pom(nxy, sdz), tr14pom(nxy, sdz)
+    double precision :: r13car(nxy, sdz), tr13car(nxy, sdz)
+    double precision :: r14car(nxy, sdz), tr14car(nxy, sdz)
 
     ! --------------------------------------------------
     !   Dissolved material
@@ -116,122 +116,122 @@ contains
     ! --------------------------------------------------
 
     ! Concentration [mMol/m^3]
-    double precision :: CNIT(NXY, SDZ),   CNNIT(NXY, SDZ)
-    double precision :: CDIC(NXY, SDZ),   CNDIC(NXY, SDZ)
-    double precision :: CALK(NXY, SDZ),   CNALK(NXY, SDZ)
-    double precision :: CDO2(NXY, SDZ),   CNDO2(NXY, SDZ)
-    double precision :: CSIL(NXY, SDZ),   CNSIL(NXY, SDZ)
-    double precision :: C13DIC(NXY, SDZ), CN13DIC(NXY, SDZ)
-    double precision :: C14DIC(NXY, SDZ), CN14DIC(NXY, SDZ)
-    double precision :: CDC13(NXY, SDZ),  CDC14(NXY, SDZ)
-    double precision :: CCO32(NXY, SDZ)
-    double precision :: SATCO32(NXY)
-    double precision :: SATSIL(NXY,SDZ)
-    double precision :: CNITG(nxydim, sdzdim)
-    double precision :: CDICG(nxydim, sdzdim)
-    double precision :: CALKG(nxydim, sdzdim)
-    double precision :: CDO2G(nxydim, sdzdim)
-    double precision :: CSILG(nxydim, sdzdim)
-    double precision :: C13DICG(nxydim, sdzdim)
-    double precision :: C14DICG(nxydim, sdzdim)
-    double precision :: CDC13G(nxydim, sdzdim)
-    double precision :: CDC14G(nxydim, sdzdim)
-    double precision :: CCO32G(nxydim, sdzdim)
-    double precision :: SATCO32G(nxydim)
-    double precision :: SATSILG(nxydim,sdzdim)
+    double precision :: cnit(nxy, sdz),   cnnit(nxy, sdz)
+    double precision :: cdic(nxy, sdz),   cndic(nxy, sdz)
+    double precision :: calk(nxy, sdz),   cnalk(nxy, sdz)
+    double precision :: cdo2(nxy, sdz),   cndo2(nxy, sdz)
+    double precision :: csil(nxy, sdz),   cnsil(nxy, sdz)
+    double precision :: c13dic(nxy, sdz), cn13dic(nxy, sdz)
+    double precision :: c14dic(nxy, sdz), cn14dic(nxy, sdz)
+    double precision :: cdc13(nxy, sdz),  cdc14(nxy, sdz)
+    double precision :: cco32(nxy, sdz)
+    double precision :: satco32(nxy)
+    double precision :: satsil(nxy,sdz)
+    double precision :: cnitg(nxydim, sdzdim)
+    double precision :: cdicg(nxydim, sdzdim)
+    double precision :: calkg(nxydim, sdzdim)
+    double precision :: cdo2g(nxydim, sdzdim)
+    double precision :: csilg(nxydim, sdzdim)
+    double precision :: c13dicg(nxydim, sdzdim)
+    double precision :: c14dicg(nxydim, sdzdim)
+    double precision :: cdc13g(nxydim, sdzdim)
+    double precision :: cdc14g(nxydim, sdzdim)
+    double precision :: cco32g(nxydim, sdzdim)
+    double precision :: satco32g(nxydim)
+    double precision :: satsilg(nxydim,sdzdim)
 
     ! Concentration (bottom water)
     !   temperature [C], salinity [psu], the others [mMol/m^3]
-    double precision :: BWTEM(NXY)
-    double precision :: BWSAL(NXY)
-    double precision :: BWNIT(NXY)
-    double precision :: BWDIC(NXY)
-    double precision :: BWALK(NXY)
-    double precision :: BWDO2(NXY)
-    double precision :: BWSIL(NXY)
-    double precision :: BW13DIC(NXY)
-    double precision :: BW14DIC(NXY)
-    double precision :: BWTEMG(nxydim)
-    double precision :: BWSALG(nxydim)
-    double precision :: BWNITG(nxydim)
-    double precision :: BWDICG(nxydim)
-    double precision :: BWALKG(nxydim)
-    double precision :: BWDO2G(nxydim)
-    double precision :: BWSILG(nxydim)
-    double precision :: BW13DICG(nxydim)
-    double precision :: BW14DICG(nxydim)
+    double precision :: bwtem(nxy)
+    double precision :: bwsal(nxy)
+    double precision :: bwnit(nxy)
+    double precision :: bwdic(nxy)
+    double precision :: bwalk(nxy)
+    double precision :: bwdo2(nxy)
+    double precision :: bwsil(nxy)
+    double precision :: bw13dic(nxy)
+    double precision :: bw14dic(nxy)
+    double precision :: bwtemg(nxydim)
+    double precision :: bwsalg(nxydim)
+    double precision :: bwnitg(nxydim)
+    double precision :: bwdicg(nxydim)
+    double precision :: bwalkg(nxydim)
+    double precision :: bwdo2g(nxydim)
+    double precision :: bwsilg(nxydim)
+    double precision :: bw13dicg(nxydim)
+    double precision :: bw14dicg(nxydim)
 
     ! Concentration (total)
     !   total phosphorous [mMol/m^3], total silicon [mMol/m^3]
-    double precision :: PT(NXY)
-    double precision :: SIT(NXY)
+    double precision :: pt(nxy)
+    double precision :: sit(nxy)
 
     ! Dissolution term [mMol/m^3/s]
-    double precision :: TRNIT(NXY, SDZ)
-    double precision :: TRDIC(NXY, SDZ)
-    double precision :: TRALK(NXY, SDZ)
-    double precision :: TRDO2(NXY, SDZ)
-    double precision :: TRSIL(NXY, SDZ)
-    double precision :: TR13DIC(NXY, SDZ)
-    double precision :: TR14DIC(NXY, SDZ)
+    double precision :: trnit(nxy, sdz)
+    double precision :: trdic(nxy, sdz)
+    double precision :: tralk(nxy, sdz)
+    double precision :: trdo2(nxy, sdz)
+    double precision :: trsil(nxy, sdz)
+    double precision :: tr13dic(nxy, sdz)
+    double precision :: tr14dic(nxy, sdz)
 
     ! --------------------------------------------------
     !   Fluxes
     ! --------------------------------------------------
 
     ! Sedimentation rate
-    double precision :: W(NXY, SDZ+1)
-    double precision :: WG(nxydim, sdzdim+1)
+    double precision :: w(nxy, sdz+1)
+    double precision :: wg(nxydim, sdzdim+1)
 
     ! Sea-bottom Flux
     !   clay [g/m^3*cm/s], the others [mMol/m^3*cm/s]
-    double precision :: FICLA(NXY),   FOCLA(NXY)
-    double precision :: FIPOM(NXY),   FOPOM(NXY)
-    double precision :: FICAR(NXY),   FOCAR(NXY)
-    double precision :: FIOPA(NXY),   FOOPA(NXY)
-    double precision :: FIAGE(NXY)
-    double precision :: FI13POM(NXY), FO13POM(NXY)
-    double precision :: FI13CAR(NXY), FO13CAR(NXY)
-    double precision :: FI14POM(NXY), FO14POM(NXY)
-    double precision :: FI14CAR(NXY), FO14CAR(NXY)
+    double precision :: ficla(nxy),   focla(nxy)
+    double precision :: fipom(nxy),   fopom(nxy)
+    double precision :: ficar(nxy),   focar(nxy)
+    double precision :: fiopa(nxy),   foopa(nxy)
+    double precision :: fiage(nxy)
+    double precision :: fi13pom(nxy), fo13pom(nxy)
+    double precision :: fi13car(nxy), fo13car(nxy)
+    double precision :: fi14pom(nxy), fo14pom(nxy)
+    double precision :: fi14car(nxy), fo14car(nxy)
 
-    double precision :: FICLAG(nxydim), FOCLAG(nxydim)
-    double precision :: FIPOMG(nxydim), FOPOMG(nxydim)
-    double precision :: FICARG(nxydim), FOCARG(nxydim)
-    double precision :: FIOPAG(nxydim), FOOPAG(nxydim)
-    double precision :: FIAGEG(nxydim), FOAGEG(nxydim)
-    double precision :: FI13POMG(nxydim), FO13POMG(nxydim)
-    double precision :: FI13CARG(nxydim), FO13CARG(nxydim)
-    double precision :: FI14POMG(nxydim), FO14POMG(nxydim)
-    double precision :: FI14CARG(nxydim), FO14CARG(nxydim)
+    double precision :: ficlag(nxydim),   foclag(nxydim)
+    double precision :: fipomg(nxydim),   fopomg(nxydim)
+    double precision :: ficarg(nxydim),   focarg(nxydim)
+    double precision :: fiopag(nxydim),   foopag(nxydim)
+    double precision :: fiageg(nxydim),   foageg(nxydim)
+    double precision :: fi13pomg(nxydim), fo13pomg(nxydim)
+    double precision :: fi13carg(nxydim), fo13carg(nxydim)
+    double precision :: fi14pomg(nxydim), fo14pomg(nxydim)
+    double precision :: fi14carg(nxydim), fo14carg(nxydim)
 
     ! Sea-bottom Flux [mMol/m^3*cm/s]
-    double precision :: FINIT(NXY),   FONIT(NXY)
-    double precision :: FIDIC(NXY),   FODIC(NXY)
-    double precision :: FIALK(NXY),   FOALK(NXY)
-    double precision :: FIDO2(NXY),   FODO2(NXY)
-    double precision :: FISIL(NXY),   FOSIL(NXY)
-    double precision :: FI13DIC(NXY), FO13DIC(NXY)
-    double precision :: FI14DIC(NXY), FO14DIC(NXY)
+    double precision :: finit(nxy),   fonit(nxy)
+    double precision :: fidic(nxy),   fodic(nxy)
+    double precision :: fialk(nxy),   foalk(nxy)
+    double precision :: fido2(nxy),   fodo2(nxy)
+    double precision :: fisil(nxy),   fosil(nxy)
+    double precision :: fi13dic(nxy), fo13dic(nxy)
+    double precision :: fi14dic(nxy), fo14dic(nxy)
 
     ! Sediment-bottom Flux
     !   clay [g/m^3*cm/s], the others [mMol/m^3*cm/s]
-    double precision :: BFCLA(NXY)
-    double precision :: BFPOM(NXY)
-    double precision :: BFCAR(NXY)
-    double precision :: BFOPA(NXY)
-    double precision :: BF13POM(NXY)
-    double precision :: BF14POM(NXY)
-    double precision :: BF13CAR(NXY)
-    double precision :: BF14CAR(NXY)
-    double precision :: BFCLAG(nxydim)
-    double precision :: BFPOMG(nxydim)
-    double precision :: BFCARG(nxydim)
-    double precision :: BFOPAG(nxydim)
-    double precision :: BF13POMG(nxydim)
-    double precision :: BF14POMG(nxydim)
-    double precision :: BF13CARG(nxydim)
-    double precision :: BF14CARG(nxydim)
+    double precision :: bfcla(nxy)
+    double precision :: bfpom(nxy)
+    double precision :: bfcar(nxy)
+    double precision :: bfopa(nxy)
+    double precision :: bf13pom(nxy)
+    double precision :: bf14pom(nxy)
+    double precision :: bf13car(nxy)
+    double precision :: bf14car(nxy)
+    double precision :: bfclag(nxydim)
+    double precision :: bfpomg(nxydim)
+    double precision :: bfcarg(nxydim)
+    double precision :: bfopag(nxydim)
+    double precision :: bf13pomg(nxydim)
+    double precision :: bf14pomg(nxydim)
+    double precision :: bf13carg(nxydim)
+    double precision :: bf14carg(nxydim)
 
     ! --------------------------------------------------
     !   Others
@@ -239,10 +239,10 @@ contains
 
     ! MASK
     ! ocean depth [m]
-    double precision :: BDEP(NXY)
+    double precision :: bdep(nxy)
 
     ! Carbon isotope metrics
-    double precision :: FEOPH, FEOSH, R13, R14, ADCAY, THALF, DLTC13, DLTC14
+    double precision :: feoph, feosh, r13, r14, adcay, thalf, dltc13, dltc14
 
     ! Parallel computing
     integer, allocatable :: nrcvct2d(:),  ndispt2d(:)
@@ -269,17 +269,17 @@ contains
    !double precision, allocatable :: DUMMY57(:), DUMMY58(:)
 
     ! etc
-    character(len=100) :: FILENAME, VARNAME, VARUNIT
-    double precision :: LON_VALUES(NXDIM)
-    double precision :: LAT_VALUES(NYDIM)
-    double precision :: DEPTH_VALUES(sdzdim)
-    double precision :: VAR2D_VALUES(NXDIM, NYDIM, 1)
-    double precision :: VAR3D_VALUES(NXDIM, NYDIM, sdzdim, 1)
+    character(len=100) :: filename, varname, varunit
+    double precision :: lon_values(nxdim)
+    double precision :: lat_values(nydim)
+    double precision :: depth_values(sdzdim)
+    double precision :: var2d_values(nxdim, nydim, 1)
+    double precision :: var3d_values(nxdim, nydim, sdzdim, 1)
 
     double precision :: integral_value, mean_value
 
-    integer :: I, J, IJ, K, L, IC
-    integer :: TT, YY
+    integer :: i, j, ij, k, l, ic
+    integer :: tt, yy
     integer :: ios
 
     !-- SEDIMENT TRACERS : setup --
@@ -304,22 +304,22 @@ contains
     read(nfparm, NML=nmsdiso, IOSTAT=ios)
     write(nfstdo, nmsdiso)
 
-    sedtnm(1)  = 'SCLA'
-    sedtnm(2)  = 'SPOM'
-    sedtnm(3)  = 'SCAR'
-    sedtnm(4)  = 'SOPA'
-    sedtnm(5)  = 'SAGE'
-    sedtnm(6)  = 'CNIT'
-    sedtnm(7)  = 'CDIC'
-    sedtnm(8)  = 'CALK'
-    sedtnm(9)  = 'CSIL'
-    sedtnm(10) = 'CDO2'
-    sedtnm(11) = 'S13POM'
-    sedtnm(12) = 'S13CAR'
-    sedtnm(13) = 'C13DIC'
-    sedtnm(14) = 'S14POM'
-    sedtnm(15) = 'S14CAR'
-    sedtnm(16) = 'C14DIC'
+    sedtnm(1)  = 'scla'
+    sedtnm(2)  = 'spom'
+    sedtnm(3)  = 'scar'
+    sedtnm(4)  = 'sopa'
+    sedtnm(5)  = 'sage'
+    sedtnm(6)  = 'cnit'
+    sedtnm(7)  = 'cdic'
+    sedtnm(8)  = 'calk'
+    sedtnm(9)  = 'csil'
+    sedtnm(10) = 'cdo2'
+    sedtnm(11) = 's13pom'
+    sedtnm(12) = 's13car'
+    sedtnm(13) = 'c13dic'
+    sedtnm(14) = 's14pom'
+    sedtnm(15) = 's14car'
+    sedtnm(16) = 'c14dic'
 
     call set_digda_clay
     call set_digda_pom
@@ -348,1393 +348,1393 @@ contains
 
     ! -- Convert unit --
 
-      Z0  = Z0  * 1.0D+2                       !! [m] --> [cm]
+      z0  = z0  * 1.0d+2                       !! [m] --> [cm]
 
-      DB0 = DB0 * 1.0D+4 / 3.1536D+7           !! [m^2/yr] --> [cm^2/s]
-      ZB  = ZB  * 1.0D+2                       !! [m] --> [cm]
+      db0 = db0 * 1.0d+4 / 3.1536d+7           !! [m^2/yr] --> [cm^2/s]
+      zb  = zb  * 1.0d+2                       !! [m] --> [cm]
 
-      DO K = SKST, SKEN
-         LZ(K)   = LZ(K)   * 1.0D+2            !! [m] --> [cm]
-         DLZ(K)  = DLZ(K)  * 1.0D+2            !! [m] --> [cm]
-      END DO
-      DO K = SKST, SKEN+1
-         LZI(K)  = LZI(K)  * 1.0D+2            !! [m] --> [cm]
-         DLZI(K) = DLZI(K) * 1.0D+2            !! [m] --> [cm]
-      END DO
+      do k = skst, sken
+         lz(k)   = lz(k)   * 1.0d+2            !! [m] --> [cm]
+         dlz(k)  = dlz(k)  * 1.0d+2            !! [m] --> [cm]
+      end do
+      do k = skst, sken+1
+         lzi(k)  = lzi(k)  * 1.0d+2            !! [m] --> [cm]
+         dlzi(k) = dlzi(k) * 1.0d+2            !! [m] --> [cm]
+      end do
 
-      DSWNIT   = DSWNIT   * 1.0D+4             !! [m^2/s] --> [cm^2/s]
-      DSWDIC   = DSWDIC   * 1.0D+4             !! [m^2/s] --> [cm^2/s]
-      DSWALK   = DSWALK   * 1.0D+4             !! [m^2/s] --> [cm^2/s]
-      DSWDO2   = DSWDO2   * 1.0D+4             !! [m^2/s] --> [cm^2/s]
-      DSWSIL   = DSWSIL   * 1.0D+4             !! [m^2/s] --> [cm^2/s]
-      IF ( calc13 ) THEN
-      DSW13DIC = DSW13DIC * 1.0D+4             !! [m^2/s] --> [cm^2/s]
-      END IF
-      IF ( calc14 ) THEN
-      DSW14DIC = DSW14DIC * 1.0D+4             !! [m^2/s] --> [cm^2/s]
-      END IF
-      DSW    = DSW        * 1.0D+4             !! [m^2/s] --> [cm^2/s]
+      dswnit   = dswnit   * 1.0d+4             !! [m^2/s] --> [cm^2/s]
+      dswdic   = dswdic   * 1.0d+4             !! [m^2/s] --> [cm^2/s]
+      dswalk   = dswalk   * 1.0d+4             !! [m^2/s] --> [cm^2/s]
+      dswdo2   = dswdo2   * 1.0d+4             !! [m^2/s] --> [cm^2/s]
+      dswsil   = dswsil   * 1.0d+4             !! [m^2/s] --> [cm^2/s]
+      if ( calc13 ) then
+      dsw13dic = dsw13dic * 1.0d+4             !! [m^2/s] --> [cm^2/s]
+      end if
+      if ( calc14 ) then
+      dsw14dic = dsw14dic * 1.0d+4             !! [m^2/s] --> [cm^2/s]
+      end if
+      dsw    = dsw        * 1.0d+4             !! [m^2/s] --> [cm^2/s]
 
-      MCLA   = 1.0D-6 /  RHOCLA                !! [m^3/g]
-      MPOM   = 1.0D-9 / ( RHOPOM / MOLPOM )    !! [m^3/mMol]
-      MCAR   = 1.0D-9 / ( RHOCAR / MOLCAR )    !! [m^3/mMol]
-      MOPA   = 1.0D-9 / ( RHOOPA / MOLOPA )    !! [m^3/mMol]
-      IF ( calc13 ) THEN
-      M13POM = 1.0D-9 / ( RHOPOM / MOL13POM )  !! [m^3/mMol]
-      M13CAR = 1.0D-9 / ( RHOCAR / MOL13CAR )  !! [m^3/mMol]
-      END IF
-      IF ( calc14 ) THEN
-      M14POM = 1.0D-9 / ( RHOPOM / MOL14POM )  !! [m^3/mMol]
-      M14CAR = 1.0D-9 / ( RHOCAR / MOL14CAR )  !! [m^3/mMol]
-      THALF  = THALFYR * 3.1536D+7             !! [yr] --> [s]
-      ADCAY  = LOG( 2.0D0 ) / THALF / 365.0D0 / 8.64D4
-      END IF
-      IF ( calc13 .or. calc14 ) THEN
-      FEOPH  = 1.0D0 + EOPH * 1.0D-3
-      FEOSH  = 1.0D0 + EOSH * 1.0D-3
-      END IF
+      mcla   = 1.0d-6 /  rhocla                !! [m^3/g]
+      mpom   = 1.0d-9 / ( rhopom / molpom )    !! [m^3/mMol]
+      mcar   = 1.0d-9 / ( rhocar / molcar )    !! [m^3/mMol]
+      mopa   = 1.0d-9 / ( rhoopa / molopa )    !! [m^3/mMol]
+      if ( calc13 ) then
+      m13pom = 1.0d-9 / ( rhopom / mol13pom )  !! [m^3/mMol]
+      m13car = 1.0d-9 / ( rhocar / mol13car )  !! [m^3/mMol]
+      end if
+      if ( calc14 ) then
+      m14pom = 1.0d-9 / ( rhopom / mol14pom )  !! [m^3/mMol]
+      m14car = 1.0d-9 / ( rhocar / mol14car )  !! [m^3/mMol]
+      thalf  = thalfyr * 3.1536d+7             !! [yr] --> [s]
+      adcay  = log( 2.0d0 ) / thalf / 365.0d0 / 8.64d+4
+      end if
+      if ( calc13 .or. calc14 ) then
+      feoph  = 1.0d0 + eoph * 1.0d-3
+      feosh  = 1.0d0 + eosh * 1.0d-3
+      end if
 
-      DO IJ = 1, NXY
-         BDEP(IJ) = BDEP(IJ) * 1.0D+2          !! [m] --> [cm]
-      END DO
+      do ij = 1, nxy
+        bdep(ij) = bdep(ij) * 1.0d+2           !! [m] --> [cm]
+      end do
 
 !     -- Porosity, Diffusivity --
 
-      DO K = SKST, SKEN
-         PHI(K) = PHI0 * EXP( - LZ(K)  / Z0 )
-      END DO
+      do k = skst, sken
+        phi(k) = phi0 * exp( - lz(k)  / z0 )
+      end do
 
-      DO K = SKST, SKEN+1
-         PHII(K) = PHI0 * EXP( - LZI(K) / Z0 )
-         DBI(K)  = ( DB0 / ( 1.0D0 + EXP( 2.0D0 * ( LZI(K) - ZB ) ) ) )
-      END DO
+      do k = skst, sken+1
+        phii(k) = phi0 * exp( - lzi(k) / z0 )
+        dbi(k)  = ( db0 / ( 1.0d0 + exp( 2.0d0 * ( lzi(k) - zb ) ) ) )
+      end do
 
-      DO K = SKST, SKEN+1
-         IF (deiarc) THEN
-            DEINIT(K)   = DSWNIT   * ( PHII(K) ** 3.0D0 )
-            DEIDIC(K)   = DSWDIC   * ( PHII(K) ** 3.0D0 )
-            DEIALK(K)   = DSWALK   * ( PHII(K) ** 3.0D0 )
-            DEIDO2(K)   = DSWDO2   * ( PHII(K) ** 3.0D0 )
-            DEISIL(K)   = DSWSIL   * ( PHII(K) ** 3.0D0 )
-            IF ( calc13 ) THEN
-            DEI13DIC(K) = DSW13DIC * ( PHII(K) ** 3.0D0 )
-            END IF
-            IF ( calc14 ) THEN
-            DEI14DIC(K) = DSW14DIC * ( PHII(K) ** 3.0D0 )
-            END IF
-         ELSE
-            DEINIT(K)   = ( PHII(K) ** ( NOPA - 1.0D0 ) ) * DSW
-            DEIDIC(K)   = ( PHII(K) ** ( NOPA - 1.0D0 ) ) * DSW
-            DEIALK(K)   = ( PHII(K) ** ( NOPA - 1.0D0 ) ) * DSW
-            DEIDO2(K)   = ( PHII(K) ** ( NOPA - 1.0D0 ) ) * DSW
-            DEISIL(K)   = ( PHII(K) ** ( NOPA - 1.0D0 ) ) * DSW
-            IF ( calc13 ) THEN
-            DEI13DIC(K) = ( PHII(K) ** ( NOPA - 1.0D0 ) ) * DSW
-            END IF
-            IF ( calc14 ) THEN
-            DEI14DIC(K) = ( PHII(K) ** ( NOPA - 1.0D0 ) ) * DSW
-            END IF
-         END IF
-      END DO
+      do k = skst, sken+1
+         if (deiarc) then
+            deinit(k)   = dswnit   * ( phii(k) ** 3.0d0 )
+            deidic(k)   = dswdic   * ( phii(k) ** 3.0d0 )
+            deialk(k)   = dswalk   * ( phii(k) ** 3.0d0 )
+            deido2(k)   = dswdo2   * ( phii(k) ** 3.0d0 )
+            deisil(k)   = dswsil   * ( phii(k) ** 3.0d0 )
+            if ( calc13 ) then
+            dei13dic(k) = dsw13dic * ( phii(k) ** 3.0d0 )
+            end if
+            if ( calc14 ) then
+            dei14dic(k) = dsw14dic * ( phii(k) ** 3.0d0 )
+            end if
+         else
+            deinit(k)   = ( phii(k) ** ( nopa - 1.0d0 ) ) * dsw
+            deidic(k)   = ( phii(k) ** ( nopa - 1.0d0 ) ) * dsw
+            deialk(k)   = ( phii(k) ** ( nopa - 1.0d0 ) ) * dsw
+            deido2(k)   = ( phii(k) ** ( nopa - 1.0d0 ) ) * dsw
+            deisil(k)   = ( phii(k) ** ( nopa - 1.0d0 ) ) * dsw
+            if ( calc13 ) then
+            dei13dic(k) = ( phii(k) ** ( nopa - 1.0d0 ) ) * dsw
+            end if
+            if ( calc14 ) then
+            dei14dic(k) = ( phii(k) ** ( nopa - 1.0d0 ) ) * dsw
+            end if
+         end if
+      end do
 
 !     -- Set boundary conditions --
 
-      DO I = 1, nxydim
-        FICLAG(I) = BFRCG(I, 1)
-        FIPOMG(I) = BFRCG(I, 2)
-        FICARG(I) = BFRCG(I, 3)
-        FIOPAG(I) = BFRCG(I, 4)
-        FIAGEG(I) = BFRCG(I, 5)
-        BWTEMG(I) = BFRCG(I, 6)
-        BWSALG(I) = BFRCG(I, 7)
-        BWNITG(I) = BFRCG(I, 8)
-        BWDICG(I) = BFRCG(I, 9)
-        BWALKG(I) = BFRCG(I, 10)
-        BWSILG(I) = BFRCG(I, 11)
-        BWDO2G(I) = BFRCG(I, 12)
-        BW13DICG(I) = BFRCG(I, 13)
-        BW14DICG(I) = BFRCG(I, 14)
-      END DO
+      do i = 1, nxydim
+        ficlag(i) = bfrcg(i, 1)
+        fipomg(i) = bfrcg(i, 2)
+        ficarg(i) = bfrcg(i, 3)
+        fiopag(i) = bfrcg(i, 4)
+        fiageg(i) = bfrcg(i, 5)
+        bwtemg(i) = bfrcg(i, 6)
+        bwsalg(i) = bfrcg(i, 7)
+        bwnitg(i) = bfrcg(i, 8)
+        bwdicg(i) = bfrcg(i, 9)
+        bwalkg(i) = bfrcg(i, 10)
+        bwsilg(i) = bfrcg(i, 11)
+        bwdo2g(i) = bfrcg(i, 12)
+        bw13dicg(i) = bfrcg(i, 13)
+        bw14dicg(i) = bfrcg(i, 14)
+      end do
 
-IF (use_mpi) THEN
-      DO IJ = 1, NXY
-         FICLA(IJ) = MAX( FICLAG(MYRANK*NXY+IJ), 0.0D0 )
-         FIPOM(IJ) = MAX( FIPOMG(MYRANK*NXY+IJ), 0.0D0 )
-         FICAR(IJ) = MAX( FICARG(MYRANK*NXY+IJ), 0.0D0 )
-         FIOPA(IJ) = MAX( FIOPAG(MYRANK*NXY+IJ), 0.0D0 )
-         FIAGE(IJ) = 0.0D0
-      END DO
-ELSE
-      DO IJ = 1, NXY
-         FICLA(IJ) = MAX( FICLAG(IJ), 0.0D0 )
-         FIPOM(IJ) = MAX( FIPOMG(IJ), 0.0D0 )
-         FICAR(IJ) = MAX( FICARG(IJ), 0.0D0 )
-         FIOPA(IJ) = MAX( FIOPAG(IJ), 0.0D0 )
-         FIAGE(IJ) = 0.0D0
-      END DO
-END IF
-IF (use_mpi) THEN
-      DO IJ = 1, NXY
-         BWTEM(IJ)   = BWTEMG(MYRANK*NXY+IJ)
-         BWSAL(IJ)   = BWSALG(MYRANK*NXY+IJ)
-         BWNIT(IJ)   = MAX( BWNITG(MYRANK*NXY+IJ), 0.0D0 )
-         BWDIC(IJ)   = MAX( BWDICG(MYRANK*NXY+IJ), 0.0D0 )
-         BWALK(IJ)   = MAX( BWALKG(MYRANK*NXY+IJ), 0.0D0 )
-         BWDO2(IJ)   = MAX( BWDO2G(MYRANK*NXY+IJ), 0.0D0 )
-         BWSIL(IJ)   = MAX( BWSILG(MYRANK*NXY+IJ), 0.0D0 )
-      END DO
-ELSE
-      DO IJ = 1, NXY
-         BWTEM(IJ)   = BWTEMG(IJ)
-         BWSAL(IJ)   = BWSALG(IJ)
-         BWNIT(IJ)   = MAX( BWNITG(IJ), 0.0D0 )
-         BWDIC(IJ)   = MAX( BWDICG(IJ), 0.0D0 )
-         BWALK(IJ)   = MAX( BWALKG(IJ), 0.0D0 )
-         BWDO2(IJ)   = MAX( BWDO2G(IJ), 0.0D0 )
-         BWSIL(IJ)   = MAX( BWSILG(IJ), 0.0D0 )
-      END DO
-END IF
+if (use_mpi) then
+      do ij = 1, nxy
+         ficla(ij) = max( ficlag(myrank*nxy+ij), 0.0d0 )
+         fipom(ij) = max( fipomg(myrank*nxy+ij), 0.0d0 )
+         ficar(ij) = max( ficarg(myrank*nxy+ij), 0.0d0 )
+         fiopa(ij) = max( fiopag(myrank*nxy+ij), 0.0d0 )
+         fiage(ij) = 0.0d0
+      end do
+else
+      do ij = 1, nxy
+         ficla(ij) = max( ficlag(ij), 0.0d0 )
+         fipom(ij) = max( fipomg(ij), 0.0d0 )
+         ficar(ij) = max( ficarg(ij), 0.0d0 )
+         fiopa(ij) = max( fiopag(ij), 0.0d0 )
+         fiage(ij) = 0.0d0
+      end do
+end if
+if (use_mpi) then
+      do ij = 1, nxy
+         bwtem(ij)   = bwtemg(myrank*nxy+ij)
+         bwsal(ij)   = bwsalg(myrank*nxy+ij)
+         bwnit(ij)   = max( bwnitg(myrank*nxy+ij), 0.0d0 )
+         bwdic(ij)   = max( bwdicg(myrank*nxy+ij), 0.0d0 )
+         bwalk(ij)   = max( bwalkg(myrank*nxy+ij), 0.0d0 )
+         bwdo2(ij)   = max( bwdo2g(myrank*nxy+ij), 0.0d0 )
+         bwsil(ij)   = max( bwsilg(myrank*nxy+ij), 0.0d0 )
+      end do
+else
+      do ij = 1, nxy
+         bwtem(ij)   = bwtemg(ij)
+         bwsal(ij)   = bwsalg(ij)
+         bwnit(ij)   = max( bwnitg(ij), 0.0d0 )
+         bwdic(ij)   = max( bwdicg(ij), 0.0d0 )
+         bwalk(ij)   = max( bwalkg(ij), 0.0d0 )
+         bwdo2(ij)   = max( bwdo2g(ij), 0.0d0 )
+         bwsil(ij)   = max( bwsilg(ij), 0.0d0 )
+      end do
+end if
 
-      IF ( calc13 ) THEN
-      DO IJ = IJTSTR, IJTEND
-         FI13POM(IJ) = FEOPH * PDB  * FIPOM(IJ)
-         FI13CAR(IJ) = FEOSH * PDB  * FICAR(IJ)
-      END DO
-IF (use_mpi) THEN
-      DO IJ = 1, NXY
-         BW13DIC(IJ) = MAX( BW13DICG(MYRANK*NXY+IJ), 0.0D0 )
-      END DO
-ELSE
-      DO IJ = 1, NXY
-         BW13DIC(IJ) = MAX( BW13DICG(IJ), 0.0D0 )
-      END DO
-END IF
-      END IF
+      if ( calc13 ) then
+      do ij = ijtstr, ijtend
+         fi13pom(ij) = feoph * pdb  * fipom(ij)
+         fi13car(ij) = feosh * pdb  * ficar(ij)
+      end do
+if (use_mpi) then
+      do ij = 1, nxy
+         bw13dic(ij) = max( bw13dicg(myrank*nxy+ij), 0.0d0 )
+      end do
+else
+      do ij = 1, nxy
+         bw13dic(ij) = max( bw13dicg(ij), 0.0d0 )
+      end do
+end if
+      end if
 
-      IF ( calc14 ) THEN
-      DO IJ = IJTSTR, IJTEND
-         FI14POM(IJ) = FEOPH * DSTD * FIPOM(IJ)
-         FI14CAR(IJ) = FEOSH * DSTD * FICAR(IJ)
-      END DO
-IF (use_mpi) THEN
-      DO IJ = 1, NXY
-         BW14DIC(IJ) = MAX( BW14DICG(MYRANK*NXY+IJ), 0.0D0 )
-      END DO
-ELSE
-      DO IJ = 1, NXY
-         BW14DIC(IJ) = MAX( BW14DICG(IJ), 0.0D0 )
-      END DO
-END IF
-      END IF
+      if ( calc14 ) then
+      do ij = ijtstr, ijtend
+         fi14pom(ij) = feoph * dstd * fipom(ij)
+         fi14car(ij) = feosh * dstd * ficar(ij)
+      end do
+if (use_mpi) then
+      do ij = 1, nxy
+         bw14dic(ij) = max( bw14dicg(myrank*nxy+ij), 0.0d0 )
+      end do
+else
+      do ij = 1, nxy
+         bw14dic(ij) = max( bw14dicg(ij), 0.0d0 )
+      end do
+end if
+      end if
 
-      DO IJ = 1, NXY
-         SIT(IJ) = 0.51D0
-         PT(IJ)  = 7.70D0
-      END DO
+      do ij = 1, nxy
+         sit(ij) = 0.51d0
+         pt(ij)  = 7.70d0
+      end do
 
-!     DO L = 1, sedtdm
-!        DO K = 1, sdzdim
-!           DO J = 1, NYDIM
-!              DO I = 1, NXDIM
-!                 IJ = I + (J - 1) * NXDIM
-!                 sdtxBUF(I, J, K, L) = sdtx(IJ, K, L)
-!              END DO
-!           END DO
-!        END DO
-!     END DO
-!     DO L = 1, sedtdm
-!        DO K = SKST, SKEN
-!           DO J = JSTR, JEND
-!              DO I = 1, ISTR-1
-!                 sdtxBUF(I, J, K, L) = sdtxBUF(IEND-ISTR+1+I, J, K, L)
-!              END DO
-!              DO I = IEND+1, NXDIM
-!                 sdtxBUF(I, J, K, L) = sdtxBUF(ISTR-1+I-IEND, J, K, L)
-!              END DO
-!           END DO
-!        END DO
-!     END DO
-!     DO L = 1, sedtdm
-!        DO K = 1, sdzdim
-!           DO J = 1, NYDIM
-!              DO I = 1, NXDIM
-!                 IJ = I + (J - 1) * NXDIM
-!                 sdtx(IJ, K, L) = sdtxBUF(I, J, K, L)
-!              END DO
-!           END DO
-!        END DO
-!     END DO
-!     DO L = 1, sedtdm
-!        DO K = 1, SKST-1
-!           DO IJ = 1, NXY
-!              sdtx(IJ, K, L) = sdtx(IJ, SKST, L)
-!           END DO
-!        END DO
-!     END DO
+!     do l = 1, sedtdm
+!        do k = 1, sdzdim
+!           do j = 1, nydim
+!              do i = 1, nxdim
+!                 ij = i + (j - 1) * nxdim
+!                 sdtxbuf(i, j, k, l) = sdtx(ij, k, l)
+!              end do
+!           end do
+!        end do
+!     end do
+!     do l = 1, sedtdm
+!        do k = skst, sken
+!           do j = jstr, jend
+!              do i = 1, istr-1
+!                 sdtxbuf(i, j, k, l) = sdtxbuf(iend-istr+1+i, j, k, l)
+!              end do
+!              do i = iend+1, nxdim
+!                 sdtxbuf(i, j, k, l) = sdtxbuf(istr-1+i-iend, j, k, l)
+!              end do
+!           end do
+!        end do
+!     end do
+!     do l = 1, sedtdm
+!        do k = 1, sdzdim
+!           do j = 1, nydim
+!              do i = 1, nxdim
+!                 ij = i + (j - 1) * nxdim
+!                 sdtx(ij, k, l) = sdtxbuf(i, j, k, l)
+!              end do
+!           end do
+!        end do
+!     end do
+!     do l = 1, sedtdm
+!        do k = 1, skst-1
+!           do ij = 1, nxy
+!              sdtx(ij, k, l) = sdtx(ij, skst, l)
+!           end do
+!        end do
+!     end do
 
 !     -- Time Integration --
 
-      DO TT = TSTR, TEND
+      do tt = tstr, tend
 
-         YY = INT( TSYR * TT )
+         yy = int( tsyr * tt )
 
-      IF (sdfirst) THEN
-         DO K = SKST, SKEN
-            DO IJ = IJTSTR, IJTEND
-               SCLA(IJ, K) = RHOCLA * 1.0D+6
-               SPOM(IJ, K) = 0.0D0
-               SCAR(IJ, K) = 0.0D0
-               SOPA(IJ, K) = 0.0D0
-               SAGE(IJ, K) = 0.0D0
-               CNIT(IJ, K) = BWNIT(IJ)
-               CDIC(IJ, K) = BWDIC(IJ)
-               CALK(IJ, K) = BWALK(IJ)
-               CDO2(IJ, K) = BWDO2(IJ)
-               CSIL(IJ, K) = BWSIL(IJ)
-               IF ( calc13 ) THEN
-               S13POM(IJ, K) = 0.0D0
-               S13CAR(IJ, K) = 0.0D0
-               C13DIC(IJ, K) = BW13DIC(IJ)
-               END IF
-               IF ( calc14 ) THEN
-               S14POM(IJ, K) = 0.0D0
-               S14CAR(IJ, K) = 0.0D0
-               C14DIC(IJ, K) = BW14DIC(IJ)
-               END IF
-               PCLA(IJ, K) = 1.00+2
-               PPOM(IJ, K) = 0.0D0
-               PCAR(IJ, K) = 0.0D0
-               POPA(IJ, K) = 0.0D0
-            END DO
-         END DO
+      if (sdfirst) then
+         do k = skst, sken
+            do ij = ijtstr, ijtend
+               scla(ij, k) = rhocla * 1.0d+6
+               spom(ij, k) = 0.0d0
+               scar(ij, k) = 0.0d0
+               sopa(ij, k) = 0.0d0
+               sage(ij, k) = 0.0d0
+               cnit(ij, k) = bwnit(ij)
+               cdic(ij, k) = bwdic(ij)
+               calk(ij, k) = bwalk(ij)
+               cdo2(ij, k) = bwdo2(ij)
+               csil(ij, k) = bwsil(ij)
+               if ( calc13 ) then
+               s13pom(ij, k) = 0.0d0
+               s13car(ij, k) = 0.0d0
+               c13dic(ij, k) = bw13dic(ij)
+               end if
+               if ( calc14 ) then
+               s14pom(ij, k) = 0.0d0
+               s14car(ij, k) = 0.0d0
+               c14dic(ij, k) = bw14dic(ij)
+               end if
+               pcla(ij, k) = 1.00+2
+               ppom(ij, k) = 0.0d0
+               pcar(ij, k) = 0.0d0
+               popa(ij, k) = 0.0d0
+            end do
+         end do
          sdfirst = .false.
-      ELSE
-IF (use_mpi) THEN
-         DO K = SKST, SKEN
-            DO IJ = 1, NXY
-               SCLA(IJ, K) = sdtx(MYRANK*NXY+IJ, K,  1)
-               SPOM(IJ, K) = sdtx(MYRANK*NXY+IJ, K,  2)
-               SCAR(IJ, K) = sdtx(MYRANK*NXY+IJ, K,  3)
-               SOPA(IJ, K) = sdtx(MYRANK*NXY+IJ, K,  4)
-               SAGE(IJ, K) = sdtx(MYRANK*NXY+IJ, K,  5)
-               CNIT(IJ, K) = sdtx(MYRANK*NXY+IJ, K,  6)
-               CDIC(IJ, K) = sdtx(MYRANK*NXY+IJ, K,  7)
-               CALK(IJ, K) = sdtx(MYRANK*NXY+IJ, K,  8)
-               CSIL(IJ, K) = sdtx(MYRANK*NXY+IJ, K,  9)
-               CDO2(IJ, K) = sdtx(MYRANK*NXY+IJ, K, 10)
-            END DO
-         END DO
-         IF ( calc13 ) THEN
-         DO K = SKST, SKEN
-            DO IJ = 1, NXY
-               S13POM(IJ, K) = sdtx(MYRANK*NXY+IJ, K, 11)
-               S13CAR(IJ, K) = sdtx(MYRANK*NXY+IJ, K, 12)
-               C13DIC(IJ, K) = sdtx(MYRANK*NXY+IJ, K, 13)
-            END DO
-         END DO
-         END IF
-         IF ( calc14 ) THEN
-         DO K = SKST, SKEN
-            DO IJ = 1, NXY
-               S14POM(IJ, K) = sdtx(MYRANK*NXY+IJ, K, 14)
-               S14CAR(IJ, K) = sdtx(MYRANK*NXY+IJ, K, 15)
-               C14DIC(IJ, K) = sdtx(MYRANK*NXY+IJ, K, 16)
-            END DO
-         END DO
-         END IF
-ELSE
-         DO K = SKST, SKEN
-            DO IJ = 1, NXY
-               SCLA(IJ, K) = sdtx(IJ, K,  1)
-               SPOM(IJ, K) = sdtx(IJ, K,  2)
-               SCAR(IJ, K) = sdtx(IJ, K,  3)
-               SOPA(IJ, K) = sdtx(IJ, K,  4)
-               SAGE(IJ, K) = sdtx(IJ, K,  5)
-               CNIT(IJ, K) = sdtx(IJ, K,  6)
-               CDIC(IJ, K) = sdtx(IJ, K,  7)
-               CALK(IJ, K) = sdtx(IJ, K,  8)
-               CSIL(IJ, K) = sdtx(IJ, K,  9)
-               CDO2(IJ, K) = sdtx(IJ, K, 10)
-            END DO
-         END DO
-         IF ( calc13 ) THEN
-         DO K = SKST, SKEN
-            DO IJ = 1, NXY
-               S13POM(IJ, K) = sdtx(IJ, K, 11)
-               S13CAR(IJ, K) = sdtx(IJ, K, 12)
-               C13DIC(IJ, K) = sdtx(IJ, K, 13)
-            END DO
-         END DO
-         END IF
-         IF ( calc14 ) THEN
-         DO K = SKST, SKEN
-            DO IJ = 1, NXY
-               S14POM(IJ, K) = sdtx(IJ, K, 14)
-               S14CAR(IJ, K) = sdtx(IJ, K, 15)
-               C14DIC(IJ, K) = sdtx(IJ, K, 16)
-            END DO
-         END DO
-         END IF
-END IF
-      END IF
+      else
+if (use_mpi) then
+         do k = skst, sken
+            do ij = 1, nxy
+               scla(ij, k) = sdtx(myrank*nxy+ij, k,  1)
+               spom(ij, k) = sdtx(myrank*nxy+ij, k,  2)
+               scar(ij, k) = sdtx(myrank*nxy+ij, k,  3)
+               sopa(ij, k) = sdtx(myrank*nxy+ij, k,  4)
+               sage(ij, k) = sdtx(myrank*nxy+ij, k,  5)
+               cnit(ij, k) = sdtx(myrank*nxy+ij, k,  6)
+               cdic(ij, k) = sdtx(myrank*nxy+ij, k,  7)
+               calk(ij, k) = sdtx(myrank*nxy+ij, k,  8)
+               csil(ij, k) = sdtx(myrank*nxy+ij, k,  9)
+               cdo2(ij, k) = sdtx(myrank*nxy+ij, k, 10)
+            end do
+         end do
+         if ( calc13 ) then
+         do k = skst, sken
+            do ij = 1, nxy
+               s13pom(ij, k) = sdtx(myrank*nxy+ij, k, 11)
+               s13car(ij, k) = sdtx(myrank*nxy+ij, k, 12)
+               c13dic(ij, k) = sdtx(myrank*nxy+ij, k, 13)
+            end do
+         end do
+         end if
+         if ( calc14 ) then
+         do k = skst, sken
+            do ij = 1, nxy
+               s14pom(ij, k) = sdtx(myrank*nxy+ij, k, 14)
+               s14car(ij, k) = sdtx(myrank*nxy+ij, k, 15)
+               c14dic(ij, k) = sdtx(myrank*nxy+ij, k, 16)
+            end do
+         end do
+         end if
+else
+         do k = skst, sken
+            do ij = 1, nxy
+               scla(ij, k) = sdtx(ij, k,  1)
+               spom(ij, k) = sdtx(ij, k,  2)
+               scar(ij, k) = sdtx(ij, k,  3)
+               sopa(ij, k) = sdtx(ij, k,  4)
+               sage(ij, k) = sdtx(ij, k,  5)
+               cnit(ij, k) = sdtx(ij, k,  6)
+               cdic(ij, k) = sdtx(ij, k,  7)
+               calk(ij, k) = sdtx(ij, k,  8)
+               csil(ij, k) = sdtx(ij, k,  9)
+               cdo2(ij, k) = sdtx(ij, k, 10)
+            end do
+         end do
+         if ( calc13 ) then
+         do k = skst, sken
+            do ij = 1, nxy
+               s13pom(ij, k) = sdtx(ij, k, 11)
+               s13car(ij, k) = sdtx(ij, k, 12)
+               c13dic(ij, k) = sdtx(ij, k, 13)
+            end do
+         end do
+         end if
+         if ( calc14 ) then
+         do k = skst, sken
+            do ij = 1, nxy
+               s14pom(ij, k) = sdtx(ij, k, 14)
+               s14car(ij, k) = sdtx(ij, k, 15)
+               c14dic(ij, k) = sdtx(ij, k, 16)
+            end do
+         end do
+         end if
+end if
+      end if
 
 !     -- Saturated carbonate ion concentration --
 
       call calc_digda_chemeq( &
-     &    BWTEM, BWSAL, CDIC, CALK, &
-     &    SIT, PT, &
-     &    CCO32 )
+     &    bwtem, bwsal, cdic, calk, &
+     &    sit, pt, &
+     &    cco32 )
 
       call calc_carbonate_saturation( &
-     &    BWTEM, BWSAL, BDEP, &
-     &    SATCO32 )
+     &    bwtem, bwsal, bdep, &
+     &    satco32 )
 
 !     -- Dissolution term --
 
       call calc_clay_dissolution( &
-     &    SCLA, &
-     &    RCLA )
+     &    scla, &
+     &    rcla )
 
       call calc_pom_dissolution( &
-     &    SPOM, CDO2, CP, OP, PHI, &
-     &    RPOM )
+     &    spom, cdo2, cp, op, phi, &
+     &    rpom )
 
       call calc_carbonate_dissolution( &
-     &    SCAR, CCO32, SATCO32, PHI, &
-     &    RCAR )
+     &    scar, cco32, satco32, phi, &
+     &    rcar )
 
       call calc_silicate_dissolution( &
-     &    SOPA, CSIL, PCLA, POPA, BWTEM, &
-     &    ROPA, SATSIL )
+     &    sopa, csil, pcla, popa, bwtem, &
+     &    ropa, satsil )
 
 !     -- Dissolution rate --
-!        CLA, POM, CAR, OPA
+!        Clay, POM, CaCO3, SiO2
 
-      DO K = SKST, SKEN
-         DO IJ = IJTSTR, IJTEND
-            TRCLA(IJ, K)   = ( 1.0D0 - PHI(K) ) * RCLA(IJ, K) &
-     &                     * SCLA(IJ, K)
-            TRPOM(IJ, K)   = ( 1.0D0 - PHI(K) ) * RPOM(IJ, K) &
-     &                     * SPOM(IJ, K)
-            TRCAR(IJ, K)   = ( 1.0D0 - PHI(K) ) * RCAR(IJ, K) &
-     &                     * SCAR(IJ, K)
-            TROPA(IJ, K)   = ( 1.0D0 - PHI(K) ) * ROPA(IJ, K) &
-     &                     * SOPA(IJ, K)
-         END DO
-      END DO
+      do k = skst, sken
+         do ij = ijtstr, ijtend
+            trcla(ij, k)   = ( 1.0d0 - phi(k) ) * rcla(ij, k) &
+     &                     * scla(ij, k)
+            trpom(ij, k)   = ( 1.0d0 - phi(k) ) * rpom(ij, k) &
+     &                     * spom(ij, k)
+            trcar(ij, k)   = ( 1.0d0 - phi(k) ) * rcar(ij, k) &
+     &                     * scar(ij, k)
+            tropa(ij, k)   = ( 1.0d0 - phi(k) ) * ropa(ij, k) &
+     &                     * sopa(ij, k)
+         end do
+      end do
 
-      IF ( calc13 ) THEN
-      DO K = SKST, SKEN
-         DO IJ = IJTSTR, IJTEND
-            TR13POM(IJ, K) = ( 1.0D0 - PHI(K) ) * RPOM(IJ, K) &
-     &                     * S13POM(IJ, K)
-            TR13CAR(IJ, K) = ( 1.0D0 - PHI(K) ) * RCAR(IJ, K) &
-     &                     * S13CAR(IJ, K)
-         END DO
-      END DO
-      END IF
+      if ( calc13 ) then
+      do k = skst, sken
+         do ij = ijtstr, ijtend
+            tr13pom(ij, k) = ( 1.0d0 - phi(k) ) * rpom(ij, k) &
+     &                     * s13pom(ij, k)
+            tr13car(ij, k) = ( 1.0d0 - phi(k) ) * rcar(ij, k) &
+     &                     * s13car(ij, k)
+         end do
+      end do
+      end if
 
-      IF ( calc14 ) THEN
-      DO K = SKST, SKEN
-         DO IJ = IJTSTR, IJTEND
-            TR14POM(IJ, K) = ( 1.0D0 - PHI(K) ) * RPOM(IJ, K) &
-     &                     * S14POM(IJ, K)
-            TR14CAR(IJ, K) = ( 1.0D0 - PHI(K) ) * RCAR(IJ, K) &
-     &                     * S14CAR(IJ, K)
-         END DO
-      END DO
-      END IF
+      if ( calc14 ) then
+      do k = skst, sken
+         do ij = ijtstr, ijtend
+            tr14pom(ij, k) = ( 1.0d0 - phi(k) ) * rpom(ij, k) &
+     &                     * s14pom(ij, k)
+            tr14car(ij, k) = ( 1.0d0 - phi(k) ) * rcar(ij, k) &
+     &                     * s14car(ij, k)
+         end do
+      end do
+      end if
 
 !     -- Sedimentation rate --
 
-      DO IJ = IJTSTR, IJTEND
-         W(IJ, SKST) = ( ( ( FICLA(IJ) * MCLA ) &
-     &                   + ( FIPOM(IJ) * MPOM ) &
-     &                   + ( FICAR(IJ) * MCAR ) &
-     &                   + ( FIOPA(IJ) * MOPA ) ) &
-     &               / ( 1.0D0 - PHII(SKST) ) )
-         DO K = SKST, SKEN
-            W(IJ, K+1) = ( ( 1.0D0 - PHII(K) ) / ( 1.0D0 - PHII(K+1) ) &
-     &                   * W(IJ, K) ) &
-     &                 - ( DLZ(K) * ( ( TRPOM(IJ, K) * MPOM ) &
-     &                              + ( TRCAR(IJ, K) * MCAR ) &
-     &                              + ( TROPA(IJ, K) * MOPA ) ) &
-     &                   / ( 1.0D0 - PHII(K+1) ) )
-         END DO
-      END DO
+      do ij = ijtstr, ijtend
+         w(ij, skst) = ( ( ( ficla(ij) * mcla ) &
+     &                   + ( fipom(ij) * mpom ) &
+     &                   + ( ficar(ij) * mcar ) &
+     &                   + ( fiopa(ij) * mopa ) ) &
+     &               / ( 1.0d0 - phii(skst) ) )
+         do k = skst, sken
+            w(ij, k+1) = ( ( 1.0d0 - phii(k) ) / ( 1.0d0 - phii(k+1) ) &
+     &                   * w(ij, k) ) &
+     &                 - ( dlz(k) * ( ( trpom(ij, k) * mpom ) &
+     &                              + ( trcar(ij, k) * mcar ) &
+     &                              + ( tropa(ij, k) * mopa ) ) &
+     &                   / ( 1.0d0 - phii(k+1) ) )
+         end do
+      end do
 
 !     -- Particles (t --> t+dt) --
-!        Clay, POM, CaCO3, Opal
+!        Clay, POM, CaCO3, SiO2
 
       call calc_step_solid_clay( &
-     &    FICLA, TRCLA, W, PHI, PHII, DBI, SCLA, RHOCLA, &
-     &    SNCLA, BFCLA )
+     &    ficla, trcla, w, phi, phii, dbi, scla, rhocla, &
+     &    sncla, bfcla )
 
       call calc_step_solid( &
-     &    FIPOM, TRPOM, W, PHI, PHII, DBI, SPOM, &
-     &    SNPOM, BFPOM )
+     &    fipom, trpom, w, phi, phii, dbi, spom, &
+     &    snpom, bfpom )
 
       call calc_step_solid( &
-     &    FICAR, TRCAR, W, PHI, PHII, DBI, SCAR, &
-     &    SNCAR, BFCAR )
+     &    ficar, trcar, w, phi, phii, dbi, scar, &
+     &    sncar, bfcar )
 
       call calc_step_solid( &
-     &    FIOPA, TROPA, W, PHI, PHII, DBI, SOPA, &
-     &    SNOPA, BFOPA )
+     &    fiopa, tropa, w, phi, phii, dbi, sopa, &
+     &    snopa, bfopa )
 
       call calc_step_solid_age( &
-     &    FIAGE, W, PHI, PHII, DBI, SAGE, &
-     &    SNAGE )
+     &    fiage, w, phi, phii, dbi, sage, &
+     &    snage )
 
-      IF ( calc13 ) THEN
+      if ( calc13 ) then
       call calc_step_solid( &
-     &    FI13POM, TR13POM, W, PHI, PHII, DBI, S13POM, &
-     &    SN13POM, BF13POM )
-
-      call calc_step_solid( &
-     &    FI13CAR, TR13CAR, W, PHI, PHII, DBI, S13CAR, &
-     &    SN13CAR, BF13CAR )
-      END IF
-
-      IF ( calc14 ) THEN
-      call calc_step_solid( &
-     &    FI14POM, TR14POM, W, PHI, PHII, DBI, S14POM, &
-     &    SN14POM, BF14POM )
+     &    fi13pom, tr13pom, w, phi, phii, dbi, s13pom, &
+     &    sn13pom, bf13pom )
 
       call calc_step_solid( &
-     &    FI14CAR, TR14CAR, W, PHI, PHII, DBI, S14CAR, &
-     &    SN14CAR, BF14CAR )
-      DO K = SKST, SKEN
-         DO IJ = IJTSTR, IJTEND
-            SN14POM(IJ, K) = SN14POM(IJ, K) &
-     &                     - ADCAY * TS * S14POM(IJ, K)
-            SN14CAR(IJ, K) = SN14CAR(IJ, K) &
-     &                     - ADCAY * TS * S14CAR(IJ, K)
-         END DO
-      END DO
-      END IF
+     &    fi13car, tr13car, w, phi, phii, dbi, s13car, &
+     &    sn13car, bf13car )
+      end if
+
+      if ( calc14 ) then
+      call calc_step_solid( &
+     &    fi14pom, tr14pom, w, phi, phii, dbi, s14pom, &
+     &    sn14pom, bf14pom )
+
+      call calc_step_solid( &
+     &    fi14car, tr14car, w, phi, phii, dbi, s14car, &
+     &    sn14car, bf14car )
+      do k = skst, sken
+         do ij = ijtstr, ijtend
+            sn14pom(ij, k) = sn14pom(ij, k) &
+     &                     - adcay * ts * s14pom(ij, k)
+            sn14car(ij, k) = sn14car(ij, k) &
+     &                     - adcay * ts * s14car(ij, k)
+         end do
+      end do
+      end if
 
 !     -- Dissolution rate --
-!        NIT, DIC, ALK, DO2, SIL
+!        Phosphate, DIC, Alkalinity, Oxygen, Silicate
 
-      DO K = SKST, SKEN
-         DO IJ = IJTSTR, IJTEND
-            TRNIT(IJ, K)   = ( ( PP / CP ) * TRPOM(IJ, K) )
-            TRDIC(IJ, K)   = ( TRPOM(IJ, K) + TRCAR(IJ, K) )
-            TRALK(IJ, K)   = ( - ( NP / CP ) * TRPOM(IJ, K) &
-     &                         + ( 2.0D0 * TRCAR(IJ, K) ) )
-            TRDO2(IJ, K)   = - ( ( OP / CP ) * TRPOM(IJ, K) )
-            IF ( CDO2(IJ, K) <= 0.0D0 ) THEN
-               TRDO2(IJ, K) = 0.0D0
-            END IF
-            TRSIL(IJ, K)   = TROPA(IJ, K)
-         END DO
-      END DO
+      do k = skst, sken
+         do ij = ijtstr, ijtend
+            trnit(ij, k)   = ( ( pp / cp ) * trpom(ij, k) )
+            trdic(ij, k)   = ( trpom(ij, k) + trcar(ij, k) )
+            tralk(ij, k)   = ( - ( np / cp ) * trpom(ij, k) &
+     &                         + ( 2.0d0 * trcar(ij, k) ) )
+            trdo2(ij, k)   = - ( ( op / cp ) * trpom(ij, k) )
+            if ( cdo2(ij, k) <= 0.0d0 ) then
+               trdo2(ij, k) = 0.0d0
+            end if
+            trsil(ij, k)   = tropa(ij, k)
+         end do
+      end do
 
-      IF ( calc13 ) THEN
-      DO K = SKST, SKEN
-         DO IJ = IJTSTR, IJTEND
-            TR13DIC(IJ, K) = ( TR13POM(IJ, K) + TR13CAR(IJ, K) )
-         END DO
-      END DO
-      END IF
+      if ( calc13 ) then
+      do k = skst, sken
+         do ij = ijtstr, ijtend
+            tr13dic(ij, k) = ( tr13pom(ij, k) + tr13car(ij, k) )
+         end do
+      end do
+      end if
 
-      IF ( calc14 ) THEN
-      DO K = SKST, SKEN
-         DO IJ = IJTSTR, IJTEND
-            TR14DIC(IJ, K) = ( TR14POM(IJ, K) + TR14CAR(IJ, K) )
-         END DO
-      END DO
-      END IF
+      if ( calc14 ) then
+      do k = skst, sken
+         do ij = ijtstr, ijtend
+            tr14dic(ij, k) = ( tr14pom(ij, k) + tr14car(ij, k) )
+         end do
+      end do
+      end if
 
 !     -- Dissolved material (t --> t+dt) --
-!        NIT, DIC, ALK, DO2, SIL
+!        Phosphate, DIC, Alkalinity, Oxygen, Silicate
 
       call calc_step_liquid( &
-     &    BWNIT, TRNIT, PHI, PHII, DEINIT, CNIT, &
-     &    CNNIT )
+     &    bwnit, trnit, phi, phii, deinit, cnit, &
+     &    cnnit )
 
       call calc_step_liquid( &
-     &    BWDIC, TRDIC, PHI, PHII, DEIDIC, CDIC, &
-     &    CNDIC )
+     &    bwdic, trdic, phi, phii, deidic, cdic, &
+     &    cndic )
 
       call calc_step_liquid( &
-     &    BWALK, TRALK, PHI, PHII, DEIALK, CALK, &
-     &    CNALK )
+     &    bwalk, tralk, phi, phii, deialk, calk, &
+     &    cnalk )
 
       call calc_step_liquid_o2( &
-     &    BWDO2, TRDO2, PHI, PHII, DEIDO2, CDO2, &
-     &    CNDO2 )
+     &    bwdo2, trdo2, phi, phii, deido2, cdo2, &
+     &    cndo2 )
 
       call calc_step_liquid( &
-     &    BWSIL, TRSIL, PHI, PHII, DEISIL, CSIL, &
-     &    CNSIL )
+     &    bwsil, trsil, phi, phii, deisil, csil, &
+     &    cnsil )
 
-      IF ( calc13 ) THEN
+      if ( calc13 ) then
       call calc_step_liquid( &
-     &    BW13DIC, TR13DIC, PHI, PHII, DEI13DIC, C13DIC, &
-     &    CN13DIC )
-      END IF
+     &    bw13dic, tr13dic, phi, phii, dei13dic, c13dic, &
+     &    cn13dic )
+      end if
 
-      IF ( calc14 ) THEN
+      if ( calc14 ) then
       call calc_step_liquid( &
-     &    BW14DIC, TR14DIC, PHI, PHII, DEI14DIC, C14DIC, &
-     &    CN14DIC )
-      END IF
-      DO K = SKST, SKEN
-         DO IJ = IJTSTR, IJTEND
-            CN14DIC(IJ, K) = CN14DIC(IJ, K) &
-     &                     - ADCAY * TS * C14DIC(IJ, K)
-         END DO
-      END DO
+     &    bw14dic, tr14dic, phi, phii, dei14dic, c14dic, &
+     &    cn14dic )
+      end if
+      do k = skst, sken
+         do ij = ijtstr, ijtend
+            cn14dic(ij, k) = cn14dic(ij, k) &
+     &                     - adcay * ts * c14dic(ij, k)
+         end do
+      end do
 
 !     -- Particles weight percent --
 
-      DO K = SKST, SKEN
-         DO IJ = IJTSTR, IJTEND
-            WT(IJ, K) = SNCLA(IJ, K) &
-     &                + ( SNPOM(IJ, K) * MOLPOM * 1.0D-3 ) &
-     &                + ( SNCAR(IJ, K) * MOLCAR * 1.0D-3 ) &
-     &                + ( SNOPA(IJ, K) * MOLOPA * 1.0D-3 )
-            IF ( WT(IJ, K) == 0.0D0 ) THEN
-               PCLA(IJ, K) = 0.0D0
-               PPOM(IJ, K) = 0.0D0
-               PCAR(IJ, K) = 0.0D0
-               POPA(IJ, K) = 0.0D0
-            ELSE
-               PCLA(IJ, K) = &
-     &            ( SNCLA(IJ, K) / WT(IJ, K) ) &
-     &            * 1.0D+2
-               PPOM(IJ, K) = &
-     &            ( SNPOM(IJ, K) * MOLPOM * 1.0D-3 / WT(IJ, K) ) &
-     &            * 1.0D+2
-               PCAR(IJ, K) = &
-     &            ( SNCAR(IJ, K) * MOLCAR * 1.0D-3 / WT(IJ, K) ) &
-     &            * 1.0D+2
-               POPA(IJ, K) = &
-     &            ( SNOPA(IJ, K) * MOLOPA * 1.0D-3 / WT(IJ, K) ) &
-     &            * 1.0D+2
-            END IF
-         END DO
-      END DO
+      do k = skst, sken
+         do ij = ijtstr, ijtend
+            wt(ij, k) = sncla(ij, k) &
+     &                + ( snpom(ij, k) * molpom * 1.0d-3 ) &
+     &                + ( sncar(ij, k) * molcar * 1.0d-3 ) &
+     &                + ( snopa(ij, k) * molopa * 1.0d-3 )
+            if ( wt(ij, k) == 0.0d0 ) then
+               pcla(ij, k) = 0.0d0
+               ppom(ij, k) = 0.0d0
+               pcar(ij, k) = 0.0d0
+               popa(ij, k) = 0.0d0
+            else
+               pcla(ij, k) = &
+     &            ( sncla(ij, k) / wt(ij, k) ) &
+     &            * 1.0d+2
+               ppom(ij, k) = &
+     &            ( snpom(ij, k) * molpom * 1.0d-3 / wt(ij, k) ) &
+     &            * 1.0d+2
+               pcar(ij, k) = &
+     &            ( sncar(ij, k) * molcar * 1.0d-3 / wt(ij, k) ) &
+     &            * 1.0d+2
+               popa(ij, k) = &
+     &            ( snopa(ij, k) * molopa * 1.0d-3 / wt(ij, k) ) &
+     &            * 1.0d+2
+            end if
+         end do
+      end do
 
 !     -- Isotopic fractionation --
 
-      IF ( calc13 ) THEN
-      DO K = SKST, SKEN
-         DO IJ = IJTSTR, IJTEND
-            IF ( CNDIC(IJ, K) /= 0.0D0 ) THEN
-               R13 = CN13DIC(IJ, K) / MAX( CNDIC(IJ, K), EPS )
-               CDC13(IJ, K) = &
-     &            ( 1.0D0 / 0.0112372D0 &
-     &              * R13 / ( 1.0D0 - R13 ) - 1.0D0 ) * 1.0D3
-            ELSE
-               CDC13(IJ, K) = 0.0D0
-            END IF
-         END DO
-      END DO
-      END IF
+      if ( calc13 ) then
+      do k = skst, sken
+         do ij = ijtstr, ijtend
+            if ( cndic(ij, k) /= 0.0d0 ) then
+               r13 = cn13dic(ij, k) / max( cndic(ij, k), eps )
+               cdc13(ij, k) = &
+     &            ( 1.0d0 / 0.0112372d0 &
+     &              * r13 / ( 1.0d0 - r13 ) - 1.0d0 ) * 1.0d+3
+            else
+               cdc13(ij, k) = 0.0d0
+            end if
+         end do
+      end do
+      end if
 
-      IF ( calc14 ) THEN
-      DO K = SKST, SKEN
-         DO IJ = IJTSTR, IJTEND
-            IF ( CNDIC(IJ, K) /= 0.0D0 ) THEN
-               R14 = CN14DIC(IJ, K) / MAX( CNDIC(IJ, K), EPS )
-               CDC14(IJ, K) = &
-     &            ( 1.0D0 / 1.1892D-12 &
-     &              * R14 / ( 1.0D0 - R14 ) - 1.0D0 ) * 1.0D3
-            ELSE
-               CDC14(IJ, K) = 0.0D0
-            END IF
-         END DO
-      END DO
-      DO K = SKST, SKEN
-         DO IJ = IJTSTR, IJTEND
-            DLTC13 = CDC13(IJ, K) * 1.0D-3  !! [permil]
-            DLTC14 = CDC14(IJ, K) * 1.0D-3  !! [permil]
-            CDC14(IJ, K) = &
-     &         ( DLTC14 - 2.0D0 * ( DLTC13 + 0.025D0 ) &
-     &                          * ( 1.0D0 + DLTC14 ) &
-     &         ) * 1.0D+3   !! [permil]
-         END DO
-      END DO
-      END IF
+      if ( calc14 ) then
+      do k = skst, sken
+         do ij = ijtstr, ijtend
+            if ( cndic(ij, k) /= 0.0d0 ) then
+               r14 = cn14dic(ij, k) / max( cndic(ij, k), eps )
+               cdc14(ij, k) = &
+     &            ( 1.0d0 / 1.1892d-12 &
+     &              * r14 / ( 1.0d0 - r14 ) - 1.0d0 ) * 1.0d+3
+            else
+               cdc14(ij, k) = 0.0d0
+            end if
+         end do
+      end do
+      do k = skst, sken
+         do ij = ijtstr, ijtend
+            dltc13 = cdc13(ij, k) * 1.0d-3  !! [permil]
+            dltc14 = cdc14(ij, k) * 1.0d-3  !! [permil]
+            cdc14(ij, k) = &
+     &         ( dltc14 - 2.0d0 * ( dltc13 + 0.025d0 ) &
+     &                          * ( 1.0d0 + dltc14 ) &
+     &         ) * 1.0d+3   !! [permil]
+         end do
+      end do
+      end if
 
 !     -- Sea-bottom flux --
 
-      DO IJ = IJTSTR, IJTEND
-         FONIT(IJ) = - ( PHII(SKST) * DEINIT(SKST) &
-     &      * ( BWNIT(IJ) - CNNIT(IJ, SKST) ) / DLZI(SKST) )
-         FODIC(IJ) = - ( PHII(SKST) * DEIDIC(SKST) &
-     &      * ( BWDIC(IJ) - CNDIC(IJ, SKST) ) / DLZI(SKST) )
-         FOALK(IJ) = - ( PHII(SKST) * DEIALK(SKST) &
-     &      * ( BWALK(IJ) - CNALK(IJ, SKST) ) / DLZI(SKST) )
-         FODO2(IJ) = - ( PHII(SKST) * DEIDO2(SKST) &
-     &      * ( BWDO2(IJ) - CNDO2(IJ, SKST) ) / DLZI(SKST) )
-         FOSIL(IJ) = - ( PHII(SKST) * DEISIL(SKST) &
-     &      * ( BWSIL(IJ) - CNSIL(IJ, SKST) ) / DLZI(SKST) )
-         FINIT(IJ)  = FIPOM(IJ) * ( PP / CP )
-         FIDIC(IJ)  = FIPOM(IJ) + FICAR(IJ)
-         FIALK(IJ)  = - FIPOM(IJ) * ( NP / CP ) + 2.0D0 * FICAR(IJ)
-         FIDO2(IJ)  = FIPOM(IJ) * ( OP / CP )
-         FISIL(IJ)  = FIOPA(IJ)
-         IF ( calc13 ) THEN
-         FO13DIC(IJ) = - ( PHII(SKST) * DEI13DIC(SKST) &
-     &      * ( BW13DIC(IJ) - CN13DIC(IJ, SKST) ) / DLZI(SKST) )
-         FI13DIC(IJ)  = FI13POM(IJ) + FI13CAR(IJ)
-         END IF
-         IF ( calc14 ) THEN
-         FO14DIC(IJ) = - ( PHII(SKST) * DEI14DIC(SKST) &
-     &      * ( BW14DIC(IJ) - CN14DIC(IJ, SKST) ) / DLZI(SKST) )
-         FI14DIC(IJ)  = FI14POM(IJ) + FI14CAR(IJ)
-         END IF
-      END DO
+      do ij = ijtstr, ijtend
+         fonit(ij) = - ( phii(skst) * deinit(skst) &
+     &      * ( bwnit(ij) - cnnit(ij, skst) ) / dlzi(skst) )
+         fodic(ij) = - ( phii(skst) * deidic(skst) &
+     &      * ( bwdic(ij) - cndic(ij, skst) ) / dlzi(skst) )
+         foalk(ij) = - ( phii(skst) * deialk(skst) &
+     &      * ( bwalk(ij) - cnalk(ij, skst) ) / dlzi(skst) )
+         fodo2(ij) = - ( phii(skst) * deido2(skst) &
+     &      * ( bwdo2(ij) - cndo2(ij, skst) ) / dlzi(skst) )
+         fosil(ij) = - ( phii(skst) * deisil(skst) &
+     &      * ( bwsil(ij) - cnsil(ij, skst) ) / dlzi(skst) )
+         finit(ij)  = fipom(ij) * ( pp / cp )
+         fidic(ij)  = fipom(ij) + ficar(ij)
+         fialk(ij)  = - fipom(ij) * ( np / cp ) + 2.0d0 * ficar(ij)
+         fido2(ij)  = fipom(ij) * ( op / cp )
+         fisil(ij)  = fiopa(ij)
+         if ( calc13 ) then
+         fo13dic(ij) = - ( phii(skst) * dei13dic(skst) &
+     &      * ( bw13dic(ij) - cn13dic(ij, skst) ) / dlzi(skst) )
+         fi13dic(ij)  = fi13pom(ij) + fi13car(ij)
+         end if
+         if ( calc14 ) then
+         fo14dic(ij) = - ( phii(skst) * dei14dic(skst) &
+     &      * ( bw14dic(ij) - cn14dic(ij, skst) ) / dlzi(skst) )
+         fi14dic(ij)  = fi14pom(ij) + fi14car(ij)
+         end if
+      end do
 
-      DO IJ = IJTSTR, IJTEND
-         FOPOM(IJ) = CP * FONIT(IJ)
-         FOCAR(IJ) = 0.5D0 * ( + NP * FONIT(IJ) + FOALK(IJ) )
-!         FOPOM(IJ) = ( CP / ( NP + 2.0D0 * CP ) ) &
-!     &      * ( 2.0D0 * FODIC(IJ) - FOALK(IJ) )
-!         FOCAR(IJ) = ( CP / ( NP + 2.0D0 * CP ) ) &
-!     &      * ( ( NP / CP ) * FODIC(IJ) + FOALK(IJ) )
-         FOOPA(IJ) = FOSIL(IJ)
-      END DO
+      do ij = ijtstr, ijtend
+         fopom(ij) = cp * fonit(ij)
+         focar(ij) = 0.5d0 * ( + np * fonit(ij) + foalk(ij) )
+!         fopom(ij) = ( cp / ( np + 2.0d0 * cp ) ) &
+!     &      * ( 2.0d0 * fodic(ij) - foalk(ij) )
+!         focar(ij) = ( cp / ( np + 2.0d0 * cp ) ) &
+!     &      * ( ( np / cp ) * fodic(ij) + foalk(ij) )
+         foopa(ij) = fosil(ij)
+      end do
 
 !     -- Copy the array for the next time step --
 
-IF (use_mpi) THEN
-      DO K = SKST, SKEN
-         DO IJ = 1, NXY
-            sdtx(MYRANK*NXY+IJ, K,  1) = SNCLA(IJ, K)
-            sdtx(MYRANK*NXY+IJ, K,  2) = SNPOM(IJ, K)
-            sdtx(MYRANK*NXY+IJ, K,  3) = SNCAR(IJ, K)
-            sdtx(MYRANK*NXY+IJ, K,  4) = SNOPA(IJ, K)
-            sdtx(MYRANK*NXY+IJ, K,  5) = SNAGE(IJ, K)
-            sdtx(MYRANK*NXY+IJ, K,  6) = CNNIT(IJ, K)
-            sdtx(MYRANK*NXY+IJ, K,  7) = CNDIC(IJ, K)
-            sdtx(MYRANK*NXY+IJ, K,  8) = CNALK(IJ, K)
-            sdtx(MYRANK*NXY+IJ, K,  9) = CNSIL(IJ, K)
-            sdtx(MYRANK*NXY+IJ, K, 10) = CNDO2(IJ, K)
-         END DO
-      END DO
-      IF ( calc13 ) THEN
-      DO K = SKST, SKEN
-         DO IJ = 1, NXY
-            sdtx(MYRANK*NXY+IJ, K, 11) = SN13POM(IJ, K)
-            sdtx(MYRANK*NXY+IJ, K, 12) = SN13CAR(IJ, K)
-            sdtx(MYRANK*NXY+IJ, K, 13) = CN13DIC(IJ, K)
-         END DO
-      END DO
-      END IF
-      IF ( calc14 ) THEN
-      DO K = SKST, SKEN
-         DO IJ = 1, NXY
-            sdtx(MYRANK*NXY+IJ, K, 14) = SN14POM(IJ, K)
-            sdtx(MYRANK*NXY+IJ, K, 15) = SN14CAR(IJ, K)
-            sdtx(MYRANK*NXY+IJ, K, 16) = CN14DIC(IJ, K)
-         END DO
-      END DO
-      END IF
-ELSE
-      DO K = SKST, SKEN
-         DO IJ = 1, NXY
-            sdtx(IJ, K,  1) = SNCLA(IJ, K)
-            sdtx(IJ, K,  2) = SNPOM(IJ, K)
-            sdtx(IJ, K,  3) = SNCAR(IJ, K)
-            sdtx(IJ, K,  4) = SNOPA(IJ, K)
-            sdtx(IJ, K,  5) = SNAGE(IJ, K)
-            sdtx(IJ, K,  6) = CNNIT(IJ, K)
-            sdtx(IJ, K,  7) = CNDIC(IJ, K)
-            sdtx(IJ, K,  8) = CNALK(IJ, K)
-            sdtx(IJ, K,  9) = CNSIL(IJ, K)
-            sdtx(IJ, K, 10) = CNDO2(IJ, K)
-         END DO
-      END DO
-      IF ( calc13 ) THEN
-      DO K = SKST, SKEN
-         DO IJ = 1, NXY
-            sdtx(IJ, K, 11) = SN13POM(IJ, K)
-            sdtx(IJ, K, 12) = SN13CAR(IJ, K)
-            sdtx(IJ, K, 13) = CN13DIC(IJ, K)
-         END DO
-      END DO
-      END IF
-      IF ( calc14 ) THEN
-      DO K = SKST, SKEN
-         DO IJ = 1, NXY
-            sdtx(IJ, K, 14) = SN14POM(IJ, K)
-            sdtx(IJ, K, 15) = SN14CAR(IJ, K)
-            sdtx(IJ, K, 16) = CN14DIC(IJ, K)
-         END DO
-      END DO
-      END IF
-END IF
+if (use_mpi) then
+      do k = skst, sken
+         do ij = 1, nxy
+            sdtx(myrank*nxy+ij, k,  1) = sncla(ij, k)
+            sdtx(myrank*nxy+ij, k,  2) = snpom(ij, k)
+            sdtx(myrank*nxy+ij, k,  3) = sncar(ij, k)
+            sdtx(myrank*nxy+ij, k,  4) = snopa(ij, k)
+            sdtx(myrank*nxy+ij, k,  5) = snage(ij, k)
+            sdtx(myrank*nxy+ij, k,  6) = cnnit(ij, k)
+            sdtx(myrank*nxy+ij, k,  7) = cndic(ij, k)
+            sdtx(myrank*nxy+ij, k,  8) = cnalk(ij, k)
+            sdtx(myrank*nxy+ij, k,  9) = cnsil(ij, k)
+            sdtx(myrank*nxy+ij, k, 10) = cndo2(ij, k)
+         end do
+      end do
+      if ( calc13 ) then
+      do k = skst, sken
+         do ij = 1, nxy
+            sdtx(myrank*nxy+ij, k, 11) = sn13pom(ij, k)
+            sdtx(myrank*nxy+ij, k, 12) = sn13car(ij, k)
+            sdtx(myrank*nxy+ij, k, 13) = cn13dic(ij, k)
+         end do
+      end do
+      end if
+      if ( calc14 ) then
+      do k = skst, sken
+         do ij = 1, nxy
+            sdtx(myrank*nxy+ij, k, 14) = sn14pom(ij, k)
+            sdtx(myrank*nxy+ij, k, 15) = sn14car(ij, k)
+            sdtx(myrank*nxy+ij, k, 16) = cn14dic(ij, k)
+         end do
+      end do
+      end if
+else
+      do k = skst, sken
+         do ij = 1, nxy
+            sdtx(ij, k,  1) = sncla(ij, k)
+            sdtx(ij, k,  2) = snpom(ij, k)
+            sdtx(ij, k,  3) = sncar(ij, k)
+            sdtx(ij, k,  4) = snopa(ij, k)
+            sdtx(ij, k,  5) = snage(ij, k)
+            sdtx(ij, k,  6) = cnnit(ij, k)
+            sdtx(ij, k,  7) = cndic(ij, k)
+            sdtx(ij, k,  8) = cnalk(ij, k)
+            sdtx(ij, k,  9) = cnsil(ij, k)
+            sdtx(ij, k, 10) = cndo2(ij, k)
+         end do
+      end do
+      if ( calc13 ) then
+      do k = skst, sken
+         do ij = 1, nxy
+            sdtx(ij, k, 11) = sn13pom(ij, k)
+            sdtx(ij, k, 12) = sn13car(ij, k)
+            sdtx(ij, k, 13) = cn13dic(ij, k)
+         end do
+      end do
+      end if
+      if ( calc14 ) then
+      do k = skst, sken
+         do ij = 1, nxy
+            sdtx(ij, k, 14) = sn14pom(ij, k)
+            sdtx(ij, k, 15) = sn14car(ij, k)
+            sdtx(ij, k, 16) = cn14dic(ij, k)
+         end do
+      end do
+      end if
+end if
 
 !     -- Time step --
-      IF ( WOTSTP ) THEN
-         WRITE(NFSOTS, *), 'Time Step :', TT, 'step', YY, 'year'
-      END IF
+      if ( wotstp ) then
+         write(nfsots, *), 'Time Step :', tt, 'step', yy, 'year'
+      end if
 
 !     -- Write the output --
-!     IF ( WOHIST ) THEN
-        IF ( TT == TEND .OR. MOD(TT, TOUT) == 0 ) THEN
-!     ELSE
-!       IF ( TT == TEND ) THEN
-!     END IF
+!     if ( wohist ) then
+        if ( tt == tend .or. mod(tt, tout) == 0 ) then
+!     else
+!       if ( tt == tend ) then
+!     end if
 
-IF (use_mpi) THEN
+if (use_mpi) then
 
-     !IF (sdofirst) THEN
-      ALLOCATE(nrcvct2d(0:NPROCS-1))
-      ALLOCATE(ndispt2d(0:NPROCS-1))
-      ALLOCATE(nrcvct3d(0:NPROCS-1))
-      ALLOCATE(ndispt3d(0:NPROCS-1))
-      ALLOCATE(nrcvcw3d(0:NPROCS-1))
-      ALLOCATE(ndispw3d(0:NPROCS-1))
+     !if (sdofirst) then
+      allocate(nrcvct2d(0:nprocs-1))
+      allocate(ndispt2d(0:nprocs-1))
+      allocate(nrcvct3d(0:nprocs-1))
+      allocate(ndispt3d(0:nprocs-1))
+      allocate(nrcvcw3d(0:nprocs-1))
+      allocate(ndispw3d(0:nprocs-1))
 
-      ALLOCATE(vardt2d(nxydim+NPROCS))
-      ALLOCATE(vardt3d(NXYZDM+NPROCS))
-      ALLOCATE(vardw3d(NXYZDM+nxydim+NPROCS))
+      allocate(vardt2d(nxydim+nprocs))
+      allocate(vardt3d(nxyzdm+nprocs))
+      allocate(vardw3d(nxyzdm+nxydim+nprocs))
 
-      nsndct2d = NXY
-      DO IRANK = 0, NPROCS-1
-         nrcvct2d(IRANK) = NXY
-         ndispt2d(IRANK) = NXY * IRANK
-      END DO
-      nsndct3d = NXYZ
-      DO IRANK = 0, NPROCS-1
-         nrcvct3d(IRANK) = NXYZ
-         ndispt3d(IRANK) = NXYZ * IRANK
-      END DO
-      nsndcw3d = ( NXYZ + NXY )
-      DO IRANK = 0, NPROCS-1
-         nrcvcw3d(IRANK) = ( NXYZ + NXY )
-         ndispw3d(IRANK) = ( NXYZ + NXY ) * IRANK
-      END DO
+      nsndct2d = nxy
+      do irank = 0, nprocs-1
+         nrcvct2d(irank) = nxy
+         ndispt2d(irank) = nxy * irank
+      end do
+      nsndct3d = nxyz
+      do irank = 0, nprocs-1
+         nrcvct3d(irank) = nxyz
+         ndispt3d(irank) = nxyz * irank
+      end do
+      nsndcw3d = ( nxyz + nxy )
+      do irank = 0, nprocs-1
+         nrcvcw3d(irank) = ( nxyz + nxy )
+         ndispw3d(irank) = ( nxyz + nxy ) * irank
+      end do
 
      !sdofirst = .false.
-     !END IF
+     !end if
 
 
-      call MPI_GATHERV( SCLA,    nsndct3d, mpi_real8, &
+      call mpi_gatherv( scla,    nsndct3d, mpi_real8, &
      &                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
-      IF ( MYRANK .EQ. iroot ) THEN
-         DO IRANK = 0, NPROCS-1
-            IJKG = ndispt3d(IRANK)
-            DO K = SKST, SKEN
-               DO IJ = JJSTR(IRANK), JJEND(IRANK)
-                  IJKG = IJKG + 1
-                  SCLAG(IJ, K) = vardt3d(IJKG)
-               END DO
-            END DO
-         END DO
-      END IF
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispt3d(irank)
+            do k = skst, sken
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  sclag(ij, k) = vardt3d(ijkg)
+               end do
+            end do
+         end do
+      end if
 
-      call MPI_GATHERV( SPOM,    nsndct3d, mpi_real8, &
+      call mpi_gatherv( spom,    nsndct3d, mpi_real8, &
      &                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
-      IF ( MYRANK .EQ. iroot ) THEN
-         DO IRANK = 0, NPROCS-1
-            IJKG = ndispt3d(IRANK)
-            DO K = SKST, SKEN
-               DO IJ = JJSTR(IRANK), JJEND(IRANK)
-                  IJKG = IJKG + 1
-                  SPOMG(IJ, K) = vardt3d(IJKG)
-               END DO
-            END DO
-         END DO
-      END IF
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispt3d(irank)
+            do k = skst, sken
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  spomg(ij, k) = vardt3d(ijkg)
+               end do
+            end do
+         end do
+      end if
 
-      call MPI_GATHERV( SCAR,    nsndct3d, mpi_real8, &
+      call mpi_gatherv( scar,    nsndct3d, mpi_real8, &
      &                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
-      IF ( MYRANK .EQ. iroot ) THEN
-         DO IRANK = 0, NPROCS-1
-            IJKG = ndispt3d(IRANK)
-            DO K = SKST, SKEN
-               DO IJ = JJSTR(IRANK), JJEND(IRANK)
-                  IJKG = IJKG + 1
-                  SCARG(IJ, K) = vardt3d(IJKG)
-               END DO
-            END DO
-         END DO
-      END IF
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispt3d(irank)
+            do k = skst, sken
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  scarg(ij, k) = vardt3d(ijkg)
+               end do
+            end do
+         end do
+      end if
 
-      call MPI_GATHERV( SOPA,    nsndct3d, mpi_real8, &
+      call mpi_gatherv( sopa,    nsndct3d, mpi_real8, &
      &                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
-      IF ( MYRANK .EQ. iroot ) THEN
-         DO IRANK = 0, NPROCS-1
-            IJKG = ndispt3d(IRANK)
-            DO K = SKST, SKEN
-               DO IJ = JJSTR(IRANK), JJEND(IRANK)
-                  IJKG = IJKG + 1
-                  SOPAG(IJ, K) = vardt3d(IJKG)
-               END DO
-            END DO
-         END DO
-      END IF
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispt3d(irank)
+            do k = skst, sken
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  sopag(ij, k) = vardt3d(ijkg)
+               end do
+            end do
+         end do
+      end if
 
-      call MPI_GATHERV( SAGE,    nsndct3d, mpi_real8, &
+      call mpi_gatherv( sage,    nsndct3d, mpi_real8, &
      &                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
-      IF ( MYRANK .EQ. iroot ) THEN
-         DO IRANK = 0, NPROCS-1
-            IJKG = ndispt3d(IRANK)
-            DO K = SKST, SKEN
-               DO IJ = JJSTR(IRANK), JJEND(IRANK)
-                  IJKG = IJKG + 1
-                  SAGEG(IJ, K) = vardt3d(IJKG)
-               END DO
-            END DO
-         END DO
-      END IF
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispt3d(irank)
+            do k = skst, sken
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  sageg(ij, k) = vardt3d(ijkg)
+               end do
+            end do
+         end do
+      end if
 
-      call MPI_GATHERV( CNIT,    nsndct3d, mpi_real8, &
+      call mpi_gatherv( cnit,    nsndct3d, mpi_real8, &
      &                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
-      IF ( MYRANK .EQ. iroot ) THEN
-         DO IRANK = 0, NPROCS-1
-            IJKG = ndispt3d(IRANK)
-            DO K = SKST, SKEN
-               DO IJ = JJSTR(IRANK), JJEND(IRANK)
-                  IJKG = IJKG + 1
-                  CNITG(IJ, K) = vardt3d(IJKG)
-               END DO
-            END DO
-         END DO
-      END IF
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispt3d(irank)
+            do k = skst, sken
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  cnitg(ij, k) = vardt3d(ijkg)
+               end do
+            end do
+         end do
+      end if
 
-      call MPI_GATHERV( CDIC,    nsndct3d, mpi_real8, &
+      call mpi_gatherv( cdic,    nsndct3d, mpi_real8, &
      &                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
-      IF ( MYRANK .EQ. iroot ) THEN
-         DO IRANK = 0, NPROCS-1
-            IJKG = ndispt3d(IRANK)
-            DO K = SKST, SKEN
-               DO IJ = JJSTR(IRANK), JJEND(IRANK)
-                  IJKG = IJKG + 1
-                  CDICG(IJ, K) = vardt3d(IJKG)
-               END DO
-            END DO
-         END DO
-      END IF
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispt3d(irank)
+            do k = skst, sken
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  cdicg(ij, k) = vardt3d(ijkg)
+               end do
+            end do
+         end do
+      end if
 
-      call MPI_GATHERV( CALK,    nsndct3d, mpi_real8, &
+      call mpi_gatherv( calk,    nsndct3d, mpi_real8, &
      &                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
-      IF ( MYRANK .EQ. iroot ) THEN
-         DO IRANK = 0, NPROCS-1
-            IJKG = ndispt3d(IRANK)
-            DO K = SKST, SKEN
-               DO IJ = JJSTR(IRANK), JJEND(IRANK)
-                  IJKG = IJKG + 1
-                  CALKG(IJ, K) = vardt3d(IJKG)
-               END DO
-            END DO
-         END DO
-      END IF
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispt3d(irank)
+            do k = skst, sken
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  calkg(ij, k) = vardt3d(ijkg)
+               end do
+            end do
+         end do
+      end if
 
-      call MPI_GATHERV( CSIL,    nsndct3d, mpi_real8, &
+      call mpi_gatherv( csil,    nsndct3d, mpi_real8, &
      &                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
-      IF ( MYRANK .EQ. iroot ) THEN
-         DO IRANK = 0, NPROCS-1
-            IJKG = ndispt3d(IRANK)
-            DO K = SKST, SKEN
-               DO IJ = JJSTR(IRANK), JJEND(IRANK)
-                  IJKG = IJKG + 1
-                  CSILG(IJ, K) = vardt3d(IJKG)
-               END DO
-            END DO
-         END DO
-      END IF
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispt3d(irank)
+            do k = skst, sken
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  csilg(ij, k) = vardt3d(ijkg)
+               end do
+            end do
+         end do
+      end if
 
-      call MPI_GATHERV( CDO2,    nsndct3d, mpi_real8, &
+      call mpi_gatherv( cdo2,    nsndct3d, mpi_real8, &
      &                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
-      IF ( MYRANK .EQ. iroot ) THEN
-         DO IRANK = 0, NPROCS-1
-            IJKG = ndispt3d(IRANK)
-            DO K = SKST, SKEN
-               DO IJ = JJSTR(IRANK), JJEND(IRANK)
-                  IJKG = IJKG + 1
-                  CDO2G(IJ, K) = vardt3d(IJKG)
-               END DO
-            END DO
-         END DO
-      END IF
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispt3d(irank)
+            do k = skst, sken
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  cdo2g(ij, k) = vardt3d(ijkg)
+               end do
+            end do
+         end do
+      end if
 
-   !! call MPI_GATHERV( CCO32,   nsndct3d, mpi_real8, &
+   !! call mpi_gatherv( cco32,   nsndct3d, mpi_real8, &
    !!&                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
    !!&                  iroot,   mpi_comm_world, ierr )
-   !! IF ( MYRANK .EQ. iroot ) THEN
-   !!    DO IRANK = 0, NPROCS-1
-   !!       IJKG = ndispt3d(IRANK)
-   !!       DO K = SKST, SKEN
-   !!          DO IJ = JJSTR(IRANK), JJEND(IRANK)
-   !!             IJKG = IJKG + 1
-   !!             CCO32G(IJ, K) = vardt3d(IJKG)
-   !!          END DO
-   !!       END DO
-   !!    END DO
-   !! END IF
+   !! if ( myrank .eq. iroot ) then
+   !!    do irank = 0, nprocs-1
+   !!       ijkg = ndispt3d(irank)
+   !!       do k = skst, sken
+   !!          do ij = jjstr(irank), jjend(irank)
+   !!             ijkg = ijkg + 1
+   !!             cco32g(ij, k) = vardt3d(ijkg)
+   !!          end do
+   !!       end do
+   !!    end do
+   !! end if
 
-   !! call MPI_GATHERV( SATSIL,  nsndct3d, mpi_real8, &
+   !! call mpi_gatherv( satsil,  nsndct3d, mpi_real8, &
    !!&                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
    !!&                  iroot,   mpi_comm_world, ierr )
-   !! IF ( MYRANK .EQ. iroot ) THEN
-   !!    DO IRANK = 0, NPROCS-1
-   !!       IJKG = ndispt3d(IRANK)
-   !!       DO K = SKST, SKEN
-   !!          DO IJ = JJSTR(IRANK), JJEND(IRANK)
-   !!             IJKG = IJKG + 1
-   !!             SATSILG(IJ, K) = vardt3d(IJKG)
-   !!          END DO
-   !!       END DO
-   !!    END DO
-   !! END IF
+   !! if ( myrank .eq. iroot ) then
+   !!    do irank = 0, nprocs-1
+   !!       ijkg = ndispt3d(irank)
+   !!       do k = skst, sken
+   !!          do ij = jjstr(irank), jjend(irank)
+   !!             ijkg = ijkg + 1
+   !!             satsilg(ij, k) = vardt3d(ijkg)
+   !!          end do
+   !!       end do
+   !!    end do
+   !! end if
 
-   !! call MPI_GATHERV( SATCO32, nsndct2d, mpi_real8, &
+   !! call mpi_gatherv( satco32, nsndct2d, mpi_real8, &
    !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
    !!&                  iroot,   mpi_comm_world, ierr )
-   !! IF ( MYRANK .EQ. iroot ) THEN
-   !!    DO IRANK = 0, NPROCS-1
-   !!       DO IJ = JJSTR(IRANK), JJEND(IRANK)
-   !!          SATCO32G(IJ) = vardt2d(IJ)
-   !!       END DO
-   !!    END DO
-   !! END IF
+   !! if ( myrank .eq. iroot ) then
+   !!    do irank = 0, nprocs-1
+   !!       do ij = jjstr(irank), jjend(irank)
+   !!          satco32g(ij) = vardt2d(ij)
+   !!       end do
+   !!    end do
+   !! end if
 
-   !! call MPI_GATHERV( W,       nsndct3d, mpi_real8, &
+   !! call mpi_gatherv( w,       nsndct3d, mpi_real8, &
    !!&                  vardt3d, nrcvcw3d, ndispw3d, mpi_real8, &
    !!&                  iroot,   mpi_comm_world, ierr )
-   !! IF ( MYRANK .EQ. iroot ) THEN
-   !!    DO IRANK = 0, NPROCS-1
-   !!       IJKG = ndispw3d(IRANK)
-   !!       DO K = SKST, SKEN+1
-   !!          DO IJ = JJSTR(IRANK), JJEND(IRANK)
-   !!             IJKG = IJKG + 1
-   !!             WG(IJ, K) = vardt3d(IJKG)
-   !!          END DO
-   !!       END DO
-   !!    END DO
-   !! END IF
+   !! if ( myrank .eq. iroot ) then
+   !!    do irank = 0, nprocs-1
+   !!       ijkg = ndispw3d(irank)
+   !!       do k = skst, sken+1
+   !!          do ij = jjstr(irank), jjend(irank)
+   !!             ijkg = ijkg + 1
+   !!             wg(ij, k) = vardt3d(ijkg)
+   !!          end do
+   !!       end do
+   !!    end do
+   !! end if
 
-   !! call MPI_GATHERV( FICLA,   nsndct2d, mpi_real8, &
+   !! call mpi_gatherv( ficla,   nsndct2d, mpi_real8, &
    !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
    !!&                  iroot,   mpi_comm_world, ierr )
-   !! IF ( MYRANK .EQ. iroot ) THEN
-   !!    DO IRANK = 0, NPROCS-1
-   !!       DO IJ = JJSTR(IRANK), JJEND(IRANK)
-   !!          FICLAG(IJ) = vardt2d(IJ)
-   !!       END DO
-   !!    END DO
-   !! END IF
+   !! if ( myrank .eq. iroot ) then
+   !!    do irank = 0, nprocs-1
+   !!       do ij = jjstr(irank), jjend(irank)
+   !!          ficlag(ij) = vardt2d(ij)
+   !!       end do
+   !!    end do
+   !! end if
 
-   !! call MPI_GATHERV( FIPOM,   nsndct2d, mpi_real8, &
+   !! call mpi_gatherv( fipom,   nsndct2d, mpi_real8, &
    !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
    !!&                  iroot,   mpi_comm_world, ierr )
-   !! IF ( MYRANK .EQ. iroot ) THEN
-   !!    DO IRANK = 0, NPROCS-1
-   !!       DO IJ = JJSTR(IRANK), JJEND(IRANK)
-   !!          FIPOMG(IJ) = vardt2d(IJ)
-   !!       END DO
-   !!    END DO
-   !! END IF
+   !! if ( myrank .eq. iroot ) then
+   !!    do irank = 0, nprocs-1
+   !!       do ij = jjstr(irank), jjend(irank)
+   !!          fipomg(ij) = vardt2d(ij)
+   !!       end do
+   !!    end do
+   !! end if
 
-   !! call MPI_GATHERV( FICAR,   nsndct2d, mpi_real8, &
+   !! call mpi_gatherv( ficar,   nsndct2d, mpi_real8, &
    !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
    !!&                  iroot,   mpi_comm_world, ierr )
-   !! IF ( MYRANK .EQ. iroot ) THEN
-   !!    DO IRANK = 0, NPROCS-1
-   !!       DO IJ = JJSTR(IRANK), JJEND(IRANK)
-   !!          FICARG(IJ) = vardt2d(IJ)
-   !!       END DO
-   !!    END DO
-   !! END IF
+   !! if ( myrank .eq. iroot ) then
+   !!    do irank = 0, nprocs-1
+   !!       do ij = jjstr(irank), jjend(irank)
+   !!          ficarg(ij) = vardt2d(ij)
+   !!       end do
+   !!    end do
+   !! end if
 
-   !! call MPI_GATHERV( FIOPA,   nsndct2d, mpi_real8, &
+   !! call mpi_gatherv( fiopa,   nsndct2d, mpi_real8, &
    !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
    !!&                  iroot,   mpi_comm_world, ierr )
-   !! IF ( MYRANK .EQ. iroot ) THEN
-   !!    DO IRANK = 0, NPROCS-1
-   !!       DO IJ = JJSTR(IRANK), JJEND(IRANK)
-   !!          FIOPAG(IJ) = vardt2d(IJ)
-   !!       END DO
-   !!    END DO
-   !! END IF
+   !! if ( myrank .eq. iroot ) then
+   !!    do irank = 0, nprocs-1
+   !!       do ij = jjstr(irank), jjend(irank)
+   !!          fiopag(ij) = vardt2d(ij)
+   !!       end do
+   !!    end do
+   !! end if
 
-   !! call MPI_GATHERV( FOCLA,   nsndct2d, mpi_real8, &
+   !! call mpi_gatherv( focla,   nsndct2d, mpi_real8, &
    !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
    !!&                  iroot,   mpi_comm_world, ierr )
-   !! IF ( MYRANK .EQ. iroot ) THEN
-   !!    DO IRANK = 0, NPROCS-1
-   !!       DO IJ = JJSTR(IRANK), JJEND(IRANK)
-   !!          FOCLAG(IJ) = vardt2d(IJ)
-   !!       END DO
-   !!    END DO
-   !! END IF
+   !! if ( myrank .eq. iroot ) then
+   !!    do irank = 0, nprocs-1
+   !!       do ij = jjstr(irank), jjend(irank)
+   !!          foclag(ij) = vardt2d(ij)
+   !!       end do
+   !!    end do
+   !! end if
 
-   !! call MPI_GATHERV( FOPOM,   nsndct2d, mpi_real8, &
+   !! call mpi_gatherv( fopom,   nsndct2d, mpi_real8, &
    !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
    !!&                  iroot,   mpi_comm_world, ierr )
-   !! IF ( MYRANK .EQ. iroot ) THEN
-   !!    DO IRANK = 0, NPROCS-1
-   !!       DO IJ = JJSTR(IRANK), JJEND(IRANK)
-   !!          FOPOMG(IJ) = vardt2d(IJ)
-   !!       END DO
-   !!    END DO
-   !! END IF
+   !! if ( myrank .eq. iroot ) then
+   !!    do irank = 0, nprocs-1
+   !!       do ij = jjstr(irank), jjend(irank)
+   !!          fopomg(ij) = vardt2d(ij)
+   !!       end do
+   !!    end do
+   !! end if
 
-   !! call MPI_GATHERV( FOCAR,   nsndct2d, mpi_real8, &
+   !! call mpi_gatherv( focar,   nsndct2d, mpi_real8, &
    !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
    !!&                  iroot,   mpi_comm_world, ierr )
-   !! IF ( MYRANK .EQ. iroot ) THEN
-   !!    DO IRANK = 0, NPROCS-1
-   !!       DO IJ = JJSTR(IRANK), JJEND(IRANK)
-   !!          FOCARG(IJ) = vardt2d(IJ)
-   !!       END DO
-   !!    END DO
-   !! END IF
+   !! if ( myrank .eq. iroot ) then
+   !!    do irank = 0, nprocs-1
+   !!       do ij = jjstr(irank), jjend(irank)
+   !!          focarg(ij) = vardt2d(ij)
+   !!       end do
+   !!    end do
+   !! end if
 
-   !! call MPI_GATHERV( FOOPA,   nsndct2d, mpi_real8, &
+   !! call mpi_gatherv( foopa,   nsndct2d, mpi_real8, &
    !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
    !!&                  iroot,   mpi_comm_world, ierr )
-   !! IF ( MYRANK .EQ. iroot ) THEN
-   !!    DO IRANK = 0, NPROCS-1
-   !!       DO IJ = JJSTR(IRANK), JJEND(IRANK)
-   !!          FOOPAG(IJ) = vardt2d(IJ)
-   !!       END DO
-   !!    END DO
-   !! END IF
+   !! if ( myrank .eq. iroot ) then
+   !!    do irank = 0, nprocs-1
+   !!       do ij = jjstr(irank), jjend(irank)
+   !!          foopag(ij) = vardt2d(ij)
+   !!       end do
+   !!    end do
+   !! end if
 
-   !! call MPI_GATHERV( BFCLA,   nsndct2d, mpi_real8, &
+   !! call mpi_gatherv( bfcla,   nsndct2d, mpi_real8, &
    !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
    !!&                  iroot,   mpi_comm_world, ierr )
-   !! IF ( MYRANK .EQ. iroot ) THEN
-   !!    DO IRANK = 0, NPROCS-1
-   !!       DO IJ = JJSTR(IRANK), JJEND(IRANK)
-   !!          BFCLAG(IJ) = vardt2d(IJ)
-   !!       END DO
-   !!    END DO
-   !! END IF
+   !! if ( myrank .eq. iroot ) then
+   !!    do irank = 0, nprocs-1
+   !!       do ij = jjstr(irank), jjend(irank)
+   !!          bfclag(ij) = vardt2d(ij)
+   !!       end do
+   !!    end do
+   !! end if
 
-   !! call MPI_GATHERV( BFPOM,   nsndct2d, mpi_real8, &
+   !! call mpi_gatherv( bfpom,   nsndct2d, mpi_real8, &
    !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
    !!&                  iroot,   mpi_comm_world, ierr )
-   !! IF ( MYRANK .EQ. iroot ) THEN
-   !!    DO IRANK = 0, NPROCS-1
-   !!       DO IJ = JJSTR(IRANK), JJEND(IRANK)
-   !!          BFPOMG(IJ) = vardt2d(IJ)
-   !!       END DO
-   !!    END DO
-   !! END IF
+   !! if ( myrank .eq. iroot ) then
+   !!    do irank = 0, nprocs-1
+   !!       do ij = jjstr(irank), jjend(irank)
+   !!          bfpomg(ij) = vardt2d(ij)
+   !!       end do
+   !!    end do
+   !! end if
 
-   !! call MPI_GATHERV( BFCAR,   nsndct2d, mpi_real8, &
+   !! call mpi_gatherv( bfcar,   nsndct2d, mpi_real8, &
    !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
    !!&                  iroot,   mpi_comm_world, ierr )
-   !! IF ( MYRANK .EQ. iroot ) THEN
-   !!    DO IRANK = 0, NPROCS-1
-   !!       DO IJ = JJSTR(IRANK), JJEND(IRANK)
-   !!          BFCARG(IJ) = vardt2d(IJ)
-   !!       END DO
-   !!    END DO
-   !! END IF
+   !! if ( myrank .eq. iroot ) then
+   !!    do irank = 0, nprocs-1
+   !!       do ij = jjstr(irank), jjend(irank)
+   !!          bfcarg(ij) = vardt2d(ij)
+   !!       end do
+   !!    end do
+   !! end if
 
-   !! call MPI_GATHERV( BFOPA,   nsndct2d, mpi_real8, &
+   !! call mpi_gatherv( bfopa,   nsndct2d, mpi_real8, &
    !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
    !!&                  iroot,   mpi_comm_world, ierr )
-   !! IF ( MYRANK .EQ. iroot ) THEN
-   !!    DO IRANK = 0, NPROCS-1
-   !!       DO IJ = JJSTR(IRANK), JJEND(IRANK)
-   !!          BFOPAG(IJ) = vardt2d(IJ)
-   !!       END DO
-   !!    END DO
-   !! END IF
+   !! if ( myrank .eq. iroot ) then
+   !!    do irank = 0, nprocs-1
+   !!       do ij = jjstr(irank), jjend(irank)
+   !!          bfopag(ij) = vardt2d(ij)
+   !!       end do
+   !!    end do
+   !! end if
 
-      IF ( calc13 ) THEN
+      if ( calc13 ) then
 
-      call MPI_GATHERV( S13POM,  nsndct3d, mpi_real8, &
+      call mpi_gatherv( s13pom,  nsndct3d, mpi_real8, &
      &                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
-      IF ( MYRANK .EQ. iroot ) THEN
-         DO IRANK = 0, NPROCS-1
-            IJKG = ndispt3d(IRANK)
-            DO K = SKST, SKEN
-               DO IJ = JJSTR(IRANK), JJEND(IRANK)
-                  IJKG = IJKG + 1
-                  S13POMG(IJ, K) = vardt3d(IJKG)
-               END DO
-            END DO
-         END DO
-      END IF
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispt3d(irank)
+            do k = skst, sken
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  s13pomg(ij, k) = vardt3d(ijkg)
+               end do
+            end do
+         end do
+      end if
 
-      call MPI_GATHERV( S13CAR,  nsndct3d, mpi_real8, &
+      call mpi_gatherv( s13car,  nsndct3d, mpi_real8, &
      &                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
-      IF ( MYRANK .EQ. iroot ) THEN
-         DO IRANK = 0, NPROCS-1
-            IJKG = ndispt3d(IRANK)
-            DO K = SKST, SKEN
-               DO IJ = JJSTR(IRANK), JJEND(IRANK)
-                  IJKG = IJKG + 1
-                  S13CARG(IJ, K) = vardt3d(IJKG)
-               END DO
-            END DO
-         END DO
-      END IF
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispt3d(irank)
+            do k = skst, sken
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  s13carg(ij, k) = vardt3d(ijkg)
+               end do
+            end do
+         end do
+      end if
 
-      call MPI_GATHERV( C13DIC,  nsndct3d, mpi_real8, &
+      call mpi_gatherv( c13dic,  nsndct3d, mpi_real8, &
      &                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
-      IF ( MYRANK .EQ. iroot ) THEN
-         DO IRANK = 0, NPROCS-1
-            IJKG = ndispt3d(IRANK)
-            DO K = SKST, SKEN
-               DO IJ = JJSTR(IRANK), JJEND(IRANK)
-                  IJKG = IJKG + 1
-                  C13DICG(IJ, K) = vardt3d(IJKG)
-               END DO
-            END DO
-         END DO
-      END IF
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispt3d(irank)
+            do k = skst, sken
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  c13dicg(ij, k) = vardt3d(ijkg)
+               end do
+            end do
+         end do
+      end if
 
-   !! call MPI_GATHERV( CDC13,   nsndct3d, mpi_real8, &
+   !! call mpi_gatherv( cdc13,   nsndct3d, mpi_real8, &
    !!&                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
    !!&                  iroot,   mpi_comm_world, ierr )
-   !! IF ( MYRANK .EQ. iroot ) THEN
-   !!    DO IRANK = 0, NPROCS-1
-   !!       IJKG = ndispt3d(IRANK)
-   !!       DO K = SKST, SKEN
-   !!          DO IJ = JJSTR(IRANK), JJEND(IRANK)
-   !!             IJKG = IJKG + 1
-   !!             CDC13G(IJ, K) = vardt3d(IJKG)
-   !!          END DO
-   !!       END DO
-   !!    END DO
-   !! END IF
+   !! if ( myrank .eq. iroot ) then
+   !!    do irank = 0, nprocs-1
+   !!       ijkg = ndispt3d(irank)
+   !!       do k = skst, sken
+   !!          do ij = jjstr(irank), jjend(irank)
+   !!             ijkg = ijkg + 1
+   !!             cdc13g(ij, k) = vardt3d(ijkg)
+   !!          end do
+   !!       end do
+   !!    end do
+   !! end if
 
 
-   !! call MPI_GATHERV( FI13POM, nsndct2d, mpi_real8, &
+   !! call mpi_gatherv( fi13pom, nsndct2d, mpi_real8, &
    !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
    !!&                  iroot,   mpi_comm_world, ierr )
-   !! IF ( MYRANK .EQ. iroot ) THEN
-   !!    DO IRANK = 0, NPROCS-1
-   !!       DO IJ = JJSTR(IRANK), JJEND(IRANK)
-   !!          FI13POMG(IJ) = vardt2d(IJ)
-   !!       END DO
-   !!    END DO
-   !! END IF
+   !! if ( myrank .eq. iroot ) then
+   !!    do irank = 0, nprocs-1
+   !!       do ij = jjstr(irank), jjend(irank)
+   !!          fi13pomg(ij) = vardt2d(ij)
+   !!       end do
+   !!    end do
+   !! end if
 
-   !! call MPI_GATHERV( FI13CAR, nsndct2d, mpi_real8, &
+   !! call mpi_gatherv( fi13car, nsndct2d, mpi_real8, &
    !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
    !!&                  iroot,   mpi_comm_world, ierr )
-   !! IF ( MYRANK .EQ. iroot ) THEN
-   !!    DO IRANK = 0, NPROCS-1
-   !!       DO IJ = JJSTR(IRANK), JJEND(IRANK)
-   !!          FI13CARG(IJ) = vardt2d(IJ)
-   !!       END DO
-   !!    END DO
-   !! END IF
+   !! if ( myrank .eq. iroot ) then
+   !!    do irank = 0, nprocs-1
+   !!       do ij = jjstr(irank), jjend(irank)
+   !!          fi13carg(ij) = vardt2d(ij)
+   !!       end do
+   !!    end do
+   !! end if
 
-   !! call MPI_GATHERV( FO13POM, nsndct2d, mpi_real8, &
+   !! call mpi_gatherv( fo13pom, nsndct2d, mpi_real8, &
    !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
    !!&                  iroot,   mpi_comm_world, ierr )
-   !! IF ( MYRANK .EQ. iroot ) THEN
-   !!    DO IRANK = 0, NPROCS-1
-   !!       DO IJ = JJSTR(IRANK), JJEND(IRANK)
-   !!          FO13POMG(IJ) = vardt2d(IJ)
-   !!       END DO
-   !!    END DO
-   !! END IF
+   !! if ( myrank .eq. iroot ) then
+   !!    do irank = 0, nprocs-1
+   !!       do ij = jjstr(irank), jjend(irank)
+   !!          fo13pomg(ij) = vardt2d(ij)
+   !!       end do
+   !!    end do
+   !! end if
 
-   !! call MPI_GATHERV( FO13CAR, nsndct2d, mpi_real8, &
+   !! call mpi_gatherv( fo13car, nsndct2d, mpi_real8, &
    !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
    !!&                  iroot,   mpi_comm_world, ierr )
-   !! IF ( MYRANK .EQ. iroot ) THEN
-   !!    DO IRANK = 0, NPROCS-1
-   !!       DO IJ = JJSTR(IRANK), JJEND(IRANK)
-   !!          FO13CARG(IJ) = vardt2d(IJ)
-   !!       END DO
-   !!    END DO
-   !! END IF
+   !! if ( myrank .eq. iroot ) then
+   !!    do irank = 0, nprocs-1
+   !!       do ij = jjstr(irank), jjend(irank)
+   !!          fo13carg(ij) = vardt2d(ij)
+   !!       end do
+   !!    end do
+   !! end if
 
-   !! call MPI_GATHERV( BF13POM, nsndct2d, mpi_real8, &
+   !! call mpi_gatherv( bf13pom, nsndct2d, mpi_real8, &
    !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
    !!&                  iroot,   mpi_comm_world, ierr )
-   !! IF ( MYRANK .EQ. iroot ) THEN
-   !!    DO IRANK = 0, NPROCS-1
-   !!       DO IJ = JJSTR(IRANK), JJEND(IRANK)
-   !!          BF13POMG(IJ) = vardt2d(IJ)
-   !!       END DO
-   !!    END DO
-   !! END IF
+   !! if ( myrank .eq. iroot ) then
+   !!    do irank = 0, nprocs-1
+   !!       do ij = jjstr(irank), jjend(irank)
+   !!          bf13pomg(ij) = vardt2d(ij)
+   !!       end do
+   !!    end do
+   !! end if
 
-   !! call MPI_GATHERV( BF13CAR, nsndct2d, mpi_real8, &
+   !! call mpi_gatherv( bf13car, nsndct2d, mpi_real8, &
    !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
    !!&                  iroot,   mpi_comm_world, ierr )
-   !! IF ( MYRANK .EQ. iroot ) THEN
-   !!    DO IRANK = 0, NPROCS-1
-   !!       DO IJ = JJSTR(IRANK), JJEND(IRANK)
-   !!          BF13CARG(IJ) = vardt2d(IJ)
-   !!       END DO
-   !!    END DO
-   !! END IF
+   !! if ( myrank .eq. iroot ) then
+   !!    do irank = 0, nprocs-1
+   !!       do ij = jjstr(irank), jjend(irank)
+   !!          bf13carg(ij) = vardt2d(ij)
+   !!       end do
+   !!    end do
+   !! end if
 
-      END IF
+      end if
 
-      IF ( calc14 ) THEN
+      if ( calc14 ) then
 
-      call MPI_GATHERV( S14POM,  nsndct3d, mpi_real8, &
+      call mpi_gatherv( s14pom,  nsndct3d, mpi_real8, &
      &                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
-      IF ( MYRANK .EQ. iroot ) THEN
-         DO IRANK = 0, NPROCS-1
-            IJKG = ndispt3d(IRANK)
-            DO K = SKST, SKEN
-               DO IJ = JJSTR(IRANK), JJEND(IRANK)
-                  IJKG = IJKG + 1
-                  S14POMG(IJ, K) = vardt3d(IJKG)
-               END DO
-            END DO
-         END DO
-      END IF
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispt3d(irank)
+            do k = skst, sken
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  s14pomg(ij, k) = vardt3d(ijkg)
+               end do
+            end do
+         end do
+      end if
 
-      call MPI_GATHERV( S14CAR,  nsndct3d, mpi_real8, &
+      call mpi_gatherv( s14car,  nsndct3d, mpi_real8, &
      &                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
-      IF ( MYRANK .EQ. iroot ) THEN
-         DO IRANK = 0, NPROCS-1
-            IJKG = ndispt3d(IRANK)
-            DO K = SKST, SKEN
-               DO IJ = JJSTR(IRANK), JJEND(IRANK)
-                  IJKG = IJKG + 1
-                  S14CARG(IJ, K) = vardt3d(IJKG)
-               END DO
-            END DO
-         END DO
-      END IF
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispt3d(irank)
+            do k = skst, sken
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  s14carg(ij, k) = vardt3d(ijkg)
+               end do
+            end do
+         end do
+      end if
 
-      call MPI_GATHERV( C14DIC,  nsndct3d, mpi_real8, &
+      call mpi_gatherv( c14dic,  nsndct3d, mpi_real8, &
      &                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
-      IF ( MYRANK .EQ. iroot ) THEN
-         DO IRANK = 0, NPROCS-1
-            IJKG = ndispt3d(IRANK)
-            DO K = SKST, SKEN
-               DO IJ = JJSTR(IRANK), JJEND(IRANK)
-                  IJKG = IJKG + 1
-                  C14DICG(IJ, K) = vardt3d(IJKG)
-               END DO
-            END DO
-         END DO
-      END IF
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispt3d(irank)
+            do k = skst, sken
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  c14dicg(ij, k) = vardt3d(ijkg)
+               end do
+            end do
+         end do
+      end if
 
-   !! call MPI_GATHERV( CDC14,   nsndct3d, mpi_real8, &
+   !! call mpi_gatherv( cdc14,   nsndct3d, mpi_real8, &
    !!&                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
    !!&                  iroot,   mpi_comm_world, ierr )
-   !! IF ( MYRANK .EQ. iroot ) THEN
-   !!    DO IRANK = 0, NPROCS-1
-   !!       IJKG = ndispt3d(IRANK)
-   !!       DO K = SKST, SKEN
-   !!          DO IJ = JJSTR(IRANK), JJEND(IRANK)
-   !!             IJKG = IJKG + 1
-   !!             CDC14G(IJ, K) = vardt3d(IJKG)
-   !!          END DO
-   !!       END DO
-   !!    END DO
-   !! END IF
+   !! if ( myrank .eq. iroot ) then
+   !!    do irank = 0, nprocs-1
+   !!       ijkg = ndispt3d(irank)
+   !!       do k = skst, sken
+   !!          do ij = jjstr(irank), jjend(irank)
+   !!             ijkg = ijkg + 1
+   !!             cdc14g(ij, k) = vardt3d(ijkg)
+   !!          end do
+   !!       end do
+   !!    end do
+   !! end if
 
 
-   !! call MPI_GATHERV( FI14POM, nsndct2d, mpi_real8, &
+   !! call mpi_gatherv( fi14pom, nsndct2d, mpi_real8, &
    !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
    !!&                  iroot,   mpi_comm_world, ierr )
-   !! IF ( MYRANK .EQ. iroot ) THEN
-   !!    DO IRANK = 0, NPROCS-1
-   !!       DO IJ = JJSTR(IRANK), JJEND(IRANK)
-   !!          FI14POMG(IJ) = vardt2d(IJ)
-   !!       END DO
-   !!    END DO
-   !! END IF
+   !! if ( myrank .eq. iroot ) then
+   !!    do irank = 0, nprocs-1
+   !!       do ij = jjstr(irank), jjend(irank)
+   !!          fi14pomg(ij) = vardt2d(ij)
+   !!       end do
+   !!    end do
+   !! end if
 
-   !! call MPI_GATHERV( FI14CAR, nsndct2d, mpi_real8, &
+   !! call mpi_gatherv( fi14car, nsndct2d, mpi_real8, &
    !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
    !!&                  iroot,   mpi_comm_world, ierr )
-   !! IF ( MYRANK .EQ. iroot ) THEN
-   !!    DO IRANK = 0, NPROCS-1
-   !!       DO IJ = JJSTR(IRANK), JJEND(IRANK)
-   !!          FI14CARG(IJ) = vardt2d(IJ)
-   !!       END DO
-   !!    END DO
-   !! END IF
+   !! if ( myrank .eq. iroot ) then
+   !!    do irank = 0, nprocs-1
+   !!       do ij = jjstr(irank), jjend(irank)
+   !!          fi14carg(ij) = vardt2d(ij)
+   !!       end do
+   !!    end do
+   !! end if
 
-   !! call MPI_GATHERV( FO14POM, nsndct2d, mpi_real8, &
+   !! call mpi_gatherv( fo14pom, nsndct2d, mpi_real8, &
    !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
    !!&                  iroot,   mpi_comm_world, ierr )
-   !! IF ( MYRANK .EQ. iroot ) THEN
-   !!    DO IRANK = 0, NPROCS-1
-   !!       DO IJ = JJSTR(IRANK), JJEND(IRANK)
-   !!          FO14POMG(IJ) = vardt2d(IJ)
-   !!       END DO
-   !!    END DO
-   !! END IF
+   !! if ( myrank .eq. iroot ) then
+   !!    do irank = 0, nprocs-1
+   !!       do ij = jjstr(irank), jjend(irank)
+   !!          fo14pomg(ij) = vardt2d(ij)
+   !!       end do
+   !!    end do
+   !! end if
 
-   !! call MPI_GATHERV( FO14CAR, nsndct2d, mpi_real8, &
+   !! call mpi_gatherv( fo14car, nsndct2d, mpi_real8, &
    !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
    !!&                  iroot,   mpi_comm_world, ierr )
-   !! IF ( MYRANK .EQ. iroot ) THEN
-   !!    DO IRANK = 0, NPROCS-1
-   !!       DO IJ = JJSTR(IRANK), JJEND(IRANK)
-   !!          FO14CARG(IJ) = vardt2d(IJ)
-   !!       END DO
-   !!    END DO
-   !! END IF
+   !! if ( myrank .eq. iroot ) then
+   !!    do irank = 0, nprocs-1
+   !!       do ij = jjstr(irank), jjend(irank)
+   !!          fo14carg(ij) = vardt2d(ij)
+   !!       end do
+   !!    end do
+   !! end if
 
-   !! call MPI_GATHERV( BF14POM, nsndct2d, mpi_real8, &
+   !! call mpi_gatherv( bf14pom, nsndct2d, mpi_real8, &
    !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
    !!&                  iroot,   mpi_comm_world, ierr )
-   !! IF ( MYRANK .EQ. iroot ) THEN
-   !!    DO IRANK = 0, NPROCS-1
-   !!       DO IJ = JJSTR(IRANK), JJEND(IRANK)
-   !!          BF14POMG(IJ) = vardt2d(IJ)
-   !!       END DO
-   !!    END DO
-   !! END IF
+   !! if ( myrank .eq. iroot ) then
+   !!    do irank = 0, nprocs-1
+   !!       do ij = jjstr(irank), jjend(irank)
+   !!          bf14pomg(ij) = vardt2d(ij)
+   !!       end do
+   !!    end do
+   !! end if
 
-   !! call MPI_GATHERV( BF14CAR, nsndct2d, mpi_real8, &
+   !! call mpi_gatherv( bf14car, nsndct2d, mpi_real8, &
    !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
    !!&                  iroot,   mpi_comm_world, ierr )
-   !! IF ( MYRANK .EQ. iroot ) THEN
-   !!    DO IRANK = 0, NPROCS-1
-   !!       DO IJ = JJSTR(IRANK), JJEND(IRANK)
-   !!          BF14CARG(IJ) = vardt2d(IJ)
-   !!       END DO
-   !!    END DO
-   !! END IF
+   !! if ( myrank .eq. iroot ) then
+   !!    do irank = 0, nprocs-1
+   !!       do ij = jjstr(irank), jjend(irank)
+   !!          bf14carg(ij) = vardt2d(ij)
+   !!       end do
+   !!    end do
+   !! end if
 
-      END IF
+      end if
 
-      IF ( MYRANK .EQ. iroot ) THEN
-         DO K = SKST, SKEN
-            DO IJ = 1, nxydim
-               WTG(IJ, K)   = SCLAG(IJ, K) &
-     &                      + ( SPOMG(IJ, K) * MOLPOM * 1.0D-3 ) &
-     &                      + ( SCARG(IJ, K) * MOLCAR * 1.0D-3 ) &
-     &                      + ( SOPAG(IJ, K) * MOLOPA * 1.0D-3 )
-               PCLAG(IJ, K) = SCLAG(IJ, K) &
-     &                      / WTG(IJ, K) * 1.0D+2
-               PPOMG(IJ, K) = SPOMG(IJ, K) * MOLPOM * 1.0D-3 &
-     &                      / WTG(IJ, K) * 1.0D+2
-               PCARG(IJ, K) = SCARG(IJ, K) * MOLCAR * 1.0D-3 &
-     &                      / WTG(IJ, K) * 1.0D+2
-               POPAG(IJ, K) = SOPAG(IJ, K) * MOLOPA * 1.0D-3 &
-     &                      / WTG(IJ, K) * 1.0D+2
-            END DO
-         END DO
+      if ( myrank .eq. iroot ) then
+         do k = skst, sken
+            do ij = 1, nxydim
+               wtg(ij, k)   = sclag(ij, k) &
+     &                      + ( spomg(ij, k) * molpom * 1.0d-3 ) &
+     &                      + ( scarg(ij, k) * molcar * 1.0d-3 ) &
+     &                      + ( sopag(ij, k) * molopa * 1.0d-3 )
+               pclag(ij, k) = sclag(ij, k) &
+     &                      / wtg(ij, k) * 1.0d+2
+               ppomg(ij, k) = spomg(ij, k) * molpom * 1.0d-3 &
+     &                      / wtg(ij, k) * 1.0d+2
+               pcarg(ij, k) = scarg(ij, k) * molcar * 1.0d-3 &
+     &                      / wtg(ij, k) * 1.0d+2
+               popag(ij, k) = sopag(ij, k) * molopa * 1.0d-3 &
+     &                      / wtg(ij, k) * 1.0d+2
+            end do
+         end do
 
-      END IF
+      end if
 
       call mpi_barrier(mpi_comm_world, ierr )
 
@@ -1749,535 +1749,535 @@ IF (use_mpi) THEN
       deallocate(vardt3d)
       deallocate(vardw3d)
 
-ELSE
+else
 
-         DO K = SKST, SKEN
-            DO IJ = 1, nxydim
-               SCLAG(IJ, K) = SCLA(IJ, K)
-               SPOMG(IJ, K) = SPOM(IJ, K)
-               SCARG(IJ, K) = SCAR(IJ, K)
-               SOPAG(IJ, K) = SOPA(IJ, K)
-               SAGEG(IJ, K) = SAGE(IJ, K)
-            END DO
-         END DO
+         do k = skst, sken
+            do ij = 1, nxydim
+               sclag(ij, k) = scla(ij, k)
+               spomg(ij, k) = spom(ij, k)
+               scarg(ij, k) = scar(ij, k)
+               sopag(ij, k) = sopa(ij, k)
+               sageg(ij, k) = sage(ij, k)
+            end do
+         end do
 
-         DO K = SKST, SKEN
-            DO IJ = 1, nxydim
-               PCLAG(IJ, K) = PCLA(IJ, K)
-               PPOMG(IJ, K) = PPOM(IJ, K)
-               PCARG(IJ, K) = PCAR(IJ, K)
-               POPAG(IJ, K) = POPA(IJ, K)
-            END DO
-         END DO
+         do k = skst, sken
+            do ij = 1, nxydim
+               pclag(ij, k) = pcla(ij, k)
+               ppomg(ij, k) = ppom(ij, k)
+               pcarg(ij, k) = pcar(ij, k)
+               popag(ij, k) = popa(ij, k)
+            end do
+         end do
 
-         DO K = SKST, SKEN
-            DO IJ = 1, nxydim
-                CNITG(IJ, K)   = CNIT(IJ, K)
-                CDICG(IJ, K)   = CDIC(IJ, K)
-                CALKG(IJ, K)   = CALK(IJ, K)
-                CDO2G(IJ, K)   = CDO2(IJ, K)
-                CSILG(IJ, K)   = CSIL(IJ, K)
-                CCO32G(IJ, K)  = CCO32(IJ, K)
-            END DO
-         END DO
+         do k = skst, sken
+            do ij = 1, nxydim
+                cnitg(ij, k)   = cnit(ij, k)
+                cdicg(ij, k)   = cdic(ij, k)
+                calkg(ij, k)   = calk(ij, k)
+                cdo2g(ij, k)   = cdo2(ij, k)
+                csilg(ij, k)   = csil(ij, k)
+                cco32g(ij, k)  = cco32(ij, k)
+            end do
+         end do
 
-         DO K = SKST, SKEN
-            DO IJ = 1, nxydim
-                SATSILG(IJ, K) = SATSIL(IJ, K)
-            END DO
-         END DO
+         do k = skst, sken
+            do ij = 1, nxydim
+                satsilg(ij, k) = satsil(ij, k)
+            end do
+         end do
 
-         DO IJ = 1, nxydim
-            SATCO32G(IJ) = SATCO32(IJ)
-         END DO
+         do ij = 1, nxydim
+            satco32g(ij) = satco32(ij)
+         end do
 
-         DO K = SKST, SKEN
-            DO IJ = 1, nxydim
-                WG(IJ, K) = W(IJ, K)
-            END DO
-         END DO
+         do k = skst, sken
+            do ij = 1, nxydim
+                wg(ij, k) = w(ij, k)
+            end do
+         end do
 
-         IF ( calc13 ) THEN
-         DO K = SKST, SKEN
-            DO IJ = 1, nxydim
-                S13POMG(IJ, K) = S13POM(IJ, K)
-                S13CARG(IJ, K) = S13CAR(IJ, K)
-                C13DICG(IJ, K) = C13DIC(IJ, K)
-                CDC13G(IJ, K)  = CDC13(IJ, K)
-            END DO
-         END DO
-         END IF
+         if ( calc13 ) then
+         do k = skst, sken
+            do ij = 1, nxydim
+                s13pomg(ij, k) = s13pom(ij, k)
+                s13carg(ij, k) = s13car(ij, k)
+                c13dicg(ij, k) = c13dic(ij, k)
+                cdc13g(ij, k)  = cdc13(ij, k)
+            end do
+         end do
+         end if
 
-         IF ( calc14 ) THEN
-         DO K = SKST, SKEN
-            DO IJ = 1, nxydim
-                S14POMG(IJ, K) = S14POM(IJ, K)
-                S14CARG(IJ, K) = S14CAR(IJ, K)
-                C14DICG(IJ, K) = C14DIC(IJ, K)
-                CDC14G(IJ, K)  = CDC14(IJ, K)
-            END DO
-         END DO
-         END IF
+         if ( calc14 ) then
+         do k = skst, sken
+            do ij = 1, nxydim
+                s14pomg(ij, k) = s14pom(ij, k)
+                s14carg(ij, k) = s14car(ij, k)
+                c14dicg(ij, k) = c14dic(ij, k)
+                cdc14g(ij, k)  = cdc14(ij, k)
+            end do
+         end do
+         end if
 
-         DO IJ = 1, nxydim
-            FICLAG(IJ)     = FICLA(IJ)
-            FIPOMG(IJ)     = FIPOM(IJ)
-            FICARG(IJ)     = FICAR(IJ)
-            FIOPAG(IJ)     = FIOPA(IJ)
-            FOCLAG(IJ)     = FOCLA(IJ)
-            FOPOMG(IJ)     = FOPOM(IJ)
-            FOCARG(IJ)     = FOCAR(IJ)
-            FOOPAG(IJ)     = FOOPA(IJ)
-            BFCLAG(IJ)     = BFCLA(IJ)
-            BFPOMG(IJ)     = BFPOM(IJ)
-            BFCARG(IJ)     = BFCAR(IJ)
-            BFOPAG(IJ)     = BFOPA(IJ)
-         END DO
+         do ij = 1, nxydim
+            ficlag(ij)     = ficla(ij)
+            fipomg(ij)     = fipom(ij)
+            ficarg(ij)     = ficar(ij)
+            fiopag(ij)     = fiopa(ij)
+            foclag(ij)     = focla(ij)
+            fopomg(ij)     = fopom(ij)
+            focarg(ij)     = focar(ij)
+            foopag(ij)     = foopa(ij)
+            bfclag(ij)     = bfcla(ij)
+            bfpomg(ij)     = bfpom(ij)
+            bfcarg(ij)     = bfcar(ij)
+            bfopag(ij)     = bfopa(ij)
+         end do
 
-         IF ( calc13 ) THEN
-         DO IJ = 1, nxydim
-            FI13POMG(IJ)   = FI13POM(IJ)
-            FI13CARG(IJ)   = FI13CAR(IJ)
-            FO13POMG(IJ)   = FO13POM(IJ)
-            FO13CARG(IJ)   = FO13CAR(IJ)
-            BF13POMG(IJ)   = BF13POM(IJ)
-            BF13CARG(IJ)   = BF13CAR(IJ)
-         END DO
-         END IF
+         if ( calc13 ) then
+         do ij = 1, nxydim
+            fi13pomg(ij)   = fi13pom(ij)
+            fi13carg(ij)   = fi13car(ij)
+            fo13pomg(ij)   = fo13pom(ij)
+            fo13carg(ij)   = fo13car(ij)
+            bf13pomg(ij)   = bf13pom(ij)
+            bf13carg(ij)   = bf13car(ij)
+         end do
+         end if
 
-         IF ( calc14 ) THEN
-         DO IJ = 1, nxydim
-            FI14POMG(IJ)   = FI14POM(IJ)
-            FI14CARG(IJ)   = FI14CAR(IJ)
-            FO14POMG(IJ)   = FO14POM(IJ)
-            FO14CARG(IJ)   = FO14CAR(IJ)
-            BF14POMG(IJ)   = BF14POM(IJ)
-            BF14CARG(IJ)   = BF14CAR(IJ)
-         END DO
-         END IF
+         if ( calc14 ) then
+         do ij = 1, nxydim
+            fi14pomg(ij)   = fi14pom(ij)
+            fi14carg(ij)   = fi14car(ij)
+            fo14pomg(ij)   = fo14pom(ij)
+            fo14carg(ij)   = fo14car(ij)
+            bf14pomg(ij)   = bf14pom(ij)
+            bf14carg(ij)   = bf14car(ij)
+         end do
+         end if
 
-END IF
+end if
 
-IF (use_mpi) THEN
-      IF ( MYRANK .EQ. iroot ) THEN
+if (use_mpi) then
+      if ( myrank .eq. iroot ) then
 
-         DO I = 1, NXDIM
-           LON_VALUES(I) = ((I - 1) * 360.0 / NXDIM) + (180.0 / NXDIM)
-         END DO
+         do i = 1, nxdim
+           lon_values(i) = ((i - 1) * 360.0 / nxdim) + (180.0 / nxdim)
+         end do
 
-         DO I = 1, NYDIM
-           LAT_VALUES(I) = -90.0 + ((I - 1) * 180.0 / NYDIM) + (90.0 / NYDIM)
-         END DO
+         do i = 1, nydim
+           lat_values(i) = -90.0 + ((i - 1) * 180.0 / nydim) + (90.0 / nydim)
+         end do
 
          !-- NetCDF output --
 
-         FILENAME = "scla.nc"
-         VARNAME = "Clay"
-         VARUNIT = "g m-3"
-         DO K = 1, sdzdim
-           DO J = 1, NYDIM
-             DO I = 1, NXDIM
-               IJ = I + (J - 1) * NXDIM
-               VAR3D_VALUES(I, J, K, 1) = SCLAG(IJ, K)
-             END DO
-           END DO
-         END DO
-         call write_netcdf_3d(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+         filename = "scla.nc"
+         varname = "Clay"
+         varunit = "g m-3"
+         do k = 1, sdzdim
+           do j = 1, nydim
+             do i = 1, nxdim
+               ij = i + (j - 1) * nxdim
+               var3d_values(i, j, k, 1) = sclag(ij, k)
+             end do
+           end do
+         end do
+         call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy)
          call calc_integral_and_mean_3d( sclag, lon_values, lat_values, lz, integral_value, mean_value )
-         WRITE(NFSTDO, *) "'--------------------------------------------------'"
-         WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
-         WRITE(NFSTDO,'(A, E12.5, A)') " Global Averaged: ", mean_value, " g m-3"
-         WRITE(NFSTDO,'(A, E12.5, A)') " Global Integrated: ", integral_value, " g"
-         WRITE(NFSTDO, *) "'--------------------------------------------------'"
+         write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
+         write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " g m-3"
+         write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value, " g"
+         write(nfstdo, *) "'--------------------------------------------------'"
 
-         FILENAME = "spom.nc"
-         VARNAME = "OrgM"
-         VARUNIT = "mmol m-3"
-         DO K = 1, sdzdim
-           DO J = 1, NYDIM
-             DO I = 1, NXDIM
-               IJ = I + (J - 1) * NXDIM
-               VAR3D_VALUES(I, J, K, 1) = SPOMG(IJ, K)
-             END DO
-           END DO
-         END DO
-         call write_netcdf_3d(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+         filename = "spom.nc"
+         varname = "OrgM"
+         varunit = "mmol m-3"
+         do k = 1, sdzdim
+           do j = 1, nydim
+             do i = 1, nxdim
+               ij = i + (j - 1) * nxdim
+               var3d_values(i, j, k, 1) = spomg(ij, k)
+             end do
+           end do
+         end do
+         call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy)
          call calc_integral_and_mean_3d( spomg, lon_values, lat_values, lz, integral_value, mean_value )
-         WRITE(NFSTDO, *) "'--------------------------------------------------'"
-         WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
-         WRITE(NFSTDO,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
-         WRITE(NFSTDO,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.D-3, " mol"
-         WRITE(NFSTDO, *) "'--------------------------------------------------'"
+         write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
+         write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
+         write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
+         write(nfstdo, *) "'--------------------------------------------------'"
 
-         FILENAME = "scar.nc"
-         VARNAME = "CaCO3"
-         VARUNIT = "mmol m-3"
-         DO K = 1, sdzdim
-           DO J = 1, NYDIM
-             DO I = 1, NXDIM
-               IJ = I + (J - 1) * NXDIM
-               VAR3D_VALUES(I, J, K, 1) = SCARG(IJ, K)
-             END DO
-           END DO
-         END DO
-         call write_netcdf_3d(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+         filename = "scar.nc"
+         varname = "CaCO3"
+         varunit = "mmol m-3"
+         do k = 1, sdzdim
+           do j = 1, nydim
+             do i = 1, nxdim
+               ij = i + (j - 1) * nxdim
+               var3d_values(i, j, k, 1) = scarg(ij, k)
+             end do
+           end do
+         end do
+         call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy)
          call calc_integral_and_mean_3d( scarg, lon_values, lat_values, lz, integral_value, mean_value )
-         WRITE(NFSTDO, *) "'--------------------------------------------------'"
-         WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
-         WRITE(NFSTDO,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
-         WRITE(NFSTDO,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.D-3, " mol"
-         WRITE(NFSTDO, *) "'--------------------------------------------------'"
+         write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
+         write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
+         write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
+         write(nfstdo, *) "'--------------------------------------------------'"
 
-         FILENAME = "sopa.nc"
-         VARNAME = "SiO2"
-         VARUNIT = "mmol m-3"
-         DO K = 1, sdzdim
-           DO J = 1, NYDIM
-             DO I = 1, NXDIM
-               IJ = I + (J - 1) * NXDIM
-               VAR3D_VALUES(I, J, K, 1) = SOPAG(IJ, K)
-             END DO
-           END DO
-         END DO
-         call write_netcdf_3d(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+         filename = "sopa.nc"
+         varname = "SiO2"
+         varunit = "mmol m-3"
+         do k = 1, sdzdim
+           do j = 1, nydim
+             do i = 1, nxdim
+               ij = i + (j - 1) * nxdim
+               var3d_values(i, j, k, 1) = sopag(ij, k)
+             end do
+           end do
+         end do
+         call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy)
          call calc_integral_and_mean_3d( sopag, lon_values, lat_values, lz, integral_value, mean_value )
-         WRITE(NFSTDO, *) "'--------------------------------------------------'"
-         WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
-         WRITE(NFSTDO,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
-         WRITE(NFSTDO,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.D-3, " mol"
-         WRITE(NFSTDO, *) "'--------------------------------------------------'"
+         write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
+         write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
+         write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
+         write(nfstdo, *) "'--------------------------------------------------'"
 
-         FILENAME = "sage.nc"
-         VARNAME = "Age tracer"
-         VARUNIT = "year"
-         DO K = 1, sdzdim
-           DO J = 1, NYDIM
-             DO I = 1, NXDIM
-               IJ = I + (J - 1) * NXDIM
-               VAR3D_VALUES(I, J, K, 1) = SAGEG(IJ, K)
-             END DO
-           END DO
-         END DO
-         call write_netcdf_3d(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+         filename = "sage.nc"
+         varname = "Age tracer"
+         varunit = "year"
+         do k = 1, sdzdim
+           do j = 1, nydim
+             do i = 1, nxdim
+               ij = i + (j - 1) * nxdim
+               var3d_values(i, j, k, 1) = sageg(ij, k)
+             end do
+           end do
+         end do
+         call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy)
          call calc_integral_and_mean_3d( sageg, lon_values, lat_values, lz, integral_value, mean_value )
-         WRITE(NFSTDO, *) "'--------------------------------------------------'"
-         WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
-         WRITE(NFSTDO,'(A, E12.5, A)') " Global Averaged: ", mean_value, " yr"
-         WRITE(NFSTDO, *) "'--------------------------------------------------'"
+         write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
+         write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " yr"
+         write(nfstdo, *) "'--------------------------------------------------'"
 
-         FILENAME = "cnit.nc"
-         VARNAME = "Phosphate"
-         VARUNIT = "mmol m-3"
-         DO K = 1, sdzdim
-           DO J = 1, NYDIM
-             DO I = 1, NXDIM
-               IJ = I + (J - 1) * NXDIM
-               VAR3D_VALUES(I, J, K, 1) = CNITG(IJ, K)
-             END DO
-           END DO
-         END DO
-         call write_netcdf_3d(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+         filename = "cnit.nc"
+         varname = "Phosphate"
+         varunit = "mmol m-3"
+         do k = 1, sdzdim
+           do j = 1, nydim
+             do i = 1, nxdim
+               ij = i + (j - 1) * nxdim
+               var3d_values(i, j, k, 1) = cnitg(ij, k)
+             end do
+           end do
+         end do
+         call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy)
          call calc_integral_and_mean_3d( cnitg, lon_values, lat_values, lz, integral_value, mean_value )
-         WRITE(NFSTDO, *) "'--------------------------------------------------'"
-         WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
-         WRITE(NFSTDO,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
-         WRITE(NFSTDO,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.D-3, " mol"
-         WRITE(NFSTDO, *) "'--------------------------------------------------'"
+         write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
+         write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
+         write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
+         write(nfstdo, *) "'--------------------------------------------------'"
 
-         FILENAME = "cdic.nc"
-         VARNAME = "DIC"
-         VARUNIT = "mmol m-3"
-         DO K = 1, sdzdim
-           DO J = 1, NYDIM
-             DO I = 1, NXDIM
-               IJ = I + (J - 1) * NXDIM
-               VAR3D_VALUES(I, J, K, 1) = CDICG(IJ, K)
-             END DO
-           END DO
-         END DO
-         call write_netcdf_3d(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+         filename = "cdic.nc"
+         varname = "DIC"
+         varunit = "mmol m-3"
+         do k = 1, sdzdim
+           do j = 1, nydim
+             do i = 1, nxdim
+               ij = i + (j - 1) * nxdim
+               var3d_values(i, j, k, 1) = cdicg(ij, k)
+             end do
+           end do
+         end do
+         call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy)
          call calc_integral_and_mean_3d( cdicg, lon_values, lat_values, lz, integral_value, mean_value )
-         WRITE(NFSTDO, *) "'--------------------------------------------------'"
-         WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
-         WRITE(NFSTDO,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
-         WRITE(NFSTDO,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.D-3, " mol"
-         WRITE(NFSTDO, *) "'--------------------------------------------------'"
+         write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
+         write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
+         write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
+         write(nfstdo, *) "'--------------------------------------------------'"
 
-         FILENAME = "calk.nc"
-         VARNAME = "Alkalinity"
-         VARUNIT = "mmol m-3"
-         DO K = 1, sdzdim
-           DO J = 1, NYDIM
-             DO I = 1, NXDIM
-               IJ = I + (J - 1) * NXDIM
-               VAR3D_VALUES(I, J, K, 1) = CALKG(IJ, K)
-             END DO
-           END DO
-         END DO
-         call write_netcdf_3d(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+         filename = "calk.nc"
+         varname = "Alkalinity"
+         varunit = "mmol m-3"
+         do k = 1, sdzdim
+           do j = 1, nydim
+             do i = 1, nxdim
+               ij = i + (j - 1) * nxdim
+               var3d_values(i, j, k, 1) = calkg(ij, k)
+             end do
+           end do
+         end do
+         call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy)
          call calc_integral_and_mean_3d( calkg, lon_values, lat_values, lz, integral_value, mean_value )
-         WRITE(NFSTDO, *) "'--------------------------------------------------'"
-         WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
-         WRITE(NFSTDO,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
-         WRITE(NFSTDO,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.D-3, " mol"
-         WRITE(NFSTDO, *) "'--------------------------------------------------'"
+         write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
+         write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
+         write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
+         write(nfstdo, *) "'--------------------------------------------------'"
 
-         FILENAME = "cdo2.nc"
-         VARNAME = "Oxygen"
-         VARUNIT = "mmol m-3"
-         DO K = 1, sdzdim
-           DO J = 1, NYDIM
-             DO I = 1, NXDIM
-               IJ = I + (J - 1) * NXDIM
-               VAR3D_VALUES(I, J, K, 1) = CDO2G(IJ, K)
-             END DO
-           END DO
-         END DO
-         call write_netcdf_3d(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+         filename = "cdo2.nc"
+         varname = "Oxygen"
+         varunit = "mmol m-3"
+         do k = 1, sdzdim
+           do j = 1, nydim
+             do i = 1, nxdim
+               ij = i + (j - 1) * nxdim
+               var3d_values(i, j, k, 1) = cdo2g(ij, k)
+             end do
+           end do
+         end do
+         call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy)
          call calc_integral_and_mean_3d( cdo2g, lon_values, lat_values, lz, integral_value, mean_value )
-         WRITE(NFSTDO, *) "'--------------------------------------------------'"
-         WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
-         WRITE(NFSTDO,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
-         WRITE(NFSTDO,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.D-3, " mol"
-         WRITE(NFSTDO, *) "'--------------------------------------------------'"
+         write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
+         write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
+         write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
+         write(nfstdo, *) "'--------------------------------------------------'"
 
-         FILENAME = "csil.nc"
-         VARNAME = "Silicate"
-         VARUNIT = "mmol m-3"
-         DO K = 1, sdzdim
-           DO J = 1, NYDIM
-             DO I = 1, NXDIM
-               IJ = I + (J - 1) * NXDIM
-               VAR3D_VALUES(I, J, K, 1) = CSILG(IJ, K)
-             END DO
-           END DO
-         END DO
-         call write_netcdf_3d(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+         filename = "csil.nc"
+         varname = "Silicate"
+         varunit = "mmol m-3"
+         do k = 1, sdzdim
+           do j = 1, nydim
+             do i = 1, nxdim
+               ij = i + (j - 1) * nxdim
+               var3d_values(i, j, k, 1) = csilg(ij, k)
+             end do
+           end do
+         end do
+         call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy)
          call calc_integral_and_mean_3d( csilg, lon_values, lat_values, lz, integral_value, mean_value )
-         WRITE(NFSTDO, *) "'--------------------------------------------------'"
-         WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
-         WRITE(NFSTDO,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
-         WRITE(NFSTDO,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.D-3, " mol"
-         WRITE(NFSTDO, *) "'--------------------------------------------------'"
+         write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
+         write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
+         write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
+         write(nfstdo, *) "'--------------------------------------------------'"
 
-        !FILENAME = "ficla.nc"
-        !VARNAME = "Clay_bottom_flux"
-        !VARUNIT = "g m-3 * cm s-1"
-        !DO J = 1, NYDIM
-        !  DO I = 1, NXDIM
-        !    IJ = I + (J - 1) * NXDIM
-        !    VAR2D_VALUES(I, J, 1) = FICLAG(IJ)
-        !  END DO
-        !END DO
-        !call write_netcdf_2d(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+        !filename = "ficla.nc"
+        !varname = "Clay_bottom_flux"
+        !varunit = "g m-3 * cm s-1"
+        !do j = 1, nydim
+        !  do i = 1, nxdim
+        !    ij = i + (j - 1) * nxdim
+        !    var2d_values(i, j, 1) = ficlag(ij)
+        !  end do
+        !end do
+        !call write_netcdf_2d(filename, varname, varunit, var2d_values, lon_values, lat_values, yy)
         !call calc_integral_and_mean_2d( ficlag, lon_values, lat_values, integral_value, mean_value )
-        !WRITE(NFSTDO, *) "'--------------------------------------------------'"
-        !WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
-        !WRITE(NFSTDO,'(A, E12.5, A)') " Global Averaged: ", mean_value, " g m-3 * cm s-1"
-        !WRITE(NFSTDO,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536D+5, " g * yr-1"
-        !WRITE(NFSTDO, *) "'--------------------------------------------------'"
+        !write(nfstdo, *) "'--------------------------------------------------'"
+        !write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
+        !write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " g m-3 * cm s-1"
+        !write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+5, " g * yr-1"
+        !write(nfstdo, *) "'--------------------------------------------------'"
 
-        !FILENAME = "fipom.nc"
-        !VARNAME = "OrgM_bottom_flux"
-        !VARUNIT = "mMol m-3 * cm s-1"
-        !DO J = 1, NYDIM
-        !  DO I = 1, NXDIM
-        !    IJ = I + (J - 1) * NXDIM
-        !    VAR2D_VALUES(I, J, 1) = FIPOMG(IJ)
-        !  END DO
-        !END DO
-        !call write_netcdf_2d(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+        !filename = "fipom.nc"
+        !varname = "OrgM_bottom_flux"
+        !varunit = "mMol m-3 * cm s-1"
+        !do j = 1, nydim
+        !  do i = 1, nxdim
+        !    ij = i + (j - 1) * nxdim
+        !    var2d_values(i, j, 1) = fipomg(ij)
+        !  end do
+        !end do
+        !call write_netcdf_2d(filename, varname, varunit, var2d_values, lon_values, lat_values, yy)
         !call calc_integral_and_mean_2d( fipomg, lon_values, lat_values, integral_value, mean_value )
-        !WRITE(NFSTDO, *) "'--------------------------------------------------'"
-        !WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
-        !WRITE(NFSTDO,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
-        !WRITE(NFSTDO,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536D+2, " mol * yr-1"
-        !WRITE(NFSTDO, *) "'--------------------------------------------------'"
+        !write(nfstdo, *) "'--------------------------------------------------'"
+        !write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
+        !write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
+        !write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
+        !write(nfstdo, *) "'--------------------------------------------------'"
 
-        !FILENAME = "ficar.nc"
-        !VARNAME = "CaCO3_bottom_flux"
-        !VARUNIT = "mMol m-3 * cm s-1"
-        !DO J = 1, NYDIM
-        !  DO I = 1, NXDIM
-        !    IJ = I + (J - 1) * NXDIM
-        !    VAR2D_VALUES(I, J, 1) = FICARG(IJ)
-        !  END DO
-        !END DO
-        !call write_netcdf_2d(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+        !filename = "ficar.nc"
+        !varname = "CaCO3_bottom_flux"
+        !varunit = "mMol m-3 * cm s-1"
+        !do j = 1, nydim
+        !  do i = 1, nxdim
+        !    ij = i + (j - 1) * nxdim
+        !    var2d_values(i, j, 1) = ficarg(ij)
+        !  end do
+        !end do
+        !call write_netcdf_2d(filename, varname, varunit, var2d_values, lon_values, lat_values, yy)
         !call calc_integral_and_mean_2d( ficarg, lon_values, lat_values, integral_value, mean_value )
-        !WRITE(NFSTDO, *) "'--------------------------------------------------'"
-        !WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
-        !WRITE(NFSTDO,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
-        !WRITE(NFSTDO,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536D+2, " mol * yr-1"
-        !WRITE(NFSTDO, *) "'--------------------------------------------------'"
+        !write(nfstdo, *) "'--------------------------------------------------'"
+        !write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
+        !write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
+        !write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
+        !write(nfstdo, *) "'--------------------------------------------------'"
 
-        !FILENAME = "fiopa.nc"
-        !VARNAME = "SiO2_bottom_flux"
-        !VARUNIT = "mMol m-3 * cm s-1"
-        !DO J = 1, NYDIM
-        !  DO I = 1, NXDIM
-        !    IJ = I + (J - 1) * NXDIM
-        !    VAR2D_VALUES(I, J, 1) = FIOPAG(IJ)
-        !  END DO
-        !END DO
-        !call write_netcdf_2d(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+        !filename = "fiopa.nc"
+        !varname = "SiO2_bottom_flux"
+        !varunit = "mMol m-3 * cm s-1"
+        !do j = 1, nydim
+        !  do i = 1, nxdim
+        !    ij = i + (j - 1) * nxdim
+        !    var2d_values(i, j, 1) = fiopag(ij)
+        !  end do
+        !end do
+        !call write_netcdf_2d(filename, varname, varunit, var2d_values, lon_values, lat_values, yy)
         !call calc_integral_and_mean_2d( fiopag, lon_values, lat_values, integral_value, mean_value )
-        !WRITE(NFSTDO, *) "'--------------------------------------------------'"
-        !WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
-        !WRITE(NFSTDO,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
-        !WRITE(NFSTDO,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536D+2, " mol * yr-1"
-        !WRITE(NFSTDO, *) "'--------------------------------------------------'"
+        !write(nfstdo, *) "'--------------------------------------------------'"
+        !write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
+        !write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
+        !write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
+        !write(nfstdo, *) "'--------------------------------------------------'"
 
-        !FILENAME = "focla.nc"
-        !VARNAME = "Clay_diffusion"
-        !VARUNIT = "g m-3 * cm s-1"
-        !DO J = 1, NYDIM
-        !  DO I = 1, NXDIM
-        !    IJ = I + (J - 1) * NXDIM
-        !    VAR2D_VALUES(I, J, 1) = FOCLAG(IJ)
-        !  END DO
-        !END DO
-        !call write_netcdf_2d(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+        !filename = "focla.nc"
+        !varname = "Clay_diffusion"
+        !varunit = "g m-3 * cm s-1"
+        !do j = 1, nydim
+        !  do i = 1, nxdim
+        !    ij = i + (j - 1) * nxdim
+        !    var2d_values(i, j, 1) = foclag(ij)
+        !  end do
+        !end do
+        !call write_netcdf_2d(filename, varname, varunit, var2d_values, lon_values, lat_values, yy)
 
-        !FILENAME = "fopom.nc"
-        !VARNAME = "OrgM_diffusion"
-        !VARUNIT = "mMol m-3 * cm s-1"
-        !DO J = 1, NYDIM
-        !  DO I = 1, NXDIM
-        !    IJ = I + (J - 1) * NXDIM
-        !    VAR2D_VALUES(I, J, 1) = FOPOMG(IJ)
-        !  END DO
-        !END DO
-        !call write_netcdf_2d(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+        !filename = "fopom.nc"
+        !varname = "OrgM_diffusion"
+        !varunit = "mMol m-3 * cm s-1"
+        !do j = 1, nydim
+        !  do i = 1, nxdim
+        !    ij = i + (j - 1) * nxdim
+        !    var2d_values(i, j, 1) = fopomg(ij)
+        !  end do
+        !end do
+        !call write_netcdf_2d(filename, varname, varunit, var2d_values, lon_values, lat_values, yy)
 
-        !FILENAME = "focar.nc"
-        !VARNAME = "CaCO3_diffusion"
-        !VARUNIT = "mMol m-3 * cm s-1"
-        !DO J = 1, NYDIM
-        !  DO I = 1, NXDIM
-        !    IJ = I + (J - 1) * NXDIM
-        !    VAR2D_VALUES(I, J, 1) = FOCARG(IJ)
-        !  END DO
-        !END DO
-        !call write_netcdf_2d(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+        !filename = "focar.nc"
+        !varname = "CaCO3_diffusion"
+        !varunit = "mMol m-3 * cm s-1"
+        !do j = 1, nydim
+        !  do i = 1, nxdim
+        !    ij = i + (j - 1) * nxdim
+        !    var2d_values(i, j, 1) = focarg(ij)
+        !  end do
+        !end do
+        !call write_netcdf_2d(filename, varname, varunit, var2d_values, lon_values, lat_values, yy)
 
-        !FILENAME = "foopa.nc"
-        !VARNAME = "SiO2_diffusion"
-        !VARUNIT = "mMol m-3 * cm s-1"
-        !DO J = 1, NYDIM
-        !  DO I = 1, NXDIM
-        !    IJ = I + (J - 1) * NXDIM
-        !    VAR2D_VALUES(I, J, 1) = FOOPAG(IJ)
-        !  END DO
-        !END DO
-        !call write_netcdf_2d(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+        !filename = "foopa.nc"
+        !varname = "SiO2_diffusion"
+        !varunit = "mMol m-3 * cm s-1"
+        !do j = 1, nydim
+        !  do i = 1, nxdim
+        !    ij = i + (j - 1) * nxdim
+        !    var2d_values(i, j, 1) = foopag(ij)
+        !  end do
+        !end do
+        !call write_netcdf_2d(filename, varname, varunit, var2d_values, lon_values, lat_values, yy)
 
-        !FILENAME = "bfcla.nc"
-        !VARNAME = "Clay_burial"
-        !VARUNIT = "g m-3 * cm s-1"
-        !DO J = 1, NYDIM
-        !  DO I = 1, NXDIM
-        !    IJ = I + (J - 1) * NXDIM
-        !    VAR2D_VALUES(I, J, 1) = BFCLAG(IJ)
-        !  END DO
-        !END DO
-        !call write_netcdf_2d(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+        !filename = "bfcla.nc"
+        !varname = "Clay_burial"
+        !varunit = "g m-3 * cm s-1"
+        !do j = 1, nydim
+        !  do i = 1, nxdim
+        !    ij = i + (j - 1) * nxdim
+        !    var2d_values(i, j, 1) = bfclag(ij)
+        !  end do
+        !end do
+        !call write_netcdf_2d(filename, varname, varunit, var2d_values, lon_values, lat_values, yy)
          call calc_integral_and_mean_2d( bfclag, lon_values, lat_values, integral_value, mean_value )
-         WRITE(NFSTDO, *) "'--------------------------------------------------'"
-         WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
-         WRITE(NFSTDO,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
-         WRITE(NFSTDO,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536D+2, " mol * yr-1"
-         WRITE(NFSTDO, *) "'--------------------------------------------------'"
+         write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
+         write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
+         write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
+         write(nfstdo, *) "'--------------------------------------------------'"
 
-        !FILENAME = "bfpom.nc"
-        !VARNAME = "OrgM_burial"
-        !VARUNIT = "mMol m-3 * cm s-1"
-        !DO J = 1, NYDIM
-        !  DO I = 1, NXDIM
-        !    IJ = I + (J - 1) * NXDIM
-        !    VAR2D_VALUES(I, J, 1) = BFPOMG(IJ)
-        !  END DO
-        !END DO
-        !call write_netcdf_2d(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+        !filename = "bfpom.nc"
+        !varname = "OrgM_burial"
+        !varunit = "mMol m-3 * cm s-1"
+        !do j = 1, nydim
+        !  do i = 1, nxdim
+        !    ij = i + (j - 1) * nxdim
+        !    var2d_values(i, j, 1) = bfpomg(ij)
+        !  end do
+        !end do
+        !call write_netcdf_2d(filename, varname, varunit, var2d_values, lon_values, lat_values, yy)
          call calc_integral_and_mean_2d( bfpomg, lon_values, lat_values, integral_value, mean_value )
-         WRITE(NFSTDO, *) "'--------------------------------------------------'"
-         WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
-         WRITE(NFSTDO,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
-         WRITE(NFSTDO,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536D+2, " mol * yr-1"
-         WRITE(NFSTDO, *) "'--------------------------------------------------'"
+         write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
+         write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
+         write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
+         write(nfstdo, *) "'--------------------------------------------------'"
 
-        !FILENAME = "bfcar.nc"
-        !VARNAME = "CaCO3_burial"
-        !VARUNIT = "mMol m-3 * cm s-1"
-        !DO J = 1, NYDIM
-        !  DO I = 1, NXDIM
-        !    IJ = I + (J - 1) * NXDIM
-        !    VAR2D_VALUES(I, J, 1) = BFCARG(IJ)
-        !  END DO
-        !END DO
-        !call write_netcdf_2d(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+        !filename = "bfcar.nc"
+        !varname = "CaCO3_burial"
+        !varunit = "mMol m-3 * cm s-1"
+        !do j = 1, nydim
+        !  do i = 1, nxdim
+        !    ij = i + (j - 1) * nxdim
+        !    var2d_values(i, j, 1) = bfcarg(ij)
+        !  end do
+        !end do
+        !call write_netcdf_2d(filename, varname, varunit, var2d_values, lon_values, lat_values, yy)
          call calc_integral_and_mean_2d( bfcarg, lon_values, lat_values, integral_value, mean_value )
-         WRITE(NFSTDO, *) "'--------------------------------------------------'"
-         WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
-         WRITE(NFSTDO,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
-         WRITE(NFSTDO,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536D+2, " mol * yr-1"
-         WRITE(NFSTDO, *) "'--------------------------------------------------'"
+         write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
+         write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
+         write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
+         write(nfstdo, *) "'--------------------------------------------------'"
 
-        !FILENAME = "bfopa.nc"
-        !VARNAME = "SiO2_burial"
-        !VARUNIT = "mMol m-3 * cm s-1"
-        !DO J = 1, NYDIM
-        !  DO I = 1, NXDIM
-        !    IJ = I + (J - 1) * NXDIM
-        !    VAR2D_VALUES(I, J, 1) = BFOPAG(IJ)
-        !  END DO
-        !END DO
-        !call write_netcdf_2d(FILENAME, VARNAME, VARUNIT, VAR2D_VALUES, LON_VALUES, LAT_VALUES, YY)
+        !filename = "bfopa.nc"
+        !varname = "SiO2_burial"
+        !varunit = "mMol m-3 * cm s-1"
+        !do j = 1, nydim
+        !  do i = 1, nxdim
+        !    ij = i + (j - 1) * nxdim
+        !    var2d_values(i, j, 1) = bfopag(ij)
+        !  end do
+        !end do
+        !call write_netcdf_2d(filename, varname, varunit, var2d_values, lon_values, lat_values, yy)
          call calc_integral_and_mean_2d( bfopag, lon_values, lat_values, integral_value, mean_value )
-         WRITE(NFSTDO, *) "'--------------------------------------------------'"
-         WRITE(NFSTDO,'(A, A, A, I6)') " Variable: ", trim(VARNAME), ", Year: ", YY
-         WRITE(NFSTDO,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
-         WRITE(NFSTDO,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536D+2, " mol * yr-1"
-         WRITE(NFSTDO, *) "'--------------------------------------------------'"
+         write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
+         write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
+         write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
+         write(nfstdo, *) "'--------------------------------------------------'"
 
-        !FILENAME = "w.nc"
-        !VARNAME = "Sediment_rate"
-        !VARUNIT = "mmol m-3"
-        !DO K = 1, sdzdim+1
-        !  DO J = 1, NYDIM
-        !    DO I = 1, NXDIM
-        !      IJ = I + (J - 1) * NXDIM
-        !      VAR3D_VALUES(I, J, K, 1) = WG(IJ, K)
-        !    END DO
-        !  END DO
-        !END DO
-        !call write_netcdf_3d(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ+1, YY)
+        !filename = "w.nc"
+        !varname = "Sediment_rate"
+        !varunit = "mmol m-3"
+        !do k = 1, sdzdim+1
+        !  do j = 1, nydim
+        !    do i = 1, nxdim
+        !      ij = i + (j - 1) * nxdim
+        !      var3d_values(i, j, k, 1) = wg(ij, k)
+        !    end do
+        !  end do
+        !end do
+        !call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, LZ+1, yy)
 
-        !FILENAME = "cdc13.nc"
-        !VARNAME = "delta_carbon-13"
-        !VARUNIT = "permil"
-        !DO K = 1, sdzdim
-        !  DO J = 1, NYDIM
-        !    DO I = 1, NXDIM
-        !      IJ = I + (J - 1) * NXDIM
-        !      VAR3D_VALUES(I, J, K, 1) = CDC13G(IJ, K)
-        !    END DO
-        !  END DO
-        !END DO
-        !call write_netcdf_3d(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+        !filename = "cdc13.nc"
+        !varname = "delta_carbon-13"
+        !varunit = "permil"
+        !do k = 1, sdzdim
+        !  do j = 1, nydim
+        !    do i = 1, nxdim
+        !      ij = i + (j - 1) * nxdim
+        !      var3d_values(i, j, k, 1) = cdc13g(ij, k)
+        !    end do
+        !  end do
+        !end do
+        !call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy)
 
-        !FILENAME = "cdc14.nc"
-        !VARNAME = "Delta_carbon-14"
-        !VARUNIT = "permil"
-        !DO K = 1, sdzdim+1
-        !  DO J = 1, NYDIM
-        !    DO I = 1, NXDIM
-        !      IJ = I + (J - 1) * NXDIM
-        !      VAR3D_VALUES(I, J, K, 1) = CDC14G(IJ, K)
-        !    END DO
-        !  END DO
-        !END DO
-        !call write_netcdf_3d(FILENAME, VARNAME, VARUNIT, VAR3D_VALUES, LON_VALUES, LAT_VALUES, LZ, YY)
+        !filename = "cdc14.nc"
+        !varname = "Delta_carbon-14"
+        !varunit = "permil"
+        !do k = 1, sdzdim+1
+        !  do j = 1, nydim
+        !    do i = 1, nxdim
+        !      ij = i + (j - 1) * nxdim
+        !      var3d_values(i, j, k, 1) = cdc14g(ij, k)
+        !    end do
+        !  end do
+        !end do
+        !call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy)
 
         !! -- Gtool output --
         !chead  = ''
@@ -2285,165 +2285,165 @@ IF (use_mpi) THEN
         !citem  = 'scla'
         !ctitle = 'Clay'
         !cunit  = 'g/m^3'
-        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, NXDIM, NYDIM, sdzdim, 1, SCLAG)
+        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, nxdim, nydim, sdzdim, 1, sclag)
         !cfile  = 'spom'
         !citem  = 'spom'
         !ctitle = 'OrgM'
         !cunit  = 'mmol/m^3'
-        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, NXDIM, NYDIM, sdzdim, 1, SPOMG)
+        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, nxdim, nydim, sdzdim, 1, spomg)
         !cfile  = 'scar'
         !citem  = 'scar'
         !ctitle = 'CaCO3'
         !cunit  = 'mmol/m^3'
-        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, NXDIM, NYDIM, sdzdim, 1, SCARG)
+        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, nxdim, nydim, sdzdim, 1, scarg)
         !cfile  = 'sopa'
         !citem  = 'sopa'
         !ctitle = 'SiO2'
         !cunit  = 'mmol/m^3'
-        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, NXDIM, NYDIM, sdzdim, 1, SOPAG)
+        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, nxdim, nydim, sdzdim, 1, sopag)
         !cfile  = 'sage'
         !citem  = 'sage'
         !ctitle = 'Age tracer'
         !cunit  = 'year'
-        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, NXDIM, NYDIM, sdzdim, 1, SAGEG)
+        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, nxdim, nydim, sdzdim, 1, sageg)
 
         !cfile  = 'cnit'
         !citem  = 'cnit'
         !ctitle = 'Phosphate'
         !cunit  = 'mmol/m^3'
-        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, NXDIM, NYDIM, sdzdim, 1, CNITG)
+        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, nxdim, nydim, sdzdim, 1, cnitg)
         !cfile  = 'cdic'
         !citem  = 'cdic'
-        !ctitle = 'DIC'
+        !ctitle = 'dic'
         !cunit  = 'mmol/m^3'
-        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, NXDIM, NYDIM, sdzdim, 1, CDICG)
+        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, nxdim, nydim, sdzdim, 1, cdicg)
         !cfile  = 'calk'
         !citem  = 'calk'
         !ctitle = 'Alkalinity'
         !cunit  = 'mmol/m^3'
-        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, NXDIM, NYDIM, sdzdim, 1, CALKG)
+        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, nxdim, nydim, sdzdim, 1, calkg)
         !cfile  = 'cdo2'
         !citem  = 'cdo2'
         !ctitle = 'Oxygen'
         !cunit  = 'mmol/m^3'
-        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, NXDIM, NYDIM, sdzdim, 1, CDO2G)
+        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, nxdim, nydim, sdzdim, 1, cdo2g)
         !cfile  = 'csil'
         !citem  = 'csil'
         !ctitle = 'Silicate'
         !cunit  = 'mmol/m^3'
-        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, NXDIM, NYDIM, sdzdim, 1, CSILG)
+        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, nxdim, nydim, sdzdim, 1, csilg)
 
         !cfile  = 'ficla'
         !citem  = 'ficla'
         !ctitle = 'Clay bottom flux'
         !cunit  = 'g/m^3*cm/s'
-        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, NXDIM, NYDIM, 1, 1, FICLAG)
+        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, nxdim, nydim, 1, 1, ficlag)
         !cfile  = 'fipom'
         !citem  = 'fipom'
         !ctitle = 'OrgM bottom flux'
         !cunit  = 'mMol/m^3*cm/s'
-        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, NXDIM, NYDIM, 1, 1, FIPOMG)
+        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, nxdim, nydim, 1, 1, fipomg)
         !cfile  = 'ficar'
         !citem  = 'ficar'
         !ctitle = 'CaCO3 bottom flux'
         !cunit  = 'mMol/m^3*cm/s'
-        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, NXDIM, NYDIM, 1, 1, FICARG)
+        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, nxdim, nydim, 1, 1, ficarg)
         !cfile  = 'fiopa'
         !citem  = 'fiopa'
         !ctitle = 'SiO2 bottom flux'
         !cunit  = 'mMol/m^3*cm/s'
-        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, NXDIM, NYDIM, 1, 1, FIOPAG)
+        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, nxdim, nydim, 1, 1, fiopag)
 
         !cfile  = 'fopom'
         !citem  = 'fopom'
         !ctitle = 'OrgM diffusion'
         !cunit  = 'mMol/m^3*cm/s'
-        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, NXDIM, NYDIM, 1, 1, FOPOMG)
+        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, nxdim, nydim, 1, 1, fopomg)
         !cfile  = 'focar'
         !citem  = 'focar'
         !ctitle = 'CaCO3 diffusion'
         !cunit  = 'mMol/m^3*cm/s'
-        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, NXDIM, NYDIM, 1, 1, FOCARG)
+        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, nxdim, nydim, 1, 1, focarg)
         !cfile  = 'foopa'
         !citem  = 'foopa'
         !ctitle = 'SiO2 diffusion'
         !cunit  = 'mMol/m^3*cm/s'
-        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, NXDIM, NYDIM, 1, 1, FOOPAG)
+        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, nxdim, nydim, 1, 1, foopag)
 
         !cfile  = 'bfcla'
         !citem  = 'bfcla'
         !ctitle = 'Clay burial'
         !cunit  = 'g/m^3*cm/s'
-        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, NXDIM, NYDIM, 1, 1, BFCLAG)
+        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, nxdim, nydim, 1, 1, bfclag)
         !cfile  = 'bfpom'
         !citem  = 'bfpom'
         !ctitle = 'OrgM burial'
         !cunit  = 'mMol/m^3*cm/s'
-        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, NXDIM, NYDIM, 1, 1, BFPOMG)
+        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, nxdim, nydim, 1, 1, bfpomg)
         !cfile  = 'bfcar'
         !citem  = 'bfcar'
         !ctitle = 'CaCO3 burial'
         !cunit  = 'mMol/m^3*cm/s'
-        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, NXDIM, NYDIM, 1, 1, BFCARG)
+        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, nxdim, nydim, 1, 1, bfcarg)
         !cfile  = 'bfopa'
         !citem  = 'bfopa'
         !ctitle = 'SiO2 burial'
         !cunit  = 'mMol/m^3*cm/s'
-        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, NXDIM, NYDIM, 1, 1, BFOPAG)
+        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, nxdim, nydim, 1, 1, bfopag)
 
         !cfile  = 'w'
         !citem  = 'w'
         !ctitle = 'Sediment rate'
         !cunit  = 'cm/s'
-        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, NXDIM, NYDIM, sdzdim+1, 1, WG)
+        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, nxdim, nydim, sdzdim+1, 1, wg)
 
         !cfile  = 'cdc13'
         !citem  = 'cdc13'
         !ctitle = 'delta carbon-13'
         !cunit  = 'permil'
-        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, NXDIM, NYDIM, sdzdim, 1, CDC13G)
+        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, nxdim, nydim, sdzdim, 1, cdc13g)
         !cfile  = 'cdc14'
         !citem  = 'cdc14'
         !ctitle = 'Delta carbon-14'
         !cunit  = 'permil'
-        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, NXDIM, NYDIM, sdzdim, 1, CDC14G)
+        !call write_gtool_beta( cfile, chead, citem, ctitle, cunit, nxdim, nydim, sdzdim, 1, cdc14g)
 
          ! -- Pass the tracer value to the output program --
-         DO K = SKST, SKEN
-            DO IJ = 1, nxydim
-               sdtx(IJ, K, 1) = SCLAG(IJ, K)
-               sdtx(IJ, K, 2) = SPOMG(IJ, K)
-               sdtx(IJ, K, 3) = SCARG(IJ, K)
-               sdtx(IJ, K, 4) = SOPAG(IJ, K)
-               sdtx(IJ, K, 5) = SAGEG(IJ, K)
-               sdtx(IJ, K, 6) = CNITG(IJ, K)
-               sdtx(IJ, K, 7) = CDICG(IJ, K)
-               sdtx(IJ, K, 8) = CALKG(IJ, K)
-               sdtx(IJ, K, 9) = CSILG(IJ, K)
-               sdtx(IJ, K, 10) = CDO2G(IJ, K)
-            IF ( calc13 ) THEN
-               sdtx(IJ, K, 11) = S13POMG(IJ, K)
-               sdtx(IJ, K, 12) = S13CARG(IJ, K)
-               sdtx(IJ, K, 13) = C13DICG(IJ, K)
-            END IF
-            IF ( calc14 ) THEN
-               sdtx(IJ, K, 14) = S14POMG(IJ, K)
-               sdtx(IJ, K, 15) = S14CARG(IJ, K)
-               sdtx(IJ, K, 16) = C14DICG(IJ, K)
-            END IF
-            END DO
-         END DO
+         do k = skst, sken
+            do ij = 1, nxydim
+               sdtx(ij, k, 1) = sclag(ij, k)
+               sdtx(ij, k, 2) = spomg(ij, k)
+               sdtx(ij, k, 3) = scarg(ij, k)
+               sdtx(ij, k, 4) = sopag(ij, k)
+               sdtx(ij, k, 5) = sageg(ij, k)
+               sdtx(ij, k, 6) = cnitg(ij, k)
+               sdtx(ij, k, 7) = cdicg(ij, k)
+               sdtx(ij, k, 8) = calkg(ij, k)
+               sdtx(ij, k, 9) = csilg(ij, k)
+               sdtx(ij, k, 10) = cdo2g(ij, k)
+            if ( calc13 ) then
+               sdtx(ij, k, 11) = s13pomg(ij, k)
+               sdtx(ij, k, 12) = s13carg(ij, k)
+               sdtx(ij, k, 13) = c13dicg(ij, k)
+            end if
+            if ( calc14 ) then
+               sdtx(ij, k, 14) = s14pomg(ij, k)
+               sdtx(ij, k, 15) = s14carg(ij, k)
+               sdtx(ij, k, 16) = c14dicg(ij, k)
+            end if
+            end do
+         end do
 
-      END IF
+      end if
 
       call mpi_bcast(sdtx, nxydim*sdzdim*sedtdm, mpi_real8, iroot, mpi_comm_world, ierr)
       call mpi_barrier(mpi_comm_world, ierr)
 
-END IF
+end if
 
-      END IF ! -- End of Output
+      end if ! -- End of Output
 
-      END DO ! -- End of Time integration
+      end do ! -- End of Time integration
 
       end subroutine digda_cprdc
 

@@ -12,16 +12,16 @@
 module globals_digda_carbonate
   implicit none
 
-  double precision :: RCCAR = 365.D0 !! 1.0 [1/day]
-  double precision :: NCAR = 4.5D0
-  namelist /NMSDCA/ RCCAR, NCAR
+  double precision :: rccar = 365.d0 !! 1.0 [1/day]
+  double precision :: ncar = 4.5d0
+  namelist /nmsdca/ rccar, ncar
 
  ! Millero [1995]
-  double precision :: KPRIME = 4.750D-7 !! 4.750D-7 [mol2 / kg2]
-  double precision :: DELV = -4.400D+1  !! -4.400D+1 [cm3 / mol]
-  double precision :: RR = 8.314D+1     !! 8.314D+1 [cm3 bar / K mol]
-  double precision :: DK = -1.330D-2    !! -1.330D-2 [cm3 / bar mol]
-  double precision :: PRES, KPRES
+  double precision :: kprime = 4.750d-7 !! 4.750d-7 [mol2 / kg2]
+  double precision :: delv = -4.400d+1  !! -4.400d+1 [cm3 / mol]
+  double precision :: rr = 8.314d+1     !! 8.314d+1 [cm3 bar / K mol]
+  double precision :: dk = -1.330d-2    !! -1.330d-2 [cm3 / bar mol]
+  double precision :: pres, kpres
 
 end module globals_digda_carbonate
 
@@ -37,61 +37,59 @@ contains
 
   subroutine set_digda_carbonate
 
-    WRITE(NFSTDO, *) '*** Sediment : set_digda_carbonate ***'
-    REWIND(NFPARM)
-    READ (NFPARM, NMSDCA, END=99)
+    write(nfstdo, *) '*** Sediment : set_digda_carbonate ***'
+    rewind(nfparm)
+    read(nfparm, nmsdca, end=99)
 99 continue
-    WRITE(NFSTDO, NMSDCA)
+    write(nfstdo, nmsdca)
 
-    RCCAR  = RCCAR / 3.1536D+7  !! [/yr] --> [/s]
+    rccar  = rccar / 3.1536d+7  !! [/yr] --> [/s]
 
   end subroutine set_digda_carbonate
 
-  subroutine calc_carbonate_dissolution( &
- &  SCAR, CCO32, SATCO32, PHI, &
- &  RCAR )
+  subroutine calc_carbonate_dissolution( scar, cco32, satco32, phi, & !! IN
+                                       & rcar                       ) !! OUT
 
-    double precision, intent(in) :: SCAR(NXY, SDZDIM)
-    double precision, intent(in) :: CCO32(NXY, SDZDIM)
-    double precision, intent(in) :: SATCO32(NXY)
-    double precision, intent(in) :: PHI(SDZDIM)
-    double precision, intent(out) :: RCAR(NXY, SDZDIM)
+    double precision, intent(in) :: scar(nxy, sdzdim)
+    double precision, intent(in) :: cco32(nxy, sdzdim)
+    double precision, intent(in) :: satco32(nxy)
+    double precision, intent(in) :: phi(sdzdim)
+    double precision, intent(out) :: rcar(nxy, sdzdim)
 
-    integer :: IJ, K
+    integer :: ij, k
 
-    DO K = SKST, SKEN
-      DO IJ = IJTSTR, IJTEND
-        IF ( SCAR(IJ, K) /= 0.0D0 .and. &
-   &         CCO32(IJ, K) < SATCO32(IJ) ) THEN
-          RCAR(IJ, K) = RCCAR &
-   &        * ( ( 1.0D0 - ( CCO32(IJ, K) / SATCO32(IJ) ) ) &
-   &        ** NCAR )
-        ELSE
-          RCAR(IJ, K) = 0.0D0
-        END IF
-      END DO
-    END DO
+    do k = skst, sken
+      do ij = ijtstr, ijtend
+        if ( scar(ij, k) /= 0.0d0 .and. &
+   &         cco32(ij, k) < satco32(ij) ) then
+          rcar(ij, k) = rccar &
+   &        * ( ( 1.0d0 - ( cco32(ij, k) / satco32(ij) ) ) &
+   &        ** ncar )
+        else
+          rcar(ij, k) = 0.0d0
+        end if
+      end do
+    end do
 
   end subroutine calc_carbonate_dissolution
 
-  subroutine calc_carbonate_saturation( &
-&   TEM, SAL, BDEP,&
-&   CSAT )
+  subroutine calc_carbonate_saturation( temp, salt, bdep, & !! IN
+                                      & csat              ) !! OUT
 
-    double precision, intent(in) :: TEM(NXY), SAL(NXY)
-    double precision, intent(in) :: BDEP(NXY)
-    double precision, intent(out) :: CSAT(NXY)
+    double precision, intent(in) :: temp(nxy), salt(nxy)
+    double precision, intent(in) :: bdep(nxy)
+    double precision, intent(out) :: csat(nxy)
 
-    integer :: IJ, K
+    integer :: ij, k
 
-    DO IJ = IJTSTR, IJTEND
-      PRES  =  BDEP(IJ) / 1.0D+3  !! [cm] --> [bar]
-      KPRES = LOG(KPRIME) &
-   &        - DELV / ( RR * ( TEM(IJ) + kelvin ) )        * (PRES)    & !! Effect of Pressure
-   &        + 0.50D0 * DK / ( RR * ( TEM(IJ) + kelvin ) ) * (PRES)**2   !! Effect of Pressure
-      KPRES = EXP(KPRES)
-      CSAT(IJ)  = ( KPRES / 1.028D-2 ) * 1.0D+6                         !! Millero [1982]
-    END DO
+    do ij = ijtstr, ijtend
+      pres  =  bdep(ij) / 1.0d+3  !! [cm] --> [bar]
+      kpres = log(kprime) &
+   &        - delv / ( rr * ( temp(ij) + kelvin ) )        * (pres)    & !! Effect of Pressure
+   &        + 0.50d0 * dk / ( rr * ( temp(ij) + kelvin ) ) * (pres)**2   !! Effect of Pressure
+      kpres = exp(kpres)
+      csat(ij)  = ( kpres / 1.028d-2 ) * 1.0d+6                         !! Millero [1982]
+    end do
 
   end subroutine calc_carbonate_saturation
 

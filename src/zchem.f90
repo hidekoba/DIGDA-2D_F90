@@ -4,277 +4,277 @@ contains
 
 ! Weiss & Price (1980, Mar. Chem., 8, 347-359; Eq 13 with table 6 values)
 
-  function FK0(T, S)
+  function fk0(t, s)
 
-  double precision, intent(in) :: T, S
-  double precision :: FK0
+  double precision, intent(in) :: t, s
+  double precision :: fk0
 
-  FK0 = &
- &  EXP ( &
- &     - 162.8301D0 &
- &     + 218.2968D0 * 1.D2 / T &
- &     + 90.9241D0  * LOG( T / 1.D2 ) &
- &     - 1.47696D0  * ( T / 1.D2 )**2 &
- &     + S * (   0.025695D0 &
- &             - 0.025225D0  * ( T / 1.D2 ) &
- &             + 0.0049867D0 * ( T / 1.D2 )**2 ) &
+  fk0 = &
+ &  exp ( &
+ &     - 162.8301d0 &
+ &     + 218.2968d0 * 1.d2 / t &
+ &     + 90.9241d0  * log( t / 1.d2 ) &
+ &     - 1.47696d0  * ( t / 1.d2 )**2 &
+ &     + s * (   0.025695d0 &
+ &             - 0.025225d0  * ( t / 1.d2 ) &
+ &             + 0.0049867d0 * ( t / 1.d2 )**2 ) &
  &  )
 
-  end function FK0
+  end function fk0
 
-  function FK1(T, S)
+  function fk1(t, s)
 
-  double precision, intent(in) :: T, S
-  double precision :: FK1
+  double precision, intent(in) :: t, s
+  double precision :: fk1
 
-  FK1 = &
- &  10.D0 ** ( -( &
- &     + 3670.7D0 / T &
- &     - 62.008D0 &
- &     + 9.7944D0 * LOG( T ) &
- &     - 0.0118D0 * S &
- &     + 0.000116D0 * S * S &
+  fk1 = &
+ &  10.d0 ** ( -( &
+ &     + 3670.7d0 / t &
+ &     - 62.008d0 &
+ &     + 9.7944d0 * log( t ) &
+ &     - 0.0118d0 * s &
+ &     + 0.000116d0 * s * s &
  &  ))
 
-  end function FK1
+  end function fk1
 
-  function FK2(T, S)
+  function fk2(t, s)
 
-  double precision, intent(in) :: T, S
-  double precision :: FK2
+  double precision, intent(in) :: t, s
+  double precision :: fk2
 
-  FK2 = &
- &  10.D0 ** ( -( &
- &     + 1394.7D0 / T &
- &     + 4.777D0 &
- &     - 0.0184D0 * S &
- &     + 0.000118D0 * S * S &
+  fk2 = &
+ &  10.d0 ** ( -( &
+ &     + 1394.7d0 / t &
+ &     + 4.777d0 &
+ &     - 0.0184d0 * s &
+ &     + 0.000118d0 * s * s &
  &  ))
 
-  end function FK2
+  end function fk2
 
-  function FKB(T, S)
+  function fkb(t, s)
 
-  double precision, intent(in) :: T, S
-  double precision :: FKB
+  double precision, intent(in) :: t, s
+  double precision :: fkb
 
-  FKB = &
- &  EXP ( &
- &     + ( - 8966.90D0 &
- &         - 2890.53D0 * SQRT( S ) &
- &         - 77.942D0  * S &
- &         + 1.728D0   * S * SQRT( S ) &
- &         - 0.0996D0  * S * S ) / T &
- &     + ( + 148.0248D0 &
- &         + 137.1942D0 * SQRT( S ) &
- &         + 1.62142D0  * S ) &
- &     + ( - 24.4344D0 &
- &         - 25.085D0 * SQRT( S ) &
- &         - 0.2474D0 * S ) * LOG( T ) &
- &     + 0.053105 * SQRT( S ) * T &
+  fkb = &
+ &  exp ( &
+ &     + ( - 8966.90d0 &
+ &         - 2890.53d0 * sQRt( s ) &
+ &         - 77.942d0  * s &
+ &         + 1.728d0   * s * sQRt( s ) &
+ &         - 0.0996d0  * s * s ) / t &
+ &     + ( + 148.0248d0 &
+ &         + 137.1942d0 * sQRt( s ) &
+ &         + 1.62142d0  * s ) &
+ &     + ( - 24.4344d0 &
+ &         - 25.085d0 * sQRt( s ) &
+ &         - 0.2474d0 * s ) * log( t ) &
+ &     + 0.053105 * sQRt( s ) * t &
  &  )
 
-  end function FKB
+  end function fkb
 
-  function FKW(T, S)
+  function fkw(t, s)
 
-  double precision, intent(in) :: T, S
-  double precision :: FKW
+  double precision, intent(in) :: t, s
+  double precision :: fkw
 
-  FKW = &
- &  EXP ( &
- &     - 13847.26D0 / T &
- &     + 148.9652D0 &
- &     - 23.6521D0 * LOG( T ) &
- &     + ( + 118.67D0 / T &
- &         - 5.977D0 &
- &         + 1.0495D0 * LOG( T ) ) * SQRT(S) &
- &     - 0.01615D0 * S &
+  fkw = &
+ &  exp ( &
+ &     - 13847.26d0 / t &
+ &     + 148.9652d0 &
+ &     - 23.6521d0 * log( t ) &
+ &     + ( + 118.67d0 / t &
+ &         - 5.977d0 &
+ &         + 1.0495d0 * log( t ) ) * sQRt(s) &
+ &     - 0.01615d0 * s &
  &  )
 
-  end function FKW
+  end function fkw
 
-  function FK1P(T, S)
+  function fk1p(t, s)
 
-  double precision, intent(in) :: T, S
-  double precision :: FK1P
+  double precision, intent(in) :: t, s
+  double precision :: fk1p
 
-  FK1P = &
- &  EXP ( &
- &     - 4576.752D0 / T &
- &     + 115.525D0 &
- &     - 18.453D0 * LOG( T ) &
- &     + ( - 106.736D0 / T &
- &         + 0.69171       ) / SQRT(S) &
- &     + ( - 0.65643D0 / T &
- &         - 0.01844       ) * S &
+  fk1p = &
+ &  exp ( &
+ &     - 4576.752d0 / t &
+ &     + 115.525d0 &
+ &     - 18.453d0 * log( t ) &
+ &     + ( - 106.736d0 / t &
+ &         + 0.69171       ) / sQRt(s) &
+ &     + ( - 0.65643d0 / t &
+ &         - 0.01844       ) * s &
  &  )
 
-  end function FK1P
+  end function fk1p
 
-  function FK2P(T, S)
+  function fk2p(t, s)
 
-  double precision, intent(in) :: T, S
-  double precision :: FK2P
+  double precision, intent(in) :: t, s
+  double precision :: fk2p
 
-  FK2P = &
- &  EXP ( &
- &     - 8814.15D0 / T &
- &     + 172.0883D0 &
- &     - 27.927D0 * LOG(T) &
- &     + ( - 160.340D0 / T &
- &         + 1.3566D0      ) / SQRT(S) &
- &     + ( + 0.37335D0 / T &
- &         - 0.05778D0     ) * S &
+  fk2p = &
+ &  exp ( &
+ &     - 8814.15d0 / t &
+ &     + 172.0883d0 &
+ &     - 27.927d0 * log(t) &
+ &     + ( - 160.340d0 / t &
+ &         + 1.3566d0      ) / sQRt(s) &
+ &     + ( + 0.37335d0 / t &
+ &         - 0.05778d0     ) * s &
  &  )
 
-  end function FK2P
+  end function fk2p
 
-  function FK3P(T, S)
+  function fk3p(t, s)
 
-  double precision, intent(in) :: T, S
-  double precision :: FK3P
+  double precision, intent(in) :: t, s
+  double precision :: fk3p
 
-  FK3P = &
- &  EXP ( &
- &     - 3070.75D0 / T &
- &     - 18.141D0 &
- &     + ( + 17.27039D0 / T &
- &         + 2.81197D0      ) / SQRT(S) &
- &     + ( + 0.37335D0 / T &
- &         - 0.05778       ) * S &
+  fk3p = &
+ &  exp ( &
+ &     - 3070.75d0 / t &
+ &     - 18.141d0 &
+ &     + ( + 17.27039d0 / t &
+ &         + 2.81197d0      ) / sQRt(s) &
+ &     + ( + 0.37335d0 / t &
+ &         - 0.05778       ) * s &
  &  )
 
-  end function FK3P
+  end function fk3p
 
-  function FKSI(T, S)
+  function fksi(t, s)
 
-  double precision, intent(in) :: T, S
-  double precision :: FKSI
+  double precision, intent(in) :: t, s
+  double precision :: fksi
 
-  FKSI = &
- &  EXP ( &
- &     - 8904.2D0 / T &
- &     + 117.385D0 &
- &     - 19.334D0 * LOG(T) &
- &     + ( - 458.79D0 / T &
- &         + 3.5913D0     ) / SQRT(S) &
- &     + ( + 188.74D0 / T &
- &         - 1.5998D0     ) * &
- &       ( 19.924D0 * S &
- &         / ( 1000.D0 - 1.005D0 * S )) &
- &     + ( - 12.1652 / T &
- &         + 0.07871D0   ) * &
- &       ( 19.924D0 * S &
- &         / ( 1000.D0 - 1.005D0 * S ))**2 &
- &     + LOG( 1.0 - 0.001005D0 * S ) &
+  fksi = &
+ &  exp ( &
+ &     - 8904.2d0 / t &
+ &     + 117.385d0 &
+ &     - 19.334d0 * log(t) &
+ &     + ( - 458.79d0 / t &
+ &         + 3.5913d0     ) / sQRt(s) &
+ &     + ( + 188.74d0 / t &
+ &         - 1.5998d0     ) * &
+ &       ( 19.924d0 * s &
+ &         / ( 1000.d0 - 1.005d0 * s )) &
+ &     + ( - 12.1652 / t &
+ &         + 0.07871d0   ) * &
+ &       ( 19.924d0 * s &
+ &         / ( 1000.d0 - 1.005d0 * s ))**2 &
+ &     + log( 1.0 - 0.001005d0 * s ) &
  &  )
 
-  end function FKSI
+  end function fksi
 
-  function FKSO4(T, S)
+  function fkso4(t, s)
 
-  double precision, intent(in) :: T, S
-  double precision :: FKSO4
+  double precision, intent(in) :: t, s
+  double precision :: fkso4
 
-  FKSO4 = &
- &  EXP ( &
- &     - 4276.1D0 / T &
- &     + 141.328D0 &
- &     - 23.093D0 * LOG(T) &
- &     + ( - 13856.0D0 / T &
- &         + 324.57D0 &
- &         - 47.986D0 * LOG(T) ) * &
- &       SQRT( 19.924D0 * S / ( 1000.D0 - 1.005D0 * S )) &
- &     + ( + 35474.0D0 / T &
- &         - 771.54D0 &
- &         + 114.7231 * LOG(T) ) * &
- &       ( 19.924D0 * S / ( 1000.D0 - 1.005D0 * S )) &
- &     - 2698.0D0 / T * &
- &       ( 19.924D0 * S / ( 1000.D0 - 1.005D0 * S ))**1.5D0 &
- &     + 1776.0D0 / T * &
- &       ( 19.924D0 * S / ( 1000.D0 - 1.005D0 * S ))**2.0D0 &
- &     + LOG( 1.0D0 - 0.001005D0 * S ) &
+  fkso4 = &
+ &  exp ( &
+ &     - 4276.1d0 / t &
+ &     + 141.328d0 &
+ &     - 23.093d0 * log(t) &
+ &     + ( - 13856.0d0 / t &
+ &         + 324.57d0 &
+ &         - 47.986d0 * log(t) ) * &
+ &       sQRt( 19.924d0 * s / ( 1000.d0 - 1.005d0 * s )) &
+ &     + ( + 35474.0d0 / t &
+ &         - 771.54d0 &
+ &         + 114.7231 * log(t) ) * &
+ &       ( 19.924d0 * s / ( 1000.d0 - 1.005d0 * s )) &
+ &     - 2698.0d0 / t * &
+ &       ( 19.924d0 * s / ( 1000.d0 - 1.005d0 * s ))**1.5d0 &
+ &     + 1776.0d0 / t * &
+ &       ( 19.924d0 * s / ( 1000.d0 - 1.005d0 * s ))**2.0d0 &
+ &     + log( 1.0d0 - 0.001005d0 * s ) &
  &  )
 
-  end function FKSO4
+  end function fkso4
 
-  function FKF(T, S, XKS)
+  function fkf(t, s, xks)
 
-  double precision, intent(in) :: T, S, XKS
-  double precision :: FKF
+  double precision, intent(in) :: t, s, xks
+  double precision :: fkf
 
-  FKF = &
- &  EXP ( &
- &     + 1590.2D0 / T &
- &     - 12.641D0 &
- &     + 1.525D0 / SQRT(S) &
- &     + LOG( 1.0D0 - 0.001005D0 * S ) &
- &     + LOG( 1.0D0 + ( 0.1400D0 / 96.062D0 )) * &
- &       ( S / 1.86655D0 / XKS ) &
+  fkf = &
+ &  exp ( &
+ &     + 1590.2d0 / t &
+ &     - 12.641d0 &
+ &     + 1.525d0 / sQRt(s) &
+ &     + log( 1.0d0 - 0.001005d0 * s ) &
+ &     + log( 1.0d0 + ( 0.1400d0 / 96.062d0 )) * &
+ &       ( s / 1.86655d0 / xks ) &
  &  )
 
-  end function FKF
+  end function fkf
 
-  function FBT(S)
+  function fbt(s)
 
-  double precision, intent(in) :: S
-  double precision :: FBT
+  double precision, intent(in) :: s
+  double precision :: fbt
 
-  FBT = &
- &     + 0.000232D0 / 10.811D0 &
- &       * S / 1.80655D0
+  fbt = &
+ &     + 0.000232d0 / 10.811d0 &
+ &       * s / 1.80655d0
 
-  end function FBT
+  end function fbt
 
-  function FSO4T(S)
+  function fso4t(s)
 
-  double precision, intent(in) :: S
-  double precision :: FSO4T
+  double precision, intent(in) :: s
+  double precision :: fso4t
 
-  FSO4T = &
- &     + 0.14D0 / 96.062D0 &
- &       * S / 1.80655D0
+  fso4t = &
+ &     + 0.14d0 / 96.062d0 &
+ &       * s / 1.80655d0
 
-  end function FSO4T
+  end function fso4t
 
-  function FFLT(S)
+  function fflt(s)
 
-  double precision, intent(in) :: S
-  double precision :: FFLT
+  double precision, intent(in) :: s
+  double precision :: fflt
 
-  FFLT = &
- &     + 0.000067D0 / 18.9984D0 &
- &       * S / 1.80655D0
+  fflt = &
+ &     + 0.000067d0 / 18.9984d0 &
+ &       * s / 1.80655d0
 
-  end function FFLT
+  end function fflt
 
-  function FALK( &
- &          XH, X1, X2, XB, XW, &
- &          X1P, X2P,  X3P, &
- &          XSI, XSO4, XF, &
- &          C, B, P, SI, SO4, FL )
+  function falk( &
+ &          xh, x1, x2, xb, xw, &
+ &          x1p, x2p,  x3p, &
+ &          xsi, xso4, xf, &
+ &          c, b, p, si, so4, fl )
 
-  double precision, intent(in) :: XH, X1, X2, XB, XW, X1P, X2P, X3P
-  double precision, intent(in) :: XSI, XSO4, XF
-  double precision, intent(in) :: C, B, P, SI, SO4, FL
-  double precision :: FALK
+  double precision, intent(in) :: xh, x1, x2, xb, xw, x1p, x2p, x3p
+  double precision, intent(in) :: xsi, xso4, xf
+  double precision, intent(in) :: c, b, p, si, so4, fl
+  double precision :: falk
 
-  FALK &
- &   =   C * ( XH*X1 + 2.D0*X1*X2 ) &
- &         / ( XH*XH + XH*X1 + X1*X2 ) &
- &     + B * XB / ( XH + XB ) &
- &     + XW / XH &
- &     - XH &
- &     + P * (  XH*X1P*X2P + 2.D0*X1P*X2P*X3P - XH*XH*XH ) &
- &         / (  XH*XH*XH + X1P*XH*XH + X1P*X2P*XH &
- &            + X1P*X2P*X3P ) &
- &     + SI * XSI / ( XH + XSI ) &
- &     + XH / ( 1.0D0 + SO4 / XSO4 ) &
- &     - SO4 / (  1.0D0 &
- &              + XSO4 / ( XH / ( 1.0D0 + SO4 / XSO4 ))) &
- &     - FL / ( 1.0D0 + XF / XH )
+  falk &
+ &   =   c * ( xh*x1 + 2.d0*x1*x2 ) &
+ &         / ( xh*xh + xh*x1 + x1*x2 ) &
+ &     + b * xb / ( xh + xb ) &
+ &     + xw / xh &
+ &     - xh &
+ &     + p * (  xh*x1p*x2p + 2.d0*x1p*x2p*x3p - xh*xh*xh ) &
+ &         / (  xh*xh*xh + x1p*xh*xh + x1p*x2p*xh &
+ &            + x1p*x2p*x3p ) &
+ &     + si * xsi / ( xh + xsi ) &
+ &     + xh / ( 1.0d0 + so4 / xso4 ) &
+ &     - so4 / (  1.0d0 &
+ &              + xso4 / ( xh / ( 1.0d0 + so4 / xso4 ))) &
+ &     - fl / ( 1.0d0 + xf / xh )
 
-  end function FALK
+  end function falk
 
 end module module_zchem

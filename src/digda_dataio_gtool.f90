@@ -1,6 +1,6 @@
 program digda_dataio_gtool
   use gtool_utilities
-  use module_digda_main
+  use module_digda_cprdc
   implicit none
 
   character(len=100) :: filename, varname, vartitle, varunit
@@ -142,9 +142,9 @@ program digda_dataio_gtool
 
   do i = 1, nxydim
     if (bdep(i) == rmiss) then
-      omask(i) = 0.D0
+      omask(i) = 0.d0
     else
-      omask(i) = 1.D0
+      omask(i) = 1.d0
     end if
   end do
 
@@ -165,7 +165,7 @@ program digda_dataio_gtool
     bfrc(i, 14) = bw14dic(i)
   end do
 
-  call digda_main( &
+  call digda_cprdc( &
  &     bdep, &
  &     bfrc, &
  &     sdtx )
@@ -196,31 +196,31 @@ program digda_dataio_gtool
 
   ! Call the write_netcdf subroutine
   filename = "scla.nc"
-  varitem = "SCLA"
+  varitem = "scla"
   vartitle = "clay"
   varunit = "g m-3"
   call write_gtool(filename, varitem, vartitle, varunit, lon_values, lat_values, lz, outscla)
 
   filename = "spom.nc"
-  varitem = "SPOM"
+  varitem = "spom"
   vartitle = "organic carbon"
   varunit = "mmol m-3"
   call write_gtool(filename, varitem, vartitle, varunit, lon_values, lat_values, lz, outspom)
 
   filename = "scar.nc"
-  varitem = "SCAR"
+  varitem = "scar"
   vartitle = "CaCO3"
   varunit = "mmol m-3"
   call write_gtool(filename, varitem, vartitle, varunit, lon_values, lat_values, lz, outscar)
 
   filename = "sopa.nc"
-  varitem = "SOPA"
+  varitem = "sopa"
   vartitle = "SiO2"
   varunit = "mmol m-3"
   call write_gtool(filename, varitem, vartitle, varunit, lon_values, lat_values, lz, outsopa)
 
   filename = "sage.nc"
-  varitem = "SAGE"
+  varitem = "sage"
   vartitle = "agetracer"
   varunit = "yr"
   call write_gtool(filename, varitem, vartitle, varunit, lon_values, lat_values, lz, outsage)

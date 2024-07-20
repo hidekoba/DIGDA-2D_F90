@@ -15,15 +15,15 @@ module globals_digda_step_liquid
   use module_digda_timestep
   implicit none
 
-  double precision :: DFLX(NXY, SDZDIM+1)
+  double precision :: dflx(nxy, sdzdim+1)
 
-  double precision :: EA(SDZDIM), EB(NXY, SDZDIM), EC(SDZDIM)
-  double precision :: EAL(SDZDIM), EBE(SDZDIM), EGA(SDZDIM), EEP(NXY, SDZDIM)
-  double precision :: ED(NXY, SDZDIM),  EX(NXY, SDZDIM)
+  double precision :: ea(sdzdim), eb(nxy, sdzdim), ec(sdzdim)
+  double precision :: eal(sdzdim), ebe(sdzdim), ega(sdzdim), eep(nxy, sdzdim)
+  double precision :: ed(nxy, sdzdim),  ex(nxy, sdzdim)
 
-  logical :: CDCN = .false. !! Crank nicolson ?
-  logical :: CDII = .true.  !! Implicit ?
-  namelist /NMSDLI/ CDCN, CDII
+  logical :: cdcn = .false. !! Crank nicolson ?
+  logical :: cdii = .true.  !! Implicit ?
+  namelist /nmsdli/ cdcn, cdii
 
 end module globals_digda_step_liquid
 
@@ -36,328 +36,326 @@ contains
 
   subroutine set_digda_step_liquid
 
-    integer :: IJ, K
+    integer :: ij, k
 
-    WRITE(NFSTDO, *) '*** Sediment : set_digda_step_liquid ***'
-    REWIND(NFPARM)
-    READ (NFPARM, NMSDLI, END=99)
+    write(nfstdo, *) '*** Sediment : set_digda_step_liquid ***'
+    rewind(nfparm)
+    read(nfparm, nmsdli, end=99)
 99 continue
-    WRITE(NFSTDO, NMSDLI)
+    write(nfstdo, nmsdli)
 
   end subroutine set_digda_step_liquid
 
 ! =====================================================================
 
-      subroutine calc_step_liquid( &
-     &      BW, RLT, PHI, PHII, DEI, C, &
-     &      CN )
+      subroutine calc_step_liquid( bw, rlt, phi, phii, dei, c, & !! IN
+                                 & cn                          ) !! OUT
 
-      double precision, intent(in)  :: BW(NXY)
-      double precision, intent(in)  :: RLT(NXY,SDZDIM)
-      double precision, intent(in)  :: PHI(SDZDIM)
-      double precision, intent(in)  :: PHII(SDZDIM+1)
-      double precision, intent(in)  :: DEI(SDZDIM+1)
-      double precision, intent(in)  :: C(NXY,SDZDIM)
-      double precision, intent(out) :: CN(NXY,SDZDIM)
+      double precision, intent(in)  :: bw(nxy)
+      double precision, intent(in)  :: rlt(nxy,sdzdim)
+      double precision, intent(in)  :: phi(sdzdim)
+      double precision, intent(in)  :: phii(sdzdim+1)
+      double precision, intent(in)  :: dei(sdzdim+1)
+      double precision, intent(in)  :: c(nxy,sdzdim)
+      double precision, intent(out) :: cn(nxy,sdzdim)
 
-      integer :: IJ, K
+      integer :: ij, k
 
 !     -- Diffusion : Crank nicolson --
 
-      IF (CDCN) THEN
+      if (cdcn) then
 
-      DO K = SKST, SKEN
-         EAL(K) = ( PHI(K) / TS )
-         EBE(K) = ( ( PHII(K)   * DEI(K)   ) &
-     &            / ( 2.0D0 * DLZ(K) * DLZI(K)   ) )
-         EGA(K) = ( ( PHII(K+1) * DEI(K+1) ) &
-     &            / ( 2.0D0 * DLZ(K) * DLZI(K+1) ) )
-      END DO
+      do k = skst, sken
+         eal(k) = ( phi(k) / ts )
+         ebe(k) = ( ( phii(k)   * dei(k)   ) &
+     &            / ( 2.0d0 * dlz(k) * dlzi(k)   ) )
+         ega(k) = ( ( phii(k+1) * dei(k+1) ) &
+     &            / ( 2.0d0 * dlz(k) * dlzi(k+1) ) )
+      end do
 
-      DO K = SKST+1, SKEN-1
-         EA(K)         = - EBE(K)
-         EC(K)         = - EGA(K)
-      DO IJ = IJTSTR, IJTEND
-         EB(IJ, K)     = EAL(K) + EBE(K) + EGA(K)
-      END DO
-      END DO
+      do k = skst+1, sken-1
+         ea(k)         = - ebe(k)
+         ec(k)         = - ega(k)
+      do ij = ijtstr, ijtend
+         eb(ij, k)     = eal(k) + ebe(k) + ega(k)
+      end do
+      end do
 
-         EA(SKST)      = - EBE(SKST)
-         EC(SKST)      = - EGA(SKST)
-         EA(SKEN)      = - EBE(SKEN)
-         EC(SKEN)      = - EGA(SKEN)
-      DO IJ = IJTSTR, IJTEND
-         EB(IJ, SKST)  = EAL(SKST) + EGA(SKST) &
-     &   + ( PHII(SKST) * DEI(SKST) / DLZI(SKST) / DLZI(SKST) )
-         EB(IJ, SKEN)  = EAL(SKEN) + EBE(SKEN)
-      END DO
+         ea(skst)      = - ebe(skst)
+         ec(skst)      = - ega(skst)
+         ea(sken)      = - ebe(sken)
+         ec(sken)      = - ega(sken)
+      do ij = ijtstr, ijtend
+         eb(ij, skst)  = eal(skst) + ega(skst) &
+     &   + ( phii(skst) * dei(skst) / dlzi(skst) / dlzi(skst) )
+         eb(ij, sken)  = eal(sken) + ebe(sken)
+      end do
 
-      DO IJ = IJTSTR, IJTEND
-         ED(IJ, SKST) = &
-     &      + ( EAL(SKST) - EGA(SKST) ) * C(IJ, SKST) &
-     &      + EGA(SKST) * C(IJ, SKST+1) &
-     &      + RLT(IJ, SKST) &
-     &   + ( PHII(SKST) * DEI(SKST) * BW(IJ) / DLZI(SKST) / DLZI(SKST) )
-      END DO
+      do ij = ijtstr, ijtend
+         ed(ij, skst) = &
+     &      + ( eal(skst) - ega(skst) ) * c(ij, skst) &
+     &      + ega(skst) * c(ij, skst+1) &
+     &      + rlt(ij, skst) &
+     &   + ( phii(skst) * dei(skst) * bw(ij) / dlzi(skst) / dlzi(skst) )
+      end do
 
-      DO K = SKST+1, SKEN-1
-      DO IJ = IJTSTR, IJTEND
-         ED(IJ, K) = &
-     &      + EBE(K) * C(IJ, K-1) &
-     &      + ( EAL(K) - EBE(K) - EGA(K) ) * C(IJ, K) &
-     &      + EGA(K) * C(IJ, K+1) &
-     &      + RLT(IJ, K)
-      END DO
-      END DO
+      do k = skst+1, sken-1
+      do ij = ijtstr, ijtend
+         ed(ij, k) = &
+     &      + ebe(k) * c(ij, k-1) &
+     &      + ( eal(k) - ebe(k) - ega(k) ) * c(ij, k) &
+     &      + ega(k) * c(ij, k+1) &
+     &      + rlt(ij, k)
+      end do
+      end do
 
-      DO IJ = IJTSTR, IJTEND
-         ED(IJ, SKEN) = &
-     &      + EBE(SKEN) * C(IJ, SKEN-1) &
-     &      + ( EAL(SKEN) - EGA(SKEN) ) * C(IJ, SKEN) &
-     &      + RLT(IJ, SKEN)
-      END DO
+      do ij = ijtstr, ijtend
+         ed(ij, sken) = &
+     &      + ebe(sken) * c(ij, sken-1) &
+     &      + ( eal(sken) - ega(sken) ) * c(ij, sken) &
+     &      + rlt(ij, sken)
+      end do
 
-      call calc_tridiagonal_liquid( EA, EB, EC, ED, EX )
+      call calc_tridiagonal_liquid( ea, eb, ec, ed, ex )
 
-      END IF
+      end if
 
 !     -- Diffusion : Implicit --
 
-      IF (CDII) THEN
+      if (cdii) then
 
-      DO K = SKST, SKEN
-         EAL(K) = ( PHI(K) / TS )
-         EBE(K) = ( ( PHII(K)   * DEI(K)   ) &
-     &            / ( DLZ(K) * DLZI(K)   ) )
-         EGA(K) = ( ( PHII(K+1) * DEI(K+1) ) &
-     &            / ( DLZ(K) * DLZI(K+1) ) )
-      END DO
+      do k = skst, sken
+         eal(k) = ( phi(k) / ts )
+         ebe(k) = ( ( phii(k)   * dei(k)   ) &
+     &            / ( dlz(k) * dlzi(k)   ) )
+         ega(k) = ( ( phii(k+1) * dei(k+1) ) &
+     &            / ( dlz(k) * dlzi(k+1) ) )
+      end do
 
-      DO K = SKST+1, SKEN-1
-         EA(K)         = - EBE(K)
-         EC(K)         = - EGA(K)
-      DO IJ = IJTSTR, IJTEND
-         EB(IJ, K)     = EAL(K) + EBE(K) + EGA(K)
-      END DO
-      END DO
+      do k = skst+1, sken-1
+         ea(k)         = - ebe(k)
+         ec(k)         = - ega(k)
+      do ij = ijtstr, ijtend
+         eb(ij, k)     = eal(k) + ebe(k) + ega(k)
+      end do
+      end do
 
-         EA(SKST)      = - EBE(SKST)
-         EC(SKST)      = - EGA(SKST)
-         EA(SKEN)      = - EBE(SKEN)
-         EC(SKEN)      = - EGA(SKEN)
-      DO IJ = IJTSTR, IJTEND
-         EB(IJ, SKST)  = EAL(SKST) + EGA(SKST) &
-     &   + ( PHII(SKST) * DEI(SKST) / DLZI(SKST) / DLZI(SKST) )
-         EB(IJ, SKEN)  = EAL(SKEN) + EBE(SKEN)
-      END DO
+         ea(skst)      = - ebe(skst)
+         ec(skst)      = - ega(skst)
+         ea(sken)      = - ebe(sken)
+         ec(sken)      = - ega(sken)
+      do ij = ijtstr, ijtend
+         eb(ij, skst)  = eal(skst) + ega(skst) &
+     &   + ( phii(skst) * dei(skst) / dlzi(skst) / dlzi(skst) )
+         eb(ij, sken)  = eal(sken) + ebe(sken)
+      end do
 
-      DO K = SKST, SKEN
-      DO IJ = IJTSTR, IJTEND
-         ED(IJ, K) = &
-     &      + EAL(K) * C(IJ, K) &
-     &      + RLT(IJ, K)
-      END DO
-      END DO
+      do k = skst, sken
+      do ij = ijtstr, ijtend
+         ed(ij, k) = &
+     &      + eal(k) * c(ij, k) &
+     &      + rlt(ij, k)
+      end do
+      end do
 
-      DO IJ = IJTSTR, IJTEND
-         ED(IJ, SKST) = ED(IJ, SKST) &
-     &   + ( PHII(SKST) * DEI(SKST) * BW(IJ) / DLZI(SKST) / DLZI(SKST) )
-      END DO
+      do ij = ijtstr, ijtend
+         ed(ij, skst) = ed(ij, skst) &
+     &   + ( phii(skst) * dei(skst) * bw(ij) / dlzi(skst) / dlzi(skst) )
+      end do
 
-      call calc_tridiagonal_liquid( EA, EB, EC, ED, EX )
+      call calc_tridiagonal_liquid( ea, eb, ec, ed, ex )
 
-      END IF
+      end if
 
 !     -- t = t + dt --
 
-      DO K = SKST, SKEN
-      DO IJ = IJTSTR, IJTEND
-         CN(IJ, K) = MAX( EX(IJ, K), 0.0D0 )
-         EX(IJ, K) = 0.0D0
-      END DO
-      END DO
+      do k = skst, sken
+      do ij = ijtstr, ijtend
+         cn(ij, k) = max( ex(ij, k), 0.0d0 )
+         ex(ij, k) = 0.0d0
+      end do
+      end do
 
       end subroutine calc_step_liquid
 
 ! =====================================================================
 
-      subroutine calc_step_liquid_O2( &
-     &      BW, RLT, PHI, PHII, DEI, C, &
-     &      CN )
+      subroutine calc_step_liquid_o2( bw, rlt, phi, phii, dei, c, & !! IN
+                                    & cn                          ) !! OUT
 
-      double precision, intent(in)  :: BW(NXY)
-      double precision, intent(inout) :: RLT(NXY,SDZDIM)
-      double precision, intent(in)  :: PHI(SDZDIM)
-      double precision, intent(in)  :: PHII(SDZDIM+1)
-      double precision, intent(in)  :: DEI(SDZDIM+1)
-      double precision, intent(in)  :: C(NXY,SDZDIM)
-      double precision, intent(out) :: CN(NXY,SDZDIM)
+      double precision, intent(in)  :: bw(nxy)
+      double precision, intent(inout) :: rlt(nxy,sdzdim)
+      double precision, intent(in)  :: phi(sdzdim)
+      double precision, intent(in)  :: phii(sdzdim+1)
+      double precision, intent(in)  :: dei(sdzdim+1)
+      double precision, intent(in)  :: c(nxy,sdzdim)
+      double precision, intent(out) :: cn(nxy,sdzdim)
 
-      integer :: IJ, K
+      integer :: ij, k
 
-      DO K = SKST, SKEN
-      DO IJ = IJTSTR, IJTEND
-         IF ( C(IJ, K) /= 0.0D0 ) THEN
-            RLT(IJ, K) = RLT(IJ, K) / C(IJ, K)
-         ELSE
-            RLT(IJ, K) = 0.0D0
-         END IF
-      END DO
-      END DO
+      do k = skst, sken
+      do ij = ijtstr, ijtend
+         if ( c(ij, k) /= 0.0d0 ) then
+            rlt(ij, k) = rlt(ij, k) / c(ij, k)
+         else
+            rlt(ij, k) = 0.0d0
+         end if
+      end do
+      end do
 
 !     -- Diffusion : Crank nicolson --
 
-      IF (CDCN) THEN
+      if (cdcn) then
 
-      DO K = SKST, SKEN
-         EAL(K) = ( PHI(K) / TS )
-         EBE(K) = ( ( PHII(K)   * DEI(K)   ) &
-     &            / ( 2.0D0 * DLZ(K) * DLZI(K)   ) )
-         EGA(K) = ( ( PHII(K+1) * DEI(K+1) ) &
-     &            / ( 2.0D0 * DLZ(K) * DLZI(K+1) ) )
-      DO IJ = IJTSTR, IJTEND
-         EEP(IJ, K) = - 0.50D0 * RLT(IJ, K)
-      END DO
-      END DO
+      do k = skst, sken
+         eal(k) = ( phi(k) / ts )
+         ebe(k) = ( ( phii(k)   * dei(k)   ) &
+     &            / ( 2.0d0 * dlz(k) * dlzi(k)   ) )
+         ega(k) = ( ( phii(k+1) * dei(k+1) ) &
+     &            / ( 2.0d0 * dlz(k) * dlzi(k+1) ) )
+      do ij = ijtstr, ijtend
+         eep(ij, k) = - 0.50d0 * rlt(ij, k)
+      end do
+      end do
 
-      DO K = SKST+1, SKEN-1
-         EA(K)         = - EBE(K)
-         EC(K)         = - EGA(K)
-      DO IJ = IJTSTR, IJTEND
-         EB(IJ, K)     = EAL(K) + EBE(K) + EGA(K) + EEP(IJ, K)
-      END DO
-      END DO
+      do k = skst+1, sken-1
+         ea(k)         = - ebe(k)
+         ec(k)         = - ega(k)
+      do ij = ijtstr, ijtend
+         eb(ij, k)     = eal(k) + ebe(k) + ega(k) + eep(ij, k)
+      end do
+      end do
 
-         EA(SKST)      = - EBE(SKST)
-         EC(SKST)      = - EGA(SKST)
-         EA(SKEN)      = - EBE(SKEN)
-         EC(SKEN)      = - EGA(SKEN)
-      DO IJ = IJTSTR, IJTEND
-         EB(IJ, SKST)  = EAL(SKST) + EGA(SKST) + EEP(IJ, SKST) &
-     &   + ( PHII(SKST) * DEI(SKST) / DLZI(SKST) / DLZI(SKST) )
-         EB(IJ, SKEN)  = EAL(SKEN) + EBE(SKEN) + EEP(IJ, SKEN)
-      END DO
+         ea(skst)      = - ebe(skst)
+         ec(skst)      = - ega(skst)
+         ea(sken)      = - ebe(sken)
+         ec(sken)      = - ega(sken)
+      do ij = ijtstr, ijtend
+         eb(ij, skst)  = eal(skst) + ega(skst) + eep(ij, skst) &
+     &   + ( phii(skst) * dei(skst) / dlzi(skst) / dlzi(skst) )
+         eb(ij, sken)  = eal(sken) + ebe(sken) + eep(ij, sken)
+      end do
 
-      DO IJ = IJTSTR, IJTEND
-         ED(IJ, SKST) = &
-     &      + ( EAL(SKST) - EGA(SKST) ) * C(IJ, SKST) &
-     &      + EGA(SKST) * C(IJ, SKST+1) &
-     &      + 0.50D0 * RLT(IJ, SKST) * C(IJ, SKST) &
-     &   + ( PHII(SKST) * DEI(SKST) * BW(IJ) / DLZI(SKST) / DLZI(SKST) )
-      END DO
+      do ij = ijtstr, ijtend
+         ed(ij, skst) = &
+     &      + ( eal(skst) - ega(skst) ) * c(ij, skst) &
+     &      + ega(skst) * c(ij, skst+1) &
+     &      + 0.50d0 * rlt(ij, skst) * c(ij, skst) &
+     &   + ( phii(skst) * dei(skst) * bw(ij) / dlzi(skst) / dlzi(skst) )
+      end do
 
-      DO K = SKST+1, SKEN-1
-      DO IJ = IJTSTR, IJTEND
-         ED(IJ, K) = &
-     &      + EBE(K) * C(IJ, K-1) &
-     &      + ( EAL(K) - EBE(K) - EGA(K) ) * C(IJ, K) &
-     &      + EGA(K) * C(IJ, K+1) &
-     &      + 0.50D0 * RLT(IJ, K) * C(IJ, K)
-      END DO
-      END DO
+      do k = skst+1, sken-1
+      do ij = ijtstr, ijtend
+         ed(ij, k) = &
+     &      + ebe(k) * c(ij, k-1) &
+     &      + ( eal(k) - ebe(k) - ega(k) ) * c(ij, k) &
+     &      + ega(k) * c(ij, k+1) &
+     &      + 0.50d0 * rlt(ij, k) * c(ij, k)
+      end do
+      end do
 
-      DO IJ = IJTSTR, IJTEND
-         ED(IJ, SKEN) = &
-     &      + EBE(SKEN) * C(IJ, SKEN-1) &
-     &      + ( EAL(SKEN) - EGA(SKEN) ) * C(IJ, SKEN) &
-     &      + 0.50D0 * RLT(IJ, SKEN) * C(IJ, SKEN)
-      END DO
+      do ij = ijtstr, ijtend
+         ed(ij, sken) = &
+     &      + ebe(sken) * c(ij, sken-1) &
+     &      + ( eal(sken) - ega(sken) ) * c(ij, sken) &
+     &      + 0.50d0 * rlt(ij, sken) * c(ij, sken)
+      end do
 
-      call calc_tridiagonal_liquid( EA, EB, EC, ED, EX )
+      call calc_tridiagonal_liquid( ea, eb, ec, ed, ex )
 
-      END IF
+      end if
 
 !     -- Diffusion : Implicit --
 
-      IF (CDII) THEN
+      if (cdii) then
 
-      DO K = SKST, SKEN
-         EAL(K) = ( PHI(K) / TS )
-         EBE(K) = ( ( PHII(K)   * DEI(K)   ) &
-     &            / ( DLZ(K) * DLZI(K)   ) )
-         EGA(K) = ( ( PHII(K+1) * DEI(K+1) ) &
-     &            / ( DLZ(K) * DLZI(K+1) ) )
-      DO IJ = IJTSTR, IJTEND
-         EEP(IJ, K) = - RLT(IJ, K)
-      END DO
-      END DO
+      do k = skst, sken
+         eal(k) = ( phi(k) / ts )
+         ebe(k) = ( ( phii(k)   * dei(k)   ) &
+     &            / ( dlz(k) * dlzi(k)   ) )
+         ega(k) = ( ( phii(k+1) * dei(k+1) ) &
+     &            / ( dlz(k) * dlzi(k+1) ) )
+      do ij = ijtstr, ijtend
+         eep(ij, k) = - rlt(ij, k)
+      end do
+      end do
 
-      DO K = SKST+1, SKEN-1
-         EA(K)         = - EBE(K)
-         EC(K)         = - EGA(K)
-      DO IJ = IJTSTR, IJTEND
-         EB(IJ, K)     = EAL(K) + EBE(K) + EGA(K) + EEP(IJ, K)
-      END DO
-      END DO
+      do k = skst+1, sken-1
+         ea(k)         = - ebe(k)
+         ec(k)         = - ega(k)
+      do ij = ijtstr, ijtend
+         eb(ij, k)     = eal(k) + ebe(k) + ega(k) + eep(ij, k)
+      end do
+      end do
 
-         EA(SKST)      = - EBE(SKST)
-         EC(SKST)      = - EGA(SKST)
-         EA(SKEN)      = - EBE(SKEN)
-         EC(SKEN)      = - EGA(SKEN)
-      DO IJ = IJTSTR, IJTEND
-         EB(IJ, SKST)  = EAL(SKST) + EGA(SKST) + EEP(IJ, SKST) &
-     &   + ( PHII(SKST) * DEI(SKST) / DLZI(SKST) / DLZI(SKST) )
-         EB(IJ, SKEN)  = EAL(SKEN) + EBE(SKEN) + EEP(IJ, SKEN)
-      END DO
+         ea(skst)      = - ebe(skst)
+         ec(skst)      = - ega(skst)
+         ea(sken)      = - ebe(sken)
+         ec(sken)      = - ega(sken)
+      do ij = ijtstr, ijtend
+         eb(ij, skst)  = eal(skst) + ega(skst) + eep(ij, skst) &
+     &   + ( phii(skst) * dei(skst) / dlzi(skst) / dlzi(skst) )
+         eb(ij, sken)  = eal(sken) + ebe(sken) + eep(ij, sken)
+      end do
 
-      DO K = SKST, SKEN
-      DO IJ = IJTSTR, IJTEND
-         ED(IJ, K) = &
-     &      + EAL(K) * C(IJ, K)
-      END DO
-      END DO
+      do k = skst, sken
+      do ij = ijtstr, ijtend
+         ed(ij, k) = &
+     &      + eal(k) * c(ij, k)
+      end do
+      end do
 
-      DO IJ = IJTSTR, IJTEND
-         ED(IJ, SKST) = ED(IJ, SKST) &
-     &   + ( PHII(SKST) * DEI(SKST) * BW(IJ) / DLZI(SKST) / DLZI(SKST) )
-      END DO
+      do ij = ijtstr, ijtend
+         ed(ij, skst) = ed(ij, skst) &
+     &   + ( phii(skst) * dei(skst) * bw(ij) / dlzi(skst) / dlzi(skst) )
+      end do
 
-      call calc_tridiagonal_liquid( EA, EB, EC, ED, EX )
+      call calc_tridiagonal_liquid( ea, eb, ec, ed, ex )
 
-      END IF
+      end if
 
 !     -- t = t + dt --
 
-      DO K = SKST, SKEN
-      DO IJ = IJTSTR, IJTEND
-         CN(IJ, K) = MAX( EX(IJ, K), 0.0D0 )
-         EX(IJ, K) = 0.0D0
-      END DO
-      END DO
+      do k = skst, sken
+      do ij = ijtstr, ijtend
+         cn(ij, k) = max( ex(ij, k), 0.0d0 )
+         ex(ij, k) = 0.0d0
+      end do
+      end do
 
-      end subroutine calc_step_liquid_O2
+      end subroutine calc_step_liquid_o2
 
 ! =====================================================================
 
-      subroutine calc_tridiagonal_liquid( EA, EB, EC, ED, EX )
+      subroutine calc_tridiagonal_liquid( ea, eb, ec, ed, ex )
 
-      double precision, intent(in)  :: EA(SDZDIM), EB(NXY,SDZDIM), EC(SDZDIM)
-      double precision, intent(in)  :: ED(NXY,SDZDIM)
-      double precision, intent(out) :: EX(NXY,SDZDIM)
+      double precision, intent(in)  :: ea(sdzdim), eb(nxy,sdzdim), ec(sdzdim)
+      double precision, intent(in)  :: ed(nxy,sdzdim)
+      double precision, intent(out) :: ex(nxy,sdzdim)
 
-      double precision :: EW(NXY,SDZDIM)
-      double precision :: BET(NXY)
+      double precision :: ew(nxy,sdzdim)
+      double precision :: bet(nxy)
 
-      integer :: IJ, K
+      integer :: ij, k
 
-      DO IJ = IJTSTR, IJTEND
-         BET(IJ)      = EB(IJ, SKST)
-         EX(IJ, SKST) = ED(IJ, SKST) / BET(IJ)
-      END DO
+      do ij = ijtstr, ijtend
+         bet(ij)      = eb(ij, skst)
+         ex(ij, skst) = ed(ij, skst) / bet(ij)
+      end do
 
-      DO K = SKST+1, SKEN
-      DO IJ = IJTSTR, IJTEND
-         EW(IJ, K) = EC(K-1) / BET(IJ)
-         BET(IJ)   = EB(IJ, K) - EA(K) * EW(IJ, K)
-         EX(IJ, K) = (ED(IJ, K) - EA(K) * EX(IJ, K-1) ) / BET(IJ)
-      END DO
-      END DO
+      do k = skst+1, sken
+      do ij = ijtstr, ijtend
+         ew(ij, k) = ec(k-1) / bet(ij)
+         bet(ij)   = eb(ij, k) - ea(k) * ew(ij, k)
+         ex(ij, k) = (ed(ij, k) - ea(k) * ex(ij, k-1) ) / bet(ij)
+      end do
+      end do
 
-      DO K = SKEN-1, SKST, -1
-      DO IJ = IJTSTR, IJTEND
-         EX(IJ, K) = EX(IJ, K) - EW(IJ, K+1) * EX(IJ, K+1)
-      END DO
-      END DO
+      do k = sken-1, skst, -1
+      do ij = ijtstr, ijtend
+         ex(ij, k) = ex(ij, k) - ew(ij, k+1) * ex(ij, k+1)
+      end do
+      end do
 
       end subroutine calc_tridiagonal_liquid
 
