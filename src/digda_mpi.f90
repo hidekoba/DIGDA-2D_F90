@@ -4,26 +4,23 @@ module module_digda_mpi
   implicit none
 
   ! Declaration of parameters and variables
-  integer, parameter :: IROOT = 0
-  integer :: IERR, NPROCS, MYRANK
-  integer :: IREQ, ISTATUS
- !integer, parameter :: NCPU = 12
- !integer, parameter :: NCPU = 16
- !integer, parameter :: NCPU = 24
- !integer, parameter :: NCPU = 45
- !integer, parameter :: NCPU = 64
-  integer, parameter :: NCPU = 90 !! 2160x1080
- !integer, parameter :: NCPU = 96
- !integer, parameter :: NCPU = 180
- !integer, parameter :: NCPU = 192
-  integer :: NSNDCT2D, NSNDCT3D, NSNDCW3D
-  integer :: IRANK, ISIZE1, ISIZE2, ISIZE3, IIST, IIEN, IJKG
-  integer :: ISEND1, ISEND2, ISEND3, ISEND4, ISEND5
-  integer :: IRECV1, IRECV2, IRECV3, IRECV4, IRECV5
-  integer :: IREQ1, IREQ2, IREQ3, IREQ4, IREQ5
-  integer :: IREQ11, IREQ12, IREQ13, IREQ14, IREQ15
-  integer :: IREQ21, IREQ22, IREQ23, IREQ24, IREQ25
-  integer :: JJSTR(0:NCPU-1), JJEND(0:NCPU-1)
+  integer, parameter :: iroot = 0
+  integer :: ierr, nprocs, myrank
+  integer :: ireq, istatus
+ !integer, parameter :: ncpu = 12
+ !integer, parameter :: ncpu = 16
+ !integer, parameter :: ncpu = 24
+ !integer, parameter :: ncpu = 45
+ !integer, parameter :: ncpu = 64
+  integer, parameter :: ncpu = 90 !! 2160x1080
+ !integer, parameter :: ncpu = 96
+ !integer, parameter :: ncpu = 180
+ !integer, parameter :: ncpu = 192
+  integer :: nsndct2d, nsndct3d, nsndcw3d
+  integer :: irank, isize1, isize2, isize3, ijkg
+  integer :: isend1, isend2, isend3
+  integer :: irecv1, irecv2, irecv3
+  integer :: jjstr(0:ncpu-1), jjend(0:ncpu-1)
 
   ! Parallel digda_configuration
   logical, parameter :: use_mpi = .true.
@@ -32,40 +29,42 @@ contains
 
   subroutine initialize_digda_mpi()
 
-    IF (use_mpi) THEN
-      call MPI_INIT(IERR)
-      call MPI_COMM_SIZE(MPI_COMM_WORLD, NPROCS, IERR)
-      call MPI_COMM_RANK(MPI_COMM_WORLD, MYRANK, IERR)
+    call mpi_init(ierr)
+    call mpi_comm_size(mpi_comm_world, nprocs, ierr)
+    call mpi_comm_rank(mpi_comm_world, myrank, ierr)
 
-      IF ( NPROCS /= NCPU ) THEN
-        IF ( MYRANK == 0 ) THEN
-          PRINT *, '=== MPI ERROR ==='
-          call MPI_FINALIZE(IERR)
-          STOP
-        END IF
-      END IF
-
-    END IF
+    if ( nprocs /= ncpu ) then
+      if ( myrank == iroot ) then
+        write(*, *) "***** MPI ERROR *****"
+        call mpi_finalize(ierr)
+        stop
+      end if
+    end if
 
   end subroutine initialize_digda_mpi
 
-  subroutine set_parallel_range( &
- &  N1, N2, NPR, IRA, &
- &  IST, IEN )
+  subroutine set_parallel_range( n1, n2, npr, ira, & !! IN
+                               & ist, ien          ) !! OUT
 
-    integer, intent(in) :: N1, N2
-    integer, intent(in) :: NPR, IRA
-    integer, intent(out) :: IST, IEN
-    integer :: IWORK1, IWORK2
+    integer, intent(in)  :: n1, n2
+    integer, intent(in)  :: npr, ira
+    integer, intent(out) :: ist, ien
+    integer :: iwork1, iwork2
 
-    IWORK1 = ( N2 - N1 + 1 ) / NPR
-    IWORK2 = MOD( N2 - N1 + 1, NPR )
-    IST = IRA*IWORK1 + N1 + MIN( IRA, IWORK2 )
-    IEN = IST + IWORK1 - 1
-    IF ( IWORK2 > IRA ) THEN
-      IEN = IEN + 1
-    END IF
+    iwork1 = ( n2 - n1 + 1 ) / npr
+    iwork2 = mod( n2 - n1 + 1, npr )
+    ist = ira * iwork1 + n1 + min( ira, iwork2 )
+    ien = ist + iwork1 - 1
+    if ( iwork2 > ira ) then
+      ien = ien + 1
+    end if
 
   end subroutine set_parallel_range
+
+  subroutine finalize_digda_mpi()
+
+    call mpi_finalize(ierr)
+
+  end subroutine finalize_digda_mpi
 
 end module module_digda_mpi

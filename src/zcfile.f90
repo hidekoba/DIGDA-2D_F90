@@ -2,10 +2,14 @@
 module module_zcfile
   implicit none
 
-  integer, parameter :: NFSTDI = 5
-  integer, parameter :: NFSTDO = 998
-  integer, parameter :: NFPARM = 7
+  integer, parameter :: ncf = 256
+  integer, parameter :: nfmin = 21, nfmax = 82
 
-  integer, parameter :: NFSOTS = 999
+  integer, parameter :: nfstdi = 5
+  integer, parameter :: nfstdo = 8
+  integer, parameter :: nfparm = 7
+
+  integer, parameter :: nfsots = 999
 
 end module module_zcfile
+

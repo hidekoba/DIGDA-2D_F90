@@ -9,7 +9,7 @@
 !
 ! ---------------------------------------------------------------------
 
-module globals_digda_main
+module globals_digda_cprdc
       use module_zcfile
       use module_digda_grid
       implicit none
@@ -340,9 +340,9 @@ module globals_digda_main
       SAVE BDEP, BDEPG
 
 !-- Parallel computing :
-      INTEGER, ALLOCATABLE :: NRCVC1(:),  NDISP1(:)
-      INTEGER, ALLOCATABLE :: NRCVC2(:),  NDISP2(:)
-      INTEGER, ALLOCATABLE :: NRCVC3(:),  NDISP3(:)
+      INTEGER, ALLOCATABLE :: nrcvct2d(:),  ndispt2d(:)
+      INTEGER, ALLOCATABLE :: nrcvct3d(:),  ndispt3d(:)
+      INTEGER, ALLOCATABLE :: nrcvcw3d(:),  ndispw3d(:)
       REAL*8,  ALLOCATABLE :: DUMMY01(:), DUMMY02(:), DUMMY03(:)
       REAL*8,  ALLOCATABLE :: DUMMY04(:), DUMMY05(:), DUMMY06(:)
       REAL*8,  ALLOCATABLE :: DUMMY07(:), DUMMY08(:), DUMMY09(:)
@@ -393,12 +393,12 @@ module globals_digda_main
 
       CHARACTER CFILE*128, CTITLE*128, CUNIT*128
 
-end module globals_digda_main
+end module globals_digda_cprdc
 
 ! =====================================================================
 
-module module_digda_main
-      use globals_digda_main
+module module_digda_cprdc
+      use globals_digda_cprdc
       use module_digda_clay
       use module_digda_pom
       use module_digda_carbonate
@@ -409,8 +409,8 @@ module module_digda_main
       implicit none
 contains
 
-      subroutine digda_main()
-    ! subroutine digda_main( &
+      subroutine digda_cprdc()
+    ! subroutine digda_cprdc( &
     !&     bdepg, &
     !&     bfrcg, &
     !&     sdtx )
@@ -419,8 +419,8 @@ contains
 
 IF (use_mpi) THEN
       call MPI_INIT(IERR)
-      call MPI_COMM_SIZE(MPI_COMM_WORLD, NPROCS, IERR)
-      call MPI_COMM_RANK(MPI_COMM_WORLD, MYRANK, IERR)
+      call MPI_COMM_SIZE(mpi_comm_world, NPROCS, IERR)
+      call MPI_COMM_RANK(mpi_comm_world, MYRANK, IERR)
 
       IF ( NPROCS /= NCPU ) THEN
          IF ( MYRANK == 0 ) THEN
@@ -1240,12 +1240,12 @@ END IF
 IF (use_mpi) THEN
 
       IF (SDOFIRST) THEN
-      ALLOCATE(NRCVC1(0:NPROCS-1))
-      ALLOCATE(NDISP1(0:NPROCS-1))
-      ALLOCATE(NRCVC2(0:NPROCS-1))
-      ALLOCATE(NDISP2(0:NPROCS-1))
-      ALLOCATE(NRCVC3(0:NPROCS-1))
-      ALLOCATE(NDISP3(0:NPROCS-1))
+      ALLOCATE(nrcvct2d(0:NPROCS-1))
+      ALLOCATE(ndispt2d(0:NPROCS-1))
+      ALLOCATE(nrcvct3d(0:NPROCS-1))
+      ALLOCATE(ndispt3d(0:NPROCS-1))
+      ALLOCATE(nrcvcw3d(0:NPROCS-1))
+      ALLOCATE(ndispw3d(0:NPROCS-1))
 
       ALLOCATE(DUMMY01(NXYZDM+NPROCS))
       ALLOCATE(DUMMY02(NXYZDM+NPROCS))
@@ -1298,170 +1298,170 @@ IF (use_mpi) THEN
       ALLOCATE(DUMMY58(NXYDIM+NPROCS))
       END IF
 
-      ISIZE1 = NXY
+      nsndct2d = NXY
       DO IRANK = 0, NPROCS-1
-         NRCVC1(IRANK) = NXY
-         NDISP1(IRANK) = NXY * IRANK
+         nrcvct2d(IRANK) = NXY
+         ndispt2d(IRANK) = NXY * IRANK
       END DO
-      ISIZE2 = NXYZ
+      nsndct3d = NXYZ
       DO IRANK = 0, NPROCS-1
-         NRCVC2(IRANK) = NXYZ
-         NDISP2(IRANK) = NXYZ * IRANK
+         nrcvct3d(IRANK) = NXYZ
+         ndispt3d(IRANK) = NXYZ * IRANK
       END DO
-      ISIZE3 = ( NXYZ + NXY )
+      nsndcw3d = ( NXYZ + NXY )
       DO IRANK = 0, NPROCS-1
-         NRCVC3(IRANK) = ( NXYZ + NXY )
-         NDISP3(IRANK) = ( NXYZ + NXY ) * IRANK
+         nrcvcw3d(IRANK) = ( NXYZ + NXY )
+         ndispw3d(IRANK) = ( NXYZ + NXY ) * IRANK
       END DO
 
       SDOFIRST = .false.
       END IF
 
-      call MPI_GATHERV( SCLA,    ISIZE2,         MPI_REAL8, &
-     &                  DUMMY01, NRCVC2, NDISP2, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      call MPI_GATHERV( SPOM,    ISIZE2,         MPI_REAL8, &
-     &                  DUMMY02, NRCVC2, NDISP2, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      call MPI_GATHERV( SCAR,    ISIZE2,         MPI_REAL8, &
-     &                  DUMMY03, NRCVC2, NDISP2, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      call MPI_GATHERV( SOPA,    ISIZE2,         MPI_REAL8, &
-     &                  DUMMY04, NRCVC2, NDISP2, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      call MPI_GATHERV( SAGE,    ISIZE2,         MPI_REAL8, &
-     &                  DUMMY05, NRCVC2, NDISP2, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      call MPI_GATHERV( CNIT,    ISIZE2,         MPI_REAL8, &
-     &                  DUMMY11, NRCVC2, NDISP2, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      call MPI_GATHERV( CDIC,    ISIZE2,         MPI_REAL8, &
-     &                  DUMMY12, NRCVC2, NDISP2, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      call MPI_GATHERV( CALK,    ISIZE2,         MPI_REAL8, &
-     &                  DUMMY13, NRCVC2, NDISP2, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      call MPI_GATHERV( CDO2,    ISIZE2,         MPI_REAL8, &
-     &                  DUMMY14, NRCVC2, NDISP2, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      call MPI_GATHERV( CSIL,    ISIZE2,         MPI_REAL8, &
-     &                  DUMMY15, NRCVC2, NDISP2, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      call MPI_GATHERV( CCO32,   ISIZE2,         MPI_REAL8, &
-     &                  DUMMY16, NRCVC2, NDISP2, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      call MPI_GATHERV( SATSIL,  ISIZE2,         MPI_REAL8, &
-     &                  DUMMY21, NRCVC2, NDISP2, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      call MPI_GATHERV( SATCO32, ISIZE1,         MPI_REAL8, &
-     &                  DUMMY22, NRCVC1, NDISP1, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      call MPI_GATHERV( W,       ISIZE3,         MPI_REAL8, &
-     &                  DUMMY23, NRCVC3, NDISP3, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      call MPI_GATHERV( FICLA,   ISIZE1,         MPI_REAL8, &
-     &                  DUMMY31, NRCVC1, NDISP1, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      call MPI_GATHERV( FIPOM,   ISIZE1,         MPI_REAL8, &
-     &                  DUMMY32, NRCVC1, NDISP1, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      call MPI_GATHERV( FICAR,   ISIZE1,         MPI_REAL8, &
-     &                  DUMMY33, NRCVC1, NDISP1, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      call MPI_GATHERV( FIOPA,   ISIZE1,         MPI_REAL8, &
-     &                  DUMMY34, NRCVC1, NDISP1, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      call MPI_GATHERV( FOCLA,   ISIZE1,         MPI_REAL8, &
-     &                  DUMMY41, NRCVC1, NDISP1, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      call MPI_GATHERV( FOPOM,   ISIZE1,         MPI_REAL8, &
-     &                  DUMMY42, NRCVC1, NDISP1, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      call MPI_GATHERV( FOCAR,   ISIZE1,         MPI_REAL8, &
-     &                  DUMMY43, NRCVC1, NDISP1, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      call MPI_GATHERV( FOOPA,   ISIZE1,         MPI_REAL8, &
-     &                  DUMMY44, NRCVC1, NDISP1, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      call MPI_GATHERV( BFCLA,   ISIZE1,         MPI_REAL8, &
-     &                  DUMMY51, NRCVC1, NDISP1, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      call MPI_GATHERV( BFPOM,   ISIZE1,         MPI_REAL8, &
-     &                  DUMMY52, NRCVC1, NDISP1, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      call MPI_GATHERV( BFCAR,   ISIZE1,         MPI_REAL8, &
-     &                  DUMMY53, NRCVC1, NDISP1, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      call MPI_GATHERV( BFOPA,   ISIZE1,         MPI_REAL8, &
-     &                  DUMMY54, NRCVC1, NDISP1, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
+      call MPI_GATHERV( SCLA,    nsndct3d, mpi_real8, &
+     &                  DUMMY01, nrcvct3d, ndispt3d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
+      call MPI_GATHERV( SPOM,    nsndct3d, mpi_real8, &
+     &                  DUMMY02, nrcvct3d, ndispt3d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
+      call MPI_GATHERV( SCAR,    nsndct3d, mpi_real8, &
+     &                  DUMMY03, nrcvct3d, ndispt3d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
+      call MPI_GATHERV( SOPA,    nsndct3d, mpi_real8, &
+     &                  DUMMY04, nrcvct3d, ndispt3d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
+      call MPI_GATHERV( SAGE,    nsndct3d, mpi_real8, &
+     &                  DUMMY05, nrcvct3d, ndispt3d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
+      call MPI_GATHERV( CNIT,    nsndct3d, mpi_real8, &
+     &                  DUMMY11, nrcvct3d, ndispt3d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
+      call MPI_GATHERV( CDIC,    nsndct3d, mpi_real8, &
+     &                  DUMMY12, nrcvct3d, ndispt3d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
+      call MPI_GATHERV( CALK,    nsndct3d, mpi_real8, &
+     &                  DUMMY13, nrcvct3d, ndispt3d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
+      call MPI_GATHERV( CDO2,    nsndct3d, mpi_real8, &
+     &                  DUMMY14, nrcvct3d, ndispt3d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
+      call MPI_GATHERV( CSIL,    nsndct3d, mpi_real8, &
+     &                  DUMMY15, nrcvct3d, ndispt3d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
+      call MPI_GATHERV( CCO32,   nsndct3d, mpi_real8, &
+     &                  DUMMY16, nrcvct3d, ndispt3d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
+      call MPI_GATHERV( SATSIL,  nsndct3d, mpi_real8, &
+     &                  DUMMY21, nrcvct3d, ndispt3d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
+      call MPI_GATHERV( SATCO32, nsndct2d, mpi_real8, &
+     &                  DUMMY22, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
+      call MPI_GATHERV( W,       nsndcw3d, mpi_real8, &
+     &                  DUMMY23, nrcvcw3d, ndispw3d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
+      call MPI_GATHERV( FICLA,   nsndct2d, mpi_real8, &
+     &                  DUMMY31, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
+      call MPI_GATHERV( FIPOM,   nsndct2d, mpi_real8, &
+     &                  DUMMY32, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
+      call MPI_GATHERV( FICAR,   nsndct2d, mpi_real8, &
+     &                  DUMMY33, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
+      call MPI_GATHERV( FIOPA,   nsndct2d, mpi_real8, &
+     &                  DUMMY34, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
+      call MPI_GATHERV( FOCLA,   nsndct2d, mpi_real8, &
+     &                  DUMMY41, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
+      call MPI_GATHERV( FOPOM,   nsndct2d, mpi_real8, &
+     &                  DUMMY42, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
+      call MPI_GATHERV( FOCAR,   nsndct2d, mpi_real8, &
+     &                  DUMMY43, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
+      call MPI_GATHERV( FOOPA,   nsndct2d, mpi_real8, &
+     &                  DUMMY44, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
+      call MPI_GATHERV( BFCLA,   nsndct2d, mpi_real8, &
+     &                  DUMMY51, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
+      call MPI_GATHERV( BFPOM,   nsndct2d, mpi_real8, &
+     &                  DUMMY52, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
+      call MPI_GATHERV( BFCAR,   nsndct2d, mpi_real8, &
+     &                  DUMMY53, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
+      call MPI_GATHERV( BFOPA,   nsndct2d, mpi_real8, &
+     &                  DUMMY54, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
 
       IF ( CALC13 ) THEN
-      call MPI_GATHERV( S13POM,  ISIZE2,         MPI_REAL8, &
-     &                  DUMMY06, NRCVC2, NDISP2, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      call MPI_GATHERV( S13CAR,  ISIZE2,         MPI_REAL8, &
-     &                  DUMMY08, NRCVC2, NDISP2, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      call MPI_GATHERV( C13DIC,  ISIZE2,         MPI_REAL8, &
-     &                  DUMMY17, NRCVC2, NDISP2, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      call MPI_GATHERV( CDC13,   ISIZE2,         MPI_REAL8, &
-     &                  DUMMY19, NRCVC2, NDISP2, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      call MPI_GATHERV( FI13POM, ISIZE1,         MPI_REAL8, &
-     &                  DUMMY35, NRCVC1, NDISP1, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      call MPI_GATHERV( FI13CAR, ISIZE1,         MPI_REAL8, &
-     &                  DUMMY37, NRCVC1, NDISP1, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      call MPI_GATHERV( FO13POM, ISIZE1,         MPI_REAL8, &
-     &                  DUMMY45, NRCVC1, NDISP1, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      call MPI_GATHERV( FO13CAR, ISIZE1,         MPI_REAL8, &
-     &                  DUMMY47, NRCVC1, NDISP1, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      call MPI_GATHERV( BF13POM, ISIZE1,         MPI_REAL8, &
-     &                  DUMMY55, NRCVC1, NDISP1, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      call MPI_GATHERV( BF13CAR, ISIZE1,         MPI_REAL8, &
-     &                  DUMMY57, NRCVC1, NDISP1, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
+      call MPI_GATHERV( S13POM,  nsndct3d, mpi_real8, &
+     &                  DUMMY06, nrcvct3d, ndispt3d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
+      call MPI_GATHERV( S13CAR,  nsndct3d, mpi_real8, &
+     &                  DUMMY08, nrcvct3d, ndispt3d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
+      call MPI_GATHERV( C13DIC,  nsndct3d, mpi_real8, &
+     &                  DUMMY17, nrcvct3d, ndispt3d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
+      call MPI_GATHERV( CDC13,   nsndct3d, mpi_real8, &
+     &                  DUMMY19, nrcvct3d, ndispt3d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
+      call MPI_GATHERV( FI13POM, nsndct2d, mpi_real8, &
+     &                  DUMMY35, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
+      call MPI_GATHERV( FI13CAR, nsndct2d, mpi_real8, &
+     &                  DUMMY37, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
+      call MPI_GATHERV( FO13POM, nsndct2d, mpi_real8, &
+     &                  DUMMY45, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
+      call MPI_GATHERV( FO13CAR, nsndct2d, mpi_real8, &
+     &                  DUMMY47, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
+      call MPI_GATHERV( BF13POM, nsndct2d, mpi_real8, &
+     &                  DUMMY55, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
+      call MPI_GATHERV( BF13CAR, nsndct2d, mpi_real8, &
+     &                  DUMMY57, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
       END IF
 
       IF ( CALC14 ) THEN
-      call MPI_GATHERV( S14POM,  ISIZE2,         MPI_REAL8, &
-     &                  DUMMY07, NRCVC2, NDISP2, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      call MPI_GATHERV( S14CAR,  ISIZE2,         MPI_REAL8, &
-     &                  DUMMY09, NRCVC2, NDISP2, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      call MPI_GATHERV( C14DIC,  ISIZE2,         MPI_REAL8, &
-     &                  DUMMY18, NRCVC2, NDISP2, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      call MPI_GATHERV( CDC14,   ISIZE2,         MPI_REAL8, &
-     &                  DUMMY20, NRCVC2, NDISP2, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      call MPI_GATHERV( FI14POM, ISIZE1,         MPI_REAL8, &
-     &                  DUMMY36, NRCVC1, NDISP1, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      call MPI_GATHERV( FO14POM, ISIZE1,         MPI_REAL8, &
-     &                  DUMMY46, NRCVC1, NDISP1, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      call MPI_GATHERV( FO14CAR, ISIZE1,         MPI_REAL8, &
-     &                  DUMMY48, NRCVC1, NDISP1, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      call MPI_GATHERV( BF14POM, ISIZE1,         MPI_REAL8, &
-     &                  DUMMY56, NRCVC1, NDISP1, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
-      call MPI_GATHERV( BF14CAR, ISIZE1,         MPI_REAL8, &
-     &                  DUMMY58, NRCVC1, NDISP1, MPI_REAL8, &
-     &                  IROOT,   MPI_COMM_WORLD, IERR     )
+      call MPI_GATHERV( S14POM,  nsndct3d, mpi_real8, &
+     &                  DUMMY07, nrcvct3d, ndispt3d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
+      call MPI_GATHERV( S14CAR,  nsndct3d, mpi_real8, &
+     &                  DUMMY09, nrcvct3d, ndispt3d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
+      call MPI_GATHERV( C14DIC,  nsndct3d, mpi_real8, &
+     &                  DUMMY18, nrcvct3d, ndispt3d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
+      call MPI_GATHERV( CDC14,   nsndct3d, mpi_real8, &
+     &                  DUMMY20, nrcvct3d, ndispt3d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
+      call MPI_GATHERV( FI14POM, nsndct2d, mpi_real8, &
+     &                  DUMMY36, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
+      call MPI_GATHERV( FO14POM, nsndct2d, mpi_real8, &
+     &                  DUMMY46, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
+      call MPI_GATHERV( FO14CAR, nsndct2d, mpi_real8, &
+     &                  DUMMY48, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
+      call MPI_GATHERV( BF14POM, nsndct2d, mpi_real8, &
+     &                  DUMMY56, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
+      call MPI_GATHERV( BF14CAR, nsndct2d, mpi_real8, &
+     &                  DUMMY58, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  IROOT, mpi_COMM_WORLD, IERR     )
       END IF
 
       IF ( MYRANK .EQ. IROOT ) THEN
          DO IRANK = 0, NPROCS-1
-            IJKG = NDISP2(IRANK)
+            IJKG = ndispt3d(IRANK)
             DO K = SKST, SKEN
                DO IJ = JJSTR(IRANK), JJEND(IRANK)
                   IJKG = IJKG + 1
@@ -1491,7 +1491,7 @@ IF (use_mpi) THEN
                   SATSILG(IJ, K) = DUMMY21(IJKG)
                END DO
             END DO
-            IJKG = NDISP3(IRANK)
+            IJKG = ndispw3d(IRANK)
             DO K = SKST, SKEN+1
                DO IJ = JJSTR(IRANK), JJEND(IRANK)
                   IJKG = IJKG + 1
@@ -1549,7 +1549,7 @@ IF (use_mpi) THEN
          END DO
 
       END IF
-      call MPI_BARRIER(MPI_COMM_WORLD, IERR)
+      call mpi_barrier(mpi_comm_world, IERR)
 
 ELSE
 
@@ -1783,7 +1783,7 @@ IF (use_mpi) THEN
          call write_gtoolfile(      YY,  CDC14G,   CFILE,  CTITLE,   CUNIT, &
      &                   NXDIM,   NYDIM,  SDZDIM  )
       END IF
-      call MPI_BARRIER(MPI_COMM_WORLD, IERR)
+      call mpi_barrier(mpi_comm_world, IERR)
 END IF
 
       END IF ! -- End of Output
@@ -1794,9 +1794,9 @@ END IF
 
       END DO ! -- End of Time integration
 
-      end subroutine digda_main
+      end subroutine digda_cprdc
 
-end module module_digda_main
+end module module_digda_cprdc
 
 ! =====================================================================
       subroutine read_gtoolfile( FLX, NSIZE, CFILE)
