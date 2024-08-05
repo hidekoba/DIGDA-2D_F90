@@ -209,7 +209,7 @@ contains
 
     filename = trim(rstt_dir)//"/SEDTRR.nc"
     write(nfstdo, *) "'--------------------------------------------------'"
-    write(nfstdo, *) "  write initial condition file: ", filename
+    write(nfstdo, *) "  write restart file: ", filename
     write(nfstdo, *) "'--------------------------------------------------'"
     varname = "Clay"
     varunit = "mmol m-3"
@@ -221,11 +221,11 @@ contains
         end do
       end do
     end do
-    call write_netcdf_3d(filename, varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
+    call write_restart(filename, varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
 
     varname = "OrgM"
     varunit = "mmol m-3"
-    call write_netcdf_3d(filename, varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
+    call write_restart(filename, varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
     do k = 1, sdzdim
       do j = 1, nydim
         do i = 1, nxdim
@@ -237,7 +237,7 @@ contains
 
     varname = "CaCO3"
     varunit = "mmol m-3"
-    call write_netcdf_3d(filename, varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
+    call write_restart(filename, varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
     do k = 1, sdzdim
       do j = 1, nydim
         do i = 1, nxdim
@@ -249,7 +249,7 @@ contains
 
     varname = "SiO2"
     varunit = "mmol m-3"
-    call write_netcdf_3d(filename, varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
+    call write_restart(filename, varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
     do k = 1, sdzdim
       do j = 1, nydim
         do i = 1, nxdim
@@ -261,7 +261,7 @@ contains
 
     varname = "Agetracer"
     varunit = "mmol m-3"
-    call write_netcdf_3d(filename, varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
+    call write_restart(filename, varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
     do k = 1, sdzdim
       do j = 1, nydim
         do i = 1, nxdim
@@ -273,7 +273,7 @@ contains
 
     varname = "Phosphate"
     varunit = "mmol m-3"
-    call write_netcdf_3d(filename, varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
+    call write_restart(filename, varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
     do k = 1, sdzdim
       do j = 1, nydim
         do i = 1, nxdim
@@ -285,7 +285,7 @@ contains
 
     varname = "DIC"
     varunit = "mmol m-3"
-    call write_netcdf_3d(filename, varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
+    call write_restart(filename, varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
     do k = 1, sdzdim
       do j = 1, nydim
         do i = 1, nxdim
@@ -297,7 +297,7 @@ contains
 
     varname = "Alkalinity"
     varunit = "mmol m-3"
-    call write_netcdf_3d(filename, varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
+    call write_restart(filename, varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
     do k = 1, sdzdim
       do j = 1, nydim
         do i = 1, nxdim
@@ -309,7 +309,7 @@ contains
 
     varname = "Silicate"
     varunit = "mmol m-3"
-    call write_netcdf_3d(filename, varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
+    call write_restart(filename, varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
     do k = 1, sdzdim
       do j = 1, nydim
         do i = 1, nxdim
@@ -321,7 +321,7 @@ contains
 
     varname = "Oxygen"
     varunit = "mmol m-3"
-    call write_netcdf_3d(filename, varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
+    call write_restart(filename, varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
     do k = 1, sdzdim
       do j = 1, nydim
         do i = 1, nxdim

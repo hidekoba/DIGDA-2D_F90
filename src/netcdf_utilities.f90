@@ -1178,4 +1178,244 @@ contains
 
   end subroutine write_netcdf_3d
 
+  subroutine write_restart(filename, varname, varunit, var, xvalues, yvalues, zvalues, tvalues)
+    use netcdf
+    implicit none
+
+    character(len=*), intent(in) :: filename, varname, varunit
+    double precision, dimension(:,:,:,:), intent(in) :: var
+    double precision, dimension(:), intent(in) :: xvalues, yvalues, zvalues
+    integer(kind=4), dimension(:), intent(in) :: tvalues
+
+    double precision, dimension(:), allocatable :: tvalues_real
+    integer(kind=4) :: ncid, varid, retval
+    integer(kind=4) :: xid, xsize
+    integer(kind=4) :: yid, ysize
+    integer(kind=4) :: zid, zsize
+    integer(kind=4) :: tid, tsize
+    integer(kind=4) :: xvarid, yvarid, zvarid, tvarid
+    logical :: file_exists
+    character(len=*), parameter :: xname = 'lon'
+    character(len=*), parameter :: yname = 'lat'
+    character(len=*), parameter :: zname = 'depth'
+    character(len=*), parameter :: tname = 'time'
+    double precision, parameter :: fill_value = 999.0
+    integer(kind=4), dimension(4) :: start_var, count_var
+
+    ! Determine the size of each dimension from the input arrays
+    xsize = size(xvalues)
+    ysize = size(yvalues)
+    zsize = size(zvalues)
+    tsize = size(tvalues)
+    allocate(tvalues_real(tsize))
+    tvalues_real = real(tvalues, kind=8)
+
+    ! Check if file already exists
+    inquire(file=filename, exist=file_exists)
+
+    if (file_exists) then
+      ! Open existing file in write mode
+      retval = nf90_open(filename, nf90_write, ncid)
+      if (retval /= nf90_noerr) then
+        print *, 'Failed to open existing file: ', trim(filename)
+        print *, 'Error: ', nf90_strerror(retval)
+        stop
+      endif
+
+      ! Get the time dimension
+      retval = nf90_inq_dimid(ncid, tname, tid)
+      if (retval /= nf90_noerr) then
+        print *, 'Failed to get time dimension.'
+        print *, 'Error: ', nf90_strerror(retval)
+        stop
+      endif
+
+      ! Get the current size of the time dimension
+      retval = nf90_inquire_dimension(ncid, tid, len=tsize)
+      if (retval /= nf90_noerr) then
+        print *, 'Failed to get time dimension size.'
+        print *, 'Error: ', nf90_strerror(retval)
+        stop
+      endif
+
+      ! Check if the variable already exists
+      retval = nf90_inq_varid(ncid, varname, varid)
+      if (retval /= nf90_noerr) then
+        ! If the variable does not exist, define it
+        retval = nf90_redef(ncid)
+        if (retval /= nf90_noerr) then
+          print *, 'Failed to enter define mode.'
+          print *, 'Error: ', nf90_strerror(retval)
+          stop
+        endif
+
+        ! Define the data variable
+        retval = nf90_def_var(ncid, varname, nf90_double, [xid, yid, zid, tid], varid)
+        if (retval /= nf90_noerr) then
+          print *, 'Failed to define variable ', varname
+          print *, 'Error: ', nf90_strerror(retval)
+          stop
+        endif
+
+        ! Add units attribute to the data variable
+        retval = nf90_put_att(ncid, varid, 'units', varunit)
+        if (retval /= nf90_noerr) then
+          print *, 'Failed to add units attribute to variable ', varname
+          print *, 'Error: ', nf90_strerror(retval)
+          stop
+        endif
+
+        ! End define mode
+        retval = nf90_enddef(ncid)
+        if (retval /= nf90_noerr) then
+          print *, 'Failed to end define mode.'
+          print *, 'Error: ', nf90_strerror(retval)
+          stop
+        endif
+      endif
+
+    else
+      ! Create the netCDF file
+      retval = nf90_create(filename, nf90_clobber, ncid)
+      if (retval /= nf90_noerr) then
+        print *, 'Failed to create file.'
+        print *, 'Error: ', nf90_strerror(retval)
+        stop
+      endif
+
+      ! Define the dimensions
+      retval = nf90_def_dim(ncid, xname, xsize, xid)
+      if (retval /= nf90_noerr) then
+        print *, 'Failed to define dimension ', xname
+        print *, 'Error: ', nf90_strerror(retval)
+        stop
+      endif
+
+      retval = nf90_def_dim(ncid, yname, ysize, yid)
+      if (retval /= nf90_noerr) then
+        print *, 'Failed to define dimension ', yname
+        print *, 'Error: ', nf90_strerror(retval)
+        stop
+      endif
+
+      retval = nf90_def_dim(ncid, zname, zsize, zid)
+      if (retval /= nf90_noerr) then
+        print *, 'Failed to define dimension ', zname
+        print *, 'Error: ', nf90_strerror(retval)
+        stop
+      endif
+
+      retval = nf90_def_dim(ncid, tname, nf90_unlimited, tid)
+      if (retval /= nf90_noerr) then
+        print *, 'Failed to define dimension ', tname
+        print *, 'Error: ', nf90_strerror(retval)
+        stop
+      endif
+
+      ! Define the dimension variables
+      retval = nf90_def_var(ncid, xname, nf90_double, [xid], xvarid)
+      if (retval /= nf90_noerr) then
+        print *, 'Failed to define variable ', xname
+        print *, 'Error: ', nf90_strerror(retval)
+        stop
+      endif
+
+      retval = nf90_def_var(ncid, yname, nf90_double, [yid], yvarid)
+      if (retval /= nf90_noerr) then
+        print *, 'Failed to define variable ', yname
+        print *, 'Error: ', nf90_strerror(retval)
+        stop
+      endif
+
+      retval = nf90_def_var(ncid, zname, nf90_double, [zid], zvarid)
+      if (retval /= nf90_noerr) then
+        print *, 'Failed to define variable ', zname
+        print *, 'Error: ', nf90_strerror(retval)
+        stop
+      endif
+
+      retval = nf90_def_var(ncid, tname, nf90_double, [tid], tvarid)
+      if (retval /= nf90_noerr) then
+        print *, 'Failed to define variable ', tname
+        print *, 'Error: ', nf90_strerror(retval)
+        stop
+      endif
+
+      ! Define the data variable
+      retval = nf90_def_var(ncid, varname, nf90_double, [xid, yid, zid, tid], varid)
+      if (retval /= nf90_noerr) then
+        print *, 'Failed to define variable ', varname
+        print *, 'Error: ', nf90_strerror(retval)
+        stop
+      endif
+
+      ! Add units attribute to the data variable
+      retval = nf90_put_att(ncid, varid, 'units', varunit)
+      if (retval /= nf90_noerr) then
+        print *, 'Failed to add units attribute to variable ', varname
+        print *, 'Error: ', nf90_strerror(retval)
+        stop
+      endif
+
+      ! End define mode
+      retval = nf90_enddef(ncid)
+      if (retval /= nf90_noerr) then
+        print *, 'Failed to end define mode.'
+        print *, 'Error: ', nf90_strerror(retval)
+        stop
+      endif
+
+      ! Write the dimension variables
+      retval = nf90_put_var(ncid, xvarid, xvalues)
+      if (retval /= nf90_noerr) then
+        print *, 'Failed to write longitude values.'
+        print *, 'Error: ', nf90_strerror(retval)
+        stop
+      endif
+
+      retval = nf90_put_var(ncid, yvarid, yvalues)
+      if (retval /= nf90_noerr) then
+        print *, 'Failed to write latitude values.'
+        print *, 'Error: ', nf90_strerror(retval)
+        stop
+      endif
+
+      retval = nf90_put_var(ncid, zvarid, zvalues)
+      if (retval /= nf90_noerr) then
+        print *, 'Failed to write depth values.'
+        print *, 'Error: ', nf90_strerror(retval)
+        stop
+      endif
+
+      retval = nf90_put_var(ncid, tvarid, tvalues_real)
+      if (retval /= nf90_noerr) then
+        print *, 'Failed to write time values.'
+        print *, 'Error: ', nf90_strerror(retval)
+        stop
+      endif
+    endif
+
+    ! Write data to the variable
+    start_var = [1, 1, 1, 1]
+    count_var = [xsize, ysize, zsize, tsize]
+
+    retval = nf90_put_var(ncid, varid, var, start=start_var, count=count_var)
+    if (retval /= nf90_noerr) then
+      print *, 'Failed to write data to variable.'
+      print *, 'Error: ', nf90_strerror(retval)
+      stop
+    endif
+
+    ! Close the NetCDF file
+    retval = nf90_close(ncid)
+    if (retval /= nf90_noerr) then
+      print *, 'Error occurred while closing the file.'
+      print *, 'Error: ', nf90_strerror(retval)
+      stop
+    endif
+
+    print *, "Successfully wrote to file: ", trim(filename)
+
+  end subroutine write_restart
+
 end module netcdf_utilities
