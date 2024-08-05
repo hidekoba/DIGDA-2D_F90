@@ -221,8 +221,8 @@ contains
       do k = skst+1, sken+1
       do ij = ijtstr, ijtend
          si(ij, k) = c0(ij, k) &
-     &   - ( c1(ij, k) * ( ( w(ij, k) * ts ) / 2.0d0 ) ) &
-     &   + ( c2(ij, k) * ( ( ( ( w(ij, k) * ts ) ** 2.0d0 ) / 3.0d0 ) &
+     &   - ( c1(ij, k) * ( ( w(ij, k) * tssec ) / 2.0d0 ) ) &
+     &   + ( c2(ij, k) * ( ( ( ( w(ij, k) * tssec ) ** 2.0d0 ) / 3.0d0 ) &
      &             - ( ( ( dlzi(k) ** 2.0d0 ) / 12.0d0 ) ) ) )
       end do
       end do
@@ -421,7 +421,7 @@ contains
       if (sdic) then
 
       do k = skst, sken
-         eal(k) = ( ( 1.0d0 - phi(k) ) / ts )
+         eal(k) = ( ( 1.0d0 - phi(k) ) / tssec )
          ebe(k) = ( ( ( 1.0d0 - phii(k) )   * dbi(k) ) &
      &            / ( 2.0d0 * dlz(k) * dlzi(k)   ) )
          ega(k) = ( ( ( 1.0d0 - phii(k+1) ) * dbi(k+1) ) &
@@ -477,7 +477,7 @@ contains
       if (sdii) then
 
       do k = skst, sken
-         eal(k) = ( ( 1.0d0 - phi(k) ) / ts )
+         eal(k) = ( ( 1.0d0 - phi(k) ) / tssec )
          ebe(k) = ( ( ( 1.0d0 - phii(k) )   * dbi(k) ) &
      &            / ( dlz(k) * dlzi(k)   ) )
          ega(k) = ( ( ( 1.0d0 - phii(k+1) ) * dbi(k+1) ) &
@@ -670,8 +670,8 @@ contains
       do k = skst+1, sken+1
       do ij = ijtstr, ijtend
          si(ij, k) = c0(ij, k) &
-     &   - ( c1(ij, k) * ( ( w(ij, k) * ts ) / 2.0d0 ) ) &
-     &   + ( c2(ij, k) * ( ( ( ( w(ij, k) * ts ) ** 2.0d0 ) / 3.0d0 ) &
+     &   - ( c1(ij, k) * ( ( w(ij, k) * tssec ) / 2.0d0 ) ) &
+     &   + ( c2(ij, k) * ( ( ( ( w(ij, k) * tssec ) ** 2.0d0 ) / 3.0d0 ) &
      &             - ( ( ( dlzi(k) ** 2.0d0 ) / 12.0d0 ) ) ) )
       end do
       end do
@@ -873,7 +873,7 @@ contains
       if (sdic) then
 
       do k = skst, sken
-         eal(k) = ( ( 1.0d0 - phi(k) ) / ts )
+         eal(k) = ( ( 1.0d0 - phi(k) ) / tssec )
          ebe(k) = ( ( ( 1.0d0 - phii(k) )   * dbi(k) ) &
      &            / ( 2.0d0 * dlz(k) * dlzi(k)   ) )
          ega(k) = ( ( ( 1.0d0 - phii(k+1) ) * dbi(k+1) ) &
@@ -929,7 +929,7 @@ contains
       if (sdii) then
 
       do k = skst, sken
-         eal(k) = ( ( 1.0d0 - phi(k) ) / ts )
+         eal(k) = ( ( 1.0d0 - phi(k) ) / tssec )
          ebe(k) = ( ( ( 1.0d0 - phii(k) )   * dbi(k) ) &
      &            / ( dlz(k) * dlzi(k)   ) )
          ega(k) = ( ( ( 1.0d0 - phii(k+1) ) * dbi(k+1) ) &
@@ -1119,8 +1119,8 @@ contains
       do k = skst+1, sken+1
       do ij = ijtstr, ijtend
          si(ij, k) = c0(ij, k) &
-     &   - ( c1(ij, k) * ( ( w(ij, k) * ts ) / 2.0d0 ) ) &
-     &   + ( c2(ij, k) * ( ( ( ( w(ij, k) * ts ) ** 2.0d0 ) / 3.0d0 ) &
+     &   - ( c1(ij, k) * ( ( w(ij, k) * tssec ) / 2.0d0 ) ) &
+     &   + ( c2(ij, k) * ( ( ( ( w(ij, k) * tssec ) ** 2.0d0 ) / 3.0d0 ) &
      &             - ( ( ( dlzi(k) ** 2.0d0 ) / 12.0d0 ) ) ) )
       end do
       end do
@@ -1319,7 +1319,7 @@ contains
       if (sdic) then
 
       do k = skst, sken
-         eal(k) = ( ( 1.0d0 - phi(k) ) / ts )
+         eal(k) = ( ( 1.0d0 - phi(k) ) / tssec )
          ebe(k) = ( ( ( 1.0d0 - phii(k) )   * dbi(k) ) &
      &            / ( 2.0d0 * dlz(k) * dlzi(k)   ) )
          ega(k) = ( ( ( 1.0d0 - phii(k+1) ) * dbi(k+1) ) &
@@ -1375,7 +1375,7 @@ contains
       if (sdii) then
 
       do k = skst, sken
-         eal(k) = ( ( 1.0d0 - phi(k) ) / ts )
+         eal(k) = ( ( 1.0d0 - phi(k) ) / tssec )
          ebe(k) = ( ( ( 1.0d0 - phii(k) )   * dbi(k) ) &
      &            / ( dlz(k) * dlzi(k)   ) )
          ega(k) = ( ( ( 1.0d0 - phii(k+1) ) * dbi(k+1) ) &

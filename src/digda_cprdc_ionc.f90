@@ -280,6 +280,8 @@ contains
 
     integer :: i, j, ij, k, l, ic
     integer :: tt, yy
+!   integer, dimension(:),  :: yy_array
+    integer(kind=4), dimension(:), allocatable :: yy_array
     integer :: ios
 
     !-- SEDIMENT TRACERS : setup --
@@ -303,6 +305,11 @@ contains
     rewind(nfparm)
     read(nfparm, NML=nmsdiso, IOSTAT=ios)
     write(nfstdo, nmsdiso)
+
+    call initialize_timestep()
+    write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *)  sdtsyr, sdyrstr, sdyrend, sdyrhst
+    write(nfstdo, *) "'--------------------------------------------------'"
 
     sedtnm(1)  = 'scla'
     sedtnm(2)  = 'spom'
@@ -576,7 +583,7 @@ end if
 
       do tt = tstr, tend
 
-         yy = int( tsyr * tt )
+         yy = int( sdtsyr * tt )
 
       if (sdfirst) then
          do k = skst, sken
@@ -807,9 +814,9 @@ end if
       do k = skst, sken
          do ij = ijtstr, ijtend
             sn14pom(ij, k) = sn14pom(ij, k) &
-     &                     - adcay * ts * s14pom(ij, k)
+     &                     - adcay * tssec * s14pom(ij, k)
             sn14car(ij, k) = sn14car(ij, k) &
-     &                     - adcay * ts * s14car(ij, k)
+     &                     - adcay * tssec * s14car(ij, k)
          end do
       end do
       end if
@@ -884,7 +891,7 @@ end if
       do k = skst, sken
          do ij = ijtstr, ijtend
             cn14dic(ij, k) = cn14dic(ij, k) &
-     &                     - adcay * ts * c14dic(ij, k)
+     &                     - adcay * tssec * c14dic(ij, k)
          end do
       end do
 
@@ -1077,7 +1084,7 @@ end if
 
 !     -- Write the output --
 !     if ( wohist ) then
-        if ( tt == tend .or. mod(tt, tout) == 0 ) then
+        if ( tt == tend .or. mod(tt, thst) == 0 ) then
 !     else
 !       if ( tt == tend ) then
 !     end if
@@ -1870,6 +1877,8 @@ if (use_mpi) then
          end do
 
          !-- NetCDF output --
+         allocate(yy_array(1))
+         yy_array(1) = yy
 
          filename = "scla.nc"
          varname = "Clay"
@@ -1882,8 +1891,8 @@ if (use_mpi) then
              end do
            end do
          end do
-         call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy)
-         call calc_integral_and_mean_3d( sclag, lon_values, lat_values, lz, integral_value, mean_value )
+         call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
+         call calc_integral_and_mean_3d(sclag, lon_values, lat_values, lz, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " g m-3"
@@ -1901,8 +1910,8 @@ if (use_mpi) then
              end do
            end do
          end do
-         call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy)
-         call calc_integral_and_mean_3d( spomg, lon_values, lat_values, lz, integral_value, mean_value )
+         call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
+         call calc_integral_and_mean_3d(spomg, lon_values, lat_values, lz, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
@@ -1920,8 +1929,8 @@ if (use_mpi) then
              end do
            end do
          end do
-         call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy)
-         call calc_integral_and_mean_3d( scarg, lon_values, lat_values, lz, integral_value, mean_value )
+         call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
+         call calc_integral_and_mean_3d(scarg, lon_values, lat_values, lz, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
@@ -1939,8 +1948,8 @@ if (use_mpi) then
              end do
            end do
          end do
-         call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy)
-         call calc_integral_and_mean_3d( sopag, lon_values, lat_values, lz, integral_value, mean_value )
+         call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
+         call calc_integral_and_mean_3d(sopag, lon_values, lat_values, lz, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
@@ -1948,7 +1957,7 @@ if (use_mpi) then
          write(nfstdo, *) "'--------------------------------------------------'"
 
          filename = "sage.nc"
-         varname = "Age tracer"
+         varname = "Agetracer"
          varunit = "year"
          do k = 1, sdzdim
            do j = 1, nydim
@@ -1958,8 +1967,8 @@ if (use_mpi) then
              end do
            end do
          end do
-         call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy)
-         call calc_integral_and_mean_3d( sageg, lon_values, lat_values, lz, integral_value, mean_value )
+         call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
+         call calc_integral_and_mean_3d(sageg, lon_values, lat_values, lz, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " yr"
@@ -1976,8 +1985,8 @@ if (use_mpi) then
              end do
            end do
          end do
-         call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy)
-         call calc_integral_and_mean_3d( cnitg, lon_values, lat_values, lz, integral_value, mean_value )
+         call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
+         call calc_integral_and_mean_3d(cnitg, lon_values, lat_values, lz, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
@@ -1995,8 +2004,8 @@ if (use_mpi) then
              end do
            end do
          end do
-         call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy)
-         call calc_integral_and_mean_3d( cdicg, lon_values, lat_values, lz, integral_value, mean_value )
+         call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
+         call calc_integral_and_mean_3d(cdicg, lon_values, lat_values, lz, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
@@ -2014,8 +2023,8 @@ if (use_mpi) then
              end do
            end do
          end do
-         call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy)
-         call calc_integral_and_mean_3d( calkg, lon_values, lat_values, lz, integral_value, mean_value )
+         call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
+         call calc_integral_and_mean_3d(calkg, lon_values, lat_values, lz, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
@@ -2033,8 +2042,8 @@ if (use_mpi) then
              end do
            end do
          end do
-         call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy)
-         call calc_integral_and_mean_3d( cdo2g, lon_values, lat_values, lz, integral_value, mean_value )
+         call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
+         call calc_integral_and_mean_3d(cdo2g, lon_values, lat_values, lz, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
@@ -2052,8 +2061,8 @@ if (use_mpi) then
              end do
            end do
          end do
-         call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy)
-         call calc_integral_and_mean_3d( csilg, lon_values, lat_values, lz, integral_value, mean_value )
+         call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
+         call calc_integral_and_mean_3d(csilg, lon_values, lat_values, lz, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
@@ -2070,7 +2079,7 @@ if (use_mpi) then
         !  end do
         !end do
         !call write_netcdf_2d(filename, varname, varunit, var2d_values, lon_values, lat_values, yy)
-        !call calc_integral_and_mean_2d( ficlag, lon_values, lat_values, integral_value, mean_value )
+        !call calc_integral_and_mean_2d(ficlag, lon_values, lat_values, integral_value, mean_value)
         !write(nfstdo, *) "'--------------------------------------------------'"
         !write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
         !write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " g m-3 * cm s-1"
@@ -2087,7 +2096,7 @@ if (use_mpi) then
         !  end do
         !end do
         !call write_netcdf_2d(filename, varname, varunit, var2d_values, lon_values, lat_values, yy)
-        !call calc_integral_and_mean_2d( fipomg, lon_values, lat_values, integral_value, mean_value )
+        !call calc_integral_and_mean_2d(fipomg, lon_values, lat_values, integral_value, mean_value)
         !write(nfstdo, *) "'--------------------------------------------------'"
         !write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
         !write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
@@ -2104,7 +2113,7 @@ if (use_mpi) then
         !  end do
         !end do
         !call write_netcdf_2d(filename, varname, varunit, var2d_values, lon_values, lat_values, yy)
-        !call calc_integral_and_mean_2d( ficarg, lon_values, lat_values, integral_value, mean_value )
+        !call calc_integral_and_mean_2d(ficarg, lon_values, lat_values, integral_value, mean_value)
         !write(nfstdo, *) "'--------------------------------------------------'"
         !write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
         !write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
@@ -2121,7 +2130,7 @@ if (use_mpi) then
         !  end do
         !end do
         !call write_netcdf_2d(filename, varname, varunit, var2d_values, lon_values, lat_values, yy)
-        !call calc_integral_and_mean_2d( fiopag, lon_values, lat_values, integral_value, mean_value )
+        !call calc_integral_and_mean_2d(fiopag, lon_values, lat_values, integral_value, mean_value)
         !write(nfstdo, *) "'--------------------------------------------------'"
         !write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
         !write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
@@ -2182,7 +2191,7 @@ if (use_mpi) then
         !  end do
         !end do
         !call write_netcdf_2d(filename, varname, varunit, var2d_values, lon_values, lat_values, yy)
-         call calc_integral_and_mean_2d( bfclag, lon_values, lat_values, integral_value, mean_value )
+         call calc_integral_and_mean_2d(bfclag, lon_values, lat_values, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
@@ -2199,7 +2208,7 @@ if (use_mpi) then
         !  end do
         !end do
         !call write_netcdf_2d(filename, varname, varunit, var2d_values, lon_values, lat_values, yy)
-         call calc_integral_and_mean_2d( bfpomg, lon_values, lat_values, integral_value, mean_value )
+         call calc_integral_and_mean_2d(bfpomg, lon_values, lat_values, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
@@ -2216,7 +2225,7 @@ if (use_mpi) then
         !  end do
         !end do
         !call write_netcdf_2d(filename, varname, varunit, var2d_values, lon_values, lat_values, yy)
-         call calc_integral_and_mean_2d( bfcarg, lon_values, lat_values, integral_value, mean_value )
+         call calc_integral_and_mean_2d(bfcarg, lon_values, lat_values, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
@@ -2233,7 +2242,7 @@ if (use_mpi) then
         !  end do
         !end do
         !call write_netcdf_2d(filename, varname, varunit, var2d_values, lon_values, lat_values, yy)
-         call calc_integral_and_mean_2d( bfopag, lon_values, lat_values, integral_value, mean_value )
+         call calc_integral_and_mean_2d(bfopag, lon_values, lat_values, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
@@ -2264,7 +2273,7 @@ if (use_mpi) then
         !    end do
         !  end do
         !end do
-        !call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy)
+        !call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
 
         !filename = "cdc14.nc"
         !varname = "Delta_carbon-14"
@@ -2277,7 +2286,7 @@ if (use_mpi) then
         !    end do
         !  end do
         !end do
-        !call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy)
+        !call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
 
         !! -- Gtool output --
         !chead  = ''

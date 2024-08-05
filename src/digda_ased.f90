@@ -1,4 +1,5 @@
 program digda_ased
+
   use module_zcfile
   use module_digda_dataio_netcdf
   use module_digda_cprdc
@@ -16,6 +17,7 @@ program digda_ased
 ! double precision, dimension(:), allocatable :: lon_values
 ! double precision, dimension(:), allocatable :: lat_values
 ! double precision, dimension(:), allocatable :: depth_values
+! integer(kind=4), dimension(:), allocatable :: time_values
 
 ! double precision, dimension(:,:), allocatable :: vard2d
 ! double precision, dimension(:,:,:,:), allocatable :: vard3d
@@ -28,6 +30,10 @@ program digda_ased
   namelist /nmstdo/ cstdo
 
   integer :: ios
+
+  write(nfstdo, *) "'--------------------------------------------------'"
+  write(nfstdo, *) "'-- DIGDA MAIN: Started                          --'"
+  write(nfstdo, *) "'--------------------------------------------------'"
 
   !-- Initialize MPI --
   if (use_mpi) then
@@ -49,6 +55,7 @@ program digda_ased
       & ACCESS='SeqUENTIAL', FORM='FORMATTED' )
   write(nfstdo, *) "'--------------------------------------------------'"
   write(nfstdo, *) 'MESSAGE OUTPUT FOR RANK', myrank
+  rewind(nfparm)
   read(nfparm, NML=nmrun, IOSTAT=ios)
   write(nfstdo, *) 'Run name :'//trim(crun)
  !if (ios /= 0) then
@@ -67,15 +74,18 @@ program digda_ased
  !!-- Read the namelist --
  !call read_namelist()
 
+  !-- Read RESTART file --
+  call digda_read_restart(sdtx, lon_values, lat_values, depth_values, time_values)
+
   !-- Read the forcing --
-  call digda_read_data(bdep, bfrc)
+  call digda_read_bottom_forcing(bdep, bfrc)
 
   !-- Start time-stepping --
   call digda_cprdc(bdep, bfrc, sdtx)
 
   !-- Write the restart file --
+  call digda_write_restart(sdtx, lon_values, lat_values, depth_values, time_values)
   call digda_write_data()
-
 
   !-- Finalize MPI
   if (use_mpi) then

@@ -60,7 +60,7 @@ contains
             rpom(ij, k) = kax
           end if
           rpommax = ( phi(k) / ( 1.0d0 - phi(k) ) ) &
-         &        * ( cp / op ) * cdo2(ij, k) / spom(ij, k) / ts
+         &        * ( cp / op ) * cdo2(ij, k) / spom(ij, k) / tssec
           rpom(ij, k) = max( min( rpom(ij, k), rpommax ), kax )
         else
           rpom(ij, k) = 0.0d0

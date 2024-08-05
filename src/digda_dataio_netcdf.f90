@@ -13,23 +13,25 @@ module module_digda_dataio_netcdf
   double precision, dimension(:), allocatable :: lon_values
   double precision, dimension(:), allocatable :: lat_values
   double precision, dimension(:), allocatable :: depth_values
+  integer(kind=4), dimension(:), allocatable :: time_values
 
   double precision, dimension(:,:), allocatable :: vard2d
-  double precision, dimension(:,:,:,:), allocatable :: vard3d
+  double precision, dimension(:,:,:), allocatable :: vard3d
+  double precision, dimension(:,:,:,:), allocatable :: vard4d
 
 contains
 
-  subroutine digda_read_data(bdep, bfrc)
-
-    double precision, dimension(nxydim), intent(out) :: bdep
-    double precision, dimension(nxydim, benfdm), intent(out) :: bfrc
-
-    double precision, dimension(nxdim, nydim) :: omask
+  subroutine digda_read_restart(sdtx, lon_values, lat_values, depth_values, time_values)
+    double precision, dimension(:), allocatable, intent(out) :: lon_values
+    double precision, dimension(:), allocatable, intent(out) :: lat_values
+    double precision, dimension(:), allocatable, intent(out) :: depth_values
+    integer(kind=4), dimension(:), allocatable, intent(out) :: time_values
+    double precision, dimension(nxydim, sdzdim, sedtdm), intent(out) :: sdtx
 
     integer :: ios
 
     write(nfstdo, *) "'--------------------------------------------------'"
-    write(nfstdo, *) "'-- Started reading Sed-Water boundary forcing   --'"
+    write(nfstdo, *) "'-- Started reading Sediment RESTART file        --'"
     write(nfstdo, *) "'--------------------------------------------------'"
     write(nfstdo, *) "  DIGDA TRACER No.01 = scla"
     write(nfstdo, *) "  DIGDA TRACER No.02 = spom"
@@ -47,6 +49,316 @@ contains
     write(nfstdo, *) "  DIGDA TRACER No.14 = s14pom"
     write(nfstdo, *) "  DIGDA TRACER No.15 = s14car"
     write(nfstdo, *) "  DIGDA TRACER No.16 = c14dic"
+    write(nfstdo, *) "'--------------------------------------------------'"
+    rewind(nfparm)
+    read(nfparm, NML=nmocrt, IOSTAT=ios)
+    write(nfstdo, nmocrt)
+
+    !-- Call the read_netcdf subroutine --
+
+    filename = trim(init_dir)//"/SEDTRR.nc"
+    write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "  Read initial condition file: ", filename
+    write(nfstdo, *) "'--------------------------------------------------'"
+    varname = "Clay"
+    call read_netcdf_4d(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+    do k = 1, sdzdim
+      do j = 1, nydim
+        do i = 1, nxdim
+          ij = i + (j - 1) * nxdim
+          sdtx(ij, k, 1) = vard4d(i, j, k, 1)
+        end do
+      end do
+    end do
+
+    varname = "OrgM"
+    call read_netcdf_4d(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+    do k = 1, sdzdim
+      do j = 1, nydim
+        do i = 1, nxdim
+          ij = i + (j - 1) * nxdim
+          sdtx(ij, k, 2) = vard4d(i, j, k, 1)
+        end do
+      end do
+    end do
+
+    varname = "CaCO3"
+    call read_netcdf_4d(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+    do k = 1, sdzdim
+      do j = 1, nydim
+        do i = 1, nxdim
+          ij = i + (j - 1) * nxdim
+          sdtx(ij, k, 3) = vard4d(i, j, k, 1)
+        end do
+      end do
+    end do
+
+    varname = "SiO2"
+    call read_netcdf_4d(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+    do k = 1, sdzdim
+      do j = 1, nydim
+        do i = 1, nxdim
+          ij = i + (j - 1) * nxdim
+          sdtx(ij, k, 4) = vard4d(i, j, k, 1)
+        end do
+      end do
+    end do
+
+    varname = "Agetracer"
+    call read_netcdf_4d(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+    do k = 1, sdzdim
+      do j = 1, nydim
+        do i = 1, nxdim
+          ij = i + (j - 1) * nxdim
+          sdtx(ij, k, 5) = vard4d(i, j, k, 1)
+        end do
+      end do
+    end do
+
+    varname = "Phosphate"
+    call read_netcdf_4d(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+    do k = 1, sdzdim
+      do j = 1, nydim
+        do i = 1, nxdim
+          ij = i + (j - 1) * nxdim
+          sdtx(ij, k, 6) = vard4d(i, j, k, 1)
+        end do
+      end do
+    end do
+
+    varname = "DIC"
+    call read_netcdf_4d(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+    do k = 1, sdzdim
+      do j = 1, nydim
+        do i = 1, nxdim
+          ij = i + (j - 1) * nxdim
+          sdtx(ij, k, 7) = vard4d(i, j, k, 1)
+        end do
+      end do
+    end do
+
+    varname = "Alkalinity"
+    call read_netcdf_4d(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+    do k = 1, sdzdim
+      do j = 1, nydim
+        do i = 1, nxdim
+          ij = i + (j - 1) * nxdim
+          sdtx(ij, k, 8) = vard4d(i, j, k, 1)
+        end do
+      end do
+    end do
+
+    varname = "Silicate"
+    call read_netcdf_4d(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+    do k = 1, sdzdim
+      do j = 1, nydim
+        do i = 1, nxdim
+          ij = i + (j - 1) * nxdim
+          sdtx(ij, k, 9) = vard4d(i, j, k, 1)
+        end do
+      end do
+    end do
+
+    varname = "Oxygen"
+    call read_netcdf_4d(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+    do k = 1, sdzdim
+      do j = 1, nydim
+        do i = 1, nxdim
+          ij = i + (j - 1) * nxdim
+          sdtx(ij, k, 10) = vard4d(i, j, k, 1)
+        end do
+      end do
+    end do
+
+    !-- Synchronize all processes --
+    call mpi_barrier(mpi_comm_world, ierr)
+
+    !-- Free memory for variables --
+    if (allocated(vard3d)) then
+      deallocate(vard3d)
+    end if
+    if (allocated(vard4d)) then
+      deallocate(vard4d)
+    end if
+
+    write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "'-- Finised reading Sediment RESTART file        --'"
+    write(nfstdo, *) "'--------------------------------------------------'"
+
+  end subroutine digda_read_restart
+
+
+  subroutine digda_write_restart(sdtx, lon_values, lat_values, depth_values, time_values)
+
+    double precision, dimension(nxydim, sdzdim, sedtdm), intent(in) :: sdtx
+    double precision, dimension(:), allocatable, intent(in) :: lon_values
+    double precision, dimension(:), allocatable, intent(in) :: lat_values
+    double precision, dimension(:), allocatable, intent(in) :: depth_values
+    integer(kind=4), dimension(:), allocatable, intent(in) :: time_values
+
+    integer :: ios
+
+    !-- Allocate the array with appropriate dimensions --
+    allocate(vard4d(nxdim, nydim, sdzdim, 1))
+
+    write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "'-- Started writing Sediment RESTART file        --'"
+    write(nfstdo, *) "'--------------------------------------------------'"
+
+    !-- Call the write_netcdf subroutine --
+
+    filename = trim(rstt_dir)//"/SEDTRR.nc"
+    write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "  write initial condition file: ", filename
+    write(nfstdo, *) "'--------------------------------------------------'"
+    varname = "Clay"
+    varunit = "mmol m-3"
+    do k = 1, sdzdim
+      do j = 1, nydim
+        do i = 1, nxdim
+          ij = i + (j - 1) * nxdim
+          vard4d(i, j, k, 1) = sdtx(ij, k, 1)
+        end do
+      end do
+    end do
+    call write_netcdf_3d(filename, varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
+
+    varname = "OrgM"
+    varunit = "mmol m-3"
+    call write_netcdf_3d(filename, varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
+    do k = 1, sdzdim
+      do j = 1, nydim
+        do i = 1, nxdim
+          ij = i + (j - 1) * nxdim
+          vard4d(i, j, k, 1) = sdtx(ij, k, 2)
+        end do
+      end do
+    end do
+
+    varname = "CaCO3"
+    varunit = "mmol m-3"
+    call write_netcdf_3d(filename, varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
+    do k = 1, sdzdim
+      do j = 1, nydim
+        do i = 1, nxdim
+          ij = i + (j - 1) * nxdim
+          vard4d(i, j, k, 1) = sdtx(ij, k, 3)
+        end do
+      end do
+    end do
+
+    varname = "SiO2"
+    varunit = "mmol m-3"
+    call write_netcdf_3d(filename, varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
+    do k = 1, sdzdim
+      do j = 1, nydim
+        do i = 1, nxdim
+          ij = i + (j - 1) * nxdim
+          vard4d(i, j, k, 1) = sdtx(ij, k, 4)
+        end do
+      end do
+    end do
+
+    varname = "Agetracer"
+    varunit = "mmol m-3"
+    call write_netcdf_3d(filename, varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
+    do k = 1, sdzdim
+      do j = 1, nydim
+        do i = 1, nxdim
+          ij = i + (j - 1) * nxdim
+          vard4d(i, j, k, 1) = sdtx(ij, k, 5)
+        end do
+      end do
+    end do
+
+    varname = "Phosphate"
+    varunit = "mmol m-3"
+    call write_netcdf_3d(filename, varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
+    do k = 1, sdzdim
+      do j = 1, nydim
+        do i = 1, nxdim
+          ij = i + (j - 1) * nxdim
+          vard4d(i, j, k, 1) = sdtx(ij, k, 6)
+        end do
+      end do
+    end do
+
+    varname = "DIC"
+    varunit = "mmol m-3"
+    call write_netcdf_3d(filename, varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
+    do k = 1, sdzdim
+      do j = 1, nydim
+        do i = 1, nxdim
+          ij = i + (j - 1) * nxdim
+          vard4d(i, j, k, 1) = sdtx(ij, k, 7)
+        end do
+      end do
+    end do
+
+    varname = "Alkalinity"
+    varunit = "mmol m-3"
+    call write_netcdf_3d(filename, varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
+    do k = 1, sdzdim
+      do j = 1, nydim
+        do i = 1, nxdim
+          ij = i + (j - 1) * nxdim
+          vard4d(i, j, k, 1) = sdtx(ij, k, 8)
+        end do
+      end do
+    end do
+
+    varname = "Silicate"
+    varunit = "mmol m-3"
+    call write_netcdf_3d(filename, varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
+    do k = 1, sdzdim
+      do j = 1, nydim
+        do i = 1, nxdim
+          ij = i + (j - 1) * nxdim
+          vard4d(i, j, k, 1) = sdtx(ij, k, 9)
+        end do
+      end do
+    end do
+
+    varname = "Oxygen"
+    varunit = "mmol m-3"
+    call write_netcdf_3d(filename, varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
+    do k = 1, sdzdim
+      do j = 1, nydim
+        do i = 1, nxdim
+          ij = i + (j - 1) * nxdim
+          vard4d(i, j, k, 1) = sdtx(ij, k, 10)
+        end do
+      end do
+    end do
+
+    !-- Synchronize all processes --
+    call mpi_barrier(mpi_comm_world, ierr)
+
+    !-- Free memory for variables --
+    if (allocated(vard3d)) then
+      deallocate(vard3d)
+    end if
+    if (allocated(vard4d)) then
+      deallocate(vard4d)
+    end if
+
+    write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "'-- Finised writing Sediment RESTART file        --'"
+    write(nfstdo, *) "'--------------------------------------------------'"
+
+  end subroutine digda_write_restart
+
+  subroutine digda_read_bottom_forcing(bdep, bfrc)
+
+    double precision, dimension(nxydim), intent(out) :: bdep
+    double precision, dimension(nxydim, benfdm), intent(out) :: bfrc
+
+    double precision, dimension(nxdim, nydim) :: omask
+
+    integer :: ios
+
+    write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "'-- Started reading Sed-Water boundary forcing   --'"
     write(nfstdo, *) "'--------------------------------------------------'"
     rewind(nfparm)
     read(nfparm, NML=nmocbc, IOSTAT=ios)
@@ -222,7 +534,7 @@ contains
     write(nfstdo, *) "'-- Finished reading Sed-Water boundary forcing  --'"
     write(nfstdo, *) "'--------------------------------------------------'"
 
-  end subroutine digda_read_data
+  end subroutine digda_read_bottom_forcing
 
   subroutine digda_write_data()
 
@@ -233,7 +545,7 @@ contains
     write(nfstdo, *) "'--------------------------------------------------'"
 
     !-- Allocate the array with appropriate dimensions --
-    allocate(vard3d(nxdim, nydim, sdzdim, 1))
+    allocate(vard4d(nxdim, nydim, sdzdim, 1))
 
   ! do k = 1, sdzdim
   !   do j = 1, nydim
@@ -369,6 +681,9 @@ contains
     ! Free memory for variables
     if (allocated(vard3d)) then
       deallocate(vard3d)
+    end if
+    if (allocated(vard4d)) then
+      deallocate(vard4d)
     end if
 
     write(nfstdo, *) "'--------------------------------------------------'"

@@ -66,7 +66,7 @@ contains
       if (cdcn) then
 
       do k = skst, sken
-         eal(k) = ( phi(k) / ts )
+         eal(k) = ( phi(k) / tssec )
          ebe(k) = ( ( phii(k)   * dei(k)   ) &
      &            / ( 2.0d0 * dlz(k) * dlzi(k)   ) )
          ega(k) = ( ( phii(k+1) * dei(k+1) ) &
@@ -125,7 +125,7 @@ contains
       if (cdii) then
 
       do k = skst, sken
-         eal(k) = ( phi(k) / ts )
+         eal(k) = ( phi(k) / tssec )
          ebe(k) = ( ( phii(k)   * dei(k)   ) &
      &            / ( dlz(k) * dlzi(k)   ) )
          ega(k) = ( ( phii(k+1) * dei(k+1) ) &
@@ -208,7 +208,7 @@ contains
       if (cdcn) then
 
       do k = skst, sken
-         eal(k) = ( phi(k) / ts )
+         eal(k) = ( phi(k) / tssec )
          ebe(k) = ( ( phii(k)   * dei(k)   ) &
      &            / ( 2.0d0 * dlz(k) * dlzi(k)   ) )
          ega(k) = ( ( phii(k+1) * dei(k+1) ) &
@@ -270,7 +270,7 @@ contains
       if (cdii) then
 
       do k = skst, sken
-         eal(k) = ( phi(k) / ts )
+         eal(k) = ( phi(k) / tssec )
          ebe(k) = ( ( phii(k)   * dei(k)   ) &
      &            / ( dlz(k) * dlzi(k)   ) )
          ega(k) = ( ( phii(k+1) * dei(k+1) ) &

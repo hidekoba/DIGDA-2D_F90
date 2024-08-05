@@ -6,7 +6,8 @@ module module_digda_grid
   ! Declaration of parameters and variables
   integer, parameter :: benfdm = 14
   ! cla,pom,car,opa,age,tem,sal,nit,dic,alk,sil,do2,13dic,14dic
-  integer, parameter :: sedtdm = 16
+  integer, parameter :: sedtdm = 10
+ !integer, parameter :: sedtdm = 16
   ! scla,spom,scar,sopa,sage,cnit,cdic,calk,csil,cdo2,s13pom,s13car,c13dic,s14pom,s14car,c14dic
 
   ! Vertical grid settings
@@ -105,13 +106,16 @@ module module_digda_grid
  !integer, parameter :: nydim = 180
  !integer, parameter :: nzdim = 44
 
-  !-- Grid_2160x1080 --
+ !!-- Grid_2160x1080 --
  !integer, parameter :: nxdim = 2160
  !integer, parameter :: nydim = 1080
  !integer, parameter :: nzdim = 44
 
   character(len=100) :: bound_dir = 'not-specified/'
   namelist /nmocbc/ bound_dir
+  character(len=100) :: init_dir = 'not-specified/'
+  character(len=100) :: rstt_dir = 'not-specified/'
+  namelist /nmocrt/ init_dir, rstt_dir
 
   integer, parameter :: nxydim = nxdim * nydim
   integer, parameter :: nx = nxdim
