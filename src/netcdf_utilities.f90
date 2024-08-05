@@ -111,10 +111,10 @@ contains
       stop
     endif
 
-!   ! Deallocate arrays if they are already allocated
-!   if (allocated(xvalues)) deallocate(xvalues)
-!   if (allocated(yvalues)) deallocate(yvalues)
-!   if (allocated(var)) deallocate(var)
+   !! Deallocate arrays if they are already allocated
+   !if (allocated(xvalues)) deallocate(xvalues)
+   !if (allocated(yvalues)) deallocate(yvalues)
+   !if (allocated(var)) deallocate(var)
 
   end subroutine read_netcdf_2d
 
@@ -240,11 +240,11 @@ contains
       stop
     endif
 
-    ! Deallocate arrays if they are already allocated
-    if (allocated(xvalues)) deallocate(xvalues)
-    if (allocated(yvalues)) deallocate(yvalues)
-    if (allocated(zvalues)) deallocate(zvalues)
-    if (allocated(var)) deallocate(var)
+   !! Deallocate arrays if they are already allocated
+   !if (allocated(xvalues)) deallocate(xvalues)
+   !if (allocated(yvalues)) deallocate(yvalues)
+   !if (allocated(zvalues)) deallocate(zvalues)
+   !if (allocated(var)) deallocate(var)
 
   end subroutine read_netcdf_3d
 
@@ -393,12 +393,12 @@ contains
       stop
     endif
 
-    ! Deallocate arrays if they are already allocated
-    if (allocated(xvalues)) deallocate(xvalues)
-    if (allocated(yvalues)) deallocate(yvalues)
-    if (allocated(zvalues)) deallocate(zvalues)
-    if (allocated(tvalues)) deallocate(tvalues)
-    if (allocated(var)) deallocate(var)
+   !! Deallocate arrays if they are already allocated
+   !if (allocated(xvalues)) deallocate(xvalues)
+   !if (allocated(yvalues)) deallocate(yvalues)
+   !if (allocated(zvalues)) deallocate(zvalues)
+   !if (allocated(tvalues)) deallocate(tvalues)
+   !if (allocated(var)) deallocate(var)
 
   end subroutine read_netcdf_4d
 
