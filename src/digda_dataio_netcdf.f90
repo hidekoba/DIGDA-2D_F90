@@ -196,6 +196,8 @@ contains
     double precision, dimension(:), allocatable, intent(in) :: depth_values
     integer(kind=4), dimension(:), allocatable, intent(in) :: time_values
 
+    character(len=100)            :: filenames(sedtdm)
+
     integer :: ios
 
     !-- Allocate the array with appropriate dimensions --
@@ -211,6 +213,13 @@ contains
     write(nfstdo, *) "'--------------------------------------------------'"
     write(nfstdo, *) "  write restart file: ", filename
     write(nfstdo, *) "'--------------------------------------------------'"
+
+    if ( myrank == iroot ) then
+
+    filenames(1) = trim(rstt_dir)//"/SEDTRR01.nc"
+    write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "  write restart file: ", filenames(1)
+    write(nfstdo, *) "'--------------------------------------------------'"
     varname = "Clay"
     varunit = "mmol m-3"
     do k = 1, sdzdim
@@ -221,11 +230,16 @@ contains
         end do
       end do
     end do
-    call write_restart(filename, varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
+   !call write_restart(filename, varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
+    call write_netcdf_3d(filenames(1), varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
 
+    filenames(2) = trim(rstt_dir)//"/SEDTRR02.nc"
+    write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "  write restart file: ", filenames(2)
+    write(nfstdo, *) "'--------------------------------------------------'"
     varname = "OrgM"
     varunit = "mmol m-3"
-    call write_restart(filename, varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
+    call write_netcdf_3d(filenames(2), varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
     do k = 1, sdzdim
       do j = 1, nydim
         do i = 1, nxdim
@@ -235,9 +249,13 @@ contains
       end do
     end do
 
+    filenames(3) = trim(rstt_dir)//"/SEDTRR03.nc"
+    write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "  write restart file: ", filenames(3)
+    write(nfstdo, *) "'--------------------------------------------------'"
     varname = "CaCO3"
     varunit = "mmol m-3"
-    call write_restart(filename, varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
+    call write_netcdf_3d(filenames(3), varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
     do k = 1, sdzdim
       do j = 1, nydim
         do i = 1, nxdim
@@ -247,9 +265,13 @@ contains
       end do
     end do
 
+    filenames(4) = trim(rstt_dir)//"/SEDTRR04.nc"
+    write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "  write restart file: ", filenames(4)
+    write(nfstdo, *) "'--------------------------------------------------'"
     varname = "SiO2"
     varunit = "mmol m-3"
-    call write_restart(filename, varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
+    call write_netcdf_3d(filenames(4), varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
     do k = 1, sdzdim
       do j = 1, nydim
         do i = 1, nxdim
@@ -259,9 +281,13 @@ contains
       end do
     end do
 
+    filenames(5) = trim(rstt_dir)//"/SEDTRR05.nc"
+    write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "  write restart file: ", filenames(5)
+    write(nfstdo, *) "'--------------------------------------------------'"
     varname = "Agetracer"
     varunit = "mmol m-3"
-    call write_restart(filename, varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
+    call write_netcdf_3d(filenames(5), varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
     do k = 1, sdzdim
       do j = 1, nydim
         do i = 1, nxdim
@@ -271,9 +297,13 @@ contains
       end do
     end do
 
+    filenames(6) = trim(rstt_dir)//"/SEDTRR06.nc"
+    write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "  write restart file: ", filenames(6)
+    write(nfstdo, *) "'--------------------------------------------------'"
     varname = "Phosphate"
     varunit = "mmol m-3"
-    call write_restart(filename, varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
+    call write_netcdf_3d(filenames(6), varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
     do k = 1, sdzdim
       do j = 1, nydim
         do i = 1, nxdim
@@ -283,9 +313,13 @@ contains
       end do
     end do
 
+    filenames(7) = trim(rstt_dir)//"/SEDTRR07.nc"
+    write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "  write restart file: ", filenames(7)
+    write(nfstdo, *) "'--------------------------------------------------'"
     varname = "DIC"
     varunit = "mmol m-3"
-    call write_restart(filename, varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
+    call write_netcdf_3d(filenames(7), varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
     do k = 1, sdzdim
       do j = 1, nydim
         do i = 1, nxdim
@@ -295,9 +329,13 @@ contains
       end do
     end do
 
+    filenames(8) = trim(rstt_dir)//"/SEDTRR08.nc"
+    write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "  write restart file: ", filenames(8)
+    write(nfstdo, *) "'--------------------------------------------------'"
     varname = "Alkalinity"
     varunit = "mmol m-3"
-    call write_restart(filename, varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
+    call write_netcdf_3d(filenames(8), varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
     do k = 1, sdzdim
       do j = 1, nydim
         do i = 1, nxdim
@@ -307,9 +345,13 @@ contains
       end do
     end do
 
+    filenames(9) = trim(rstt_dir)//"/SEDTRR09.nc"
+    write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "  write restart file: ", filenames(9)
+    write(nfstdo, *) "'--------------------------------------------------'"
     varname = "Silicate"
     varunit = "mmol m-3"
-    call write_restart(filename, varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
+    call write_netcdf_3d(filenames(9), varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
     do k = 1, sdzdim
       do j = 1, nydim
         do i = 1, nxdim
@@ -319,9 +361,13 @@ contains
       end do
     end do
 
+    filenames(10) = trim(rstt_dir)//"/SEDTRR10.nc"
+    write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "  write restart file: ", filenames(10)
+    write(nfstdo, *) "'--------------------------------------------------'"
     varname = "Oxygen"
     varunit = "mmol m-3"
-    call write_restart(filename, varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
+    call write_netcdf_3d(filenames(10), varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
     do k = 1, sdzdim
       do j = 1, nydim
         do i = 1, nxdim
@@ -330,6 +376,10 @@ contains
         end do
       end do
     end do
+
+   !call combine_multiple_netcdf_files(filenames, filename)
+
+    end if
 
     !-- Synchronize all processes --
     call mpi_barrier(mpi_comm_world, ierr)

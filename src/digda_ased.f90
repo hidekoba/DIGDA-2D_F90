@@ -31,10 +31,6 @@ program digda_ased
 
   integer :: ios
 
-  write(nfstdo, *) "'--------------------------------------------------'"
-  write(nfstdo, *) "'-- DIGDA MAIN: Started                          --'"
-  write(nfstdo, *) "'--------------------------------------------------'"
-
   !-- Initialize MPI --
   if (use_mpi) then
     call initialize_digda_mpi
@@ -63,6 +59,10 @@ program digda_ased
  !else
  !  write(nfstdo, *) 'Run name :'//trim(crun)
  !end if
+  write(nfstdo, *) "'--------------------------------------------------'"
+
+  write(nfstdo, *) "'--------------------------------------------------'"
+  write(nfstdo, *) "'-- DIGDA MAIN: Started                          --'"
   write(nfstdo, *) "'--------------------------------------------------'"
 
 ! open(nfparm, FILE="PARAMET", STATUS="UNKNOWN")
