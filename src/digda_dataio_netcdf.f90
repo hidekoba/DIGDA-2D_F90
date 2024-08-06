@@ -230,7 +230,6 @@ contains
         end do
       end do
     end do
-   !call write_restart(filename, varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
     call write_netcdf_3d(filenames(1), varname, varunit, vard4d, lon_values, lat_values, depth_values, time_values)
 
     filenames(2) = trim(rstt_dir)//"/SEDTRR02.nc"
