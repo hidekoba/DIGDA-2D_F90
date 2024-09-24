@@ -126,7 +126,7 @@ contains
     double precision :: cdc13(nxy, sdz),  cdc14(nxy, sdz)
     double precision :: cco32(nxy, sdz)
     double precision :: satco32(nxy)
-    double precision :: satsil(nxy,sdz)
+    double precision :: satsil(nxy, sdz)
     double precision :: cnitg(nxydim, sdzdim)
     double precision :: cdicg(nxydim, sdzdim)
     double precision :: calkg(nxydim, sdzdim)
@@ -138,7 +138,7 @@ contains
     double precision :: cdc14g(nxydim, sdzdim)
     double precision :: cco32g(nxydim, sdzdim)
     double precision :: satco32g(nxydim)
-    double precision :: satsilg(nxydim,sdzdim)
+    double precision :: satsilg(nxydim, sdzdim)
 
     ! Concentration (bottom water)
     !   temperature [C], salinity [psu], the others [mMol/m^3]
@@ -195,6 +195,11 @@ contains
     double precision :: fi14pom(nxy), fo14pom(nxy)
     double precision :: fi14car(nxy), fo14car(nxy)
 
+    double precision :: fiocla(nxy)
+    double precision :: fiopom(nxy)
+    double precision :: fiocar(nxy)
+    double precision :: fioopa(nxy)
+
     double precision :: ficlag(nxydim),   foclag(nxydim)
     double precision :: fipomg(nxydim),   fopomg(nxydim)
     double precision :: ficarg(nxydim),   focarg(nxydim)
@@ -204,6 +209,11 @@ contains
     double precision :: fi13carg(nxydim), fo13carg(nxydim)
     double precision :: fi14pomg(nxydim), fo14pomg(nxydim)
     double precision :: fi14carg(nxydim), fo14carg(nxydim)
+
+    double precision :: fioclag(nxydim)
+    double precision :: fiopomg(nxydim)
+    double precision :: fiocarg(nxydim)
+    double precision :: fioopag(nxydim)
 
     ! Sea-bottom Flux [mMol/m^3*cm/s]
     double precision :: finit(nxy),   fonit(nxy)
@@ -249,24 +259,6 @@ contains
     integer, allocatable :: nrcvct3d(:),  ndispt3d(:)
     integer, allocatable :: nrcvcw3d(:),  ndispw3d(:)
     double precision, allocatable :: vardt3d(:), vardt2d(:), vardw3d(:)
-
-   !double precision, allocatable :: DUMMY01(:), DUMMY02(:), DUMMY03(:)
-   !double precision, allocatable :: DUMMY04(:), DUMMY05(:), DUMMY06(:)
-   !double precision, allocatable :: DUMMY07(:), DUMMY08(:), DUMMY09(:)
-   !double precision, allocatable :: DUMMY11(:), DUMMY12(:), DUMMY13(:)
-   !double precision, allocatable :: DUMMY14(:), DUMMY15(:), DUMMY16(:)
-   !double precision, allocatable :: DUMMY17(:), DUMMY18(:), DUMMY19(:)
-   !double precision, allocatable :: DUMMY20(:)
-   !double precision, allocatable :: DUMMY21(:), DUMMY22(:), DUMMY23(:)
-   !double precision, allocatable :: DUMMY31(:), DUMMY32(:), DUMMY33(:)
-   !double precision, allocatable :: DUMMY34(:), DUMMY35(:), DUMMY36(:)
-   !double precision, allocatable :: DUMMY37(:), DUMMY38(:)
-   !double precision, allocatable :: DUMMY41(:), DUMMY42(:), DUMMY43(:)
-   !double precision, allocatable :: DUMMY44(:), DUMMY45(:), DUMMY46(:)
-   !double precision, allocatable :: DUMMY47(:), DUMMY48(:)
-   !double precision, allocatable :: DUMMY51(:), DUMMY52(:), DUMMY53(:)
-   !double precision, allocatable :: DUMMY54(:), DUMMY55(:), DUMMY56(:)
-   !double precision, allocatable :: DUMMY57(:), DUMMY58(:)
 
     ! etc
     character(len=100) :: filename, varname, varunit
@@ -1007,6 +999,12 @@ end if
          foopa(ij) = fosil(ij)
       end do
 
+      do ij = ijtstr, ijtend
+         fiopom(ij) = fipom(ij) - fopom(ij)
+         fiocar(ij) = ficar(ij) - focar(ij)
+         fioopa(ij) = fiopa(ij) - foopa(ij)
+      end do
+
 !     -- Copy the array for the next time step --
 
 if (use_mpi) then
@@ -1121,7 +1119,6 @@ if (use_mpi) then
 
      !sdofirst = .false.
      !end if
-
 
       call mpi_gatherv( scla,    nsndct3d, mpi_real8, &
      &                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
@@ -1273,193 +1270,237 @@ if (use_mpi) then
          end do
       end if
 
-   !! call mpi_gatherv( cco32,   nsndct3d, mpi_real8, &
-   !!&                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
-   !!&                  iroot,   mpi_comm_world, ierr )
-   !! if ( myrank .eq. iroot ) then
-   !!    do irank = 0, nprocs-1
-   !!       ijkg = ndispt3d(irank)
-   !!       do k = skst, sken
-   !!          do ij = jjstr(irank), jjend(irank)
-   !!             ijkg = ijkg + 1
-   !!             cco32g(ij, k) = vardt3d(ijkg)
-   !!          end do
-   !!       end do
-   !!    end do
-   !! end if
+      call mpi_gatherv( cco32,   nsndct3d, mpi_real8, &
+     &                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispt3d(irank)
+            do k = skst, sken
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  cco32g(ij, k) = vardt3d(ijkg)
+               end do
+            end do
+         end do
+      end if
 
-   !! call mpi_gatherv( satsil,  nsndct3d, mpi_real8, &
-   !!&                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
-   !!&                  iroot,   mpi_comm_world, ierr )
-   !! if ( myrank .eq. iroot ) then
-   !!    do irank = 0, nprocs-1
-   !!       ijkg = ndispt3d(irank)
-   !!       do k = skst, sken
-   !!          do ij = jjstr(irank), jjend(irank)
-   !!             ijkg = ijkg + 1
-   !!             satsilg(ij, k) = vardt3d(ijkg)
-   !!          end do
-   !!       end do
-   !!    end do
-   !! end if
+      call mpi_gatherv( satsil,  nsndct3d, mpi_real8, &
+     &                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispt3d(irank)
+            do k = skst, sken
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  satsilg(ij, k) = vardt3d(ijkg)
+               end do
+            end do
+         end do
+      end if
 
-   !! call mpi_gatherv( satco32, nsndct2d, mpi_real8, &
-   !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
-   !!&                  iroot,   mpi_comm_world, ierr )
-   !! if ( myrank .eq. iroot ) then
-   !!    do irank = 0, nprocs-1
-   !!       do ij = jjstr(irank), jjend(irank)
-   !!          satco32g(ij) = vardt2d(ij)
-   !!       end do
-   !!    end do
-   !! end if
+      call mpi_gatherv( satco32, nsndct2d, mpi_real8, &
+     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            do ij = jjstr(irank), jjend(irank)
+               satco32g(ij) = vardt2d(ij)
+            end do
+         end do
+      end if
 
-   !! call mpi_gatherv( w,       nsndct3d, mpi_real8, &
-   !!&                  vardt3d, nrcvcw3d, ndispw3d, mpi_real8, &
-   !!&                  iroot,   mpi_comm_world, ierr )
-   !! if ( myrank .eq. iroot ) then
-   !!    do irank = 0, nprocs-1
-   !!       ijkg = ndispw3d(irank)
-   !!       do k = skst, sken+1
-   !!          do ij = jjstr(irank), jjend(irank)
-   !!             ijkg = ijkg + 1
-   !!             wg(ij, k) = vardt3d(ijkg)
-   !!          end do
-   !!       end do
-   !!    end do
-   !! end if
+      call mpi_gatherv( w,       nsndcw3d, mpi_real8, &
+     &                  vardw3d, nrcvcw3d, ndispw3d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispw3d(irank)
+            do k = skst, sken+1
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  wg(ij, k) = vardw3d(ijkg)
+               end do
+            end do
+         end do
+      end if
 
-   !! call mpi_gatherv( ficla,   nsndct2d, mpi_real8, &
-   !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
-   !!&                  iroot,   mpi_comm_world, ierr )
-   !! if ( myrank .eq. iroot ) then
-   !!    do irank = 0, nprocs-1
-   !!       do ij = jjstr(irank), jjend(irank)
-   !!          ficlag(ij) = vardt2d(ij)
-   !!       end do
-   !!    end do
-   !! end if
+      call mpi_gatherv( ficla,   nsndct2d, mpi_real8, &
+     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            do ij = jjstr(irank), jjend(irank)
+               ficlag(ij) = vardt2d(ij)
+            end do
+         end do
+      end if
 
-   !! call mpi_gatherv( fipom,   nsndct2d, mpi_real8, &
-   !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
-   !!&                  iroot,   mpi_comm_world, ierr )
-   !! if ( myrank .eq. iroot ) then
-   !!    do irank = 0, nprocs-1
-   !!       do ij = jjstr(irank), jjend(irank)
-   !!          fipomg(ij) = vardt2d(ij)
-   !!       end do
-   !!    end do
-   !! end if
+      call mpi_gatherv( fipom,   nsndct2d, mpi_real8, &
+     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            do ij = jjstr(irank), jjend(irank)
+               fipomg(ij) = vardt2d(ij)
+            end do
+         end do
+      end if
 
-   !! call mpi_gatherv( ficar,   nsndct2d, mpi_real8, &
-   !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
-   !!&                  iroot,   mpi_comm_world, ierr )
-   !! if ( myrank .eq. iroot ) then
-   !!    do irank = 0, nprocs-1
-   !!       do ij = jjstr(irank), jjend(irank)
-   !!          ficarg(ij) = vardt2d(ij)
-   !!       end do
-   !!    end do
-   !! end if
+      call mpi_gatherv( ficar,   nsndct2d, mpi_real8, &
+     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            do ij = jjstr(irank), jjend(irank)
+               ficarg(ij) = vardt2d(ij)
+            end do
+         end do
+      end if
 
-   !! call mpi_gatherv( fiopa,   nsndct2d, mpi_real8, &
-   !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
-   !!&                  iroot,   mpi_comm_world, ierr )
-   !! if ( myrank .eq. iroot ) then
-   !!    do irank = 0, nprocs-1
-   !!       do ij = jjstr(irank), jjend(irank)
-   !!          fiopag(ij) = vardt2d(ij)
-   !!       end do
-   !!    end do
-   !! end if
+      call mpi_gatherv( fiopa,   nsndct2d, mpi_real8, &
+     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            do ij = jjstr(irank), jjend(irank)
+               fiopag(ij) = vardt2d(ij)
+            end do
+         end do
+      end if
 
-   !! call mpi_gatherv( focla,   nsndct2d, mpi_real8, &
-   !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
-   !!&                  iroot,   mpi_comm_world, ierr )
-   !! if ( myrank .eq. iroot ) then
-   !!    do irank = 0, nprocs-1
-   !!       do ij = jjstr(irank), jjend(irank)
-   !!          foclag(ij) = vardt2d(ij)
-   !!       end do
-   !!    end do
-   !! end if
+ !!!! call mpi_gatherv( focla,   nsndct2d, mpi_real8, &
+ !!!!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+ !!!!&                  iroot,   mpi_comm_world, ierr )
+ !!!! if ( myrank .eq. iroot ) then
+ !!!!    do irank = 0, nprocs-1
+ !!!!       do ij = jjstr(irank), jjend(irank)
+ !!!!          foclag(ij) = vardt2d(ij)
+ !!!!       end do
+ !!!!    end do
+ !!!! end if
 
-   !! call mpi_gatherv( fopom,   nsndct2d, mpi_real8, &
-   !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
-   !!&                  iroot,   mpi_comm_world, ierr )
-   !! if ( myrank .eq. iroot ) then
-   !!    do irank = 0, nprocs-1
-   !!       do ij = jjstr(irank), jjend(irank)
-   !!          fopomg(ij) = vardt2d(ij)
-   !!       end do
-   !!    end do
-   !! end if
+      call mpi_gatherv( fopom,   nsndct2d, mpi_real8, &
+     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            do ij = jjstr(irank), jjend(irank)
+               fopomg(ij) = vardt2d(ij)
+            end do
+         end do
+      end if
 
-   !! call mpi_gatherv( focar,   nsndct2d, mpi_real8, &
-   !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
-   !!&                  iroot,   mpi_comm_world, ierr )
-   !! if ( myrank .eq. iroot ) then
-   !!    do irank = 0, nprocs-1
-   !!       do ij = jjstr(irank), jjend(irank)
-   !!          focarg(ij) = vardt2d(ij)
-   !!       end do
-   !!    end do
-   !! end if
+      call mpi_gatherv( focar,   nsndct2d, mpi_real8, &
+     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            do ij = jjstr(irank), jjend(irank)
+               focarg(ij) = vardt2d(ij)
+            end do
+         end do
+      end if
 
-   !! call mpi_gatherv( foopa,   nsndct2d, mpi_real8, &
-   !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
-   !!&                  iroot,   mpi_comm_world, ierr )
-   !! if ( myrank .eq. iroot ) then
-   !!    do irank = 0, nprocs-1
-   !!       do ij = jjstr(irank), jjend(irank)
-   !!          foopag(ij) = vardt2d(ij)
-   !!       end do
-   !!    end do
-   !! end if
+      call mpi_gatherv( foopa,   nsndct2d, mpi_real8, &
+     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            do ij = jjstr(irank), jjend(irank)
+               foopag(ij) = vardt2d(ij)
+            end do
+         end do
+      end if
 
-   !! call mpi_gatherv( bfcla,   nsndct2d, mpi_real8, &
-   !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
-   !!&                  iroot,   mpi_comm_world, ierr )
-   !! if ( myrank .eq. iroot ) then
-   !!    do irank = 0, nprocs-1
-   !!       do ij = jjstr(irank), jjend(irank)
-   !!          bfclag(ij) = vardt2d(ij)
-   !!       end do
-   !!    end do
-   !! end if
+ !!!! call mpi_gatherv( fiocla,  nsndct2d, mpi_real8, &
+ !!!!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+ !!!!&                  iroot,   mpi_comm_world, ierr )
+ !!!! if ( myrank .eq. iroot ) then
+ !!!!    do irank = 0, nprocs-1
+ !!!!       do ij = jjstr(irank), jjend(irank)
+ !!!!          fioclag(ij) = vardt2d(ij)
+ !!!!       end do
+ !!!!    end do
+ !!!! end if
 
-   !! call mpi_gatherv( bfpom,   nsndct2d, mpi_real8, &
-   !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
-   !!&                  iroot,   mpi_comm_world, ierr )
-   !! if ( myrank .eq. iroot ) then
-   !!    do irank = 0, nprocs-1
-   !!       do ij = jjstr(irank), jjend(irank)
-   !!          bfpomg(ij) = vardt2d(ij)
-   !!       end do
-   !!    end do
-   !! end if
+      call mpi_gatherv( fiopom,  nsndct2d, mpi_real8, &
+     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            do ij = jjstr(irank), jjend(irank)
+               fiopomg(ij) = vardt2d(ij)
+            end do
+         end do
+      end if
 
-   !! call mpi_gatherv( bfcar,   nsndct2d, mpi_real8, &
-   !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
-   !!&                  iroot,   mpi_comm_world, ierr )
-   !! if ( myrank .eq. iroot ) then
-   !!    do irank = 0, nprocs-1
-   !!       do ij = jjstr(irank), jjend(irank)
-   !!          bfcarg(ij) = vardt2d(ij)
-   !!       end do
-   !!    end do
-   !! end if
+      call mpi_gatherv( fiocar,  nsndct2d, mpi_real8, &
+     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            do ij = jjstr(irank), jjend(irank)
+               fiocarg(ij) = vardt2d(ij)
+            end do
+         end do
+      end if
 
-   !! call mpi_gatherv( bfopa,   nsndct2d, mpi_real8, &
-   !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
-   !!&                  iroot,   mpi_comm_world, ierr )
-   !! if ( myrank .eq. iroot ) then
-   !!    do irank = 0, nprocs-1
-   !!       do ij = jjstr(irank), jjend(irank)
-   !!          bfopag(ij) = vardt2d(ij)
-   !!       end do
-   !!    end do
-   !! end if
+      call mpi_gatherv( fioopa,  nsndct2d, mpi_real8, &
+     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            do ij = jjstr(irank), jjend(irank)
+               fioopag(ij) = vardt2d(ij)
+            end do
+         end do
+      end if
+
+      call mpi_gatherv( bfcla,   nsndct2d, mpi_real8, &
+     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            do ij = jjstr(irank), jjend(irank)
+               bfclag(ij) = vardt2d(ij)
+            end do
+         end do
+      end if
+
+      call mpi_gatherv( bfpom,   nsndct2d, mpi_real8, &
+     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            do ij = jjstr(irank), jjend(irank)
+               bfpomg(ij) = vardt2d(ij)
+            end do
+         end do
+      end if
+
+      call mpi_gatherv( bfcar,   nsndct2d, mpi_real8, &
+     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            do ij = jjstr(irank), jjend(irank)
+               bfcarg(ij) = vardt2d(ij)
+            end do
+         end do
+      end if
+
+      call mpi_gatherv( bfopa,   nsndct2d, mpi_real8, &
+     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            do ij = jjstr(irank), jjend(irank)
+               bfopag(ij) = vardt2d(ij)
+            end do
+         end do
+      end if
 
       if ( calc13 ) then
 
@@ -1508,87 +1549,86 @@ if (use_mpi) then
          end do
       end if
 
-   !! call mpi_gatherv( cdc13,   nsndct3d, mpi_real8, &
-   !!&                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
-   !!&                  iroot,   mpi_comm_world, ierr )
-   !! if ( myrank .eq. iroot ) then
-   !!    do irank = 0, nprocs-1
-   !!       ijkg = ndispt3d(irank)
-   !!       do k = skst, sken
-   !!          do ij = jjstr(irank), jjend(irank)
-   !!             ijkg = ijkg + 1
-   !!             cdc13g(ij, k) = vardt3d(ijkg)
-   !!          end do
-   !!       end do
-   !!    end do
-   !! end if
+      call mpi_gatherv( cdc13,   nsndct3d, mpi_real8, &
+     &                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispt3d(irank)
+            do k = skst, sken
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  cdc13g(ij, k) = vardt3d(ijkg)
+               end do
+            end do
+         end do
+      end if
 
+!     call mpi_gatherv( fi13pom, nsndct2d, mpi_real8, &
+!    &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+!    &                  iroot,   mpi_comm_world, ierr )
+!     if ( myrank .eq. iroot ) then
+!        do irank = 0, nprocs-1
+!           do ij = jjstr(irank), jjend(irank)
+!              fi13pomg(ij) = vardt2d(ij)
+!           end do
+!        end do
+!     end if
 
-   !! call mpi_gatherv( fi13pom, nsndct2d, mpi_real8, &
-   !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
-   !!&                  iroot,   mpi_comm_world, ierr )
-   !! if ( myrank .eq. iroot ) then
-   !!    do irank = 0, nprocs-1
-   !!       do ij = jjstr(irank), jjend(irank)
-   !!          fi13pomg(ij) = vardt2d(ij)
-   !!       end do
-   !!    end do
-   !! end if
+!     call mpi_gatherv( fi13car, nsndct2d, mpi_real8, &
+!    &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+!    &                  iroot,   mpi_comm_world, ierr )
+!     if ( myrank .eq. iroot ) then
+!        do irank = 0, nprocs-1
+!           do ij = jjstr(irank), jjend(irank)
+!              fi13carg(ij) = vardt2d(ij)
+!           end do
+!        end do
+!     end if
 
-   !! call mpi_gatherv( fi13car, nsndct2d, mpi_real8, &
-   !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
-   !!&                  iroot,   mpi_comm_world, ierr )
-   !! if ( myrank .eq. iroot ) then
-   !!    do irank = 0, nprocs-1
-   !!       do ij = jjstr(irank), jjend(irank)
-   !!          fi13carg(ij) = vardt2d(ij)
-   !!       end do
-   !!    end do
-   !! end if
+!     call mpi_gatherv( fo13pom, nsndct2d, mpi_real8, &
+!    &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+!    &                  iroot,   mpi_comm_world, ierr )
+!     if ( myrank .eq. iroot ) then
+!        do irank = 0, nprocs-1
+!           do ij = jjstr(irank), jjend(irank)
+!              fo13pomg(ij) = vardt2d(ij)
+!           end do
+!        end do
+!     end if
 
-   !! call mpi_gatherv( fo13pom, nsndct2d, mpi_real8, &
-   !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
-   !!&                  iroot,   mpi_comm_world, ierr )
-   !! if ( myrank .eq. iroot ) then
-   !!    do irank = 0, nprocs-1
-   !!       do ij = jjstr(irank), jjend(irank)
-   !!          fo13pomg(ij) = vardt2d(ij)
-   !!       end do
-   !!    end do
-   !! end if
+!     call mpi_gatherv( fo13car, nsndct2d, mpi_real8, &
+!    &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+!    &                  iroot,   mpi_comm_world, ierr )
+!     if ( myrank .eq. iroot ) then
+!        do irank = 0, nprocs-1
+!           do ij = jjstr(irank), jjend(irank)
+!              fo13carg(ij) = vardt2d(ij)
+!           end do
+!        end do
+!     end if
 
-   !! call mpi_gatherv( fo13car, nsndct2d, mpi_real8, &
-   !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
-   !!&                  iroot,   mpi_comm_world, ierr )
-   !! if ( myrank .eq. iroot ) then
-   !!    do irank = 0, nprocs-1
-   !!       do ij = jjstr(irank), jjend(irank)
-   !!          fo13carg(ij) = vardt2d(ij)
-   !!       end do
-   !!    end do
-   !! end if
+!     call mpi_gatherv( bf13pom, nsndct2d, mpi_real8, &
+!    &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+!    &                  iroot,   mpi_comm_world, ierr )
+!     if ( myrank .eq. iroot ) then
+!        do irank = 0, nprocs-1
+!           do ij = jjstr(irank), jjend(irank)
+!              bf13pomg(ij) = vardt2d(ij)
+!           end do
+!        end do
+!     end if
 
-   !! call mpi_gatherv( bf13pom, nsndct2d, mpi_real8, &
-   !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
-   !!&                  iroot,   mpi_comm_world, ierr )
-   !! if ( myrank .eq. iroot ) then
-   !!    do irank = 0, nprocs-1
-   !!       do ij = jjstr(irank), jjend(irank)
-   !!          bf13pomg(ij) = vardt2d(ij)
-   !!       end do
-   !!    end do
-   !! end if
-
-   !! call mpi_gatherv( bf13car, nsndct2d, mpi_real8, &
-   !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
-   !!&                  iroot,   mpi_comm_world, ierr )
-   !! if ( myrank .eq. iroot ) then
-   !!    do irank = 0, nprocs-1
-   !!       do ij = jjstr(irank), jjend(irank)
-   !!          bf13carg(ij) = vardt2d(ij)
-   !!       end do
-   !!    end do
-   !! end if
+!     call mpi_gatherv( bf13car, nsndct2d, mpi_real8, &
+!    &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+!    &                  iroot,   mpi_comm_world, ierr )
+!     if ( myrank .eq. iroot ) then
+!        do irank = 0, nprocs-1
+!           do ij = jjstr(irank), jjend(irank)
+!              bf13carg(ij) = vardt2d(ij)
+!           end do
+!        end do
+!     end if
 
       end if
 
@@ -1639,87 +1679,86 @@ if (use_mpi) then
          end do
       end if
 
-   !! call mpi_gatherv( cdc14,   nsndct3d, mpi_real8, &
-   !!&                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
-   !!&                  iroot,   mpi_comm_world, ierr )
-   !! if ( myrank .eq. iroot ) then
-   !!    do irank = 0, nprocs-1
-   !!       ijkg = ndispt3d(irank)
-   !!       do k = skst, sken
-   !!          do ij = jjstr(irank), jjend(irank)
-   !!             ijkg = ijkg + 1
-   !!             cdc14g(ij, k) = vardt3d(ijkg)
-   !!          end do
-   !!       end do
-   !!    end do
-   !! end if
+      call mpi_gatherv( cdc14,   nsndct3d, mpi_real8, &
+     &                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispt3d(irank)
+            do k = skst, sken
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  cdc14g(ij, k) = vardt3d(ijkg)
+               end do
+            end do
+         end do
+      end if
 
+!     call mpi_gatherv( fi14pom, nsndct2d, mpi_real8, &
+!    &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+!    &                  iroot,   mpi_comm_world, ierr )
+!     if ( myrank .eq. iroot ) then
+!        do irank = 0, nprocs-1
+!           do ij = jjstr(irank), jjend(irank)
+!              fi14pomg(ij) = vardt2d(ij)
+!           end do
+!        end do
+!     end if
 
-   !! call mpi_gatherv( fi14pom, nsndct2d, mpi_real8, &
-   !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
-   !!&                  iroot,   mpi_comm_world, ierr )
-   !! if ( myrank .eq. iroot ) then
-   !!    do irank = 0, nprocs-1
-   !!       do ij = jjstr(irank), jjend(irank)
-   !!          fi14pomg(ij) = vardt2d(ij)
-   !!       end do
-   !!    end do
-   !! end if
+!     call mpi_gatherv( fi14car, nsndct2d, mpi_real8, &
+!    &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+!    &                  iroot,   mpi_comm_world, ierr )
+!     if ( myrank .eq. iroot ) then
+!        do irank = 0, nprocs-1
+!           do ij = jjstr(irank), jjend(irank)
+!              fi14carg(ij) = vardt2d(ij)
+!           end do
+!        end do
+!     end if
 
-   !! call mpi_gatherv( fi14car, nsndct2d, mpi_real8, &
-   !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
-   !!&                  iroot,   mpi_comm_world, ierr )
-   !! if ( myrank .eq. iroot ) then
-   !!    do irank = 0, nprocs-1
-   !!       do ij = jjstr(irank), jjend(irank)
-   !!          fi14carg(ij) = vardt2d(ij)
-   !!       end do
-   !!    end do
-   !! end if
+!     call mpi_gatherv( fo14pom, nsndct2d, mpi_real8, &
+!    &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+!    &                  iroot,   mpi_comm_world, ierr )
+!     if ( myrank .eq. iroot ) then
+!        do irank = 0, nprocs-1
+!           do ij = jjstr(irank), jjend(irank)
+!              fo14pomg(ij) = vardt2d(ij)
+!           end do
+!        end do
+!     end if
 
-   !! call mpi_gatherv( fo14pom, nsndct2d, mpi_real8, &
-   !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
-   !!&                  iroot,   mpi_comm_world, ierr )
-   !! if ( myrank .eq. iroot ) then
-   !!    do irank = 0, nprocs-1
-   !!       do ij = jjstr(irank), jjend(irank)
-   !!          fo14pomg(ij) = vardt2d(ij)
-   !!       end do
-   !!    end do
-   !! end if
+!     call mpi_gatherv( fo14car, nsndct2d, mpi_real8, &
+!    &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+!    &                  iroot,   mpi_comm_world, ierr )
+!     if ( myrank .eq. iroot ) then
+!        do irank = 0, nprocs-1
+!           do ij = jjstr(irank), jjend(irank)
+!              fo14carg(ij) = vardt2d(ij)
+!           end do
+!        end do
+!     end if
 
-   !! call mpi_gatherv( fo14car, nsndct2d, mpi_real8, &
-   !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
-   !!&                  iroot,   mpi_comm_world, ierr )
-   !! if ( myrank .eq. iroot ) then
-   !!    do irank = 0, nprocs-1
-   !!       do ij = jjstr(irank), jjend(irank)
-   !!          fo14carg(ij) = vardt2d(ij)
-   !!       end do
-   !!    end do
-   !! end if
+!     call mpi_gatherv( bf14pom, nsndct2d, mpi_real8, &
+!    &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+!    &                  iroot,   mpi_comm_world, ierr )
+!     if ( myrank .eq. iroot ) then
+!        do irank = 0, nprocs-1
+!           do ij = jjstr(irank), jjend(irank)
+!              bf14pomg(ij) = vardt2d(ij)
+!           end do
+!        end do
+!     end if
 
-   !! call mpi_gatherv( bf14pom, nsndct2d, mpi_real8, &
-   !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
-   !!&                  iroot,   mpi_comm_world, ierr )
-   !! if ( myrank .eq. iroot ) then
-   !!    do irank = 0, nprocs-1
-   !!       do ij = jjstr(irank), jjend(irank)
-   !!          bf14pomg(ij) = vardt2d(ij)
-   !!       end do
-   !!    end do
-   !! end if
-
-   !! call mpi_gatherv( bf14car, nsndct2d, mpi_real8, &
-   !!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
-   !!&                  iroot,   mpi_comm_world, ierr )
-   !! if ( myrank .eq. iroot ) then
-   !!    do irank = 0, nprocs-1
-   !!       do ij = jjstr(irank), jjend(irank)
-   !!          bf14carg(ij) = vardt2d(ij)
-   !!       end do
-   !!    end do
-   !! end if
+!     call mpi_gatherv( bf14car, nsndct2d, mpi_real8, &
+!    &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+!    &                  iroot,   mpi_comm_world, ierr )
+!     if ( myrank .eq. iroot ) then
+!        do irank = 0, nprocs-1
+!           do ij = jjstr(irank), jjend(irank)
+!              bf14carg(ij) = vardt2d(ij)
+!           end do
+!        end do
+!     end if
 
       end if
 
@@ -1743,18 +1782,18 @@ if (use_mpi) then
 
       end if
 
-      call mpi_barrier(mpi_comm_world, ierr )
+      call mpi_barrier(mpi_comm_world, ierr)
 
-      deallocate(nrcvct2d)
-      deallocate(ndispt2d)
-      deallocate(nrcvct3d)
-      deallocate(ndispt3d)
-      deallocate(nrcvcw3d)
-      deallocate(ndispw3d)
+      if (allocated(nrcvct2d)) deallocate(nrcvct2d)
+      if (allocated(ndispt2d)) deallocate(ndispt2d)
+      if (allocated(nrcvct3d)) deallocate(nrcvct3d)
+      if (allocated(ndispt3d)) deallocate(ndispt3d)
+      if (allocated(nrcvcw3d)) deallocate(nrcvcw3d)
+      if (allocated(ndispw3d)) deallocate(ndispw3d)
 
-      deallocate(vardt2d)
-      deallocate(vardt3d)
-      deallocate(vardw3d)
+      if (allocated(vardt2d))  deallocate(vardt2d)
+      if (allocated(vardt3d))  deallocate(vardt3d)
+      if (allocated(vardw3d))  deallocate(vardw3d)
 
 else
 
@@ -1835,6 +1874,10 @@ else
             fopomg(ij)     = fopom(ij)
             focarg(ij)     = focar(ij)
             foopag(ij)     = foopa(ij)
+            fioclag(ij)    = fiocla(ij)
+            fiopomg(ij)    = fiopom(ij)
+            fiocarg(ij)    = fiocar(ij)
+            fioopag(ij)    = fioopa(ij)
             bfclag(ij)     = bfcla(ij)
             bfpomg(ij)     = bfpom(ij)
             bfcarg(ij)     = bfcar(ij)
@@ -1877,6 +1920,7 @@ if (use_mpi) then
          end do
 
          !-- NetCDF output --
+         if (allocated(yy_array)) deallocate(yy_array)
          allocate(yy_array(1))
          yy_array(1) = yy
 
@@ -1891,7 +1935,7 @@ if (use_mpi) then
              end do
            end do
          end do
-         call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
+         call write_netcdf_3dwt(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
          call calc_integral_and_mean_3d(sclag, lon_values, lat_values, lz, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
@@ -1910,7 +1954,7 @@ if (use_mpi) then
              end do
            end do
          end do
-         call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
+         call write_netcdf_3dwt(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
          call calc_integral_and_mean_3d(spomg, lon_values, lat_values, lz, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
@@ -1929,7 +1973,7 @@ if (use_mpi) then
              end do
            end do
          end do
-         call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
+         call write_netcdf_3dwt(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
          call calc_integral_and_mean_3d(scarg, lon_values, lat_values, lz, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
@@ -1948,7 +1992,7 @@ if (use_mpi) then
              end do
            end do
          end do
-         call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
+         call write_netcdf_3dwt(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
          call calc_integral_and_mean_3d(sopag, lon_values, lat_values, lz, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
@@ -1967,7 +2011,7 @@ if (use_mpi) then
              end do
            end do
          end do
-         call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
+         call write_netcdf_3dwt(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
          call calc_integral_and_mean_3d(sageg, lon_values, lat_values, lz, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
@@ -1985,7 +2029,7 @@ if (use_mpi) then
              end do
            end do
          end do
-         call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
+         call write_netcdf_3dwt(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
          call calc_integral_and_mean_3d(cnitg, lon_values, lat_values, lz, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
@@ -2004,7 +2048,7 @@ if (use_mpi) then
              end do
            end do
          end do
-         call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
+         call write_netcdf_3dwt(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
          call calc_integral_and_mean_3d(cdicg, lon_values, lat_values, lz, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
@@ -2023,7 +2067,7 @@ if (use_mpi) then
              end do
            end do
          end do
-         call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
+         call write_netcdf_3dwt(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
          call calc_integral_and_mean_3d(calkg, lon_values, lat_values, lz, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
@@ -2042,7 +2086,7 @@ if (use_mpi) then
              end do
            end do
          end do
-         call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
+         call write_netcdf_3dwt(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
          call calc_integral_and_mean_3d(cdo2g, lon_values, lat_values, lz, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
@@ -2061,7 +2105,7 @@ if (use_mpi) then
              end do
            end do
          end do
-         call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
+         call write_netcdf_3dwt(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
          call calc_integral_and_mean_3d(csilg, lon_values, lat_values, lz, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
@@ -2069,128 +2113,220 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
          write(nfstdo, *) "'--------------------------------------------------'"
 
-        !filename = "ficla.nc"
-        !varname = "Clay_bottom_flux"
-        !varunit = "g m-3 * cm s-1"
-        !do j = 1, nydim
-        !  do i = 1, nxdim
-        !    ij = i + (j - 1) * nxdim
-        !    var2d_values(i, j, 1) = ficlag(ij)
-        !  end do
-        !end do
-        !call write_netcdf_2d(filename, varname, varunit, var2d_values, lon_values, lat_values, yy)
-        !call calc_integral_and_mean_2d(ficlag, lon_values, lat_values, integral_value, mean_value)
-        !write(nfstdo, *) "'--------------------------------------------------'"
-        !write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
-        !write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " g m-3 * cm s-1"
-        !write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+5, " g * yr-1"
-        !write(nfstdo, *) "'--------------------------------------------------'"
+         filename = "ficla.nc"
+         varname = "Clay_bottom_flux"
+         varunit = "g m-3 * cm s-1"
+         do j = 1, nydim
+           do i = 1, nxdim
+             ij = i + (j - 1) * nxdim
+             var2d_values(i, j, 1) = ficlag(ij)
+           end do
+         end do
+        !call write_netcdf_2dwt(filename, varname, varunit, var2d_values, lon_values, lat_values, yy_array)
+         call calc_integral_and_mean_2d(ficlag, lon_values, lat_values, integral_value, mean_value)
+         write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
+         write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " g m-3 * cm s-1"
+         write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+5, " g * yr-1"
+         write(nfstdo, *) "'--------------------------------------------------'"
 
-        !filename = "fipom.nc"
-        !varname = "OrgM_bottom_flux"
-        !varunit = "mMol m-3 * cm s-1"
-        !do j = 1, nydim
-        !  do i = 1, nxdim
-        !    ij = i + (j - 1) * nxdim
-        !    var2d_values(i, j, 1) = fipomg(ij)
-        !  end do
-        !end do
-        !call write_netcdf_2d(filename, varname, varunit, var2d_values, lon_values, lat_values, yy)
-        !call calc_integral_and_mean_2d(fipomg, lon_values, lat_values, integral_value, mean_value)
-        !write(nfstdo, *) "'--------------------------------------------------'"
-        !write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
-        !write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
-        !write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
-        !write(nfstdo, *) "'--------------------------------------------------'"
+         filename = "fipom.nc"
+         varname = "OrgM_bottom_flux"
+         varunit = "mMol m-3 * cm s-1"
+         do j = 1, nydim
+           do i = 1, nxdim
+             ij = i + (j - 1) * nxdim
+             var2d_values(i, j, 1) = fipomg(ij)
+           end do
+         end do
+        !call write_netcdf_2dwt(filename, varname, varunit, var2d_values, lon_values, lat_values, yy_array)
+         call calc_integral_and_mean_2d(fipomg, lon_values, lat_values, integral_value, mean_value)
+         write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
+         write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
+         write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
+         write(nfstdo, *) "'--------------------------------------------------'"
 
-        !filename = "ficar.nc"
-        !varname = "CaCO3_bottom_flux"
-        !varunit = "mMol m-3 * cm s-1"
-        !do j = 1, nydim
-        !  do i = 1, nxdim
-        !    ij = i + (j - 1) * nxdim
-        !    var2d_values(i, j, 1) = ficarg(ij)
-        !  end do
-        !end do
-        !call write_netcdf_2d(filename, varname, varunit, var2d_values, lon_values, lat_values, yy)
-        !call calc_integral_and_mean_2d(ficarg, lon_values, lat_values, integral_value, mean_value)
-        !write(nfstdo, *) "'--------------------------------------------------'"
-        !write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
-        !write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
-        !write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
-        !write(nfstdo, *) "'--------------------------------------------------'"
+         filename = "ficar.nc"
+         varname = "CaCO3_bottom_flux"
+         varunit = "mMol m-3 * cm s-1"
+         do j = 1, nydim
+           do i = 1, nxdim
+             ij = i + (j - 1) * nxdim
+             var2d_values(i, j, 1) = ficarg(ij)
+           end do
+         end do
+        !call write_netcdf_2dwt(filename, varname, varunit, var2d_values, lon_values, lat_values, yy_array)
+         call calc_integral_and_mean_2d(ficarg, lon_values, lat_values, integral_value, mean_value)
+         write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
+         write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
+         write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
+         write(nfstdo, *) "'--------------------------------------------------'"
 
-        !filename = "fiopa.nc"
-        !varname = "SiO2_bottom_flux"
-        !varunit = "mMol m-3 * cm s-1"
-        !do j = 1, nydim
-        !  do i = 1, nxdim
-        !    ij = i + (j - 1) * nxdim
-        !    var2d_values(i, j, 1) = fiopag(ij)
-        !  end do
-        !end do
-        !call write_netcdf_2d(filename, varname, varunit, var2d_values, lon_values, lat_values, yy)
-        !call calc_integral_and_mean_2d(fiopag, lon_values, lat_values, integral_value, mean_value)
-        !write(nfstdo, *) "'--------------------------------------------------'"
-        !write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
-        !write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
-        !write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
-        !write(nfstdo, *) "'--------------------------------------------------'"
+         filename = "fiopa.nc"
+         varname = "SiO2_bottom_flux"
+         varunit = "mMol m-3 * cm s-1"
+         do j = 1, nydim
+           do i = 1, nxdim
+             ij = i + (j - 1) * nxdim
+             var2d_values(i, j, 1) = fiopag(ij)
+           end do
+         end do
+        !call write_netcdf_2dwt(filename, varname, varunit, var2d_values, lon_values, lat_values, yy_array)
+         call calc_integral_and_mean_2d(fiopag, lon_values, lat_values, integral_value, mean_value)
+         write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
+         write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
+         write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
+         write(nfstdo, *) "'--------------------------------------------------'"
 
-        !filename = "focla.nc"
-        !varname = "Clay_diffusion"
-        !varunit = "g m-3 * cm s-1"
-        !do j = 1, nydim
-        !  do i = 1, nxdim
-        !    ij = i + (j - 1) * nxdim
-        !    var2d_values(i, j, 1) = foclag(ij)
-        !  end do
-        !end do
-        !call write_netcdf_2d(filename, varname, varunit, var2d_values, lon_values, lat_values, yy)
+         filename = "focla.nc"
+         varname = "Clay_diffusion"
+         varunit = "g m-3 * cm s-1"
+         do j = 1, nydim
+           do i = 1, nxdim
+             ij = i + (j - 1) * nxdim
+             var2d_values(i, j, 1) = foclag(ij)
+           end do
+         end do
+        !call write_netcdf_2dwt(filename, varname, varunit, var2d_values, lon_values, lat_values, yy_array)
+         call calc_integral_and_mean_2d(foclag, lon_values, lat_values, integral_value, mean_value)
+         write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
+         write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
+         write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
+         write(nfstdo, *) "'--------------------------------------------------'"
 
-        !filename = "fopom.nc"
-        !varname = "OrgM_diffusion"
-        !varunit = "mMol m-3 * cm s-1"
-        !do j = 1, nydim
-        !  do i = 1, nxdim
-        !    ij = i + (j - 1) * nxdim
-        !    var2d_values(i, j, 1) = fopomg(ij)
-        !  end do
-        !end do
-        !call write_netcdf_2d(filename, varname, varunit, var2d_values, lon_values, lat_values, yy)
+         filename = "fopom.nc"
+         varname = "OrgM_diffusion"
+         varunit = "mMol m-3 * cm s-1"
+         do j = 1, nydim
+           do i = 1, nxdim
+             ij = i + (j - 1) * nxdim
+             var2d_values(i, j, 1) = fopomg(ij)
+           end do
+         end do
+        !call write_netcdf_2dwt(filename, varname, varunit, var2d_values, lon_values, lat_values, yy_array)
+         call calc_integral_and_mean_2d(fopomg, lon_values, lat_values, integral_value, mean_value)
+         write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
+         write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
+         write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
+         write(nfstdo, *) "'--------------------------------------------------'"
 
-        !filename = "focar.nc"
-        !varname = "CaCO3_diffusion"
-        !varunit = "mMol m-3 * cm s-1"
-        !do j = 1, nydim
-        !  do i = 1, nxdim
-        !    ij = i + (j - 1) * nxdim
-        !    var2d_values(i, j, 1) = focarg(ij)
-        !  end do
-        !end do
-        !call write_netcdf_2d(filename, varname, varunit, var2d_values, lon_values, lat_values, yy)
+         filename = "focar.nc"
+         varname = "CaCO3_diffusion"
+         varunit = "mMol m-3 * cm s-1"
+         do j = 1, nydim
+           do i = 1, nxdim
+             ij = i + (j - 1) * nxdim
+             var2d_values(i, j, 1) = focarg(ij)
+           end do
+         end do
+        !call write_netcdf_2dwt(filename, varname, varunit, var2d_values, lon_values, lat_values, yy_array)
+         call calc_integral_and_mean_2d(focarg, lon_values, lat_values, integral_value, mean_value)
+         write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
+         write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
+         write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
+         write(nfstdo, *) "'--------------------------------------------------'"
 
-        !filename = "foopa.nc"
-        !varname = "SiO2_diffusion"
-        !varunit = "mMol m-3 * cm s-1"
-        !do j = 1, nydim
-        !  do i = 1, nxdim
-        !    ij = i + (j - 1) * nxdim
-        !    var2d_values(i, j, 1) = foopag(ij)
-        !  end do
-        !end do
-        !call write_netcdf_2d(filename, varname, varunit, var2d_values, lon_values, lat_values, yy)
+         filename = "foopa.nc"
+         varname = "SiO2_diffusion"
+         varunit = "mMol m-3 * cm s-1"
+         do j = 1, nydim
+           do i = 1, nxdim
+             ij = i + (j - 1) * nxdim
+             var2d_values(i, j, 1) = foopag(ij)
+           end do
+         end do
+        !call write_netcdf_2dwt(filename, varname, varunit, var2d_values, lon_values, lat_values, yy_array)
+         call calc_integral_and_mean_2d(foopag, lon_values, lat_values, integral_value, mean_value)
+         write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
+         write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
+         write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
+         write(nfstdo, *) "'--------------------------------------------------'"
 
-        !filename = "bfcla.nc"
-        !varname = "Clay_burial"
-        !varunit = "g m-3 * cm s-1"
-        !do j = 1, nydim
-        !  do i = 1, nxdim
-        !    ij = i + (j - 1) * nxdim
-        !    var2d_values(i, j, 1) = bfclag(ij)
-        !  end do
-        !end do
-        !call write_netcdf_2d(filename, varname, varunit, var2d_values, lon_values, lat_values, yy)
+         filename = "fiocla.nc"
+         varname = "Clay_burial"
+         varunit = "g m-3 * cm s-1"
+         do j = 1, nydim
+           do i = 1, nxdim
+             ij = i + (j - 1) * nxdim
+             var2d_values(i, j, 1) = fioclag(ij)
+           end do
+         end do
+        !call write_netcdf_2dwt(filename, varname, varunit, var2d_values, lon_values, lat_values, yy_array)
+         call calc_integral_and_mean_2d(fioclag, lon_values, lat_values, integral_value, mean_value)
+         write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
+         write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " g m-3 * cm s-1"
+         write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+5, " g * yr-1"
+         write(nfstdo, *) "'--------------------------------------------------'"
+
+         filename = "fiopom.nc"
+         varname = "OrgM_burial"
+         varunit = "mMol m-3 * cm s-1"
+         do j = 1, nydim
+           do i = 1, nxdim
+             ij = i + (j - 1) * nxdim
+             var2d_values(i, j, 1) = fiopomg(ij)
+           end do
+         end do
+         call write_netcdf_2dwt(filename, varname, varunit, var2d_values, lon_values, lat_values, yy_array)
+         call calc_integral_and_mean_2d(fiopomg, lon_values, lat_values, integral_value, mean_value)
+         write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
+         write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
+         write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
+         write(nfstdo, *) "'--------------------------------------------------'"
+
+         filename = "fiocar.nc"
+         varname = "CaCO3_burial"
+         varunit = "mMol m-3 * cm s-1"
+         do j = 1, nydim
+           do i = 1, nxdim
+             ij = i + (j - 1) * nxdim
+             var2d_values(i, j, 1) = fiocarg(ij)
+           end do
+         end do
+         call write_netcdf_2dwt(filename, varname, varunit, var2d_values, lon_values, lat_values, yy_array)
+         call calc_integral_and_mean_2d(fiocarg, lon_values, lat_values, integral_value, mean_value)
+         write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
+         write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
+         write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
+         write(nfstdo, *) "'--------------------------------------------------'"
+
+         filename = "fioopa.nc"
+         varname = "SiO2_burial"
+         varunit = "mMol m-3 * cm s-1"
+         do j = 1, nydim
+           do i = 1, nxdim
+             ij = i + (j - 1) * nxdim
+             var2d_values(i, j, 1) = fioopag(ij)
+           end do
+         end do
+         call write_netcdf_2dwt(filename, varname, varunit, var2d_values, lon_values, lat_values, yy_array)
+         call calc_integral_and_mean_2d(fioopag, lon_values, lat_values, integral_value, mean_value)
+         write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
+         write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
+         write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
+         write(nfstdo, *) "'--------------------------------------------------'"
+
+         filename = "bfcla.nc"
+         varname = "Clay_burial"
+         varunit = "g m-3 * cm s-1"
+         do j = 1, nydim
+           do i = 1, nxdim
+             ij = i + (j - 1) * nxdim
+             var2d_values(i, j, 1) = bfclag(ij)
+           end do
+         end do
+        !call write_netcdf_2dwt(filename, varname, varunit, var2d_values, lon_values, lat_values, yy_array)
          call calc_integral_and_mean_2d(bfclag, lon_values, lat_values, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
@@ -2198,16 +2334,16 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
          write(nfstdo, *) "'--------------------------------------------------'"
 
-        !filename = "bfpom.nc"
-        !varname = "OrgM_burial"
-        !varunit = "mMol m-3 * cm s-1"
-        !do j = 1, nydim
-        !  do i = 1, nxdim
-        !    ij = i + (j - 1) * nxdim
-        !    var2d_values(i, j, 1) = bfpomg(ij)
-        !  end do
-        !end do
-        !call write_netcdf_2d(filename, varname, varunit, var2d_values, lon_values, lat_values, yy)
+         filename = "bfpom.nc"
+         varname = "OrgM_burial"
+         varunit = "mMol m-3 * cm s-1"
+         do j = 1, nydim
+           do i = 1, nxdim
+             ij = i + (j - 1) * nxdim
+             var2d_values(i, j, 1) = bfpomg(ij)
+           end do
+         end do
+        !call write_netcdf_2dwt(filename, varname, varunit, var2d_values, lon_values, lat_values, yy_array)
          call calc_integral_and_mean_2d(bfpomg, lon_values, lat_values, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
@@ -2215,16 +2351,16 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
          write(nfstdo, *) "'--------------------------------------------------'"
 
-        !filename = "bfcar.nc"
-        !varname = "CaCO3_burial"
-        !varunit = "mMol m-3 * cm s-1"
-        !do j = 1, nydim
-        !  do i = 1, nxdim
-        !    ij = i + (j - 1) * nxdim
-        !    var2d_values(i, j, 1) = bfcarg(ij)
-        !  end do
-        !end do
-        !call write_netcdf_2d(filename, varname, varunit, var2d_values, lon_values, lat_values, yy)
+         filename = "bfcar.nc"
+         varname = "CaCO3_burial"
+         varunit = "mMol m-3 * cm s-1"
+         do j = 1, nydim
+           do i = 1, nxdim
+             ij = i + (j - 1) * nxdim
+             var2d_values(i, j, 1) = bfcarg(ij)
+           end do
+         end do
+        !call write_netcdf_2dwt(filename, varname, varunit, var2d_values, lon_values, lat_values, yy_array)
          call calc_integral_and_mean_2d(bfcarg, lon_values, lat_values, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
@@ -2232,16 +2368,16 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
          write(nfstdo, *) "'--------------------------------------------------'"
 
-        !filename = "bfopa.nc"
-        !varname = "SiO2_burial"
-        !varunit = "mMol m-3 * cm s-1"
-        !do j = 1, nydim
-        !  do i = 1, nxdim
-        !    ij = i + (j - 1) * nxdim
-        !    var2d_values(i, j, 1) = bfopag(ij)
-        !  end do
-        !end do
-        !call write_netcdf_2d(filename, varname, varunit, var2d_values, lon_values, lat_values, yy)
+         filename = "bfopa.nc"
+         varname = "SiO2_burial"
+         varunit = "mMol m-3 * cm s-1"
+         do j = 1, nydim
+           do i = 1, nxdim
+             ij = i + (j - 1) * nxdim
+             var2d_values(i, j, 1) = bfopag(ij)
+           end do
+         end do
+        !call write_netcdf_2dwt(filename, varname, varunit, var2d_values, lon_values, lat_values, yy_array)
          call calc_integral_and_mean_2d(bfopag, lon_values, lat_values, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
@@ -2260,7 +2396,14 @@ if (use_mpi) then
         !    end do
         !  end do
         !end do
-        !call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, LZ+1, yy)
+        !call write_netcdf_3dwt(filename, varname, varunit, var3d_values, lon_values, lat_values, LZ+1, yy)
+        !call calc_integral_and_mean_3d(wg, lon_values, lat_values, lz+1, integral_value, mean_value)
+        !write(nfstdo, *) "'--------------------------------------------------'"
+        !write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
+        !write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
+        !write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
+        !write(nfstdo, *) "'--------------------------------------------------'"
+
 
         !filename = "cdc13.nc"
         !varname = "delta_carbon-13"
@@ -2273,7 +2416,13 @@ if (use_mpi) then
         !    end do
         !  end do
         !end do
-        !call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
+        !call write_netcdf_3dwt(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
+        !call calc_integral_and_mean_3d(cdc13g, lon_values, lat_values, lz, integral_value, mean_value)
+        !write(nfstdo, *) "'--------------------------------------------------'"
+        !write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
+        !write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
+        !write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
+        !write(nfstdo, *) "'--------------------------------------------------'"
 
         !filename = "cdc14.nc"
         !varname = "Delta_carbon-14"
@@ -2286,7 +2435,13 @@ if (use_mpi) then
         !    end do
         !  end do
         !end do
-        !call write_netcdf_3d(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
+        !call write_netcdf_3dwt(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
+        !call calc_integral_and_mean_3d(cdc14g, lon_values, lat_values, lz, integral_value, mean_value)
+        !write(nfstdo, *) "'--------------------------------------------------'"
+        !write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
+        !write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
+        !write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
+        !write(nfstdo, *) "'--------------------------------------------------'"
 
         !! -- Gtool output --
         !chead  = ''
@@ -2514,10 +2669,10 @@ end if
         end do
         mean_value = integral_value / grid_volume
 
-        deallocate(lon_grid_size)
-        deallocate(lat_grid_size)
-        deallocate(lon_grid_size_m)
-        deallocate(lat_grid_size_m)
+        if (allocated(lon_grid_size))   deallocate(lon_grid_size)
+        if (allocated(lat_grid_size))   deallocate(lat_grid_size)
+        if (allocated(lon_grid_size_m)) deallocate(lon_grid_size_m)
+        if (allocated(lat_grid_size_m)) deallocate(lat_grid_size_m)
 
       end subroutine calc_integral_and_mean_2d
 
@@ -2595,12 +2750,12 @@ end if
         end do
         mean_value = integral_value / grid_volume
 
-        deallocate(lon_grid_size)
-        deallocate(lat_grid_size)
-        deallocate(dep_grid_size)
-        deallocate(lon_grid_size_m)
-        deallocate(lat_grid_size_m)
-        deallocate(dep_grid_size_m)
+        if (allocated(lon_grid_size))   deallocate(lon_grid_size)
+        if (allocated(lat_grid_size))   deallocate(lat_grid_size)
+        if (allocated(dep_grid_size))   deallocate(dep_grid_size)
+        if (allocated(lon_grid_size_m)) deallocate(lon_grid_size_m)
+        if (allocated(lat_grid_size_m)) deallocate(lat_grid_size_m)
+        if (allocated(dep_grid_size_m)) deallocate(dep_grid_size_m)
 
       end subroutine calc_integral_and_mean_3d
 

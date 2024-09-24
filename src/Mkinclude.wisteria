@@ -6,4 +6,5 @@ SYSTEM	= wisteria
 #PARALLEL =
  PARALLEL = .par
 
-TARGET	= $(DIGDADIR)/bin/digda$(PARALLEL)
+#TARGET	= $(DIGDADIR)/bin/digda$(PARALLEL)
+TARGET	= $(DIGDADIR)/bin/digda_21601080$(PARALLEL)

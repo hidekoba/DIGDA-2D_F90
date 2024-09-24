@@ -36,9 +36,9 @@ module globals_digda_step_solid
   logical :: sadq = .true.  !! Quickest ?
   logical :: sadqf = .true. !!   + Flux limiter ?
   ! Diffusion choice
-  logical :: sdic = .false. !! Crank nicolson ?
+  logical :: sdcn = .false. !! Crank nicolson ?
   logical :: sdii = .true.  !! Implicit ?
-  namelist /nmsdso/ sadu, sadq, sadqf, sdic, sdii
+  namelist /nmsdso/ sadu, sadq, sadqf, sdcn, sdii
 
 end module globals_digda_step_solid
 
@@ -418,7 +418,7 @@ contains
 
 !     -- Diffusion : Crank nicolson
 
-      if (sdic) then
+      if (sdcn) then
 
       do k = skst, sken
          eal(k) = ( ( 1.0d0 - phi(k) ) / tssec )
@@ -870,7 +870,7 @@ contains
 
 !     -- Diffusion : Crank nicolson
 
-      if (sdic) then
+      if (sdcn) then
 
       do k = skst, sken
          eal(k) = ( ( 1.0d0 - phi(k) ) / tssec )
@@ -1316,7 +1316,7 @@ contains
 
 !     -- Diffusion : Crank nicolson
 
-      if (sdic) then
+      if (sdcn) then
 
       do k = skst, sken
          eal(k) = ( ( 1.0d0 - phi(k) ) / tssec )

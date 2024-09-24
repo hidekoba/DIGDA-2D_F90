@@ -3,11 +3,12 @@ module netcdf_utilities
     implicit none
 contains
 
-  subroutine read_netcdf_2d(filename, varname, var, xvalues, yvalues)
+  subroutine read_netcdf_2dwot(filename, varname, var, xvalues, yvalues)
     implicit none
 
     character(len=*), intent(in) :: filename, varname
     double precision, dimension(:,:), allocatable, intent(out) :: var
+    double precision, dimension(:), allocatable, intent(out) :: xvalues, yvalues
 
     integer(kind=4) :: ncid, varid, retval
     integer(kind=4) :: xid, xsize
@@ -16,7 +17,8 @@ contains
     character(len=*), parameter :: xname = 'lon'
     character(len=*), parameter :: yname = 'lat'
 
-    double precision, allocatable, dimension(:) :: xvalues, yvalues
+    integer(kind=4), dimension(1) :: start_axis, count_axis
+    integer(kind=4), dimension(2) :: start_var, count_var
     integer(kind=4) :: i
 
     ! Open the netCDF file
@@ -37,7 +39,7 @@ contains
       print *, 'Error: ', nf90_strerror(retval)
       stop
     endif
-   !print *, 'Longitude size = ', xsize
+    print *, 'Longitude size = ', xsize
 
     ! Get the latitude dimension ID and size
     retval = nf90_inq_dimid(ncid, yname, yid)
@@ -48,7 +50,7 @@ contains
       print *, 'Error: ', nf90_strerror(retval)
       stop
     endif
-   !print *, 'Latitude size = ', ysize
+    print *, 'Latitude size = ', ysize
 
     ! Deallocate arrays if they are already allocated
     if (allocated(xvalues)) deallocate(xvalues)
@@ -59,29 +61,34 @@ contains
     allocate(xvalues(xsize))
     allocate(yvalues(ysize))
 
-    ! Retrieve the longitude values
-    retval = nf90_get_var(ncid, xid, xvalues)
-    if (retval /= nf90_noerr) then
-      print *, 'Failed to read longitude values.'
-      print *, 'Error: ', nf90_strerror(retval)
-      stop
-    endif
-   !print *, 'Longitude values:'
-   !do i = 1, xsize
-   !  print *, xvalues(i)
-   !end do
+!   ! Retrieve the longitude values
+!   start_axis = (/ 1 /)
+!   count_axis = (/ xsize /)
+!   retval = nf90_get_var(ncid, xid, xvalues, start=start_axis, count=count_axis)
+!   if (retval /= nf90_noerr) then
+!    !print *, 'Failed to read longitude values.'
+!     print *, 'Failed to read longitude values.', varname
+!     print *, 'Error: ', nf90_strerror(retval)
+!     stop
+!   endif
+!  !print *, 'Longitude values:'
+!  !do i = 1, xsize
+!  !  print *, xvalues(i)
+!  !end do
 
-    ! Retrieve the latitude values
-    retval = nf90_get_var(ncid, yid, yvalues)
-    if (retval /= nf90_noerr) then
-      print *, 'Failed to read latitude values.'
-      print *, 'Error: ', nf90_strerror(retval)
-      stop
-    endif
-   !print *, 'Latitude values:'
-   !do i = 1, ysize
-   !  print *, yvalues(i)
-   !end do
+!   ! Retrieve the latitude values
+!   start_axis = (/ 1 /)
+!   count_axis = (/ ysize /)
+!   retval = nf90_get_var(ncid, yid, yvalues, start=start_axis, count=count_axis)
+!   if (retval /= nf90_noerr) then
+!     print *, 'Failed to read latitude values.'
+!     print *, 'Error: ', nf90_strerror(retval)
+!     stop
+!   endif
+!  !print *, 'Latitude values:'
+!  !do i = 1, ysize
+!  !  print *, yvalues(i)
+!  !end do
 
     ! Allocate memory for the 2D data variable based on retrieved dimensions
     allocate(var(xsize, ysize))
@@ -97,7 +104,9 @@ contains
       print *, 'Error: ', nf90_strerror(retval)
       stop
     endif
-    retval = nf90_get_var(ncid, varid, var)
+    start_var = (/ 1, 1 /)
+    count_var = (/ xsize, ysize /)
+    retval = nf90_get_var(ncid, varid, var, start=start_var, count=count_var)
     if (retval /= nf90_noerr) then
       print *, 'Failed to read data for variable: ', varname
       print *, 'Error: ', nf90_strerror(retval)
@@ -116,10 +125,154 @@ contains
    !if (allocated(yvalues)) deallocate(yvalues)
    !if (allocated(var)) deallocate(var)
 
-  end subroutine read_netcdf_2d
+  end subroutine read_netcdf_2dwot
 
 
-  subroutine read_netcdf_3d(filename, varname, var, xvalues, yvalues, zvalues)
+  subroutine read_netcdf_2dwt(filename, varname, var, xvalues, yvalues, tvalues)
+    implicit none
+
+    character(len=*), intent(in) :: filename, varname
+    double precision, dimension(:,:,:), allocatable, intent(out) :: var
+    double precision, dimension(:), allocatable, intent(out) :: xvalues, yvalues
+    integer(kind=4), dimension(:), allocatable, intent(out) :: tvalues
+
+    integer(kind=4) :: ncid, varid, retval
+    integer(kind=4) :: xid, xsize
+    integer(kind=4) :: yid, ysize
+    integer(kind=4) :: tid, tsize
+
+    character(len=*), parameter :: xname = 'lon'
+    character(len=*), parameter :: yname = 'lat'
+    character(len=*), parameter :: tname = 'time'
+
+    integer(kind=4), dimension(1) :: start_axis, count_axis
+    integer(kind=4), dimension(3) :: start_var, count_var
+
+    ! Open the netCDF file
+    retval = nf90_open(filename, nf90_nowrite, ncid)
+    if (retval /= nf90_noerr) then
+      print *, 'Failed to open file: ', trim(filename)
+      print *, 'Error: ', nf90_strerror(retval)
+      stop
+    endif
+
+    ! Retrieve the dimension IDs and sizes for longitude, latitude, and depth
+    ! Get the longitude dimension ID and size
+    retval = nf90_inq_dimid(ncid, xname, xid)
+    if (retval == nf90_noerr) then
+      retval = nf90_inquire_dimension(ncid, xid, len=xsize)
+    else
+      print *, 'Failed to get ID and length of longitude dimension.'
+      print *, 'Error: ', nf90_strerror(retval)
+      stop
+    endif
+    print *, 'Longitude size = ', xsize
+
+    ! Get the latitude dimension ID and size
+    retval = nf90_inq_dimid(ncid, yname, yid)
+    if (retval == nf90_noerr) then
+      retval = nf90_inquire_dimension(ncid, yid, len=ysize)
+    else
+      print *, 'Failed to get ID and length of latitude dimension.'
+      print *, 'Error: ', nf90_strerror(retval)
+      stop
+    endif
+    print *, 'Latitude size = ', ysize
+
+    ! Get the time dimension ID and size
+    retval = nf90_inq_dimid(ncid, tname, tid)
+    if (retval == nf90_noerr) then
+      retval = nf90_inquire_dimension(ncid, tid, len=tsize)
+    else
+      print *, 'Failed to get ID and length of time dimension.'
+      print *, 'Error: ', nf90_strerror(retval)
+      stop
+    endif
+    print *, 'time size = ', tsize
+
+    ! Deallocate arrays if they are already allocated
+    if (allocated(xvalues)) deallocate(xvalues)
+    if (allocated(yvalues)) deallocate(yvalues)
+    if (allocated(tvalues)) deallocate(tvalues)
+    if (allocated(var)) deallocate(var)
+
+    ! Allocate memory for the dimension values
+    allocate(xvalues(xsize))
+    allocate(yvalues(ysize))
+    allocate(tvalues(tsize))
+
+    ! Retrieve the longitude values
+    start_axis = (/ 1 /)
+    count_axis = (/ xsize /)
+    retval = nf90_get_var(ncid, xid, xvalues, start=start_axis, count=count_axis)
+    if (retval /= nf90_noerr) then
+     !print *, 'Failed to read longitude values.'
+      print *, 'Failed to read longitude values.', varname
+      print *, 'Error: ', nf90_strerror(retval)
+      stop
+    endif
+
+    ! Retrieve the latitude values
+    start_axis = (/ 1 /)
+    count_axis = (/ ysize /)
+    retval = nf90_get_var(ncid, yid, yvalues, start=start_axis, count=count_axis)
+    if (retval /= nf90_noerr) then
+      print *, 'Failed to read latitude values.'
+      print *, 'Error: ', nf90_strerror(retval)
+      stop
+    endif
+
+    ! Retrieve the time values
+    start_axis = (/ 1 /)
+    count_axis = (/ tsize /)
+    retval = nf90_get_var(ncid, tid, tvalues, start=start_axis, count=count_axis)
+    if (retval /= nf90_noerr) then
+      print *, 'Failed to read time values.'
+      print *, 'Error: ', nf90_strerror(retval)
+      stop
+    endif
+
+    ! Allocate memory for the 4D data variable based on retrieved dimensions
+    allocate(var(xsize, ysize, tsize))
+    if (.not. allocated(var)) then
+      print *, 'Allocation of ', varname, ' failed.'
+      stop
+    endif
+
+    ! Retrieve the variable ID and read the data into the allocated array
+    retval = nf90_inq_varid(ncid, varname, varid)
+    if (retval /= nf90_noerr) then
+      print *, 'Failed to retrieve variable ID: ', varname
+      print *, 'Error: ', nf90_strerror(retval)
+      stop
+    endif
+    start_var = (/ 1, 1, 1 /)
+    count_var = (/ xsize, ysize, tsize /)
+    retval = nf90_get_var(ncid, varid, var, start=start_var, count=count_var)
+    if (retval /= nf90_noerr) then
+      print *, 'Failed to read data for variable: ', varname
+      print *, 'Error: ', nf90_strerror(retval)
+      stop
+    endif
+
+    ! Close the netCDF file
+    retval = nf90_close(ncid)
+    if (retval /= nf90_noerr) then
+      print *, 'Error occurred while closing the file: ', trim(filename)
+      stop
+    endif
+
+   !! Deallocate arrays if they are already allocated
+   !if (allocated(xvalues)) deallocate(xvalues)
+   !if (allocated(yvalues)) deallocate(yvalues)
+   !if (allocated(zvalues)) deallocate(zvalues)
+   !if (allocated(tvalues)) deallocate(tvalues)
+   !if (allocated(var)) deallocate(var)
+
+  end subroutine read_netcdf_2dwt
+
+
+  subroutine read_netcdf_3dwot(filename, varname, var, xvalues, yvalues, zvalues)
     implicit none
 
     character(len=*), intent(in) :: filename, varname
@@ -134,6 +287,9 @@ contains
     character(len=*), parameter :: xname = 'lon'
     character(len=*), parameter :: yname = 'lat'
     character(len=*), parameter :: zname = 'depth'
+
+    integer(kind=4), dimension(1) :: start_axis, count_axis
+    integer(kind=4), dimension(3) :: start_var, count_var
 
     ! Open the netCDF file
     retval = nf90_open(filename, nf90_nowrite, ncid)
@@ -189,7 +345,9 @@ contains
     allocate(zvalues(zsize))
 
     ! Retrieve the longitude values
-    retval = nf90_get_var(ncid, xid, xvalues)
+    start_axis = (/ 1 /)
+    count_axis = (/ xsize /)
+    retval = nf90_get_var(ncid, xid, xvalues, start=start_axis, count=count_axis)
     if (retval /= nf90_noerr) then
       print *, 'Failed to read longitude values.'
       print *, 'Error: ', nf90_strerror(retval)
@@ -197,7 +355,9 @@ contains
     endif
 
     ! Retrieve the latitude values
-    retval = nf90_get_var(ncid, yid, yvalues)
+    start_axis = (/ 1 /)
+    count_axis = (/ ysize /)
+    retval = nf90_get_var(ncid, yid, yvalues, start=start_axis, count=count_axis)
     if (retval /= nf90_noerr) then
       print *, 'Failed to read latitude values.'
       print *, 'Error: ', nf90_strerror(retval)
@@ -205,7 +365,9 @@ contains
     endif
 
     ! Retrieve the depth values
-    retval = nf90_get_var(ncid, zid, zvalues)
+    start_axis = (/ 1 /)
+    count_axis = (/ zsize /)
+    retval = nf90_get_var(ncid, zid, zvalues, start=start_axis, count=count_axis)
     if (retval /= nf90_noerr) then
       print *, 'Failed to read depth values.'
       print *, 'Error: ', nf90_strerror(retval)
@@ -226,7 +388,9 @@ contains
       print *, 'Error: ', nf90_strerror(retval)
       stop
     endif
-    retval = nf90_get_var(ncid, varid, var)
+    start_var = (/ 1, 1, 1 /)
+    count_var = (/ xsize, ysize, zsize /)
+    retval = nf90_get_var(ncid, varid, var, start=start_var, count=count_var)
     if (retval /= nf90_noerr) then
       print *, 'Failed to read data for variable: ', varname
       print *, 'Error: ', nf90_strerror(retval)
@@ -246,9 +410,10 @@ contains
    !if (allocated(zvalues)) deallocate(zvalues)
    !if (allocated(var)) deallocate(var)
 
-  end subroutine read_netcdf_3d
+  end subroutine read_netcdf_3dwot
 
-  subroutine read_netcdf_4d(filename, varname, var, xvalues, yvalues, zvalues, tvalues)
+
+  subroutine read_netcdf_3dwt(filename, varname, var, xvalues, yvalues, zvalues, tvalues)
     implicit none
 
     character(len=*), intent(in) :: filename, varname
@@ -266,6 +431,9 @@ contains
     character(len=*), parameter :: yname = 'lat'
     character(len=*), parameter :: zname = 'depth'
     character(len=*), parameter :: tname = 'time'
+
+    integer(kind=4), dimension(1) :: start_axis, count_axis
+    integer(kind=4), dimension(4) :: start_var, count_var
 
     ! Open the netCDF file
     retval = nf90_open(filename, nf90_nowrite, ncid)
@@ -334,7 +502,9 @@ contains
     allocate(tvalues(tsize))
 
     ! Retrieve the longitude values
-    retval = nf90_get_var(ncid, xid, xvalues)
+    start_axis = (/ 1 /)
+    count_axis = (/ xsize /)
+    retval = nf90_get_var(ncid, xid, xvalues, start=start_axis, count=count_axis)
     if (retval /= nf90_noerr) then
       print *, 'Failed to read longitude values.'
       print *, 'Error: ', nf90_strerror(retval)
@@ -342,7 +512,9 @@ contains
     endif
 
     ! Retrieve the latitude values
-    retval = nf90_get_var(ncid, yid, yvalues)
+    start_axis = (/ 1 /)
+    count_axis = (/ ysize /)
+    retval = nf90_get_var(ncid, yid, yvalues, start=start_axis, count=count_axis)
     if (retval /= nf90_noerr) then
       print *, 'Failed to read latitude values.'
       print *, 'Error: ', nf90_strerror(retval)
@@ -350,7 +522,9 @@ contains
     endif
 
     ! Retrieve the depth values
-    retval = nf90_get_var(ncid, zid, zvalues)
+    start_axis = (/ 1 /)
+    count_axis = (/ zsize /)
+    retval = nf90_get_var(ncid, zid, zvalues, start=start_axis, count=count_axis)
     if (retval /= nf90_noerr) then
       print *, 'Failed to read depth values.'
       print *, 'Error: ', nf90_strerror(retval)
@@ -358,9 +532,11 @@ contains
     endif
 
     ! Retrieve the time values
-    retval = nf90_get_var(ncid, tid, tvalues)
+    start_axis = (/ 1 /)
+    count_axis = (/ tsize /)
+    retval = nf90_get_var(ncid, tid, tvalues, start=start_axis, count=count_axis)
     if (retval /= nf90_noerr) then
-      print *, 'Failed to read depth values.'
+      print *, 'Failed to read time values.'
       print *, 'Error: ', nf90_strerror(retval)
       stop
     endif
@@ -379,7 +555,9 @@ contains
       print *, 'Error: ', nf90_strerror(retval)
       stop
     endif
-    retval = nf90_get_var(ncid, varid, var)
+    start_var = (/ 1, 1, 1, 1 /)
+    count_var = (/ xsize, ysize, zsize, tsize /)
+    retval = nf90_get_var(ncid, varid, var, start=start_var, count=count_var)
     if (retval /= nf90_noerr) then
       print *, 'Failed to read data for variable: ', varname
       print *, 'Error: ', nf90_strerror(retval)
@@ -400,288 +578,136 @@ contains
    !if (allocated(tvalues)) deallocate(tvalues)
    !if (allocated(var)) deallocate(var)
 
-  end subroutine read_netcdf_4d
+  end subroutine read_netcdf_3dwt
 
-!!subroutine write_netcdf_2d(filename, varname, varunit, var, xvalues, yvalues)
-!!  implicit none
 
-!!  character(len=*), intent(in) :: filename, varname, varunit
-!!  double precision, dimension(:,:), intent(in) :: var
-!!  double precision, dimension(:), intent(in) :: xvalues, yvalues
+  subroutine write_netcdf_2dwot(filename, varname, varunit, var, xvalues, yvalues)
+    implicit none
 
-!!  integer(kind=4) :: ncid, varid, retval
-!!  integer(kind=4) :: xid, xsize
-!!  integer(kind=4) :: yid, ysize
-!!  integer(kind=4) :: xvarid, yvarid
+    character(len=*), intent(in) :: filename, varname, varunit
+    double precision, dimension(:,:), intent(in) :: var
+    double precision, dimension(:), intent(in) :: xvalues, yvalues
 
-!!  character(len=*), parameter :: xname = 'lon'
-!!  character(len=*), parameter :: yname = 'lat'
+    integer(kind=4) :: ncid, varid, retval
+    integer(kind=4) :: xid, xsize
+    integer(kind=4) :: yid, ysize
+    integer(kind=4) :: xvarid, yvarid
 
-!!  double precision, parameter :: fill_value = 999.0
+    character(len=*), parameter :: xname = 'lon'
+    character(len=*), parameter :: yname = 'lat'
 
-!!  ! Determine the size of each dimension from the input arrays
-!!  xsize = size(xvalues)
-!!  ysize = size(yvalues)
+    double precision, parameter :: fill_value = 999.0
 
-!!  ! Create the netCDF file
-!!  retval = nf90_create(filename, nf90_clobber, ncid)
-!!  if (retval /= nf90_noerr) then
-!!    print *, 'Failed to create file: ', trim(filename)
-!!    print *, 'Error: ', nf90_strerror(retval)
-!!    stop
-!!  endif
+    ! Determine the size of each dimension from the input arrays
+    xsize = size(xvalues)
+    ysize = size(yvalues)
 
-!!  ! Define the dimensions
-!!  retval = nf90_def_dim(ncid, xname, xsize, xid)
-!!  if (retval /= nf90_noerr) then
-!!    print *, 'Failed to define dimension ', xname
-!!    print *, 'Error: ', nf90_strerror(retval)
-!!    stop
-!!  endif
+    ! Create the netCDF file
+    retval = nf90_create(filename, nf90_clobber, ncid)
+    if (retval /= nf90_noerr) then
+      print *, 'Failed to create file: ', trim(filename)
+      print *, 'Error: ', nf90_strerror(retval)
+      stop
+    endif
 
-!!  retval = nf90_def_dim(ncid, yname, ysize, yid)
-!!  if (retval /= nf90_noerr) then
-!!    print *, 'Failed to define dimension ', yname
-!!    print *, 'Error: ', nf90_strerror(retval)
-!!    stop
-!!  endif
+    ! Define the dimensions
+    retval = nf90_def_dim(ncid, xname, xsize, xid)
+    if (retval /= nf90_noerr) then
+      print *, 'Failed to define dimension ', xname
+      print *, 'Error: ', nf90_strerror(retval)
+      stop
+    endif
 
-!!  ! Define the dimension variables
-!!  retval = nf90_def_var(ncid, xname, nf90_double, [xid], xvarid)
-!!  if (retval /= nf90_noerr) then
-!!    print *, 'Failed to define variable: ', xname
-!!    print *, 'Error: ', nf90_strerror(retval)
-!!    stop
-!!  endif
+    retval = nf90_def_dim(ncid, yname, ysize, yid)
+    if (retval /= nf90_noerr) then
+      print *, 'Failed to define dimension ', yname
+      print *, 'Error: ', nf90_strerror(retval)
+      stop
+    endif
 
-!!  retval = nf90_def_var(ncid, yname, nf90_double, [yid], yvarid)
-!!  if (retval /= nf90_noerr) then
-!!    print *, 'Failed to define variable: ', yname
-!!    print *, 'Error: ', nf90_strerror(retval)
-!!    stop
-!!  endif
+    ! Define the dimension variables
+    retval = nf90_def_var(ncid, xname, nf90_double, [xid], xvarid)
+    if (retval /= nf90_noerr) then
+      print *, 'Failed to define variable: ', xname
+      print *, 'Error: ', nf90_strerror(retval)
+      stop
+    endif
 
-!!  ! Add attributes to the dimension variables
-!!  retval = nf90_put_att(ncid, xvarid, 'standard_name', 'longitude')
-!!  retval = nf90_put_att(ncid, xvarid, 'long_name', 'longitude')
-!!  retval = nf90_put_att(ncid, xvarid, 'units', 'degrees_east')
-!!  retval = nf90_put_att(ncid, xvarid, 'axis', 'X')
+    retval = nf90_def_var(ncid, yname, nf90_double, [yid], yvarid)
+    if (retval /= nf90_noerr) then
+      print *, 'Failed to define variable: ', yname
+      print *, 'Error: ', nf90_strerror(retval)
+      stop
+    endif
 
-!!  retval = nf90_put_att(ncid, yvarid, 'standard_name', 'latitude')
-!!  retval = nf90_put_att(ncid, yvarid, 'long_name', 'latitude')
-!!  retval = nf90_put_att(ncid, yvarid, 'units', 'degrees_north')
-!!  retval = nf90_put_att(ncid, yvarid, 'axis', 'Y')
+    ! Add attributes to the dimension variables
+    retval = nf90_put_att(ncid, xvarid, 'standard_name', 'longitude')
+    retval = nf90_put_att(ncid, xvarid, 'long_name', 'longitude')
+    retval = nf90_put_att(ncid, xvarid, 'units', 'degrees_east')
+    retval = nf90_put_att(ncid, xvarid, 'axis', 'X')
 
-!!  ! Define the variable
-!!  retval = nf90_def_var(ncid, varname, nf90_double, [xid, yid], varid)
-!!  if (retval /= nf90_noerr) then
-!!    print *, 'Failed to define variable: ', varname
-!!    print *, 'Error: ', nf90_strerror(retval)
-!!    stop
-!!  endif
+    retval = nf90_put_att(ncid, yvarid, 'standard_name', 'latitude')
+    retval = nf90_put_att(ncid, yvarid, 'long_name', 'latitude')
+    retval = nf90_put_att(ncid, yvarid, 'units', 'degrees_north')
+    retval = nf90_put_att(ncid, yvarid, 'axis', 'Y')
 
-!!  ! Add attributes to the variable
-!!  retval = nf90_put_att(ncid, varid, 'units', varunit)
-!!  retval = nf90_put_att(ncid, varid, '_FillValue', fill_value)
-!!  retval = nf90_put_att(ncid, varid, 'missing_value', fill_value)
-!!  retval = nf90_put_att(ncid, varid, 'cell_methods', 'time: mean')
-!!  retval = nf90_put_att(ncid, varid, 'original_name', varname)
+    ! Define the variable
+    retval = nf90_def_var(ncid, varname, nf90_double, [xid, yid], varid)
+    if (retval /= nf90_noerr) then
+      print *, 'Failed to define variable: ', varname
+      print *, 'Error: ', nf90_strerror(retval)
+      stop
+    endif
 
-!!  ! End define mode
-!!  retval = nf90_enddef(ncid)
-!!  if (retval /= nf90_noerr) then
-!!    print *, 'Failed to end define mode.'
-!!    print *, 'Error: ', nf90_strerror(retval)
-!!    stop
-!!  endif
+    ! Add attributes to the variable
+    retval = nf90_put_att(ncid, varid, 'units', varunit)
+    retval = nf90_put_att(ncid, varid, '_FillValue', fill_value)
+    retval = nf90_put_att(ncid, varid, 'missing_value', fill_value)
+    retval = nf90_put_att(ncid, varid, 'cell_methods', 'time: mean')
+    retval = nf90_put_att(ncid, varid, 'original_name', varname)
 
-!!  ! Write the data for the dimensions
-!!  retval = nf90_put_var(ncid, xvarid, xvalues)
-!!  if (retval /= nf90_noerr) then
-!!    print *, 'Failed to write data: ', xname
-!!    print *, 'Error: ', nf90_strerror(retval)
-!!    stop
-!!  endif
+    ! End define mode
+    retval = nf90_enddef(ncid)
+    if (retval /= nf90_noerr) then
+      print *, 'Failed to end define mode.'
+      print *, 'Error: ', nf90_strerror(retval)
+      stop
+    endif
 
-!!  retval = nf90_put_var(ncid, yvarid, yvalues)
-!!  if (retval /= nf90_noerr) then
-!!    print *, 'Failed to write data: ', yname
-!!    print *, 'Error: ', nf90_strerror(retval)
-!!    stop
-!!  endif
+    ! Write the data for the dimensions
+    retval = nf90_put_var(ncid, xvarid, xvalues)
+    if (retval /= nf90_noerr) then
+      print *, 'Failed to write data: ', xname
+      print *, 'Error: ', nf90_strerror(retval)
+      stop
+    endif
 
-!!  ! Write the data for the variable
-!!  retval = nf90_put_var(ncid, varid, var)
-!!  if (retval /= nf90_noerr) then
-!!    print *, 'Failed to write data for variable: ', varname
-!!    print *, 'Error: ', nf90_strerror(retval)
-!!    stop
-!!  endif
+    retval = nf90_put_var(ncid, yvarid, yvalues)
+    if (retval /= nf90_noerr) then
+      print *, 'Failed to write data: ', yname
+      print *, 'Error: ', nf90_strerror(retval)
+      stop
+    endif
 
-!!  ! Close the netCDF file
-!!  retval = nf90_close(ncid)
-!!  if (retval /= nf90_noerr) then
-!!    print *, 'Error occurred while closing the file: ', trim(filename)
-!!    stop
-!!  endif
+    ! Write the data for the variable
+    retval = nf90_put_var(ncid, varid, var)
+    if (retval /= nf90_noerr) then
+      print *, 'Failed to write data for variable: ', varname
+      print *, 'Error: ', nf90_strerror(retval)
+      stop
+    endif
 
-!!end subroutine write_netcdf_2d
+    ! Close the netCDF file
+    retval = nf90_close(ncid)
+    if (retval /= nf90_noerr) then
+      print *, 'Error occurred while closing the file: ', trim(filename)
+      stop
+    endif
 
-!!subroutine write_netcdf_3d(filename, varname, varunit, var, xvalues, yvalues, zvalues)
-!!  implicit none
+  end subroutine write_netcdf_2dwot
 
-!!  character(len=*), intent(in) :: filename, varname, varunit
-!!  double precision, dimension(:,:,:), intent(in) :: var
-!!  double precision, dimension(:), intent(in) :: xvalues, yvalues, zvalues
 
-!!  integer(kind=4) :: ncid, varid, retval
-!!  integer(kind=4) :: xid, xsize
-!!  integer(kind=4) :: yid, ysize
-!!  integer(kind=4) :: zid, zsize
-!!  integer(kind=4) :: xvarid, yvarid, zvarid
-
-!!  character(len=*), parameter :: xname = 'lon'
-!!  character(len=*), parameter :: yname = 'lat'
-!!  character(len=*), parameter :: zname = 'depth'
-
-!!  double precision, parameter :: fill_value = 999.0
-
-!!  ! Determine the size of each dimension from the input arrays
-!!  xsize = size(xvalues)
-!!  ysize = size(yvalues)
-!!  zsize = size(zvalues)
-
-!!  ! Create the netCDF file
-!!  retval = nf90_create(filename, nf90_clobber, ncid)
-!!  if (retval /= nf90_noerr) then
-!!    print *, 'Failed to create file: ', trim(filename)
-!!    print *, 'Error: ', nf90_strerror(retval)
-!!    stop
-!!  endif
-
-!!  ! Define the dimensions
-!!  retval = nf90_def_dim(ncid, xname, xsize, xid)
-!!  if (retval /= nf90_noerr) then
-!!    print *, 'Failed to define dimension ', xname
-!!    print *, 'Error: ', nf90_strerror(retval)
-!!    stop
-!!  endif
-
-!!  retval = nf90_def_dim(ncid, yname, ysize, yid)
-!!  if (retval /= nf90_noerr) then
-!!    print *, 'Failed to define dimension ', yname
-!!    print *, 'Error: ', nf90_strerror(retval)
-!!    stop
-!!  endif
-
-!!  retval = nf90_def_dim(ncid, zname, zsize, zid)
-!!  if (retval /= nf90_noerr) then
-!!    print *, 'Failed to define dimension ', zname
-!!    print *, 'Error: ', nf90_strerror(retval)
-!!    stop
-!!  endif
-
-!!  ! Define the dimension variables
-!!  retval = nf90_def_var(ncid, xname, nf90_double, [xid], xvarid)
-!!  if (retval /= nf90_noerr) then
-!!    print *, 'Failed to define variable: ', xname
-!!    print *, 'Error: ', nf90_strerror(retval)
-!!    stop
-!!  endif
-
-!!  retval = nf90_def_var(ncid, yname, nf90_double, [yid], yvarid)
-!!  if (retval /= nf90_noerr) then
-!!    print *, 'Failed to define variable: ', yname
-!!    print *, 'Error: ', nf90_strerror(retval)
-!!    stop
-!!  endif
-
-!!  retval = nf90_def_var(ncid, zname, nf90_double, [zid], zvarid)
-!!  if (retval /= nf90_noerr) then
-!!    print *, 'Failed to define variable: ', zname
-!!    print *, 'Error: ', nf90_strerror(retval)
-!!    stop
-!!  endif
-
-!!  ! Add attributes to the dimension variables
-!!  retval = nf90_put_att(ncid, xvarid, 'standard_name', 'longitude')
-!!  retval = nf90_put_att(ncid, xvarid, 'long_name', 'longitude')
-!!  retval = nf90_put_att(ncid, xvarid, 'units', 'degrees_east')
-!!  retval = nf90_put_att(ncid, xvarid, 'axis', 'X')
-
-!!  retval = nf90_put_att(ncid, yvarid, 'standard_name', 'latitude')
-!!  retval = nf90_put_att(ncid, yvarid, 'long_name', 'latitude')
-!!  retval = nf90_put_att(ncid, yvarid, 'units', 'degrees_north')
-!!  retval = nf90_put_att(ncid, yvarid, 'axis', 'Y')
-
-!!  retval = nf90_put_att(ncid, zvarid, 'standard_name', 'depth')
-!!  retval = nf90_put_att(ncid, zvarid, 'long_name', 'depth')
-!!  retval = nf90_put_att(ncid, zvarid, 'units', 'm')
-!!  retval = nf90_put_att(ncid, zvarid, 'axis', 'Z')
-
-!!  ! Define the variable
-!!  retval = nf90_def_var(ncid, varname, nf90_double, [xid, yid, zid], varid)
-!!  if (retval /= nf90_noerr) then
-!!    print *, 'Failed to define variable: ', varname
-!!    print *, 'Error: ', nf90_strerror(retval)
-!!    stop
-!!  endif
-
-!!  ! Add attributes to the variable
-!!  retval = nf90_put_att(ncid, varid, 'units', varunit)
-!!  retval = nf90_put_att(ncid, varid, '_FillValue', fill_value)
-!!  retval = nf90_put_att(ncid, varid, 'missing_value', fill_value)
-!!  retval = nf90_put_att(ncid, varid, 'cell_methods', 'time: mean')
-!!  retval = nf90_put_att(ncid, varid, 'original_name', varname)
-
-!!  ! End define mode
-!!  retval = nf90_enddef(ncid)
-!!  if (retval /= nf90_noerr) then
-!!    print *, 'Failed to end define mode.'
-!!    print *, 'Error: ', nf90_strerror(retval)
-!!    stop
-!!  endif
-
-!!  ! Write the data for the dimensions
-!!  retval = nf90_put_var(ncid, xvarid, xvalues)
-!!  if (retval /= nf90_noerr) then
-!!    print *, 'Failed to write data: ', xname
-!!    print *, 'Error: ', nf90_strerror(retval)
-!!    stop
-!!  endif
-
-!!  retval = nf90_put_var(ncid, yvarid, yvalues)
-!!  if (retval /= nf90_noerr) then
-!!    print *, 'Failed to write data: ', yname
-!!    print *, 'Error: ', nf90_strerror(retval)
-!!    stop
-!!  endif
-
-!!  retval = nf90_put_var(ncid, zvarid, zvalues)
-!!  if (retval /= nf90_noerr) then
-!!    print *, 'Failed to write data: ', zname
-!!    print *, 'Error: ', nf90_strerror(retval)
-!!    stop
-!!  endif
-
-!!  ! Write the data for the variable
-!!  retval = nf90_put_var(ncid, varid, var)
-!!  if (retval /= nf90_noerr) then
-!!    print *, 'Failed to write data for variable: ', varname
-!!    print *, 'Error: ', nf90_strerror(retval)
-!!    stop
-!!  endif
-
-!!  ! Close the netCDF file
-!!  retval = nf90_close(ncid)
-!!  if (retval /= nf90_noerr) then
-!!    print *, 'Error occurred while closing the file: ', trim(filename)
-!!    stop
-!!  endif
-
-!!end subroutine write_netcdf_3d
-
-  subroutine write_netcdf_2d(filename, varname, varunit, var, xvalues, yvalues, tvalues)
+  subroutine write_netcdf_2dwt(filename, varname, varunit, var, xvalues, yvalues, tvalues)
     implicit none
     character(len=*), intent(in) :: filename, varname, varunit
     double precision, dimension(:,:,:), intent(in) :: var
@@ -913,9 +939,165 @@ contains
       stop
     endif
 
-  end subroutine write_netcdf_2d
+  end subroutine write_netcdf_2dwt
 
-  subroutine write_netcdf_3d(filename, varname, varunit, var, xvalues, yvalues, zvalues, tvalues)
+
+  subroutine write_netcdf_3dwot(filename, varname, varunit, var, xvalues, yvalues, zvalues)
+    implicit none
+
+    character(len=*), intent(in) :: filename, varname, varunit
+    double precision, dimension(:,:,:), intent(in) :: var
+    double precision, dimension(:), intent(in) :: xvalues, yvalues, zvalues
+
+    integer(kind=4) :: ncid, varid, retval
+    integer(kind=4) :: xid, xsize
+    integer(kind=4) :: yid, ysize
+    integer(kind=4) :: zid, zsize
+    integer(kind=4) :: xvarid, yvarid, zvarid
+
+    character(len=*), parameter :: xname = 'lon'
+    character(len=*), parameter :: yname = 'lat'
+    character(len=*), parameter :: zname = 'depth'
+
+    double precision, parameter :: fill_value = 999.0
+
+    ! Determine the size of each dimension from the input arrays
+    xsize = size(xvalues)
+    ysize = size(yvalues)
+    zsize = size(zvalues)
+
+    ! Create the netCDF file
+    retval = nf90_create(filename, nf90_clobber, ncid)
+    if (retval /= nf90_noerr) then
+      print *, 'Failed to create file: ', trim(filename)
+      print *, 'Error: ', nf90_strerror(retval)
+      stop
+    endif
+
+    ! Define the dimensions
+    retval = nf90_def_dim(ncid, xname, xsize, xid)
+    if (retval /= nf90_noerr) then
+      print *, 'Failed to define dimension ', xname
+      print *, 'Error: ', nf90_strerror(retval)
+      stop
+    endif
+
+    retval = nf90_def_dim(ncid, yname, ysize, yid)
+    if (retval /= nf90_noerr) then
+      print *, 'Failed to define dimension ', yname
+      print *, 'Error: ', nf90_strerror(retval)
+      stop
+    endif
+
+    retval = nf90_def_dim(ncid, zname, zsize, zid)
+    if (retval /= nf90_noerr) then
+      print *, 'Failed to define dimension ', zname
+      print *, 'Error: ', nf90_strerror(retval)
+      stop
+    endif
+
+    ! Define the dimension variables
+    retval = nf90_def_var(ncid, xname, nf90_double, [xid], xvarid)
+    if (retval /= nf90_noerr) then
+      print *, 'Failed to define variable: ', xname
+      print *, 'Error: ', nf90_strerror(retval)
+      stop
+    endif
+
+    retval = nf90_def_var(ncid, yname, nf90_double, [yid], yvarid)
+    if (retval /= nf90_noerr) then
+      print *, 'Failed to define variable: ', yname
+      print *, 'Error: ', nf90_strerror(retval)
+      stop
+    endif
+
+    retval = nf90_def_var(ncid, zname, nf90_double, [zid], zvarid)
+    if (retval /= nf90_noerr) then
+      print *, 'Failed to define variable: ', zname
+      print *, 'Error: ', nf90_strerror(retval)
+      stop
+    endif
+
+    ! Add attributes to the dimension variables
+    retval = nf90_put_att(ncid, xvarid, 'standard_name', 'longitude')
+    retval = nf90_put_att(ncid, xvarid, 'long_name', 'longitude')
+    retval = nf90_put_att(ncid, xvarid, 'units', 'degrees_east')
+    retval = nf90_put_att(ncid, xvarid, 'axis', 'X')
+
+    retval = nf90_put_att(ncid, yvarid, 'standard_name', 'latitude')
+    retval = nf90_put_att(ncid, yvarid, 'long_name', 'latitude')
+    retval = nf90_put_att(ncid, yvarid, 'units', 'degrees_north')
+    retval = nf90_put_att(ncid, yvarid, 'axis', 'Y')
+
+    retval = nf90_put_att(ncid, zvarid, 'standard_name', 'depth')
+    retval = nf90_put_att(ncid, zvarid, 'long_name', 'depth')
+    retval = nf90_put_att(ncid, zvarid, 'units', 'm')
+    retval = nf90_put_att(ncid, zvarid, 'axis', 'Z')
+
+    ! Define the variable
+    retval = nf90_def_var(ncid, varname, nf90_double, [xid, yid, zid], varid)
+    if (retval /= nf90_noerr) then
+      print *, 'Failed to define variable: ', varname
+      print *, 'Error: ', nf90_strerror(retval)
+      stop
+    endif
+
+    ! Add attributes to the variable
+    retval = nf90_put_att(ncid, varid, 'units', varunit)
+    retval = nf90_put_att(ncid, varid, '_FillValue', fill_value)
+    retval = nf90_put_att(ncid, varid, 'missing_value', fill_value)
+    retval = nf90_put_att(ncid, varid, 'cell_methods', 'time: mean')
+    retval = nf90_put_att(ncid, varid, 'original_name', varname)
+
+    ! End define mode
+    retval = nf90_enddef(ncid)
+    if (retval /= nf90_noerr) then
+      print *, 'Failed to end define mode.'
+      print *, 'Error: ', nf90_strerror(retval)
+      stop
+    endif
+
+    ! Write the data for the dimensions
+    retval = nf90_put_var(ncid, xvarid, xvalues)
+    if (retval /= nf90_noerr) then
+      print *, 'Failed to write data: ', xname
+      print *, 'Error: ', nf90_strerror(retval)
+      stop
+    endif
+
+    retval = nf90_put_var(ncid, yvarid, yvalues)
+    if (retval /= nf90_noerr) then
+      print *, 'Failed to write data: ', yname
+      print *, 'Error: ', nf90_strerror(retval)
+      stop
+    endif
+
+    retval = nf90_put_var(ncid, zvarid, zvalues)
+    if (retval /= nf90_noerr) then
+      print *, 'Failed to write data: ', zname
+      print *, 'Error: ', nf90_strerror(retval)
+      stop
+    endif
+
+    ! Write the data for the variable
+    retval = nf90_put_var(ncid, varid, var)
+    if (retval /= nf90_noerr) then
+      print *, 'Failed to write data for variable: ', varname
+      print *, 'Error: ', nf90_strerror(retval)
+      stop
+    endif
+
+    ! Close the netCDF file
+    retval = nf90_close(ncid)
+    if (retval /= nf90_noerr) then
+      print *, 'Error occurred while closing the file: ', trim(filename)
+      stop
+    endif
+
+  end subroutine write_netcdf_3dwot
+
+
+  subroutine write_netcdf_3dwt(filename, varname, varunit, var, xvalues, yvalues, zvalues, tvalues)
     implicit none
     character(len=*), intent(in) :: filename, varname, varunit
     double precision, dimension(:,:,:,:), intent(in) :: var
@@ -1176,7 +1358,8 @@ contains
       stop
     endif
 
-  end subroutine write_netcdf_3d
+  end subroutine write_netcdf_3dwt
+
 
 !!subroutine write_restart(filename, varname, varunit, var, xvalues, yvalues, zvalues, tvalues)
 !!  use netcdf
