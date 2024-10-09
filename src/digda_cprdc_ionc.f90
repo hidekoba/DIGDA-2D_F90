@@ -26,8 +26,9 @@ module module_digda_cprdc
   use module_digda_chemeq
   implicit none
 
-  logical :: sdfirst = .true.
+  logical :: sdrest = .true.
   logical :: sdofirst = .true.
+  namelist /nmsdrst/ sdrest
 
   logical :: deiarc = .true.  !! Archer's DEI formulation ?
   namelist /nmsddear/ deiarc
@@ -577,7 +578,7 @@ end if
 
          yy = int( sdtsyr * tt )
 
-      if (sdfirst) then
+      if (.not. sdrest) then
          do k = skst, sken
             do ij = ijtstr, ijtend
                scla(ij, k) = rhocla * 1.0d+6
@@ -606,7 +607,7 @@ end if
                popa(ij, k) = 0.0d0
             end do
          end do
-         sdfirst = .false.
+         sdrest = .false.
       else
 if (use_mpi) then
          do k = skst, sken
