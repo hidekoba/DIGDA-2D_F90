@@ -3,38 +3,35 @@
 DIGDADIR=/work/gi55/c24116/digda/DIGDA-2D_F90
 BINARY=$DIGDADIR/bin/digda_256192.par
 RUNDIR=$DIGDADIR/RUN
-#BOUNDDIR=$DIGDADIR/Bound/bound256192
-BOUNDDIR=$DIGDADIR/Bound/data_digda256192
+#BNDDIR=$DIGDADIR/Bound/bound256192
+#BNDDIR=$DIGDADIR/Bound/bound21601080
+BNDDIR=$DIGDADIR/Bound/data_digda256192
 PARAMET=./PARAMET
 MPIRUN=mpiexec
 
 SDYRSTR="0"
-SDYREND="150000"
-SDYRSTP="30000"
-SDYRHST="10000"
+SDYREND="10000"
+SDYRHST="2000"
 
-EXPDIR=$DIGDADIR/OUT/test_256192
+EXPDIR=$DIGDADIR/OUT/1p4d
 
-for (( SDYR=$SDYRSTR; SDYR<$SDYREND; SDYR+=$SDYRSTP )); do
-    INIDIR=$EXPDIR/$SDYR
-    SDYRNXT=$((SDYR + SDYRSTP))
-    if [ $SDYRNXT -gt $SDYREND ]; then
-        SDYRNXT=$SDYREND
-    fi
-    OUTDIR=$EXPDIR/$SDYRNXT
+INIDIR=$EXPDIR/$SDYRSTR
+OUTDIR=$EXPDIR/$SDYREND
 
-    mkdir -p $OUTDIR
+mkdir -p $OUTDIR
 
-    cd $OUTDIR
-    /bin/rm -f $PARAMET ; /bin/rm -rf *
+#cd $RUNDIR
+#mv digda.[0-9]*.out digda.[0-9]*.stats exp
 
-    JOB_NAME=`basename $0`
-    /bin/rm -rf ${JOB_NAME}.y${SDYRNXT}*
+cd $OUTDIR
+/bin/rm -f $PARAMET ; /bin/rm -rf *
 
+JOB_NAME=`basename $0`
+/bin/rm -rf ${JOB_NAME}.y${SDYREND}*
 #############################################################################
 cat << EOF >> $PARAMET
 &nmrun crun='digda test' &end
-&nmocbc bound_dir='$BOUNDDIR' &end
+&nmocbc bound_dir='$BNDDIR' &end
 &nmocrt init_dir='$INIDIR',
         rstt_dir='$OUTDIR' &end
 &nmsdtm sdyrstr=$SDYRSTR,
@@ -56,7 +53,7 @@ cat << EOF >> $PARAMET
 
 EOF
 #############################################################################
-cat << EOF > ${JOB_NAME}.y${SDYRNXT}
+cat << EOF > ${JOB_NAME}.y${SDYREND}
 #!/bin/tcsh
 
 #PJM -g gi55o
@@ -75,7 +72,7 @@ cat << EOF > ${JOB_NAME}.y${SDYRNXT}
 
 EOF
 #############################################################################
-cat << EOF >> ${JOB_NAME}.y${SDYRNXT}
+cat << EOF >> ${JOB_NAME}.y${SDYREND}
 umask 002
 
 module unload intel
@@ -87,22 +84,22 @@ module load phdf5
 module load netcdf
 module load netcdf-fortran
 
-setenv PLE_MPI_STD_EMPTYFILE off
-setenv PARALLEL        1
-setenv OMP_NUM_THREADS 1
+setenv PLE_MPI_STD_EMPTYFILE off 
+setenv PARALLEL        1 
+setenv OMP_NUM_THREADS 1 
 setenv FORT90L "-Wl,-T" # big-endian
 
 EOF
 #############################################################################
-cat << EOF >> ${JOB_NAME}.y${SDYRNXT}
+cat << EOF >> ${JOB_NAME}.y${SDYREND}
 setenv BINARY    $BINARY
 setenv RUNDIR    $RUNDIR
-setenv BOUNDDIR  $BOUNDDIR
+setenv BNDDIR  $BNDDIR
 setenv PARAMET   $PARAMET
 setenv MPIRUN    $MPIRUN
 
-set SDYRSTR=$SDYR
-set SDYREND=$SDYRNXT
+set SDYRSTR=$SDYRSTR
+set SDYREND=$SDYREND
 
 setenv EXPDIR    $EXPDIR
 
@@ -116,7 +113,7 @@ mv STDOUT.* ./STDOUT
 EOF
 #######################################################################
 
-VAR=`pjsub --step ${JOB_NAME}.y${SDYRNXT} -e ERROUT`
+VAR=`pjsub --step ${JOB_NAME}.y${SDYREND} -e ERROUT`
 echo $VAR
 VAR=`echo $VAR | cut -d " " -f 6`
 JID=${VAR%_0}
@@ -137,5 +134,3 @@ echo "post-process `basename $OUTDIR` started at `date`."
 
 bash $RUNDIR/pp_digda_combine_SEDTRR.sh $OUTDIR
 bash $RUNDIR/pp_digda_calc_weight_percentage.sh $OUTDIR
-
-done

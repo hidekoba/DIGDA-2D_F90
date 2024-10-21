@@ -1,41 +1,45 @@
 #!/bin/bash
 
 DIGDADIR=/work/gi55/c24116/digda/DIGDA-2D_F90
-BINARY=$DIGDADIR/bin/digda_256192.par
+BINARY=$DIGDADIR/bin/digda_256192rst.par
 RUNDIR=$DIGDADIR/RUN
-#BOUNDDIR=$DIGDADIR/Bound/bound256192
-#BOUNDDIR=$DIGDADIR/Bound/bound21601080
-BOUNDDIR=$DIGDADIR/Bound/data_digda256192
+#BNDDIR=$DIGDADIR/Bound/bound256192
+BNDDIR=$DIGDADIR/Bound/data_digda256192
 PARAMET=./PARAMET
 MPIRUN=mpiexec
 
 SDYRSTR="0"
-SDYREND="10000"
-SDYRHST="2000"
+SDYREND="150000"
+SDYRSTP="30000"
+SDYRHST="10000"
 
-EXPDIR=$DIGDADIR/OUT/test_256192
+#EXPDIR=$DIGDADIR/OUT/1p4d
+EXPDIR=$DIGDADIR/OUT/rccar_p4/1p4d
 
-INIDIR=$EXPDIR/$SDYRSTR
-OUTDIR=$EXPDIR/$SDYREND
+for (( SDYR=$SDYRSTR; SDYR<$SDYREND; SDYR+=$SDYRSTP )); do
+    INIDIR=$EXPDIR/$SDYR
+    SDYRNXT=$((SDYR + SDYRSTP))
+    if [ $SDYRNXT -gt $SDYREND ]; then
+        SDYRNXT=$SDYREND
+    fi
+    OUTDIR=$EXPDIR/$SDYRNXT
 
-mkdir -p $OUTDIR
+    mkdir -p $OUTDIR
 
-#cd $RUNDIR
-#mv digda.[0-9]*.out digda.[0-9]*.stats exp
+    cd $OUTDIR
+    /bin/rm -f $PARAMET ; /bin/rm -rf *
 
-cd $OUTDIR
-/bin/rm -f $PARAMET ; /bin/rm -rf *
+    JOB_NAME=`basename $0`
+    /bin/rm -rf ${JOB_NAME}.y${SDYRNXT}*
 
-JOB_NAME=`basename $0`
-/bin/rm -rf ${JOB_NAME}.y${SDYREND}*
 #############################################################################
 cat << EOF >> $PARAMET
 &nmrun crun='digda test' &end
-&nmocbc bound_dir='$BOUNDDIR' &end
+&nmocbc bound_dir='$BNDDIR' &end
 &nmocrt init_dir='$INIDIR',
         rstt_dir='$OUTDIR' &end
-&nmsdtm sdyrstr=$SDYRSTR,
-        sdyrend=$SDYREND,
+&nmsdtm sdyrstr=$SDYR,
+        sdyrend=$SDYRNXT,
         sdyrhst=$SDYRHST &end
 &nmsdhi wotstp=t,
         wohist=t &end
@@ -43,7 +47,7 @@ cat << EOF >> $PARAMET
 &nmsdiso calc13=f, calc14=f &end
 
 &nmsdpm kox=2.00e-9, kax=7.90e-11 &end
-&nmsdca rccar=365.d-3, ncar=4.50  &end
+&nmsdca rccar=365.d-4, ncar=4.50  &end
 &nmsdop rcopa=5.0d-3, roprid=f, roparc=t &end
 
 &nmsdchem alkerr=0.10d0, itrmax=10000, rocn=1.0245d0 &end
@@ -53,7 +57,7 @@ cat << EOF >> $PARAMET
 
 EOF
 #############################################################################
-cat << EOF > ${JOB_NAME}.y${SDYREND}
+cat << EOF > ${JOB_NAME}.y${SDYRNXT}
 #!/bin/tcsh
 
 #PJM -g gi55o
@@ -72,7 +76,7 @@ cat << EOF > ${JOB_NAME}.y${SDYREND}
 
 EOF
 #############################################################################
-cat << EOF >> ${JOB_NAME}.y${SDYREND}
+cat << EOF >> ${JOB_NAME}.y${SDYRNXT}
 umask 002
 
 module unload intel
@@ -84,22 +88,22 @@ module load phdf5
 module load netcdf
 module load netcdf-fortran
 
-setenv PLE_MPI_STD_EMPTYFILE off 
-setenv PARALLEL        1 
-setenv OMP_NUM_THREADS 1 
+setenv PLE_MPI_STD_EMPTYFILE off
+setenv PARALLEL        1
+setenv OMP_NUM_THREADS 1
 setenv FORT90L "-Wl,-T" # big-endian
 
 EOF
 #############################################################################
-cat << EOF >> ${JOB_NAME}.y${SDYREND}
+cat << EOF >> ${JOB_NAME}.y${SDYRNXT}
 setenv BINARY    $BINARY
 setenv RUNDIR    $RUNDIR
-setenv BOUNDDIR  $BOUNDDIR
+setenv BNDDIR  $BNDDIR
 setenv PARAMET   $PARAMET
 setenv MPIRUN    $MPIRUN
 
-set SDYRSTR=$SDYRSTR
-set SDYREND=$SDYREND
+set SDYRSTR=$SDYR
+set SDYREND=$SDYRNXT
 
 setenv EXPDIR    $EXPDIR
 
@@ -113,7 +117,7 @@ mv STDOUT.* ./STDOUT
 EOF
 #######################################################################
 
-VAR=`pjsub --step ${JOB_NAME}.y${SDYREND} -e ERROUT`
+VAR=`pjsub --step ${JOB_NAME}.y${SDYRNXT} -e ERROUT`
 echo $VAR
 VAR=`echo $VAR | cut -d " " -f 6`
 JID=${VAR%_0}
@@ -134,3 +138,5 @@ echo "post-process `basename $OUTDIR` started at `date`."
 
 bash $RUNDIR/pp_digda_combine_SEDTRR.sh $OUTDIR
 bash $RUNDIR/pp_digda_calc_weight_percentage.sh $OUTDIR
+
+done

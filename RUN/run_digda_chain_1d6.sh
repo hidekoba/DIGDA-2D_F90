@@ -1,19 +1,20 @@
 #!/bin/bash
 
 DIGDADIR=/work/gi55/c24116/digda/DIGDA-2D_F90
-BINARY=$DIGDADIR/bin/digda_21601080.par
+BINARY=$DIGDADIR/bin/digda_21601080rst.par
 RUNDIR=$DIGDADIR/RUN
-#BOUNDDIR=$DIGDADIR/Bound/bound21601080
-BOUNDDIR=$DIGDADIR/Bound/data_digda21601080
+#BNDDIR=$DIGDADIR/Bound/bound21601080
+BNDDIR=$DIGDADIR/Bound/data_digda21601080
 PARAMET=./PARAMET
 MPIRUN=mpiexec
 
 SDYRSTR="0"
-SDYREND="5"
-SDYRSTP="1"
-SDYRHST="1"
+SDYREND="10000"
+SDYRSTP="2000"
+SDYRHST="1000"
 
-EXPDIR=$DIGDADIR/OUT/test_21601080
+#EXPDIR=$DIGDADIR/OUT/rccar_p3/1d6
+ EXPDIR=$DIGDADIR/OUT/rccar_p3/1d6_fl150k
 
 for (( SDYR=$SDYRSTR; SDYR<$SDYREND; SDYR+=$SDYRSTP )); do
     INIDIR=$EXPDIR/$SDYR
@@ -34,11 +35,11 @@ for (( SDYR=$SDYRSTR; SDYR<$SDYREND; SDYR+=$SDYRSTP )); do
 #############################################################################
 cat << EOF >> $PARAMET
 &nmrun crun='digda test' &end
-&nmocbc bound_dir='$BOUNDDIR' &end
+&nmocbc bound_dir='$BNDDIR' &end
 &nmocrt init_dir='$INIDIR',
         rstt_dir='$OUTDIR' &end
-&nmsdtm sdyrstr=$SDYRSTR,
-        sdyrend=$SDYREND,
+&nmsdtm sdyrstr=$SDYR,
+        sdyrend=$SDYRNXT,
         sdyrhst=$SDYRHST &end
 &nmsdhi wotstp=t,
         wohist=t &end
@@ -97,7 +98,7 @@ EOF
 cat << EOF >> ${JOB_NAME}.y${SDYRNXT}
 setenv BINARY    $BINARY
 setenv RUNDIR    $RUNDIR
-setenv BOUNDDIR  $BOUNDDIR
+setenv BNDDIR  $BNDDIR
 setenv PARAMET   $PARAMET
 setenv MPIRUN    $MPIRUN
 

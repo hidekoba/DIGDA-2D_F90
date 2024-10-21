@@ -3,9 +3,9 @@
 DIGDADIR=/work/gi55/c24116/digda/DIGDA-2D_F90
 BINARY=$DIGDADIR/bin/digda_21601080.par
 RUNDIR=$DIGDADIR/RUN
-#BOUNDDIR=$DIGDADIR/Bound/bound256192
-#BOUNDDIR=$DIGDADIR/Bound/bound21601080
-BOUNDDIR=$DIGDADIR/Bound/data_digda21601080
+#BNDDIR=$DIGDADIR/Bound/bound256192
+#BNDDIR=$DIGDADIR/Bound/bound21601080
+BNDDIR=$DIGDADIR/Bound/data_digda21601080
 PARAMET=./PARAMET
 MPIRUN=mpiexec
 
@@ -13,7 +13,7 @@ SDYRSTR="0"
 SDYREND="1000"
 SDYRHST="200"
 
-EXPDIR=$DIGDADIR/OUT/test_21601080
+EXPDIR=$DIGDADIR/OUT/1d6
 
 INIDIR=$EXPDIR/$SDYRSTR
 OUTDIR=$EXPDIR/$SDYREND
@@ -31,7 +31,7 @@ JOB_NAME=`basename $0`
 #############################################################################
 cat << EOF >> $PARAMET
 &nmrun crun='digda test' &end
-&nmocbc bound_dir='$BOUNDDIR' &end
+&nmocbc bound_dir='$BNDDIR' &end
 &nmocrt init_dir='$INIDIR',
         rstt_dir='$OUTDIR' &end
 &nmsdtm sdyrstr=$SDYRSTR,
@@ -94,7 +94,7 @@ EOF
 cat << EOF >> ${JOB_NAME}.y${SDYREND}
 setenv BINARY    $BINARY
 setenv RUNDIR    $RUNDIR
-setenv BOUNDDIR  $BOUNDDIR
+setenv BNDDIR  $BNDDIR
 setenv PARAMET   $PARAMET
 setenv MPIRUN    $MPIRUN
 
