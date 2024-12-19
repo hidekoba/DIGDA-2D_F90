@@ -76,16 +76,15 @@ module module_digda_timestep
   integer :: sdyrstr = 0
   integer :: sdyrend = 500
   integer :: tend
+  logical :: wotstp = .true.  !! write out time step ?
+  namelist /nmsdtm/ sdtsyr, sdyrstr, sdyrend, wotstp
 
   ! Interval for outputting history files
   integer :: sdyrhst = 100
   integer :: thst
-  namelist /nmsdtm/ sdtsyr, sdyrstr, sdyrend, sdyrhst
-
-  ! Control whether history files and time steps are written
-  logical :: wotstp = .true.  !! write out time step ?
   logical :: wohist = .true.  !! write out history file ?
-  namelist /nmsdhi/ wotstp, wohist
+  logical :: hstavg = .true.  !! output the average file as history file ?
+  namelist /nmsdhi/ sdyrhst, wohist, hstavg
 
   contains
 
