@@ -150,7 +150,7 @@ contains
       do itr = 1, itrmax
         x = 0.5d0 * ( xlw + xhi )
         h = 10.0d0 ** ( - x )
-       !if ( AMSKT(ij, kstr). eq. 0.0d0 ) goto 999
+       !if ( amskt(ij, kstr). eq. 0.0d0 ) goto 999
        !if ( temp(ij) .eq. 0.0d0 .and. salt(ij) .eq. 0.0d0 ) goto 999
         if ( temp(ij) .eq. rmiss .and. salt(ij) .eq. rmiss ) goto 999
         f = falk( &

@@ -29,8 +29,8 @@ contains
 
   end subroutine set_digda_clay
 
-  subroutine calc_clay_dissolution( scla, & !! IN
-                                  & rcla  ) !! OUT
+  subroutine calc_clay_dissolution( scla, &
+                                  & rcla  )
 
     double precision, intent(in) :: scla(nxy, sdzdim)
     double precision, intent(out) :: rcla(nxy, sdzdim)

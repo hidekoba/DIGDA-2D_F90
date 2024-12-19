@@ -97,9 +97,9 @@ module module_digda_grid
  !integer, parameter :: nzdim = 44
 
   !-- Grid_256x192 --
- !integer, parameter :: nxdim = 256
- !integer, parameter :: nydim = 192
- !integer, parameter :: nzdim = 44
+  integer, parameter :: nxdim = 256
+  integer, parameter :: nydim = 192
+  integer, parameter :: nzdim = 44
 
   !-- Grid_360x180 --
  !integer, parameter :: nxdim = 360
@@ -107,9 +107,9 @@ module module_digda_grid
  !integer, parameter :: nzdim = 44
 
   !-- Grid_2160x1080 --
-  integer, parameter :: nxdim = 2160
-  integer, parameter :: nydim = 1080
-  integer, parameter :: nzdim = 44
+ !integer, parameter :: nxdim = 2160
+ !integer, parameter :: nydim = 1080
+ !integer, parameter :: nzdim = 44
 
   character(len=100) :: bound_dir = 'not-specified/'
   namelist /nmocbc/ bound_dir

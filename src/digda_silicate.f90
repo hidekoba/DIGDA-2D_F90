@@ -40,8 +40,8 @@ contains
 
   end subroutine set_digda_silicate
 
-  subroutine calc_silicate_dissolution( sopa, csil, pcla, popa, temp, & !! IN
-                                      & ropa, satsil                  ) !! OUT
+  subroutine calc_silicate_dissolution( sopa, csil, pcla, popa, temp, &
+                                      & ropa, satsil                  )
 
     double precision, intent(in) :: sopa(nxy, sdzdim)
     double precision, intent(in) :: csil(nxy, sdzdim)

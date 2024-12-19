@@ -11,9 +11,9 @@ module module_digda_mpi
  !integer, parameter :: ncpu = 16
  !integer, parameter :: ncpu = 24
  !integer, parameter :: ncpu = 45
- !integer, parameter :: ncpu = 48 !! 256x192
+  integer, parameter :: ncpu = 48 !! 256x192
  !integer, parameter :: ncpu = 64
-  integer, parameter :: ncpu = 90 !! 2160x1080
+ !integer, parameter :: ncpu = 90 !! 2160x1080
  !integer, parameter :: ncpu = 96
  !integer, parameter :: ncpu = 180
  !integer, parameter :: ncpu = 192

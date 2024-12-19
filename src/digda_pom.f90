@@ -38,8 +38,8 @@ contains
 
   end subroutine set_digda_pom
 
-  subroutine calc_pom_dissolution( spom, cdo2, cp, op, phi, & !! IN
-                                 & rpom                     ) !! OUT
+  subroutine calc_pom_dissolution( spom, cdo2, cp, op, phi, &
+                                 & rpom                     )
 
     double precision, intent(in) :: spom(nxy, sdzdim)
     double precision, intent(in) :: cdo2(nxy, sdzdim)
@@ -66,7 +66,7 @@ contains
           rpom(ij, k) = 0.0d0
         end if
       end do
-     end do
+    end do
 
   end subroutine calc_pom_dissolution
 end module module_digda_pom
