@@ -24,6 +24,7 @@ module module_digda_cprdc
   use module_digda_step_solid
   use module_digda_step_liquid
   use module_digda_chemeq
+  use module_digda_time_mean
   implicit none
 
   logical :: sdrest = .true.
@@ -94,11 +95,11 @@ contains
     double precision :: pcar(nxy, sdz)
     double precision :: popa(nxy, sdz)
     double precision :: wt(nxy, sdz)
-    double precision :: pclag(nxydim, sdzdim)
-    double precision :: ppomg(nxydim, sdzdim)
-    double precision :: pcarg(nxydim, sdzdim)
-    double precision :: popag(nxydim, sdzdim)
-    double precision :: wtg(nxydim, sdzdim)
+!!!!double precision :: pclag(nxydim, sdzdim)
+!!!!double precision :: ppomg(nxydim, sdzdim)
+!!!!double precision :: pcarg(nxydim, sdzdim)
+!!!!double precision :: popag(nxydim, sdzdim)
+!!!!double precision :: wtg(nxydim, sdzdim)
 
     ! Dissolution rate [1/s], Dissolution term [mMol/m^3/s]
     double precision :: rcla(nxy, sdz),   trcla(nxy, sdz)
@@ -245,6 +246,42 @@ contains
     double precision :: bf14carg(nxydim)
 
     ! --------------------------------------------------
+    !   Output
+    ! --------------------------------------------------
+
+    type(time_mean_type), allocatable :: mean_data(:)
+    integer :: num_vars
+    double precision :: scla_avg(nxy, sdz)
+    double precision :: spom_avg(nxy, sdz)
+    double precision :: scar_avg(nxy, sdz)
+    double precision :: sopa_avg(nxy, sdz)
+    double precision :: sage_avg(nxy, sdz)
+    double precision :: cnit_avg(nxy, sdz)
+    double precision :: cdic_avg(nxy, sdz)
+    double precision :: calk_avg(nxy, sdz)
+    double precision :: cdo2_avg(nxy, sdz)
+    double precision :: csil_avg(nxy, sdz)
+    double precision :: ficla_avg(nxy)
+    double precision :: fipom_avg(nxy)
+    double precision :: ficar_avg(nxy)
+    double precision :: fiopa_avg(nxy)
+    double precision :: focla_avg(nxy)
+    double precision :: fopom_avg(nxy)
+    double precision :: focar_avg(nxy)
+    double precision :: foopa_avg(nxy)
+    double precision :: fiocla_avg(nxy)
+    double precision :: fiopom_avg(nxy)
+    double precision :: fiocar_avg(nxy)
+    double precision :: fioopa_avg(nxy)
+    double precision :: bfcla_avg(nxy)
+    double precision :: bfpom_avg(nxy)
+    double precision :: bfcar_avg(nxy)
+    double precision :: bfopa_avg(nxy)
+   !double precision :: w_avg(nxy, sdz+1)
+   !double precision :: cdc13_avg(nxy, sdz)
+   !double precision :: cdc14_avg(nxy, sdz)
+
+    ! --------------------------------------------------
     !   Others
     ! --------------------------------------------------
 
@@ -260,14 +297,15 @@ contains
     integer, allocatable :: nrcvct3d(:),  ndispt3d(:)
     integer, allocatable :: nrcvcw3d(:),  ndispw3d(:)
     double precision, allocatable :: vardt3d(:), vardt2d(:), vardw3d(:)
+    double precision, allocatable :: varavgdt(:,:)
 
     ! etc
     character(len=100) :: filename, varname, varunit
     double precision :: lon_values(nxdim)
     double precision :: lat_values(nydim)
     double precision :: depth_values(sdzdim)
-    double precision :: var2d_values(nxdim, nydim, 1)
-    double precision :: var3d_values(nxdim, nydim, sdzdim, 1)
+    double precision, allocatable :: var2d_values(:,:,:)
+    double precision, allocatable :: var3d_values(:,:,:,:)
 
     double precision :: integral_value, mean_value
 
@@ -292,6 +330,9 @@ contains
     rewind(nfparm)
     read(nfparm, NML=nmsdhi, IOSTAT=ios)
     write(nfstdo, nmsdhi)
+    rewind(nfparm)
+    read(nfparm, NML=nmsdrst, IOSTAT=ios)
+    write(nfstdo, nmsdrst)
     rewind(nfparm)
     read(nfparm, NML=nmsddear, IOSTAT=ios)
     write(nfstdo, nmsddear)
@@ -332,6 +373,65 @@ contains
     write(nfstdo, *) "'--------------------------------------------------'"
     write(nfstdo, *) "'-- Finished setting up model parameters         --'"
     write(nfstdo, *) "'--------------------------------------------------'"
+
+    if (hstavg) then
+      !-- Initialize time_mean --
+      num_vars = 40  ! Number of variables to track
+      allocate(mean_data(num_vars))
+      ! Variable 1--10: 3D grid
+      ! scla, spom, scar, sopa, sage
+      ! cnit, cdic, calk, csil, cdo2
+      do i = 1, 10
+         call initialize_time_mean(mean_data(i), nxy, sdz, 3)
+      end do
+      ! Variable 11--26: 2D grid (nz = 1)
+      ! ficla,  fipom,  ficar,  fiopa
+      ! focla,  fopom,  focar,  foopa
+      ! fiocla, fiopom, fiocar, fioopa
+      ! bfcla,  bfpom,  bfcar,  bfopa
+      do i = 11, 26
+         call initialize_time_mean(mean_data(i), nxy, 1, 2)
+      end do
+      ! Variable 27--28: 3D grid
+      ! cco32, satsil
+      do i = 27, 28
+         call initialize_time_mean(mean_data(i), nxy, sdz, 3)
+      end do
+      ! Variable 29: 2D grid
+      ! satco32
+      do i = 29, 29
+         call initialize_time_mean(mean_data(i), nxy, 1, 2)
+      end do
+      ! Variable 30: 3D grid
+      ! w
+      do i = 30, 30
+         call initialize_time_mean(mean_data(i), nxy, sdz+1, 3)
+      end do
+      if ( calc13 ) then
+      ! Variable 31--34: 3D grid
+      ! s13pom, s13car, c13dic, cdc13
+      do i = 31, 34
+         call initialize_time_mean(mean_data(i), nxy, sdz, 3)
+      end do
+      ! Variable 35--40: 2D grid
+      ! fi13pom, fi13car, fo13pom, fo13car, bf13pom, bf13car
+      do i = 35, 40
+         call initialize_time_mean(mean_data(i), nxy, 1, 2)
+      end do
+      end if
+      if ( calc14 ) then
+      ! Variable 41--44: 3D grid
+      ! s14pom, s14car, c14dic, cdc14
+      do i = 41, 44
+         call initialize_time_mean(mean_data(i), nxy, sdz, 3)
+      end do
+      ! Variable 45--50: 2D grid
+      ! fi14pom, fi14car, fo14pom, fo14car, bf14pom, bf14car
+      do i = 45, 50
+         call initialize_time_mean(mean_data(i), nxy, 1, 2)
+      end do
+      end if
+    end if
 
     !-- SEDIMENT TRACERS : setup (end) --
 
@@ -1076,6 +1176,135 @@ else
       end if
 end if
 
+      if (hstavg) then
+
+!     -- Update the time mean for variables --
+
+        call update_time_mean(mean_data(1),  scla)
+        call update_time_mean(mean_data(2),  spom)
+        call update_time_mean(mean_data(3),  scar)
+        call update_time_mean(mean_data(4),  sopa)
+        call update_time_mean(mean_data(5),  sage)
+        call update_time_mean(mean_data(6),  cnit)
+        call update_time_mean(mean_data(7),  cdic)
+        call update_time_mean(mean_data(8),  calk)
+        call update_time_mean(mean_data(9),  csil)
+        call update_time_mean(mean_data(10), cdo2)
+
+        allocate(varavgdt(nxy,1))
+        do ij = 1, nxy
+           varavgdt(ij, 1) = ficla(ij)
+        end do
+        call update_time_mean(mean_data(11),  varavgdt)
+        deallocate(varavgdt)
+
+        allocate(varavgdt(nxy,1))
+        do ij = 1, nxy
+           varavgdt(ij, 1) = fipom(ij)
+        end do
+        call update_time_mean(mean_data(12),  varavgdt)
+        deallocate(varavgdt)
+
+        allocate(varavgdt(nxy,1))
+        do ij = 1, nxy
+           varavgdt(ij, 1) = ficar(ij)
+        end do
+        call update_time_mean(mean_data(13),  varavgdt)
+        deallocate(varavgdt)
+
+        allocate(varavgdt(nxy,1))
+        do ij = 1, nxy
+           varavgdt(ij, 1) = fiopa(ij)
+        end do
+        call update_time_mean(mean_data(14),  varavgdt)
+        deallocate(varavgdt)
+
+        allocate(varavgdt(nxy,1))
+        do ij = 1, nxy
+           varavgdt(ij, 1) = focla(ij)
+        end do
+        call update_time_mean(mean_data(15),  varavgdt)
+        deallocate(varavgdt)
+
+        allocate(varavgdt(nxy,1))
+        do ij = 1, nxy
+           varavgdt(ij, 1) = fopom(ij)
+        end do
+        call update_time_mean(mean_data(16),  varavgdt)
+        deallocate(varavgdt)
+
+        allocate(varavgdt(nxy,1))
+        do ij = 1, nxy
+           varavgdt(ij, 1) = focar(ij)
+        end do
+        call update_time_mean(mean_data(17),  varavgdt)
+        deallocate(varavgdt)
+
+        allocate(varavgdt(nxy,1))
+        do ij = 1, nxy
+           varavgdt(ij, 1) = foopa(ij)
+        end do
+        call update_time_mean(mean_data(18),  varavgdt)
+        deallocate(varavgdt)
+
+        allocate(varavgdt(nxy,1))
+        do ij = 1, nxy
+           varavgdt(ij, 1) = fiocla(ij)
+        end do
+        call update_time_mean(mean_data(19),  varavgdt)
+        deallocate(varavgdt)
+
+        allocate(varavgdt(nxy,1))
+        do ij = 1, nxy
+           varavgdt(ij, 1) = fiopom(ij)
+        end do
+        call update_time_mean(mean_data(20),  varavgdt)
+        deallocate(varavgdt)
+
+        allocate(varavgdt(nxy,1))
+        do ij = 1, nxy
+           varavgdt(ij, 1) = fiocar(ij)
+        end do
+        call update_time_mean(mean_data(21),  varavgdt)
+        deallocate(varavgdt)
+
+        allocate(varavgdt(nxy,1))
+        do ij = 1, nxy
+           varavgdt(ij, 1) = fioopa(ij)
+        end do
+        call update_time_mean(mean_data(22),  varavgdt)
+        deallocate(varavgdt)
+
+        allocate(varavgdt(nxy,1))
+        do ij = 1, nxy
+           varavgdt(ij, 1) = bfcla(ij)
+        end do
+        call update_time_mean(mean_data(23),  varavgdt)
+        deallocate(varavgdt)
+
+        allocate(varavgdt(nxy,1))
+        do ij = 1, nxy
+           varavgdt(ij, 1) = bfpom(ij)
+        end do
+        call update_time_mean(mean_data(24),  varavgdt)
+        deallocate(varavgdt)
+
+        allocate(varavgdt(nxy,1))
+        do ij = 1, nxy
+           varavgdt(ij, 1) = bfcar(ij)
+        end do
+        call update_time_mean(mean_data(25),  varavgdt)
+        deallocate(varavgdt)
+
+        allocate(varavgdt(nxy,1))
+        do ij = 1, nxy
+           varavgdt(ij, 1) = bfopa(ij)
+        end do
+        call update_time_mean(mean_data(26),  varavgdt)
+        deallocate(varavgdt)
+
+      end if
+
 !     -- Time step --
       if ( wotstp ) then
          write(nfsots, *), 'Time Step :', tt, 'step', yy, 'year'
@@ -1120,6 +1349,875 @@ if (use_mpi) then
 
      !sdofirst = .false.
      !end if
+
+if (hstavg) then
+
+!     -- Compute the time mean for variables --
+
+      allocate(varavgdt(nxy,sdz))
+      call get_time_mean(mean_data(1),  varavgdt)
+      call mpi_gatherv( varavgdt, nsndct3d, mpi_real8, &
+     &                  vardt3d,  nrcvct3d, ndispt3d, mpi_real8, &
+     &                  iroot,    mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispt3d(irank)
+            do k = skst, sken
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  sclag(ij, k) = vardt3d(ijkg)
+               end do
+            end do
+         end do
+      end if
+      call reset_time_mean(mean_data(1))
+      deallocate(varavgdt)
+
+      allocate(varavgdt(nxy,sdz))
+      call get_time_mean(mean_data(2),  varavgdt)
+      call mpi_gatherv( varavgdt, nsndct3d, mpi_real8, &
+     &                  vardt3d,  nrcvct3d, ndispt3d, mpi_real8, &
+     &                  iroot,    mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispt3d(irank)
+            do k = skst, sken
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  spomg(ij, k) = vardt3d(ijkg)
+               end do
+            end do
+         end do
+      end if
+      call reset_time_mean(mean_data(2))
+      deallocate(varavgdt)
+
+      allocate(varavgdt(nxy,sdz))
+      call get_time_mean(mean_data(3),  varavgdt)
+      call mpi_gatherv( varavgdt, nsndct3d, mpi_real8, &
+     &                  vardt3d,  nrcvct3d, ndispt3d, mpi_real8, &
+     &                  iroot,    mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispt3d(irank)
+            do k = skst, sken
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  scarg(ij, k) = vardt3d(ijkg)
+               end do
+            end do
+         end do
+      end if
+      call reset_time_mean(mean_data(3))
+      deallocate(varavgdt)
+
+      allocate(varavgdt(nxy,sdz))
+      call get_time_mean(mean_data(4),  varavgdt)
+      call mpi_gatherv( varavgdt, nsndct3d, mpi_real8, &
+     &                  vardt3d,  nrcvct3d, ndispt3d, mpi_real8, &
+     &                  iroot,    mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispt3d(irank)
+            do k = skst, sken
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  sopag(ij, k) = vardt3d(ijkg)
+               end do
+            end do
+         end do
+      end if
+      call reset_time_mean(mean_data(4))
+      deallocate(varavgdt)
+
+      allocate(varavgdt(nxy,sdz))
+      call get_time_mean(mean_data(5),  varavgdt)
+      call mpi_gatherv( varavgdt, nsndct3d, mpi_real8, &
+     &                  vardt3d,  nrcvct3d, ndispt3d, mpi_real8, &
+     &                  iroot,    mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispt3d(irank)
+            do k = skst, sken
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  sageg(ij, k) = vardt3d(ijkg)
+               end do
+            end do
+         end do
+      end if
+      call reset_time_mean(mean_data(5))
+      deallocate(varavgdt)
+
+      allocate(varavgdt(nxy,sdz))
+      call get_time_mean(mean_data(6),  varavgdt)
+      call mpi_gatherv( varavgdt, nsndct3d, mpi_real8, &
+     &                  vardt3d,  nrcvct3d, ndispt3d, mpi_real8, &
+     &                  iroot,    mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispt3d(irank)
+            do k = skst, sken
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  cnitg(ij, k) = vardt3d(ijkg)
+               end do
+            end do
+         end do
+      end if
+      call reset_time_mean(mean_data(6))
+      deallocate(varavgdt)
+
+      allocate(varavgdt(nxy,sdz))
+      call get_time_mean(mean_data(7),  varavgdt)
+      call mpi_gatherv( varavgdt, nsndct3d, mpi_real8, &
+     &                  vardt3d,  nrcvct3d, ndispt3d, mpi_real8, &
+     &                  iroot,    mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispt3d(irank)
+            do k = skst, sken
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  cdicg(ij, k) = vardt3d(ijkg)
+               end do
+            end do
+         end do
+      end if
+      call reset_time_mean(mean_data(7))
+      deallocate(varavgdt)
+
+      allocate(varavgdt(nxy,sdz))
+      call get_time_mean(mean_data(8),  varavgdt)
+      call mpi_gatherv( varavgdt, nsndct3d, mpi_real8, &
+     &                  vardt3d,  nrcvct3d, ndispt3d, mpi_real8, &
+     &                  iroot,    mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispt3d(irank)
+            do k = skst, sken
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  calkg(ij, k) = vardt3d(ijkg)
+               end do
+            end do
+         end do
+      end if
+      call reset_time_mean(mean_data(8))
+      deallocate(varavgdt)
+
+      allocate(varavgdt(nxy,sdz))
+      call get_time_mean(mean_data(9),  varavgdt)
+      call mpi_gatherv( varavgdt, nsndct3d, mpi_real8, &
+     &                  vardt3d,  nrcvct3d, ndispt3d, mpi_real8, &
+     &                  iroot,    mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispt3d(irank)
+            do k = skst, sken
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  csilg(ij, k) = vardt3d(ijkg)
+               end do
+            end do
+         end do
+      end if
+      call reset_time_mean(mean_data(9))
+      deallocate(varavgdt)
+
+      allocate(varavgdt(nxy,sdz))
+      call get_time_mean(mean_data(10),  varavgdt)
+      call mpi_gatherv( varavgdt, nsndct3d, mpi_real8, &
+     &                  vardt3d,  nrcvct3d, ndispt3d, mpi_real8, &
+     &                  iroot,    mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispt3d(irank)
+            do k = skst, sken
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  cdo2g(ij, k) = vardt3d(ijkg)
+               end do
+            end do
+         end do
+      end if
+      call reset_time_mean(mean_data(10))
+      deallocate(varavgdt)
+
+      allocate(varavgdt(nxy,sdz))
+      call get_time_mean(mean_data(27),  varavgdt)
+      call mpi_gatherv( varavgdt, nsndct3d, mpi_real8, &
+     &                  vardt3d,  nrcvct3d, ndispt3d, mpi_real8, &
+     &                  iroot,    mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispt3d(irank)
+            do k = skst, sken
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  cco32g(ij, k) = vardt3d(ijkg)
+               end do
+            end do
+         end do
+      end if
+      call reset_time_mean(mean_data(27))
+      deallocate(varavgdt)
+
+      allocate(varavgdt(nxy,sdz))
+      call get_time_mean(mean_data(28),  varavgdt)
+      call mpi_gatherv( varavgdt, nsndct3d, mpi_real8, &
+     &                  vardt3d,  nrcvct3d, ndispt3d, mpi_real8, &
+     &                  iroot,    mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispt3d(irank)
+            do k = skst, sken
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  satsilg(ij, k) = vardt3d(ijkg)
+               end do
+            end do
+         end do
+      end if
+      call reset_time_mean(mean_data(28))
+      deallocate(varavgdt)
+
+      allocate(varavgdt(nxy,1))
+      call get_time_mean(mean_data(29),  varavgdt)
+      call mpi_gatherv( varavgdt, nsndct2d, mpi_real8, &
+     &                  vardt2d,  nrcvct2d, ndispt3d, mpi_real8, &
+     &                  iroot,    mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            do ij = jjstr(irank), jjend(irank)
+               satco32g(ij) = vardt2d(ij)
+            end do
+         end do
+      end if
+      call reset_time_mean(mean_data(29))
+      deallocate(varavgdt)
+
+      allocate(varavgdt(nxy,sdz+1))
+      call get_time_mean(mean_data(30),  varavgdt)
+      call mpi_gatherv( varavgdt, nsndcw3d, mpi_real8, &
+     &                  vardw3d,  nrcvcw3d, ndispw3d, mpi_real8, &
+     &                  iroot,    mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispw3d(irank)
+            do k = skst, sken+1
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  wg(ij, k) = vardw3d(ijkg)
+               end do
+            end do
+         end do
+      end if
+      call reset_time_mean(mean_data(30))
+      deallocate(varavgdt)
+
+      allocate(varavgdt(nxy,1))
+      call get_time_mean(mean_data(11),  varavgdt)
+      call mpi_gatherv( ficla,   nsndct2d, mpi_real8, &
+     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            do ij = jjstr(irank), jjend(irank)
+               ficlag(ij) = vardt2d(ij)
+            end do
+         end do
+      end if
+      call reset_time_mean(mean_data(11))
+      deallocate(varavgdt)
+
+      allocate(varavgdt(nxy,1))
+      call get_time_mean(mean_data(12),  varavgdt)
+      call mpi_gatherv( fipom,   nsndct2d, mpi_real8, &
+     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            do ij = jjstr(irank), jjend(irank)
+               fipomg(ij) = vardt2d(ij)
+            end do
+         end do
+      end if
+      call reset_time_mean(mean_data(12))
+      deallocate(varavgdt)
+
+      allocate(varavgdt(nxy,1))
+      call get_time_mean(mean_data(13),  varavgdt)
+      call mpi_gatherv( ficar,   nsndct2d, mpi_real8, &
+     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            do ij = jjstr(irank), jjend(irank)
+               ficarg(ij) = vardt2d(ij)
+            end do
+         end do
+      end if
+      call reset_time_mean(mean_data(13))
+      deallocate(varavgdt)
+
+      allocate(varavgdt(nxy,1))
+      call get_time_mean(mean_data(14),  varavgdt)
+      call mpi_gatherv( fiopa,   nsndct2d, mpi_real8, &
+     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            do ij = jjstr(irank), jjend(irank)
+               fiopag(ij) = vardt2d(ij)
+            end do
+         end do
+      end if
+      call reset_time_mean(mean_data(14))
+      deallocate(varavgdt)
+
+ !!!! allocate(varavgdt(nxy,1))
+ !!!! call get_time_mean(mean_data(15),  varavgdt)
+ !!!! call mpi_gatherv( focla,   nsndct2d, mpi_real8, &
+ !!!!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+ !!!!&                  iroot,   mpi_comm_world, ierr )
+ !!!! if ( myrank .eq. iroot ) then
+ !!!!    do irank = 0, nprocs-1
+ !!!!       do ij = jjstr(irank), jjend(irank)
+ !!!!          foclag(ij) = vardt2d(ij)
+ !!!!       end do
+ !!!!    end do
+ !!!! end if
+ !!!! call reset_time_mean(mean_data(15))
+ !!!! deallocate(varavgdt)
+
+      allocate(varavgdt(nxy,1))
+      call get_time_mean(mean_data(16),  varavgdt)
+      call mpi_gatherv( fopom,   nsndct2d, mpi_real8, &
+     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            do ij = jjstr(irank), jjend(irank)
+               fopomg(ij) = vardt2d(ij)
+            end do
+         end do
+      end if
+      call reset_time_mean(mean_data(16))
+      deallocate(varavgdt)
+
+      allocate(varavgdt(nxy,1))
+      call get_time_mean(mean_data(17),  varavgdt)
+      call mpi_gatherv( focar,   nsndct2d, mpi_real8, &
+     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            do ij = jjstr(irank), jjend(irank)
+               focarg(ij) = vardt2d(ij)
+            end do
+         end do
+      end if
+      call reset_time_mean(mean_data(17))
+      deallocate(varavgdt)
+
+      allocate(varavgdt(nxy,1))
+      call get_time_mean(mean_data(18),  varavgdt)
+      call mpi_gatherv( foopa,   nsndct2d, mpi_real8, &
+     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            do ij = jjstr(irank), jjend(irank)
+               foopag(ij) = vardt2d(ij)
+            end do
+         end do
+      end if
+      call reset_time_mean(mean_data(18))
+      deallocate(varavgdt)
+
+ !!!! allocate(varavgdt(nxy,1))
+ !!!! call get_time_mean(mean_data(19),  varavgdt)
+ !!!! call mpi_gatherv( fiocla,  nsndct2d, mpi_real8, &
+ !!!!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+ !!!!&                  iroot,   mpi_comm_world, ierr )
+ !!!! if ( myrank .eq. iroot ) then
+ !!!!    do irank = 0, nprocs-1
+ !!!!       do ij = jjstr(irank), jjend(irank)
+ !!!!          fioclag(ij) = vardt2d(ij)
+ !!!!       end do
+ !!!!    end do
+ !!!! end if
+ !!!! call reset_time_mean(mean_data(19))
+ !!!! deallocate(varavgdt)
+
+      allocate(varavgdt(nxy,1))
+      call get_time_mean(mean_data(20),  varavgdt)
+      call mpi_gatherv( fiopom,  nsndct2d, mpi_real8, &
+     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            do ij = jjstr(irank), jjend(irank)
+               fiopomg(ij) = vardt2d(ij)
+            end do
+         end do
+      end if
+      call reset_time_mean(mean_data(20))
+      deallocate(varavgdt)
+
+      allocate(varavgdt(nxy,1))
+      call get_time_mean(mean_data(21),  varavgdt)
+      call mpi_gatherv( fiocar,  nsndct2d, mpi_real8, &
+     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            do ij = jjstr(irank), jjend(irank)
+               fiocarg(ij) = vardt2d(ij)
+            end do
+         end do
+      end if
+      call reset_time_mean(mean_data(21))
+      deallocate(varavgdt)
+
+      allocate(varavgdt(nxy,1))
+      call get_time_mean(mean_data(22),  varavgdt)
+      call mpi_gatherv( fioopa,  nsndct2d, mpi_real8, &
+     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            do ij = jjstr(irank), jjend(irank)
+               fioopag(ij) = vardt2d(ij)
+            end do
+         end do
+      end if
+      call reset_time_mean(mean_data(22))
+      deallocate(varavgdt)
+
+      allocate(varavgdt(nxy,1))
+      call get_time_mean(mean_data(23),  varavgdt)
+      call mpi_gatherv( bfcla,   nsndct2d, mpi_real8, &
+     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            do ij = jjstr(irank), jjend(irank)
+               bfclag(ij) = vardt2d(ij)
+            end do
+         end do
+      end if
+      call reset_time_mean(mean_data(23))
+      deallocate(varavgdt)
+
+      allocate(varavgdt(nxy,1))
+      call get_time_mean(mean_data(24),  varavgdt)
+      call mpi_gatherv( bfpom,   nsndct2d, mpi_real8, &
+     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            do ij = jjstr(irank), jjend(irank)
+               bfpomg(ij) = vardt2d(ij)
+            end do
+         end do
+      end if
+      call reset_time_mean(mean_data(24))
+      deallocate(varavgdt)
+
+      allocate(varavgdt(nxy,1))
+      call get_time_mean(mean_data(25),  varavgdt)
+      call mpi_gatherv( bfcar,   nsndct2d, mpi_real8, &
+     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            do ij = jjstr(irank), jjend(irank)
+               bfcarg(ij) = vardt2d(ij)
+            end do
+         end do
+      end if
+      call reset_time_mean(mean_data(25))
+      deallocate(varavgdt)
+
+      allocate(varavgdt(nxy,1))
+      call get_time_mean(mean_data(26),  varavgdt)
+      call mpi_gatherv( bfopa,   nsndct2d, mpi_real8, &
+     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            do ij = jjstr(irank), jjend(irank)
+               bfopag(ij) = vardt2d(ij)
+            end do
+         end do
+      end if
+      call reset_time_mean(mean_data(26))
+      deallocate(varavgdt)
+
+      if ( calc13 ) then
+
+      allocate(varavgdt(nxy,sdz))
+      call get_time_mean(mean_data(31),  varavgdt)
+      call mpi_gatherv( s13pom,  nsndct3d, mpi_real8, &
+     &                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispt3d(irank)
+            do k = skst, sken
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  s13pomg(ij, k) = vardt3d(ijkg)
+               end do
+            end do
+         end do
+      end if
+      call reset_time_mean(mean_data(31))
+      deallocate(varavgdt)
+
+      allocate(varavgdt(nxy,sdz))
+      call get_time_mean(mean_data(32),  varavgdt)
+      call mpi_gatherv( s13car,  nsndct3d, mpi_real8, &
+     &                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispt3d(irank)
+            do k = skst, sken
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  s13carg(ij, k) = vardt3d(ijkg)
+               end do
+            end do
+         end do
+      end if
+      call reset_time_mean(mean_data(32))
+      deallocate(varavgdt)
+
+      allocate(varavgdt(nxy,sdz))
+      call get_time_mean(mean_data(33),  varavgdt)
+      call mpi_gatherv( c13dic,  nsndct3d, mpi_real8, &
+     &                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispt3d(irank)
+            do k = skst, sken
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  c13dicg(ij, k) = vardt3d(ijkg)
+               end do
+            end do
+         end do
+      end if
+      call reset_time_mean(mean_data(33))
+      deallocate(varavgdt)
+
+      allocate(varavgdt(nxy,sdz))
+      call get_time_mean(mean_data(34),  varavgdt)
+      call mpi_gatherv( cdc13,   nsndct3d, mpi_real8, &
+     &                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispt3d(irank)
+            do k = skst, sken
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  cdc13g(ij, k) = vardt3d(ijkg)
+               end do
+            end do
+         end do
+      end if
+      call reset_time_mean(mean_data(34))
+      deallocate(varavgdt)
+
+ !!!! allocate(varavgdt(nxy,1))
+ !!!! call get_time_mean(mean_data(35),  varavgdt)
+ !!!! call mpi_gatherv( fi13pom, nsndct2d, mpi_real8, &
+ !!!!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+ !!!!&                  iroot,   mpi_comm_world, ierr )
+ !!!! if ( myrank .eq. iroot ) then
+ !!!!    do irank = 0, nprocs-1
+ !!!!       do ij = jjstr(irank), jjend(irank)
+ !!!!          fi13pomg(ij) = vardt2d(ij)
+ !!!!       end do
+ !!!!    end do
+ !!!! end if
+ !!!! call reset_time_mean(mean_data(35))
+ !!!! deallocate(varavgdt)
+
+ !!!! allocate(varavgdt(nxy,1))
+ !!!! call get_time_mean(mean_data(36),  varavgdt)
+ !!!! call mpi_gatherv( fi13car, nsndct2d, mpi_real8, &
+ !!!!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+ !!!!&                  iroot,   mpi_comm_world, ierr )
+ !!!! if ( myrank .eq. iroot ) then
+ !!!!    do irank = 0, nprocs-1
+ !!!!       do ij = jjstr(irank), jjend(irank)
+ !!!!          fi13carg(ij) = vardt2d(ij)
+ !!!!       end do
+ !!!!    end do
+ !!!! end if
+ !!!! call reset_time_mean(mean_data(36))
+ !!!! deallocate(varavgdt)
+
+ !!!! allocate(varavgdt(nxy,1))
+ !!!! call get_time_mean(mean_data(37),  varavgdt)
+ !!!! call mpi_gatherv( fo13pom, nsndct2d, mpi_real8, &
+ !!!!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+ !!!!&                  iroot,   mpi_comm_world, ierr )
+ !!!! if ( myrank .eq. iroot ) then
+ !!!!    do irank = 0, nprocs-1
+ !!!!       do ij = jjstr(irank), jjend(irank)
+ !!!!          fo13pomg(ij) = vardt2d(ij)
+ !!!!       end do
+ !!!!    end do
+ !!!! end if
+ !!!! call reset_time_mean(mean_data(37))
+ !!!! deallocate(varavgdt)
+
+ !!!! allocate(varavgdt(nxy,1))
+ !!!! call get_time_mean(mean_data(38),  varavgdt)
+ !!!! call mpi_gatherv( fo13car, nsndct2d, mpi_real8, &
+ !!!!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+ !!!!&                  iroot,   mpi_comm_world, ierr )
+ !!!! if ( myrank .eq. iroot ) then
+ !!!!    do irank = 0, nprocs-1
+ !!!!       do ij = jjstr(irank), jjend(irank)
+ !!!!          fo13carg(ij) = vardt2d(ij)
+ !!!!       end do
+ !!!!    end do
+ !!!! end if
+ !!!! call reset_time_mean(mean_data(38))
+ !!!! deallocate(varavgdt)
+
+ !!!! allocate(varavgdt(nxy,1))
+ !!!! call get_time_mean(mean_data(39),  varavgdt)
+ !!!! call mpi_gatherv( bf13pom, nsndct2d, mpi_real8, &
+ !!!!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+ !!!!&                  iroot,   mpi_comm_world, ierr )
+ !!!! if ( myrank .eq. iroot ) then
+ !!!!    do irank = 0, nprocs-1
+ !!!!       do ij = jjstr(irank), jjend(irank)
+ !!!!          bf13pomg(ij) = vardt2d(ij)
+ !!!!       end do
+ !!!!    end do
+ !!!! end if
+ !!!! call reset_time_mean(mean_data(39))
+ !!!! deallocate(varavgdt)
+
+ !!!! allocate(varavgdt(nxy,1))
+ !!!! call get_time_mean(mean_data(40),  varavgdt)
+ !!!! call mpi_gatherv( bf13car, nsndct2d, mpi_real8, &
+ !!!!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+ !!!!&                  iroot,   mpi_comm_world, ierr )
+ !!!! if ( myrank .eq. iroot ) then
+ !!!!    do irank = 0, nprocs-1
+ !!!!       do ij = jjstr(irank), jjend(irank)
+ !!!!          bf13carg(ij) = vardt2d(ij)
+ !!!!       end do
+ !!!!    end do
+ !!!! end if
+ !!!! call reset_time_mean(mean_data(40))
+ !!!! deallocate(varavgdt)
+
+      end if
+
+      if ( calc14 ) then
+
+      allocate(varavgdt(nxy,sdz))
+      call get_time_mean(mean_data(41),  varavgdt)
+      call mpi_gatherv( s14pom,  nsndct3d, mpi_real8, &
+     &                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispt3d(irank)
+            do k = skst, sken
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  s14pomg(ij, k) = vardt3d(ijkg)
+               end do
+            end do
+         end do
+      end if
+      call reset_time_mean(mean_data(41))
+      deallocate(varavgdt)
+
+      allocate(varavgdt(nxy,sdz))
+      call get_time_mean(mean_data(42),  varavgdt)
+      call mpi_gatherv( s14car,  nsndct3d, mpi_real8, &
+     &                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispt3d(irank)
+            do k = skst, sken
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  s14carg(ij, k) = vardt3d(ijkg)
+               end do
+            end do
+         end do
+      end if
+      call reset_time_mean(mean_data(42))
+      deallocate(varavgdt)
+
+      allocate(varavgdt(nxy,sdz))
+      call get_time_mean(mean_data(43),  varavgdt)
+      call mpi_gatherv( c14dic,  nsndct3d, mpi_real8, &
+     &                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispt3d(irank)
+            do k = skst, sken
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  c14dicg(ij, k) = vardt3d(ijkg)
+               end do
+            end do
+         end do
+      end if
+      call reset_time_mean(mean_data(43))
+      deallocate(varavgdt)
+
+      allocate(varavgdt(nxy,sdz))
+      call get_time_mean(mean_data(44),  varavgdt)
+      call mpi_gatherv( cdc14,   nsndct3d, mpi_real8, &
+     &                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            ijkg = ndispt3d(irank)
+            do k = skst, sken
+               do ij = jjstr(irank), jjend(irank)
+                  ijkg = ijkg + 1
+                  cdc14g(ij, k) = vardt3d(ijkg)
+               end do
+            end do
+         end do
+      end if
+      call reset_time_mean(mean_data(44))
+      deallocate(varavgdt)
+
+ !!!! allocate(varavgdt(nxy,1))
+ !!!! call get_time_mean(mean_data(45),  varavgdt)
+ !!!! call mpi_gatherv( fi14pom, nsndct2d, mpi_real8, &
+ !!!!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+ !!!!&                  iroot,   mpi_comm_world, ierr )
+ !!!! if ( myrank .eq. iroot ) then
+ !!!!    do irank = 0, nprocs-1
+ !!!!       do ij = jjstr(irank), jjend(irank)
+ !!!!          fi14pomg(ij) = vardt2d(ij)
+ !!!!       end do
+ !!!!    end do
+ !!!! end if
+ !!!! call reset_time_mean(mean_data(45))
+ !!!! deallocate(varavgdt)
+
+ !!!! allocate(varavgdt(nxy,1))
+ !!!! call get_time_mean(mean_data(46),  varavgdt)
+ !!!! call mpi_gatherv( fi14car, nsndct2d, mpi_real8, &
+ !!!!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+ !!!!&                  iroot,   mpi_comm_world, ierr )
+ !!!! if ( myrank .eq. iroot ) then
+ !!!!    do irank = 0, nprocs-1
+ !!!!       do ij = jjstr(irank), jjend(irank)
+ !!!!          fi14carg(ij) = vardt2d(ij)
+ !!!!       end do
+ !!!!    end do
+ !!!! end if
+ !!!! call reset_time_mean(mean_data(46))
+ !!!! deallocate(varavgdt)
+
+ !!!! allocate(varavgdt(nxy,1))
+ !!!! call get_time_mean(mean_data(47),  varavgdt)
+ !!!! call mpi_gatherv( fo14pom, nsndct2d, mpi_real8, &
+ !!!!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+ !!!!&                  iroot,   mpi_comm_world, ierr )
+ !!!! if ( myrank .eq. iroot ) then
+ !!!!    do irank = 0, nprocs-1
+ !!!!       do ij = jjstr(irank), jjend(irank)
+ !!!!          fo14pomg(ij) = vardt2d(ij)
+ !!!!       end do
+ !!!!    end do
+ !!!! end if
+ !!!! call reset_time_mean(mean_data(47))
+ !!!! deallocate(varavgdt)
+
+ !!!! allocate(varavgdt(nxy,1))
+ !!!! call get_time_mean(mean_data(48),  varavgdt)
+ !!!! call mpi_gatherv( fo14car, nsndct2d, mpi_real8, &
+ !!!!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+ !!!!&                  iroot,   mpi_comm_world, ierr )
+ !!!! if ( myrank .eq. iroot ) then
+ !!!!    do irank = 0, nprocs-1
+ !!!!       do ij = jjstr(irank), jjend(irank)
+ !!!!          fo14carg(ij) = vardt2d(ij)
+ !!!!       end do
+ !!!!    end do
+ !!!! end if
+ !!!! call reset_time_mean(mean_data(48))
+ !!!! deallocate(varavgdt)
+
+ !!!! allocate(varavgdt(nxy,1))
+ !!!! call get_time_mean(mean_data(49),  varavgdt)
+ !!!! call mpi_gatherv( bf14pom, nsndct2d, mpi_real8, &
+ !!!!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+ !!!!&                  iroot,   mpi_comm_world, ierr )
+ !!!! if ( myrank .eq. iroot ) then
+ !!!!    do irank = 0, nprocs-1
+ !!!!       do ij = jjstr(irank), jjend(irank)
+ !!!!          bf14pomg(ij) = vardt2d(ij)
+ !!!!       end do
+ !!!!    end do
+ !!!! end if
+ !!!! call reset_time_mean(mean_data(49))
+ !!!! deallocate(varavgdt)
+
+ !!!! allocate(varavgdt(nxy,1))
+ !!!! call get_time_mean(mean_data(50),  varavgdt)
+ !!!! call mpi_gatherv( bf14car, nsndct2d, mpi_real8, &
+ !!!!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+ !!!!&                  iroot,   mpi_comm_world, ierr )
+ !!!! if ( myrank .eq. iroot ) then
+ !!!!    do irank = 0, nprocs-1
+ !!!!       do ij = jjstr(irank), jjend(irank)
+ !!!!          bf14carg(ij) = vardt2d(ij)
+ !!!!       end do
+ !!!!    end do
+ !!!! end if
+ !!!! call reset_time_mean(mean_data(50))
+ !!!! deallocate(varavgdt)
+
+      end if
+
+ !!!! if ( myrank .eq. iroot ) then
+ !!!!    do k = skst, sken
+ !!!!       do ij = 1, nxydim
+ !!!!          wtg(ij, k)   = sclag(ij, k) &
+ !!!!&                      + ( spomg(ij, k) * molpom * 1.0d-3 ) &
+ !!!!&                      + ( scarg(ij, k) * molcar * 1.0d-3 ) &
+ !!!!&                      + ( sopag(ij, k) * molopa * 1.0d-3 )
+ !!!!          pclag(ij, k) = sclag(ij, k) &
+ !!!!&                      / wtg(ij, k) * 1.0d+2
+ !!!!          ppomg(ij, k) = spomg(ij, k) * molpom * 1.0d-3 &
+ !!!!&                      / wtg(ij, k) * 1.0d+2
+ !!!!          pcarg(ij, k) = scarg(ij, k) * molcar * 1.0d-3 &
+ !!!!&                      / wtg(ij, k) * 1.0d+2
+ !!!!          popag(ij, k) = sopag(ij, k) * molopa * 1.0d-3 &
+ !!!!&                      / wtg(ij, k) * 1.0d+2
+ !!!!       end do
+ !!!!    end do
+
+ !!!! end if
+
+
+else
 
       call mpi_gatherv( scla,    nsndct3d, mpi_real8, &
      &                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
@@ -1565,71 +2663,71 @@ if (use_mpi) then
          end do
       end if
 
-!     call mpi_gatherv( fi13pom, nsndct2d, mpi_real8, &
-!    &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
-!    &                  iroot,   mpi_comm_world, ierr )
-!     if ( myrank .eq. iroot ) then
-!        do irank = 0, nprocs-1
-!           do ij = jjstr(irank), jjend(irank)
-!              fi13pomg(ij) = vardt2d(ij)
-!           end do
-!        end do
-!     end if
+ !!!! call mpi_gatherv( fi13pom, nsndct2d, mpi_real8, &
+ !!!!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+ !!!!&                  iroot,   mpi_comm_world, ierr )
+ !!!! if ( myrank .eq. iroot ) then
+ !!!!    do irank = 0, nprocs-1
+ !!!!       do ij = jjstr(irank), jjend(irank)
+ !!!!          fi13pomg(ij) = vardt2d(ij)
+ !!!!       end do
+ !!!!    end do
+ !!!! end if
 
-!     call mpi_gatherv( fi13car, nsndct2d, mpi_real8, &
-!    &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
-!    &                  iroot,   mpi_comm_world, ierr )
-!     if ( myrank .eq. iroot ) then
-!        do irank = 0, nprocs-1
-!           do ij = jjstr(irank), jjend(irank)
-!              fi13carg(ij) = vardt2d(ij)
-!           end do
-!        end do
-!     end if
+ !!!! call mpi_gatherv( fi13car, nsndct2d, mpi_real8, &
+ !!!!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+ !!!!&                  iroot,   mpi_comm_world, ierr )
+ !!!! if ( myrank .eq. iroot ) then
+ !!!!    do irank = 0, nprocs-1
+ !!!!       do ij = jjstr(irank), jjend(irank)
+ !!!!          fi13carg(ij) = vardt2d(ij)
+ !!!!       end do
+ !!!!    end do
+ !!!! end if
 
-!     call mpi_gatherv( fo13pom, nsndct2d, mpi_real8, &
-!    &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
-!    &                  iroot,   mpi_comm_world, ierr )
-!     if ( myrank .eq. iroot ) then
-!        do irank = 0, nprocs-1
-!           do ij = jjstr(irank), jjend(irank)
-!              fo13pomg(ij) = vardt2d(ij)
-!           end do
-!        end do
-!     end if
+ !!!! call mpi_gatherv( fo13pom, nsndct2d, mpi_real8, &
+ !!!!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+ !!!!&                  iroot,   mpi_comm_world, ierr )
+ !!!! if ( myrank .eq. iroot ) then
+ !!!!    do irank = 0, nprocs-1
+ !!!!       do ij = jjstr(irank), jjend(irank)
+ !!!!          fo13pomg(ij) = vardt2d(ij)
+ !!!!       end do
+ !!!!    end do
+ !!!! end if
 
-!     call mpi_gatherv( fo13car, nsndct2d, mpi_real8, &
-!    &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
-!    &                  iroot,   mpi_comm_world, ierr )
-!     if ( myrank .eq. iroot ) then
-!        do irank = 0, nprocs-1
-!           do ij = jjstr(irank), jjend(irank)
-!              fo13carg(ij) = vardt2d(ij)
-!           end do
-!        end do
-!     end if
+ !!!! call mpi_gatherv( fo13car, nsndct2d, mpi_real8, &
+ !!!!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+ !!!!&                  iroot,   mpi_comm_world, ierr )
+ !!!! if ( myrank .eq. iroot ) then
+ !!!!    do irank = 0, nprocs-1
+ !!!!       do ij = jjstr(irank), jjend(irank)
+ !!!!          fo13carg(ij) = vardt2d(ij)
+ !!!!       end do
+ !!!!    end do
+ !!!! end if
 
-!     call mpi_gatherv( bf13pom, nsndct2d, mpi_real8, &
-!    &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
-!    &                  iroot,   mpi_comm_world, ierr )
-!     if ( myrank .eq. iroot ) then
-!        do irank = 0, nprocs-1
-!           do ij = jjstr(irank), jjend(irank)
-!              bf13pomg(ij) = vardt2d(ij)
-!           end do
-!        end do
-!     end if
+ !!!! call mpi_gatherv( bf13pom, nsndct2d, mpi_real8, &
+ !!!!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+ !!!!&                  iroot,   mpi_comm_world, ierr )
+ !!!! if ( myrank .eq. iroot ) then
+ !!!!    do irank = 0, nprocs-1
+ !!!!       do ij = jjstr(irank), jjend(irank)
+ !!!!          bf13pomg(ij) = vardt2d(ij)
+ !!!!       end do
+ !!!!    end do
+ !!!! end if
 
-!     call mpi_gatherv( bf13car, nsndct2d, mpi_real8, &
-!    &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
-!    &                  iroot,   mpi_comm_world, ierr )
-!     if ( myrank .eq. iroot ) then
-!        do irank = 0, nprocs-1
-!           do ij = jjstr(irank), jjend(irank)
-!              bf13carg(ij) = vardt2d(ij)
-!           end do
-!        end do
-!     end if
+ !!!! call mpi_gatherv( bf13car, nsndct2d, mpi_real8, &
+ !!!!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+ !!!!&                  iroot,   mpi_comm_world, ierr )
+ !!!! if ( myrank .eq. iroot ) then
+ !!!!    do irank = 0, nprocs-1
+ !!!!       do ij = jjstr(irank), jjend(irank)
+ !!!!          bf13carg(ij) = vardt2d(ij)
+ !!!!       end do
+ !!!!    end do
+ !!!! end if
 
       end if
 
@@ -1695,93 +2793,95 @@ if (use_mpi) then
          end do
       end if
 
-!     call mpi_gatherv( fi14pom, nsndct2d, mpi_real8, &
-!    &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
-!    &                  iroot,   mpi_comm_world, ierr )
-!     if ( myrank .eq. iroot ) then
-!        do irank = 0, nprocs-1
-!           do ij = jjstr(irank), jjend(irank)
-!              fi14pomg(ij) = vardt2d(ij)
-!           end do
-!        end do
-!     end if
+ !!!! call mpi_gatherv( fi14pom, nsndct2d, mpi_real8, &
+ !!!!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+ !!!!&                  iroot,   mpi_comm_world, ierr )
+ !!!! if ( myrank .eq. iroot ) then
+ !!!!    do irank = 0, nprocs-1
+ !!!!       do ij = jjstr(irank), jjend(irank)
+ !!!!          fi14pomg(ij) = vardt2d(ij)
+ !!!!       end do
+ !!!!    end do
+ !!!! end if
 
-!     call mpi_gatherv( fi14car, nsndct2d, mpi_real8, &
-!    &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
-!    &                  iroot,   mpi_comm_world, ierr )
-!     if ( myrank .eq. iroot ) then
-!        do irank = 0, nprocs-1
-!           do ij = jjstr(irank), jjend(irank)
-!              fi14carg(ij) = vardt2d(ij)
-!           end do
-!        end do
-!     end if
+ !!!! call mpi_gatherv( fi14car, nsndct2d, mpi_real8, &
+ !!!!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+ !!!!&                  iroot,   mpi_comm_world, ierr )
+ !!!! if ( myrank .eq. iroot ) then
+ !!!!    do irank = 0, nprocs-1
+ !!!!       do ij = jjstr(irank), jjend(irank)
+ !!!!          fi14carg(ij) = vardt2d(ij)
+ !!!!       end do
+ !!!!    end do
+ !!!! end if
 
-!     call mpi_gatherv( fo14pom, nsndct2d, mpi_real8, &
-!    &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
-!    &                  iroot,   mpi_comm_world, ierr )
-!     if ( myrank .eq. iroot ) then
-!        do irank = 0, nprocs-1
-!           do ij = jjstr(irank), jjend(irank)
-!              fo14pomg(ij) = vardt2d(ij)
-!           end do
-!        end do
-!     end if
+ !!!! call mpi_gatherv( fo14pom, nsndct2d, mpi_real8, &
+ !!!!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+ !!!!&                  iroot,   mpi_comm_world, ierr )
+ !!!! if ( myrank .eq. iroot ) then
+ !!!!    do irank = 0, nprocs-1
+ !!!!       do ij = jjstr(irank), jjend(irank)
+ !!!!          fo14pomg(ij) = vardt2d(ij)
+ !!!!       end do
+ !!!!    end do
+ !!!! end if
 
-!     call mpi_gatherv( fo14car, nsndct2d, mpi_real8, &
-!    &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
-!    &                  iroot,   mpi_comm_world, ierr )
-!     if ( myrank .eq. iroot ) then
-!        do irank = 0, nprocs-1
-!           do ij = jjstr(irank), jjend(irank)
-!              fo14carg(ij) = vardt2d(ij)
-!           end do
-!        end do
-!     end if
+ !!!! call mpi_gatherv( fo14car, nsndct2d, mpi_real8, &
+ !!!!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+ !!!!&                  iroot,   mpi_comm_world, ierr )
+ !!!! if ( myrank .eq. iroot ) then
+ !!!!    do irank = 0, nprocs-1
+ !!!!       do ij = jjstr(irank), jjend(irank)
+ !!!!          fo14carg(ij) = vardt2d(ij)
+ !!!!       end do
+ !!!!    end do
+ !!!! end if
 
-!     call mpi_gatherv( bf14pom, nsndct2d, mpi_real8, &
-!    &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
-!    &                  iroot,   mpi_comm_world, ierr )
-!     if ( myrank .eq. iroot ) then
-!        do irank = 0, nprocs-1
-!           do ij = jjstr(irank), jjend(irank)
-!              bf14pomg(ij) = vardt2d(ij)
-!           end do
-!        end do
-!     end if
+ !!!! call mpi_gatherv( bf14pom, nsndct2d, mpi_real8, &
+ !!!!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+ !!!!&                  iroot,   mpi_comm_world, ierr )
+ !!!! if ( myrank .eq. iroot ) then
+ !!!!    do irank = 0, nprocs-1
+ !!!!       do ij = jjstr(irank), jjend(irank)
+ !!!!          bf14pomg(ij) = vardt2d(ij)
+ !!!!       end do
+ !!!!    end do
+ !!!! end if
 
-!     call mpi_gatherv( bf14car, nsndct2d, mpi_real8, &
-!    &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
-!    &                  iroot,   mpi_comm_world, ierr )
-!     if ( myrank .eq. iroot ) then
-!        do irank = 0, nprocs-1
-!           do ij = jjstr(irank), jjend(irank)
-!              bf14carg(ij) = vardt2d(ij)
-!           end do
-!        end do
-!     end if
-
-      end if
-
-      if ( myrank .eq. iroot ) then
-         do k = skst, sken
-            do ij = 1, nxydim
-               wtg(ij, k)   = sclag(ij, k) &
-     &                      + ( spomg(ij, k) * molpom * 1.0d-3 ) &
-     &                      + ( scarg(ij, k) * molcar * 1.0d-3 ) &
-     &                      + ( sopag(ij, k) * molopa * 1.0d-3 )
-               pclag(ij, k) = sclag(ij, k) &
-     &                      / wtg(ij, k) * 1.0d+2
-               ppomg(ij, k) = spomg(ij, k) * molpom * 1.0d-3 &
-     &                      / wtg(ij, k) * 1.0d+2
-               pcarg(ij, k) = scarg(ij, k) * molcar * 1.0d-3 &
-     &                      / wtg(ij, k) * 1.0d+2
-               popag(ij, k) = sopag(ij, k) * molopa * 1.0d-3 &
-     &                      / wtg(ij, k) * 1.0d+2
-            end do
-         end do
+ !!!! call mpi_gatherv( bf14car, nsndct2d, mpi_real8, &
+ !!!!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+ !!!!&                  iroot,   mpi_comm_world, ierr )
+ !!!! if ( myrank .eq. iroot ) then
+ !!!!    do irank = 0, nprocs-1
+ !!!!       do ij = jjstr(irank), jjend(irank)
+ !!!!          bf14carg(ij) = vardt2d(ij)
+ !!!!       end do
+ !!!!    end do
+ !!!! end if
 
       end if
+
+ !!!! if ( myrank .eq. iroot ) then
+ !!!!    do k = skst, sken
+ !!!!       do ij = 1, nxydim
+ !!!!          wtg(ij, k)   = sclag(ij, k) &
+ !!!!&                      + ( spomg(ij, k) * molpom * 1.0d-3 ) &
+ !!!!&                      + ( scarg(ij, k) * molcar * 1.0d-3 ) &
+ !!!!&                      + ( sopag(ij, k) * molopa * 1.0d-3 )
+ !!!!          pclag(ij, k) = sclag(ij, k) &
+ !!!!&                      / wtg(ij, k) * 1.0d+2
+ !!!!          ppomg(ij, k) = spomg(ij, k) * molpom * 1.0d-3 &
+ !!!!&                      / wtg(ij, k) * 1.0d+2
+ !!!!          pcarg(ij, k) = scarg(ij, k) * molcar * 1.0d-3 &
+ !!!!&                      / wtg(ij, k) * 1.0d+2
+ !!!!          popag(ij, k) = sopag(ij, k) * molopa * 1.0d-3 &
+ !!!!&                      / wtg(ij, k) * 1.0d+2
+ !!!!       end do
+ !!!!    end do
+
+ !!!! end if
+
+end if ! -- End of hstavg
 
       call mpi_barrier(mpi_comm_world, ierr)
 
@@ -1808,14 +2908,14 @@ else
             end do
          end do
 
-         do k = skst, sken
-            do ij = 1, nxydim
-               pclag(ij, k) = pcla(ij, k)
-               ppomg(ij, k) = ppom(ij, k)
-               pcarg(ij, k) = pcar(ij, k)
-               popag(ij, k) = popa(ij, k)
-            end do
-         end do
+!!       do k = skst, sken
+!!          do ij = 1, nxydim
+!!             pclag(ij, k) = pcla(ij, k)
+!!             ppomg(ij, k) = ppom(ij, k)
+!!             pcarg(ij, k) = pcar(ij, k)
+!!             popag(ij, k) = popa(ij, k)
+!!          end do
+!!       end do
 
          do k = skst, sken
             do ij = 1, nxydim
@@ -1907,7 +3007,7 @@ else
          end do
          end if
 
-end if
+end if ! -- End of use_mpi
 
 if (use_mpi) then
       if ( myrank .eq. iroot ) then
@@ -1925,6 +3025,7 @@ if (use_mpi) then
          allocate(yy_array(1))
          yy_array(1) = yy
 
+         allocate(var3d_values(nxdim,nydim,sdzdim,1))
          filename = "scla.nc"
          varname = "Clay"
          varunit = "g m-3"
@@ -1943,7 +3044,9 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " g m-3"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value, " g"
          write(nfstdo, *) "'--------------------------------------------------'"
+         deallocate(var3d_values)
 
+         allocate(var3d_values(nxdim,nydim,sdzdim,1))
          filename = "spom.nc"
          varname = "OrgM"
          varunit = "mmol m-3"
@@ -1962,7 +3065,9 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
          write(nfstdo, *) "'--------------------------------------------------'"
+         deallocate(var3d_values)
 
+         allocate(var3d_values(nxdim,nydim,sdzdim,1))
          filename = "scar.nc"
          varname = "CaCO3"
          varunit = "mmol m-3"
@@ -1981,7 +3086,9 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
          write(nfstdo, *) "'--------------------------------------------------'"
+         deallocate(var3d_values)
 
+         allocate(var3d_values(nxdim,nydim,sdzdim,1))
          filename = "sopa.nc"
          varname = "SiO2"
          varunit = "mmol m-3"
@@ -2000,7 +3107,9 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
          write(nfstdo, *) "'--------------------------------------------------'"
+         deallocate(var3d_values)
 
+         allocate(var3d_values(nxdim,nydim,sdzdim,1))
          filename = "sage.nc"
          varname = "Agetracer"
          varunit = "year"
@@ -2018,7 +3127,9 @@ if (use_mpi) then
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " yr"
          write(nfstdo, *) "'--------------------------------------------------'"
+         deallocate(var3d_values)
 
+         allocate(var3d_values(nxdim,nydim,sdzdim,1))
          filename = "cnit.nc"
          varname = "Phosphate"
          varunit = "mmol m-3"
@@ -2037,7 +3148,9 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
          write(nfstdo, *) "'--------------------------------------------------'"
+         deallocate(var3d_values)
 
+         allocate(var3d_values(nxdim,nydim,sdzdim,1))
          filename = "cdic.nc"
          varname = "DIC"
          varunit = "mmol m-3"
@@ -2056,7 +3169,9 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
          write(nfstdo, *) "'--------------------------------------------------'"
+         deallocate(var3d_values)
 
+         allocate(var3d_values(nxdim,nydim,sdzdim,1))
          filename = "calk.nc"
          varname = "Alkalinity"
          varunit = "mmol m-3"
@@ -2075,7 +3190,9 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
          write(nfstdo, *) "'--------------------------------------------------'"
+         deallocate(var3d_values)
 
+         allocate(var3d_values(nxdim,nydim,sdzdim,1))
          filename = "cdo2.nc"
          varname = "Oxygen"
          varunit = "mmol m-3"
@@ -2094,7 +3211,9 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
          write(nfstdo, *) "'--------------------------------------------------'"
+         deallocate(var3d_values)
 
+         allocate(var3d_values(nxdim,nydim,sdzdim,1))
          filename = "csil.nc"
          varname = "Silicate"
          varunit = "mmol m-3"
@@ -2113,7 +3232,9 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
          write(nfstdo, *) "'--------------------------------------------------'"
+         deallocate(var3d_values)
 
+         allocate(var2d_values(nxdim,nydim,1))
          filename = "ficla.nc"
          varname = "Clay_bottom_flux"
          varunit = "g m-3 * cm s-1"
@@ -2130,7 +3251,9 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " g m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+5, " g * yr-1"
          write(nfstdo, *) "'--------------------------------------------------'"
+         deallocate(var2d_values)
 
+         allocate(var2d_values(nxdim,nydim,1))
          filename = "fipom.nc"
          varname = "OrgM_bottom_flux"
          varunit = "mMol m-3 * cm s-1"
@@ -2147,7 +3270,9 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
          write(nfstdo, *) "'--------------------------------------------------'"
+         deallocate(var2d_values)
 
+         allocate(var2d_values(nxdim,nydim,1))
          filename = "ficar.nc"
          varname = "CaCO3_bottom_flux"
          varunit = "mMol m-3 * cm s-1"
@@ -2164,7 +3289,9 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
          write(nfstdo, *) "'--------------------------------------------------'"
+         deallocate(var2d_values)
 
+         allocate(var2d_values(nxdim,nydim,1))
          filename = "fiopa.nc"
          varname = "SiO2_bottom_flux"
          varunit = "mMol m-3 * cm s-1"
@@ -2181,7 +3308,9 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
          write(nfstdo, *) "'--------------------------------------------------'"
+         deallocate(var2d_values)
 
+         allocate(var2d_values(nxdim,nydim,1))
          filename = "focla.nc"
          varname = "Clay_diffusion"
          varunit = "g m-3 * cm s-1"
@@ -2198,7 +3327,9 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
          write(nfstdo, *) "'--------------------------------------------------'"
+         deallocate(var2d_values)
 
+         allocate(var2d_values(nxdim,nydim,1))
          filename = "fopom.nc"
          varname = "OrgM_diffusion"
          varunit = "mMol m-3 * cm s-1"
@@ -2215,7 +3346,9 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
          write(nfstdo, *) "'--------------------------------------------------'"
+         deallocate(var2d_values)
 
+         allocate(var2d_values(nxdim,nydim,1))
          filename = "focar.nc"
          varname = "CaCO3_diffusion"
          varunit = "mMol m-3 * cm s-1"
@@ -2232,7 +3365,9 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
          write(nfstdo, *) "'--------------------------------------------------'"
+         deallocate(var2d_values)
 
+         allocate(var2d_values(nxdim,nydim,1))
          filename = "foopa.nc"
          varname = "SiO2_diffusion"
          varunit = "mMol m-3 * cm s-1"
@@ -2249,7 +3384,9 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
          write(nfstdo, *) "'--------------------------------------------------'"
+         deallocate(var2d_values)
 
+         allocate(var2d_values(nxdim,nydim,1))
          filename = "fiocla.nc"
          varname = "Clay_burial"
          varunit = "g m-3 * cm s-1"
@@ -2266,7 +3403,9 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " g m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+5, " g * yr-1"
          write(nfstdo, *) "'--------------------------------------------------'"
+         deallocate(var2d_values)
 
+         allocate(var2d_values(nxdim,nydim,1))
          filename = "fiopom.nc"
          varname = "OrgM_burial"
          varunit = "mMol m-3 * cm s-1"
@@ -2283,7 +3422,9 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
          write(nfstdo, *) "'--------------------------------------------------'"
+         deallocate(var2d_values)
 
+         allocate(var2d_values(nxdim,nydim,1))
          filename = "fiocar.nc"
          varname = "CaCO3_burial"
          varunit = "mMol m-3 * cm s-1"
@@ -2300,7 +3441,9 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
          write(nfstdo, *) "'--------------------------------------------------'"
+         deallocate(var2d_values)
 
+         allocate(var2d_values(nxdim,nydim,1))
          filename = "fioopa.nc"
          varname = "SiO2_burial"
          varunit = "mMol m-3 * cm s-1"
@@ -2317,7 +3460,9 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
          write(nfstdo, *) "'--------------------------------------------------'"
+         deallocate(var2d_values)
 
+         allocate(var2d_values(nxdim,nydim,1))
          filename = "bfcla.nc"
          varname = "Clay_burial"
          varunit = "g m-3 * cm s-1"
@@ -2334,7 +3479,9 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
          write(nfstdo, *) "'--------------------------------------------------'"
+         deallocate(var2d_values)
 
+         allocate(var2d_values(nxdim,nydim,1))
          filename = "bfpom.nc"
          varname = "OrgM_burial"
          varunit = "mMol m-3 * cm s-1"
@@ -2351,7 +3498,9 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
          write(nfstdo, *) "'--------------------------------------------------'"
+         deallocate(var2d_values)
 
+         allocate(var2d_values(nxdim,nydim,1))
          filename = "bfcar.nc"
          varname = "CaCO3_burial"
          varunit = "mMol m-3 * cm s-1"
@@ -2368,7 +3517,9 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
          write(nfstdo, *) "'--------------------------------------------------'"
+         deallocate(var2d_values)
 
+         allocate(var2d_values(nxdim,nydim,1))
          filename = "bfopa.nc"
          varname = "SiO2_burial"
          varunit = "mMol m-3 * cm s-1"
@@ -2385,27 +3536,29 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
          write(nfstdo, *) "'--------------------------------------------------'"
+         deallocate(var2d_values)
 
-        !filename = "w.nc"
-        !varname = "Sediment_rate"
-        !varunit = "mmol m-3"
-        !do k = 1, sdzdim+1
-        !  do j = 1, nydim
-        !    do i = 1, nxdim
-        !      ij = i + (j - 1) * nxdim
-        !      var3d_values(i, j, k, 1) = wg(ij, k)
-        !    end do
-        !  end do
-        !end do
-        !call write_netcdf_3dwt(filename, varname, varunit, var3d_values, lon_values, lat_values, LZ+1, yy)
-        !call calc_integral_and_mean_3d(wg, lon_values, lat_values, lz+1, integral_value, mean_value)
-        !write(nfstdo, *) "'--------------------------------------------------'"
-        !write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
-        !write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
-        !write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
-        !write(nfstdo, *) "'--------------------------------------------------'"
+         allocate(var3d_values(nxdim,nydim,sdzdim+1,1))
+         filename = "w.nc"
+         varname = "Sediment_rate"
+         varunit = "cm s-1"
+         do k = 1, sdzdim+1
+           do j = 1, nydim
+             do i = 1, nxdim
+               ij = i + (j - 1) * nxdim
+               var3d_values(i, j, k, 1) = wg(ij, k)
+             end do
+           end do
+         end do
+         call write_netcdf_3dwt(filename, varname, varunit, var3d_values, lon_values, lat_values, lz+1, yy_array)
+         call calc_integral_and_mean_3d(wg, lon_values, lat_values, lz+1, integral_value, mean_value)
+         write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
+         write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " cm s-1"
+         write(nfstdo, *) "'--------------------------------------------------'"
+         deallocate(var3d_values)
 
-
+        !allocate(var3d_values(nxdim,nydim,sdzdim,1))
         !filename = "cdc13.nc"
         !varname = "delta_carbon-13"
         !varunit = "permil"
@@ -2424,7 +3577,9 @@ if (use_mpi) then
         !write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
         !write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
         !write(nfstdo, *) "'--------------------------------------------------'"
+        !deallocate(var3d_values)
 
+        !allocate(var3d_values(nxdim,nydim,sdzdim,1))
         !filename = "cdc14.nc"
         !varname = "Delta_carbon-14"
         !varunit = "permil"
@@ -2443,6 +3598,7 @@ if (use_mpi) then
         !write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
         !write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
         !write(nfstdo, *) "'--------------------------------------------------'"
+        !deallocate(var3d_values)
 
         !! -- Gtool output --
         !chead  = ''
@@ -2604,11 +3760,13 @@ if (use_mpi) then
       call mpi_bcast(sdtx, nxydim*sdzdim*sedtdm, mpi_real8, iroot, mpi_comm_world, ierr)
       call mpi_barrier(mpi_comm_world, ierr)
 
-end if
+end if ! -- End of use_mpi
 
       end if ! -- End of Output
 
       end do ! -- End of Time integration
+
+      deallocate(mean_data)
 
       end subroutine digda_cprdc
 
