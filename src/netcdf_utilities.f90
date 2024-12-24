@@ -1869,7 +1869,8 @@ contains
     endif
 
     ! Deallocate arrays
-    deallocate(data1, data2)
+    if (allocated(data1)) deallocate(data1)
+    if (allocated(data2)) deallocate(data2)
 
   end subroutine combine_netcdf_files
 
@@ -1953,7 +1954,7 @@ contains
 !!        retval = nf90_close(ncid_in)
 !!        if (retval /= nf90_noerr) call handle_error(retval)
 !!
-!!        deallocate(data)
+!!        if (allocated(data)) deallocate(data)
 !!    end do
 !!
 !!    ! Close the output file
