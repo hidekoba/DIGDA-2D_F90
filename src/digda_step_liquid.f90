@@ -48,8 +48,8 @@ contains
 
 ! =====================================================================
 
-      subroutine calc_step_liquid( bw, rlt, phi, phii, dei, c, & !! IN
-                                 & cn                          ) !! OUT
+      subroutine calc_step_liquid( bw, rlt, phi, phii, dei, c, &
+                                 & cn                          )
 
       double precision, intent(in)  :: bw(nxy)
       double precision, intent(in)  :: rlt(nxy,sdzdim)
@@ -180,8 +180,8 @@ contains
 
 ! =====================================================================
 
-      subroutine calc_step_liquid_o2( bw, rlt, phi, phii, dei, c, & !! IN
-                                    & cn                          ) !! OUT
+      subroutine calc_step_liquid_o2( bw, rlt, phi, phii, dei, c, &
+                                    & cn                          )
 
       double precision, intent(in)  :: bw(nxy)
       double precision, intent(inout) :: rlt(nxy,sdzdim)

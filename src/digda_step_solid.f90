@@ -79,8 +79,8 @@ contains
 
 ! =====================================================================
 
-      subroutine calc_step_solid( ff, rst, w, phi, phii, dbi, s, & !! IN
-                                & sn, bfz                        ) !! OUT
+      subroutine calc_step_solid( ff, rst, w, phi, phii, dbi, s, &
+                                & sn, bfz                        )
 
       double precision, intent(in)  :: ff(nxy)
       double precision, intent(in)  :: rst(nxy,sdzdim)
@@ -527,8 +527,8 @@ contains
 
 ! =====================================================================
 
-      subroutine calc_step_solid_clay( ff, rst, w, phi, phii, dbi, S, rhocla, & !! IN
-                                     & sn, bfz                                ) !! OUT
+      subroutine calc_step_solid_clay( ff, rst, w, phi, phii, dbi, S, rhocla, &
+                                     & sn, bfz                                )
 
       double precision, intent(in)  :: ff(nxy)
       double precision, intent(in)  :: rst(nxy,sdzdim)

@@ -1,0 +1,696 @@
+
+ Fujitsu Fortran Version 4.11.1  Mon Dec 23 16:24:35 2024
+
+ Compilation information
+   Current directory : /work/01/gi55/c24116/digda/DIGDA-2D_F90/src
+   Source file       : digda_step_liquid.f90
+
+ Option information
+   Environment variable : -I/work/opt/local/aarch64/apps/fj/1.2.31/netcdf-fortran/4.5.3/include -I/work/opt/local/aarch64/apps/fj/1.2.31/fjmpi/1.2.31/phdf5/1.12.0/include -I/work/opt/local/aarch64/apps/fj/1.2.31/hdf5/1.12.0/include
+   Command line options : -Kident_mpi -f2004 -O2 -Kfast -fw -Cpp -Koptmsg=2,ocl,options -Nlst=t -NRnotrap -mcmodel=large -c -o digda_step_liquid.o -I/opt/FJSVxtclanga/.common/MELI030/include/mpi/fujitsu -I/opt/FJSVxtclanga/.common/MELI030/lib64 -Knointentopt
+   Cpp options          : -I/work/opt/local/aarch64/apps/fj/1.2.31/netcdf-fortran/4.5.3/include -I/work/opt/local/aarch64/apps/fj/1.2.31/fjmpi/1.2.31/phdf5/1.12.0/include -I/work/opt/local/aarch64/apps/fj/1.2.31/hdf5/1.12.0/include -I/opt/FJSVxtclanga/.common/MELI030/include/mpi/fujitsu -I/opt/FJSVxtclanga/.common/MELI030/lib64 -Dunix -Dlinux -D__FUJITSU -D__FRT_major__=4 -D__FRT_minor__=11 -D__FRT_patchlevel__=1 -D__FRT_version__="4.11.1" -D__aarch64__ -D__unix -D__frt_version=800 -D__ARM_ARCH=8 -D__ARM_FEATURE_SVE -D__ELF__ -D__unix__ -D__linux__ -D__linux -Asystem(unix) -otmp
+   Effective options    : -fw -g0 -AE -Free -O3 -X9
+                          -x0 -xaccept=nomodule_allocatable
+                          -KA64FX -KARMV8_3_A -KSVE -Kalign_commons
+                          -Kalign_loops -Knoarray_declaration_opt
+                          -Kassume=noshortloop -Kassume=nomemory_bandwidth
+                          -Kassume=notime_saving_compilation -Kauto
+                          -Kautoobjstack -Knocalleralloc -Kcmodel=large
+                          -Keval -Keval_noconcurrent -Knoextract_stride_store
+                          -Knofenv_access -Kfp_contract -Kfp_relaxed
+                          -Kfsimple -Kfz -Khpctag -Kilfunc=procedure
+                          -Knointentopt -Klargepage -Kloop_blocking
+                          -Kloop_fission -Kloop_nofission_stripmining
+                          -Kloop_fission_threshold=50 -Kloop_fusion
+                          -Kloop_interchange -Kloop_nopart_parallel
+                          -Kloop_part_simd -Kloop_perfect_nest
+                          -Kloop_noversioning -Knolto -Kmfunc=1 -Kocl
+                          -Komitfp -Knooptlib_string -Koptmsg=2
+                          -Knopc_relative_literal_loads -Kplt -Knopreex
+                          -Kprefetch_noconditional -Kprefetch_noindirect
+                          -Kprefetch_sequential=auto -Kprefetch_nostride
+                          -Kprefetch_cache_level=all -Kprefetch_noinfer
+                          -Kprefetch_strong -Kprefetch_strong_L2 -Knopreload
+                          -Ksch_post_ra -Ksch_pre_ra -Ksibling_calls
+                          -Ksimd=auto -Ksimd_packed_promotion
+                          -Ksimd_reduction_product -Ksimd_reg_size=512
+                          -Ksimd_nouncounted_loop
+                          -Ksimd_use_multiple_structures -Knostriping
+                          -Knosubscript_opt -Kswp -Kswp_freg_rate=100
+                          -Kswp_ireg_rate=100 -Kswp_preg_rate=100
+                          -Kswp_policy=auto -Ktemparraystack -Kunroll
+                          -Knounroll_and_jam -Knozfill
+                          -Knoopenmp -Kopenmp_noassume_norecurrence
+                          -Kopenmp_nocollapse_except_innermost
+                          -Kopenmp_noordered_reduction -Knoopenmp_simd
+                          -Knothreadsafe -Knoparallel
+                          -Kparallel_nofp_precision -Knoarray_private
+                          -Knodynamic_iteration -Knoreduction
+                          -Knoregion_extension
+                          -Nallextput -Nnoalloc_assign
+                          -Ncancel_overtime_compilation -Nnocheck_global
+                          -Nnocoarray -Nnocompdisp -Nnocopyarg -Nnocoverage
+                          -Nfjprof -Nfreealloc -Nf90move -Nnohook_func
+                          -Nnohook_time -Nline -Nlst -Nlst=p -Nlst=t
+                          -Nnomallocfree -Nnoobsfun -Nquickdbg=noargchk
+                          -Nquickdbg=nosubchk -Nquickdbg=noundef -NRnotrap
+                          -Nnorecursive -Nnoreordered_variable_stack
+                          -Nrt_notune -Nnosave -Nsetvalue=noheap
+                          -Nsetvalue=nostack -Nsetvalue=noscalar
+                          -Nsetvalue=noarray -Nsetvalue=nostruct -Nuse_rodata
+
+ Module "globals_digda_step_liquid"
+  (line-no.)(nest)(optimize)
+          1                     !######################################################################
+          2                     
+          3                     ! --- information -----------------------------------------------------
+          4                     !
+          5                     !  Sediment model : Dissolved material
+          6                     !
+          7                     !  HISTORY
+          8                     !     '15.01.09  H.Kobayashi :
+          9                     !
+         10                     ! ---------------------------------------------------------------------
+         11                     
+         12                     module globals_digda_step_liquid
+         13                       use module_zcfile
+         14                       use module_digda_grid
+         15                       use module_digda_timestep
+         16                       implicit none
+         17                     
+         18                       double precision :: dflx(nxy, sdzdim+1)
+         19                     
+         20                       double precision :: ea(sdzdim), eb(nxy, sdzdim), ec(sdzdim)
+         21                       double precision :: eal(sdzdim), ebe(sdzdim), ega(sdzdim), eep(nxy, sdzdim)
+         22                       double precision :: ed(nxy, sdzdim),  ex(nxy, sdzdim)
+         23                     
+         24                       logical :: cdcn = .false. !! Crank nicolson ?
+         25                       logical :: cdii = .true.  !! Implicit ?
+         26                       namelist /nmsdli/ cdcn, cdii
+         27                     
+         28                     end module globals_digda_step_liquid
+
+ Procedure information
+   Lines      : 28
+   Statements : 13
+   Stack(byte): 352
+   Prefetch num: 0
+
+ Module "module_digda_step_liquid"
+  (line-no.)(nest)(optimize)
+         29                     
+         30                     ! =====================================================================
+         31                     
+         32                     module module_digda_step_liquid
+         33                       use globals_digda_step_liquid
+         34                       implicit none
+         35                     contains
+         36                     
+         37                       subroutine set_digda_step_liquid
+         38                     
+         39                         integer :: ij, k
+         40                     
+         41                         write(nfstdo, *) '*** Sediment : set_digda_step_liquid ***'
+         42                         rewind(nfparm)
+         43                         read(nfparm, nmsdli, end=99)
+         44                     99 continue
+         45                         write(nfstdo, nmsdli)
+         46                     
+         47                       end subroutine set_digda_step_liquid
+         48                     
+         49                     ! =====================================================================
+         50                     
+         51                           subroutine calc_step_liquid( bw, rlt, phi, phii, dei, c, &
+         52                                                      & cn                          )
+         53                     
+         54                           double precision, intent(in)  :: bw(nxy)
+         55                           double precision, intent(in)  :: rlt(nxy,sdzdim)
+         56                           double precision, intent(in)  :: phi(sdzdim)
+         57                           double precision, intent(in)  :: phii(sdzdim+1)
+         58                           double precision, intent(in)  :: dei(sdzdim+1)
+         59                           double precision, intent(in)  :: c(nxy,sdzdim)
+         60                           double precision, intent(out) :: cn(nxy,sdzdim)
+         61                     
+         62                           integer :: ij, k
+         63                     
+         64                     !     -- Diffusion : Crank nicolson --
+         65                     
+         66     1                     if (cdcn) then
+         67     1               
+                              <<< Loop-information Start >>>
+                              <<<  [OPTIMIZATION]
+                              <<<    SIMD(VL: 8)
+                              <<< Loop-information  End >>>
+         68     2        v            do k = skst, sken
+         69     2        v               eal(k) = ( phi(k) / tssec )
+         70     2        v               ebe(k) = ( ( phii(k)   * dei(k)   ) &
+         71     2                    &            / ( 2.0d0 * dlz(k) * dlzi(k)   ) )
+         72     2        v               ega(k) = ( ( phii(k+1) * dei(k+1) ) &
+         73     2                    &            / ( 2.0d0 * dlz(k) * dlzi(k+1) ) )
+         74     2        v            end do
+         75     1               
+         76     2                     do k = skst+1, sken-1
+         77     2                        ea(k)         = - ebe(k)
+         78     2                        ec(k)         = - ega(k)
+                              <<< Loop-information Start >>>
+                              <<<  [OPTIMIZATION]
+                              <<<    SIMD(VL: 8)
+                              <<<    PREFETCH(HARD) Expected by compiler :
+                              <<<      eb
+                              <<< Loop-information  End >>>
+         79     3       4v            do ij = ijtstr, ijtend
+         80     3       4v               eb(ij, k)     = eal(k) + ebe(k) + ega(k)
+         81     3       4v            end do
+         82     2                     end do
+         83     1               
+         84     1                        ea(skst)      = - ebe(skst)
+         85     1                        ec(skst)      = - ega(skst)
+         86     1                        ea(sken)      = - ebe(sken)
+         87     1                        ec(sken)      = - ega(sken)
+                              <<< Loop-information Start >>>
+                              <<<  [OPTIMIZATION]
+                              <<<    FUSED(lines: 88,94)
+                              <<<    SIMD(VL: 8)
+                              <<<    SOFTWARE PIPELINING(IPC: 3.00, ITR: 144, MVE: 10, POL: S)
+                              <<<    PREFETCH(HARD) Expected by compiler :
+                              <<<      c, rlt, bw, ed, eb
+                              <<< Loop-information  End >>>
+         88     2        v            do ij = ijtstr, ijtend
+         89     2        v               eb(ij, skst)  = eal(skst) + ega(skst) &
+         90     2                    &   + ( phii(skst) * dei(skst) / dlzi(skst) / dlzi(skst) )
+         91     2        v               eb(ij, sken)  = eal(sken) + ebe(sken)
+         92     2        v            end do
+         93     1               
+                              <<< Loop-information Start >>>
+                              <<<  [OPTIMIZATION]
+                              <<<    FUSED
+                              <<< Loop-information  End >>>
+         94     2                     do ij = ijtstr, ijtend
+         95     2                        ed(ij, skst) = &
+         96     2                    &      + ( eal(skst) - ega(skst) ) * c(ij, skst) &
+         97     2                    &      + ega(skst) * c(ij, skst+1) &
+         98     2                    &      + rlt(ij, skst) &
+         99     2                    &   + ( phii(skst) * dei(skst) * bw(ij) / dlzi(skst) / dlzi(skst) )
+        100     2                     end do
+        101     1               
+                              <<< Loop-information Start >>>
+                              <<<  [OPTIMIZATION]
+                              <<<    PREFETCH(HARD) Expected by compiler :
+                              <<<      c, rlt, ed
+                              <<< Loop-information  End >>>
+        102     2                     do k = skst+1, sken-1
+                              <<< Loop-information Start >>>
+                              <<<  [OPTIMIZATION]
+                              <<<    SIMD(VL: 8)
+                              <<<    SOFTWARE PIPELINING(IPC: 2.20, ITR: 96, MVE: 2, POL: S)
+                              <<<    PREFETCH(HARD) Expected by compiler :
+                              <<<      c, rlt, ed
+                              <<< Loop-information  End >>>
+        103     3       2v            do ij = ijtstr, ijtend
+        104     3       2v               ed(ij, k) = &
+        105     3                    &      + ebe(k) * c(ij, k-1) &
+        106     3                    &      + ( eal(k) - ebe(k) - ega(k) ) * c(ij, k) &
+        107     3                    &      + ega(k) * c(ij, k+1) &
+        108     3                    &      + rlt(ij, k)
+        109     3       2v            end do
+        110     2                     end do
+        111     1               
+                              <<< Loop-information Start >>>
+                              <<<  [OPTIMIZATION]
+                              <<<    SIMD(VL: 8)
+                              <<<    SOFTWARE PIPELINING(IPC: 2.42, ITR: 96, MVE: 2, POL: S)
+                              <<<    PREFETCH(HARD) Expected by compiler :
+                              <<<      c, rlt, ed
+                              <<< Loop-information  End >>>
+        112     2       2v            do ij = ijtstr, ijtend
+        113     2       2v               ed(ij, sken) = &
+        114     2                    &      + ebe(sken) * c(ij, sken-1) &
+        115     2                    &      + ( eal(sken) - ega(sken) ) * c(ij, sken) &
+        116     2                    &      + rlt(ij, sken)
+        117     2       2v            end do
+        118     1               
+        119     1                     call calc_tridiagonal_liquid( ea, eb, ec, ed, ex )
+        120     1               
+        121     1                     end if
+        122                     
+        123                     !     -- Diffusion : Implicit --
+        124                     
+        125     1                     if (cdii) then
+        126     1               
+                              <<< Loop-information Start >>>
+                              <<<  [OPTIMIZATION]
+                              <<<    SIMD(VL: 8)
+                              <<< Loop-information  End >>>
+        127     2        v            do k = skst, sken
+        128     2        v               eal(k) = ( phi(k) / tssec )
+        129     2        v               ebe(k) = ( ( phii(k)   * dei(k)   ) &
+        130     2                    &            / ( dlz(k) * dlzi(k)   ) )
+        131     2        v               ega(k) = ( ( phii(k+1) * dei(k+1) ) &
+        132     2                    &            / ( dlz(k) * dlzi(k+1) ) )
+        133     2        v            end do
+        134     1               
+        135     2                     do k = skst+1, sken-1
+        136     2                        ea(k)         = - ebe(k)
+        137     2                        ec(k)         = - ega(k)
+                              <<< Loop-information Start >>>
+                              <<<  [OPTIMIZATION]
+                              <<<    SIMD(VL: 8)
+                              <<<    PREFETCH(HARD) Expected by compiler :
+                              <<<      eb
+                              <<< Loop-information  End >>>
+        138     3       4v            do ij = ijtstr, ijtend
+        139     3       4v               eb(ij, k)     = eal(k) + ebe(k) + ega(k)
+        140     3       4v            end do
+        141     2                     end do
+        142     1               
+        143     1                        ea(skst)      = - ebe(skst)
+        144     1                        ec(skst)      = - ega(skst)
+        145     1                        ea(sken)      = - ebe(sken)
+        146     1                        ec(sken)      = - ega(sken)
+                              <<< Loop-information Start >>>
+                              <<<  [OPTIMIZATION]
+                              <<<    SIMD(VL: 8)
+                              <<<    PREFETCH(HARD) Expected by compiler :
+                              <<<      eb
+                              <<< Loop-information  End >>>
+        147     2       2v            do ij = ijtstr, ijtend
+        148     2       2v               eb(ij, skst)  = eal(skst) + ega(skst) &
+        149     2                    &   + ( phii(skst) * dei(skst) / dlzi(skst) / dlzi(skst) )
+        150     2       2v               eb(ij, sken)  = eal(sken) + ebe(sken)
+        151     2       2v            end do
+        152     1               
+                              <<< Loop-information Start >>>
+                              <<<  [OPTIMIZATION]
+                              <<<    PREFETCH(HARD) Expected by compiler :
+                              <<<      c, rlt, ed
+                              <<< Loop-information  End >>>
+        153     2                     do k = skst, sken
+                              <<< Loop-information Start >>>
+                              <<<  [OPTIMIZATION]
+                              <<<    SIMD(VL: 8)
+                              <<<    SOFTWARE PIPELINING(IPC: 3.00, ITR: 144, MVE: 4, POL: S)
+                              <<<    PREFETCH(HARD) Expected by compiler :
+                              <<<      c, rlt, ed
+                              <<< Loop-information  End >>>
+        154     3       2v            do ij = ijtstr, ijtend
+        155     3       2v               ed(ij, k) = &
+        156     3                    &      + eal(k) * c(ij, k) &
+        157     3                    &      + rlt(ij, k)
+        158     3       2v            end do
+        159     2                     end do
+        160     1               
+                              <<< Loop-information Start >>>
+                              <<<  [OPTIMIZATION]
+                              <<<    SIMD(VL: 8)
+                              <<<    SOFTWARE PIPELINING(IPC: 3.25, ITR: 224, MVE: 7, POL: S)
+                              <<<    PREFETCH(HARD) Expected by compiler :
+                              <<<      bw, ed
+                              <<< Loop-information  End >>>
+        161     2       2v            do ij = ijtstr, ijtend
+        162     2       2v               ed(ij, skst) = ed(ij, skst) &
+        163     2                    &   + ( phii(skst) * dei(skst) * bw(ij) / dlzi(skst) / dlzi(skst) )
+        164     2       2v            end do
+        165     1               
+        166     1                     call calc_tridiagonal_liquid( ea, eb, ec, ed, ex )
+        167     1               
+        168     1                     end if
+        169                     
+        170                     !     -- t = t + dt --
+        171                     
+                              <<< Loop-information Start >>>
+                              <<<  [OPTIMIZATION]
+                              <<<    COLLAPSED
+                              <<<    SIMD(VL: 8)
+                              <<<    SOFTWARE PIPELINING(IPC: 1.83, ITR: 112, MVE: 7, POL: S)
+                              <<<    PREFETCH(HARD) Expected by compiler :
+                              <<<      ex, cn
+                              <<< Loop-information  End >>>
+        172     1       2v            do k = skst, sken
+                              <<< Loop-information Start >>>
+                              <<<  [OPTIMIZATION]
+                              <<<    COLLAPSED
+                              <<< Loop-information  End >>>
+        173     2       2v            do ij = ijtstr, ijtend
+        174     2       2v               cn(ij, k) = max( ex(ij, k), 0.0d0 )
+        175     2       2v               ex(ij, k) = 0.0d0
+        176     2       2v            end do
+        177     1                     end do
+        178                     
+        179                           end subroutine calc_step_liquid
+        180                     
+        181                     ! =====================================================================
+        182                     
+        183                           subroutine calc_step_liquid_o2( bw, rlt, phi, phii, dei, c, &
+        184                                                         & cn                          )
+        185                     
+        186                           double precision, intent(in)  :: bw(nxy)
+        187                           double precision, intent(inout) :: rlt(nxy,sdzdim)
+        188                           double precision, intent(in)  :: phi(sdzdim)
+        189                           double precision, intent(in)  :: phii(sdzdim+1)
+        190                           double precision, intent(in)  :: dei(sdzdim+1)
+        191                           double precision, intent(in)  :: c(nxy,sdzdim)
+        192                           double precision, intent(out) :: cn(nxy,sdzdim)
+        193                     
+        194                           integer :: ij, k
+        195                     
+                              <<< Loop-information Start >>>
+                              <<<  [OPTIMIZATION]
+                              <<<    COLLAPSED
+                              <<<    SIMD(VL: 8)
+                              <<<    SOFTWARE PIPELINING(IPC: 1.24, ITR: 80, MVE: 3, POL: S)
+                              <<<    PREFETCH(HARD) Expected by compiler :
+                              <<<      rlt, c
+                              <<< Loop-information  End >>>
+        196     1       2v            do k = skst, sken
+                              <<< Loop-information Start >>>
+                              <<<  [OPTIMIZATION]
+                              <<<    COLLAPSED
+                              <<< Loop-information  End >>>
+        197     2       2v            do ij = ijtstr, ijtend
+        198     3       2v               if ( c(ij, k) /= 0.0d0 ) then
+        199     3       2v                  rlt(ij, k) = rlt(ij, k) / c(ij, k)
+        200     3       2v               else
+        201     3       2v                  rlt(ij, k) = 0.0d0
+        202     3       2v               end if
+        203     2       2v            end do
+        204     1                     end do
+        205                     
+        206                     !     -- Diffusion : Crank nicolson --
+        207                     
+        208     1                     if (cdcn) then
+        209     1               
+                              <<< Loop-information Start >>>
+                              <<<  [OPTIMIZATION]
+                              <<<    COLLAPSED
+                              <<<    SIMD(VL: 8)
+                              <<<    SOFTWARE PIPELINING(IPC: 3.00, ITR: 192, MVE: 8, POL: S)
+                              <<<    PREFETCH(HARD) Expected by compiler :
+                              <<<      rlt, eep
+                              <<< Loop-information  End >>>
+        210     2       2v            do k = skst, sken
+        211     2       2v               eal(k) = ( phi(k) / tssec )
+        212     2       2v               ebe(k) = ( ( phii(k)   * dei(k)   ) &
+        213     2                    &            / ( 2.0d0 * dlz(k) * dlzi(k)   ) )
+        214     2       2v               ega(k) = ( ( phii(k+1) * dei(k+1) ) &
+        215     2                    &            / ( 2.0d0 * dlz(k) * dlzi(k+1) ) )
+                              <<< Loop-information Start >>>
+                              <<<  [OPTIMIZATION]
+                              <<<    COLLAPSED
+                              <<< Loop-information  End >>>
+        216     3       2v            do ij = ijtstr, ijtend
+        217     3       2v               eep(ij, k) = - 0.50d0 * rlt(ij, k)
+        218     3       2v            end do
+        219     2                     end do
+        220     1               
+                              <<< Loop-information Start >>>
+                              <<<  [OPTIMIZATION]
+                              <<<    PREFETCH(HARD) Expected by compiler :
+                              <<<      eep, eb
+                              <<< Loop-information  End >>>
+        221     2                     do k = skst+1, sken-1
+        222     2                        ea(k)         = - ebe(k)
+        223     2                        ec(k)         = - ega(k)
+                              <<< Loop-information Start >>>
+                              <<<  [OPTIMIZATION]
+                              <<<    SIMD(VL: 8)
+                              <<<    SOFTWARE PIPELINING(IPC: 2.75, ITR: 192, MVE: 4, POL: S)
+                              <<<    PREFETCH(HARD) Expected by compiler :
+                              <<<      eb, eep
+                              <<< Loop-information  End >>>
+        224     3       2v            do ij = ijtstr, ijtend
+        225     3       2v               eb(ij, k)     = eal(k) + ebe(k) + ega(k) + eep(ij, k)
+        226     3       2v            end do
+        227     2                     end do
+        228     1               
+        229     1                        ea(skst)      = - ebe(skst)
+        230     1                        ec(skst)      = - ega(skst)
+        231     1                        ea(sken)      = - ebe(sken)
+        232     1                        ec(sken)      = - ega(sken)
+                              <<< Loop-information Start >>>
+                              <<<  [OPTIMIZATION]
+                              <<<    FUSED(lines: 233,239)
+                              <<<    SIMD(VL: 8)
+                              <<<    SOFTWARE PIPELINING(IPC: 2.44, ITR: 104, MVE: 11, POL: S)
+                              <<<    PREFETCH(HARD) Expected by compiler :
+                              <<<      c, bw, ed, eep, rlt, eb
+                              <<< Loop-information  End >>>
+        233     2        v            do ij = ijtstr, ijtend
+        234     2        v               eb(ij, skst)  = eal(skst) + ega(skst) + eep(ij, skst) &
+        235     2                    &   + ( phii(skst) * dei(skst) / dlzi(skst) / dlzi(skst) )
+        236     2        v               eb(ij, sken)  = eal(sken) + ebe(sken) + eep(ij, sken)
+        237     2        v            end do
+        238     1               
+                              <<< Loop-information Start >>>
+                              <<<  [OPTIMIZATION]
+                              <<<    FUSED
+                              <<< Loop-information  End >>>
+        239     2                     do ij = ijtstr, ijtend
+        240     2                        ed(ij, skst) = &
+        241     2                    &      + ( eal(skst) - ega(skst) ) * c(ij, skst) &
+        242     2                    &      + ega(skst) * c(ij, skst+1) &
+        243     2                    &      + 0.50d0 * rlt(ij, skst) * c(ij, skst) &
+        244     2                    &   + ( phii(skst) * dei(skst) * bw(ij) / dlzi(skst) / dlzi(skst) )
+        245     2                     end do
+        246     1               
+                              <<< Loop-information Start >>>
+                              <<<  [OPTIMIZATION]
+                              <<<    PREFETCH(HARD) Expected by compiler :
+                              <<<      c, rlt, ed
+                              <<< Loop-information  End >>>
+        247     2                     do k = skst+1, sken-1
+                              <<< Loop-information Start >>>
+                              <<<  [OPTIMIZATION]
+                              <<<    SIMD(VL: 8)
+                              <<<    SOFTWARE PIPELINING(IPC: 2.16, ITR: 136, MVE: 10, POL: S)
+                              <<<    PREFETCH(HARD) Expected by compiler :
+                              <<<      c, rlt, ed
+                              <<< Loop-information  End >>>
+        248     3        v            do ij = ijtstr, ijtend
+        249     3        v               ed(ij, k) = &
+        250     3                    &      + ebe(k) * c(ij, k-1) &
+        251     3                    &      + ( eal(k) - ebe(k) - ega(k) ) * c(ij, k) &
+        252     3                    &      + ega(k) * c(ij, k+1) &
+        253     3                    &      + 0.50d0 * rlt(ij, k) * c(ij, k)
+        254     3        v            end do
+        255     2                     end do
+        256     1               
+                              <<< Loop-information Start >>>
+                              <<<  [OPTIMIZATION]
+                              <<<    SIMD(VL: 8)
+                              <<<    SOFTWARE PIPELINING(IPC: 2.33, ITR: 128, MVE: 4, POL: S)
+                              <<<    PREFETCH(HARD) Expected by compiler :
+                              <<<      c, rlt, ed
+                              <<< Loop-information  End >>>
+        257     2       2v            do ij = ijtstr, ijtend
+        258     2       2v               ed(ij, sken) = &
+        259     2                    &      + ebe(sken) * c(ij, sken-1) &
+        260     2                    &      + ( eal(sken) - ega(sken) ) * c(ij, sken) &
+        261     2                    &      + 0.50d0 * rlt(ij, sken) * c(ij, sken)
+        262     2       2v            end do
+        263     1               
+        264     1                     call calc_tridiagonal_liquid( ea, eb, ec, ed, ex )
+        265     1               
+        266     1                     end if
+        267                     
+        268                     !     -- Diffusion : Implicit --
+        269                     
+        270     1                     if (cdii) then
+        271     1               
+                              <<< Loop-information Start >>>
+                              <<<  [OPTIMIZATION]
+                              <<<    COLLAPSED
+                              <<<    SIMD(VL: 8)
+                              <<<    SOFTWARE PIPELINING(IPC: 3.00, ITR: 176, MVE: 8, POL: S)
+                              <<<    PREFETCH(HARD) Expected by compiler :
+                              <<<      eep, rlt
+                              <<< Loop-information  End >>>
+        272     2       2v            do k = skst, sken
+        273     2       2v               eal(k) = ( phi(k) / tssec )
+        274     2       2v               ebe(k) = ( ( phii(k)   * dei(k)   ) &
+        275     2                    &            / ( dlz(k) * dlzi(k)   ) )
+        276     2       2v               ega(k) = ( ( phii(k+1) * dei(k+1) ) &
+        277     2                    &            / ( dlz(k) * dlzi(k+1) ) )
+                              <<< Loop-information Start >>>
+                              <<<  [OPTIMIZATION]
+                              <<<    COLLAPSED
+                              <<< Loop-information  End >>>
+        278     3       2v            do ij = ijtstr, ijtend
+        279     3       2v               eep(ij, k) = - rlt(ij, k)
+        280     3       2v            end do
+        281     2                     end do
+        282     1               
+                              <<< Loop-information Start >>>
+                              <<<  [OPTIMIZATION]
+                              <<<    PREFETCH(HARD) Expected by compiler :
+                              <<<      eep, eb
+                              <<< Loop-information  End >>>
+        283     2                     do k = skst+1, sken-1
+        284     2                        ea(k)         = - ebe(k)
+        285     2                        ec(k)         = - ega(k)
+                              <<< Loop-information Start >>>
+                              <<<  [OPTIMIZATION]
+                              <<<    SIMD(VL: 8)
+                              <<<    SOFTWARE PIPELINING(IPC: 2.75, ITR: 192, MVE: 4, POL: S)
+                              <<<    PREFETCH(HARD) Expected by compiler :
+                              <<<      eb, eep
+                              <<< Loop-information  End >>>
+        286     3       2v            do ij = ijtstr, ijtend
+        287     3       2v               eb(ij, k)     = eal(k) + ebe(k) + ega(k) + eep(ij, k)
+        288     3       2v            end do
+        289     2                     end do
+        290     1               
+        291     1                        ea(skst)      = - ebe(skst)
+        292     1                        ec(skst)      = - ega(skst)
+        293     1                        ea(sken)      = - ebe(sken)
+        294     1                        ec(sken)      = - ega(sken)
+                              <<< Loop-information Start >>>
+                              <<<  [OPTIMIZATION]
+                              <<<    SIMD(VL: 8)
+                              <<<    SOFTWARE PIPELINING(IPC: 2.83, ITR: 112, MVE: 3, POL: S)
+                              <<<    PREFETCH(HARD) Expected by compiler :
+                              <<<      eb, eep
+                              <<< Loop-information  End >>>
+        295     2       2v            do ij = ijtstr, ijtend
+        296     2       2v               eb(ij, skst)  = eal(skst) + ega(skst) + eep(ij, skst) &
+        297     2                    &   + ( phii(skst) * dei(skst) / dlzi(skst) / dlzi(skst) )
+        298     2       2v               eb(ij, sken)  = eal(sken) + ebe(sken) + eep(ij, sken)
+        299     2       2v            end do
+        300     1               
+                              <<< Loop-information Start >>>
+                              <<<  [OPTIMIZATION]
+                              <<<    PREFETCH(HARD) Expected by compiler :
+                              <<<      c, ed
+                              <<< Loop-information  End >>>
+        301     2                     do k = skst, sken
+                              <<< Loop-information Start >>>
+                              <<<  [OPTIMIZATION]
+                              <<<    SIMD(VL: 8)
+                              <<<    SOFTWARE PIPELINING(IPC: 3.00, ITR: 192, MVE: 7, POL: S)
+                              <<<    PREFETCH(HARD) Expected by compiler :
+                              <<<      c, ed
+                              <<< Loop-information  End >>>
+        302     3       2v            do ij = ijtstr, ijtend
+        303     3       2v               ed(ij, k) = &
+        304     3                    &      + eal(k) * c(ij, k)
+        305     3       2v            end do
+        306     2                     end do
+        307     1               
+                              <<< Loop-information Start >>>
+                              <<<  [OPTIMIZATION]
+                              <<<    SIMD(VL: 8)
+                              <<<    SOFTWARE PIPELINING(IPC: 3.25, ITR: 224, MVE: 7, POL: S)
+                              <<<    PREFETCH(HARD) Expected by compiler :
+                              <<<      bw, ed
+                              <<< Loop-information  End >>>
+        308     2       2v            do ij = ijtstr, ijtend
+        309     2       2v               ed(ij, skst) = ed(ij, skst) &
+        310     2                    &   + ( phii(skst) * dei(skst) * bw(ij) / dlzi(skst) / dlzi(skst) )
+        311     2       2v            end do
+        312     1               
+        313     1                     call calc_tridiagonal_liquid( ea, eb, ec, ed, ex )
+        314     1               
+        315     1                     end if
+        316                     
+        317                     !     -- t = t + dt --
+        318                     
+                              <<< Loop-information Start >>>
+                              <<<  [OPTIMIZATION]
+                              <<<    COLLAPSED
+                              <<<    SIMD(VL: 8)
+                              <<<    SOFTWARE PIPELINING(IPC: 1.83, ITR: 112, MVE: 7, POL: S)
+                              <<<    PREFETCH(HARD) Expected by compiler :
+                              <<<      ex, cn
+                              <<< Loop-information  End >>>
+        319     1       2v            do k = skst, sken
+                              <<< Loop-information Start >>>
+                              <<<  [OPTIMIZATION]
+                              <<<    COLLAPSED
+                              <<< Loop-information  End >>>
+        320     2       2v            do ij = ijtstr, ijtend
+        321     2       2v               cn(ij, k) = max( ex(ij, k), 0.0d0 )
+        322     2       2v               ex(ij, k) = 0.0d0
+        323     2       2v            end do
+        324     1                     end do
+        325                     
+        326                           end subroutine calc_step_liquid_o2
+        327                     
+        328                     ! =====================================================================
+        329                     
+        330                           subroutine calc_tridiagonal_liquid( ea, eb, ec, ed, ex )
+        331                     
+        332                           double precision, intent(in)  :: ea(sdzdim), eb(nxy,sdzdim), ec(sdzdim)
+        333                           double precision, intent(in)  :: ed(nxy,sdzdim)
+        334                           double precision, intent(out) :: ex(nxy,sdzdim)
+        335                     
+        336                           double precision :: ew(nxy,sdzdim)
+        337                           double precision :: bet(nxy)
+        338                     
+        339                           integer :: ij, k
+        340                     
+                              <<< Loop-information Start >>>
+                              <<<  [OPTIMIZATION]
+                              <<<    SIMD(VL: 8)
+                              <<<    SOFTWARE PIPELINING(IPC: 1.93, ITR: 112, MVE: 4, POL: S)
+                              <<<    PREFETCH(HARD) Expected by compiler :
+                              <<<      ed, eb, ex, bet
+                              <<< Loop-information  End >>>
+        341     1       2v            do ij = ijtstr, ijtend
+        342     1       2v               bet(ij)      = eb(ij, skst)
+        343     1       2v               ex(ij, skst) = ed(ij, skst) / bet(ij)
+        344     1       2v            end do
+        345                     
+                              <<< Loop-information Start >>>
+                              <<<  [OPTIMIZATION]
+                              <<<    PREFETCH(HARD) Expected by compiler :
+                              <<<      ex, ed, bet, eb, ew
+                              <<< Loop-information  End >>>
+        346     1                     do k = skst+1, sken
+                              <<< Loop-information Start >>>
+                              <<<  [OPTIMIZATION]
+                              <<<    SIMD(VL: 8)
+                              <<<    SOFTWARE PIPELINING(IPC: 1.93, ITR: 104, MVE: 11, POL: S)
+                              <<<    PREFETCH(HARD) Expected by compiler :
+                              <<<      eb, bet, ex, ed, ew
+                              <<< Loop-information  End >>>
+        347     2        v            do ij = ijtstr, ijtend
+        348     2        v               ew(ij, k) = ec(k-1) / bet(ij)
+        349     2        v               bet(ij)   = eb(ij, k) - ea(k) * ew(ij, k)
+        350     2        v               ex(ij, k) = (ed(ij, k) - ea(k) * ex(ij, k-1) ) / bet(ij)
+        351     2        v            end do
+        352     1                     end do
+        353                     
+                              <<< Loop-information Start >>>
+                              <<<  [OPTIMIZATION]
+                              <<<    PREFETCH(HARD) Expected by compiler :
+                              <<<      ex, ew
+                              <<< Loop-information  End >>>
+        354     1                     do k = sken-1, skst, -1
+                              <<< Loop-information Start >>>
+                              <<<  [OPTIMIZATION]
+                              <<<    SIMD(VL: 8)
+                              <<<    SOFTWARE PIPELINING(IPC: 2.80, ITR: 176, MVE: 7, POL: S)
+                              <<<    PREFETCH(HARD) Expected by compiler :
+                              <<<      ex, ew
+                              <<< Loop-information  End >>>
+        355     2       2v            do ij = ijtstr, ijtend
+        356     2       2v               ex(ij, k) = ex(ij, k) - ew(ij, k+1) * ex(ij, k+1)
+        357     2       2v            end do
+        358     1                     end do
+        359                     
+        360                           end subroutine calc_tridiagonal_liquid
+        361                     
+        362                     end module module_digda_step_liquid
+
+ Procedure information
+   Lines      : 334
+   Statements : 214
+   Stack(byte): 91920
+   Prefetch num: 0
+
+ Total information
+   Procedures       : 2
+   Total lines      : 362
+   Total statements : 227
+   Total stack(byte): 92272
+   Total prefetch num: 0
+
