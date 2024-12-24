@@ -174,12 +174,8 @@ contains
     call mpi_barrier(mpi_comm_world, ierr)
 
     !-- Free memory for variables --
-    if (allocated(vard3d)) then
-      deallocate(vard3d)
-    end if
-    if (allocated(vard4d)) then
-      deallocate(vard4d)
-    end if
+    if (allocated(vard3d)) deallocate(vard3d)
+    if (allocated(vard4d)) deallocate(vard4d)
 
     write(nfstdo, *) "'--------------------------------------------------'"
     write(nfstdo, *) "'-- Finised reading Sediment RESTART file        --'"
@@ -384,12 +380,8 @@ contains
     call mpi_barrier(mpi_comm_world, ierr)
 
     !-- Free memory for variables --
-    if (allocated(vard3d)) then
-      deallocate(vard3d)
-    end if
-    if (allocated(vard4d)) then
-      deallocate(vard4d)
-    end if
+    if (allocated(vard3d)) deallocate(vard3d)
+    if (allocated(vard4d)) deallocate(vard4d)
 
     write(nfstdo, *) "'--------------------------------------------------'"
     write(nfstdo, *) "'-- Finised writing Sediment RESTART file        --'"
@@ -623,12 +615,8 @@ contains
     call mpi_barrier(mpi_comm_world, ierr)
 
     !-- Free memory for variables --
-    if (allocated(vard2d)) then
-      deallocate(vard2d)
-    end if
-    if (allocated(vard3d)) then
-      deallocate(vard3d)
-    end if
+    if (allocated(vard2d)) deallocate(vard2d)
+    if (allocated(vard3d)) deallocate(vard3d)
 
     write(nfstdo, *) "'--------------------------------------------------'"
     write(nfstdo, *) "'-- Finished reading Sed-Water boundary forcing  --'"
@@ -779,12 +767,8 @@ contains
 
 
     ! Free memory for variables
-    if (allocated(vard3d)) then
-      deallocate(vard3d)
-    end if
-    if (allocated(vard4d)) then
-      deallocate(vard4d)
-    end if
+    if (allocated(vard3d)) deallocate(vard3d)
+    if (allocated(vard4d)) deallocate(vard4d)
 
     write(nfstdo, *) "'--------------------------------------------------'"
     write(nfstdo, *) "'-- Finished writing NetCDF file                 --'"

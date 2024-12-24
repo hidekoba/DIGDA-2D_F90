@@ -48,7 +48,10 @@ contains
   subroutine digda_cprdc( &
  &  bdepg, &
  &  bfrcg, &
- &  sdtx )
+ &  sdtx, &
+ &  lon_values, &
+ &  lat_values, &
+ &  depth_values )
 
     ! --------------------------------------------------
     !   Forcing of Particles and Dissolved material
@@ -342,6 +345,7 @@ contains
 
     call initialize_timestep()
     write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) " timestep (yr), start year, end year, history year  "
     write(nfstdo, *)  sdtsyr, sdyrstr, sdyrend, sdyrhst
     write(nfstdo, *) "'--------------------------------------------------'"
 
@@ -1196,114 +1200,228 @@ end if
            varavgdt(ij, 1) = ficla(ij)
         end do
         call update_time_mean(mean_data(11),  varavgdt)
-        deallocate(varavgdt)
+        if (allocated(varavgdt)) deallocate(varavgdt)
 
         allocate(varavgdt(nxy,1))
         do ij = 1, nxy
            varavgdt(ij, 1) = fipom(ij)
         end do
         call update_time_mean(mean_data(12),  varavgdt)
-        deallocate(varavgdt)
+        if (allocated(varavgdt)) deallocate(varavgdt)
 
         allocate(varavgdt(nxy,1))
         do ij = 1, nxy
            varavgdt(ij, 1) = ficar(ij)
         end do
         call update_time_mean(mean_data(13),  varavgdt)
-        deallocate(varavgdt)
+        if (allocated(varavgdt)) deallocate(varavgdt)
 
         allocate(varavgdt(nxy,1))
         do ij = 1, nxy
            varavgdt(ij, 1) = fiopa(ij)
         end do
         call update_time_mean(mean_data(14),  varavgdt)
-        deallocate(varavgdt)
+        if (allocated(varavgdt)) deallocate(varavgdt)
 
         allocate(varavgdt(nxy,1))
         do ij = 1, nxy
            varavgdt(ij, 1) = focla(ij)
         end do
         call update_time_mean(mean_data(15),  varavgdt)
-        deallocate(varavgdt)
+        if (allocated(varavgdt)) deallocate(varavgdt)
 
         allocate(varavgdt(nxy,1))
         do ij = 1, nxy
            varavgdt(ij, 1) = fopom(ij)
         end do
         call update_time_mean(mean_data(16),  varavgdt)
-        deallocate(varavgdt)
+        if (allocated(varavgdt)) deallocate(varavgdt)
 
         allocate(varavgdt(nxy,1))
         do ij = 1, nxy
            varavgdt(ij, 1) = focar(ij)
         end do
         call update_time_mean(mean_data(17),  varavgdt)
-        deallocate(varavgdt)
+        if (allocated(varavgdt)) deallocate(varavgdt)
 
         allocate(varavgdt(nxy,1))
         do ij = 1, nxy
            varavgdt(ij, 1) = foopa(ij)
         end do
         call update_time_mean(mean_data(18),  varavgdt)
-        deallocate(varavgdt)
+        if (allocated(varavgdt)) deallocate(varavgdt)
 
         allocate(varavgdt(nxy,1))
         do ij = 1, nxy
            varavgdt(ij, 1) = fiocla(ij)
         end do
         call update_time_mean(mean_data(19),  varavgdt)
-        deallocate(varavgdt)
+        if (allocated(varavgdt)) deallocate(varavgdt)
 
         allocate(varavgdt(nxy,1))
         do ij = 1, nxy
            varavgdt(ij, 1) = fiopom(ij)
         end do
         call update_time_mean(mean_data(20),  varavgdt)
-        deallocate(varavgdt)
+        if (allocated(varavgdt)) deallocate(varavgdt)
 
         allocate(varavgdt(nxy,1))
         do ij = 1, nxy
            varavgdt(ij, 1) = fiocar(ij)
         end do
         call update_time_mean(mean_data(21),  varavgdt)
-        deallocate(varavgdt)
+        if (allocated(varavgdt)) deallocate(varavgdt)
 
         allocate(varavgdt(nxy,1))
         do ij = 1, nxy
            varavgdt(ij, 1) = fioopa(ij)
         end do
         call update_time_mean(mean_data(22),  varavgdt)
-        deallocate(varavgdt)
+        if (allocated(varavgdt)) deallocate(varavgdt)
 
         allocate(varavgdt(nxy,1))
         do ij = 1, nxy
            varavgdt(ij, 1) = bfcla(ij)
         end do
         call update_time_mean(mean_data(23),  varavgdt)
-        deallocate(varavgdt)
+        if (allocated(varavgdt)) deallocate(varavgdt)
 
         allocate(varavgdt(nxy,1))
         do ij = 1, nxy
            varavgdt(ij, 1) = bfpom(ij)
         end do
         call update_time_mean(mean_data(24),  varavgdt)
-        deallocate(varavgdt)
+        if (allocated(varavgdt)) deallocate(varavgdt)
 
         allocate(varavgdt(nxy,1))
         do ij = 1, nxy
            varavgdt(ij, 1) = bfcar(ij)
         end do
         call update_time_mean(mean_data(25),  varavgdt)
-        deallocate(varavgdt)
+        if (allocated(varavgdt)) deallocate(varavgdt)
 
         allocate(varavgdt(nxy,1))
         do ij = 1, nxy
            varavgdt(ij, 1) = bfopa(ij)
         end do
         call update_time_mean(mean_data(26),  varavgdt)
-        deallocate(varavgdt)
+        if (allocated(varavgdt)) deallocate(varavgdt)
 
-      end if
+        call update_time_mean(mean_data(27), cco32)
+        call update_time_mean(mean_data(28), satsil)
+
+        allocate(varavgdt(nxy,1))
+        do ij = 1, nxy
+           varavgdt(ij, 1) = satco32(ij)
+        end do
+        call update_time_mean(mean_data(29),  varavgdt)
+        if (allocated(varavgdt)) deallocate(varavgdt)
+
+        call update_time_mean(mean_data(30), w)
+
+        if ( calc13 ) then
+
+        call update_time_mean(mean_data(31), s13pom)
+        call update_time_mean(mean_data(32), s13car)
+        call update_time_mean(mean_data(33), c13dic)
+        call update_time_mean(mean_data(34), cdc13)
+
+        allocate(varavgdt(nxy,1))
+        do ij = 1, nxy
+           varavgdt(ij, 1) = fi13pom(ij)
+        end do
+        call update_time_mean(mean_data(35),  varavgdt)
+        if (allocated(varavgdt)) deallocate(varavgdt)
+
+        allocate(varavgdt(nxy,1))
+        do ij = 1, nxy
+           varavgdt(ij, 1) = fi13car(ij)
+        end do
+        call update_time_mean(mean_data(36),  varavgdt)
+        if (allocated(varavgdt)) deallocate(varavgdt)
+
+        allocate(varavgdt(nxy,1))
+        do ij = 1, nxy
+           varavgdt(ij, 1) = fo13pom(ij)
+        end do
+        call update_time_mean(mean_data(37),  varavgdt)
+        if (allocated(varavgdt)) deallocate(varavgdt)
+
+        allocate(varavgdt(nxy,1))
+        do ij = 1, nxy
+           varavgdt(ij, 1) = fo13car(ij)
+        end do
+        call update_time_mean(mean_data(38),  varavgdt)
+        if (allocated(varavgdt)) deallocate(varavgdt)
+
+        allocate(varavgdt(nxy,1))
+        do ij = 1, nxy
+           varavgdt(ij, 1) = bf13pom(ij)
+        end do
+        call update_time_mean(mean_data(39),  varavgdt)
+        if (allocated(varavgdt)) deallocate(varavgdt)
+
+        allocate(varavgdt(nxy,1))
+        do ij = 1, nxy
+           varavgdt(ij, 1) = bf13car(ij)
+        end do
+        call update_time_mean(mean_data(40),  varavgdt)
+        if (allocated(varavgdt)) deallocate(varavgdt)
+
+        end if
+
+        if ( calc14 ) then
+
+        call update_time_mean(mean_data(31), s14pom)
+        call update_time_mean(mean_data(32), s14car)
+        call update_time_mean(mean_data(33), c14dic)
+        call update_time_mean(mean_data(34), cdc14)
+
+        allocate(varavgdt(nxy,1))
+        do ij = 1, nxy
+           varavgdt(ij, 1) = fi14pom(ij)
+        end do
+        call update_time_mean(mean_data(35),  varavgdt)
+        if (allocated(varavgdt)) deallocate(varavgdt)
+
+        allocate(varavgdt(nxy,1))
+        do ij = 1, nxy
+           varavgdt(ij, 1) = fi14car(ij)
+        end do
+        call update_time_mean(mean_data(36),  varavgdt)
+        if (allocated(varavgdt)) deallocate(varavgdt)
+
+        allocate(varavgdt(nxy,1))
+        do ij = 1, nxy
+           varavgdt(ij, 1) = fo14pom(ij)
+        end do
+        call update_time_mean(mean_data(37),  varavgdt)
+        if (allocated(varavgdt)) deallocate(varavgdt)
+
+        allocate(varavgdt(nxy,1))
+        do ij = 1, nxy
+           varavgdt(ij, 1) = fo14car(ij)
+        end do
+        call update_time_mean(mean_data(38),  varavgdt)
+        if (allocated(varavgdt)) deallocate(varavgdt)
+
+        allocate(varavgdt(nxy,1))
+        do ij = 1, nxy
+           varavgdt(ij, 1) = bf14pom(ij)
+        end do
+        call update_time_mean(mean_data(39),  varavgdt)
+        if (allocated(varavgdt)) deallocate(varavgdt)
+
+        allocate(varavgdt(nxy,1))
+        do ij = 1, nxy
+           varavgdt(ij, 1) = bf14car(ij)
+        end do
+        call update_time_mean(mean_data(40),  varavgdt)
+        if (allocated(varavgdt)) deallocate(varavgdt)
+
+        end if
+
+      end if ! -- End of hstavg
 
 !     -- Time step --
       if ( wotstp ) then
@@ -1371,7 +1489,7 @@ if (hstavg) then
          end do
       end if
       call reset_time_mean(mean_data(1))
-      deallocate(varavgdt)
+      if (allocated(varavgdt)) deallocate(varavgdt)
 
       allocate(varavgdt(nxy,sdz))
       call get_time_mean(mean_data(2),  varavgdt)
@@ -1390,7 +1508,7 @@ if (hstavg) then
          end do
       end if
       call reset_time_mean(mean_data(2))
-      deallocate(varavgdt)
+      if (allocated(varavgdt)) deallocate(varavgdt)
 
       allocate(varavgdt(nxy,sdz))
       call get_time_mean(mean_data(3),  varavgdt)
@@ -1409,7 +1527,7 @@ if (hstavg) then
          end do
       end if
       call reset_time_mean(mean_data(3))
-      deallocate(varavgdt)
+      if (allocated(varavgdt)) deallocate(varavgdt)
 
       allocate(varavgdt(nxy,sdz))
       call get_time_mean(mean_data(4),  varavgdt)
@@ -1428,7 +1546,7 @@ if (hstavg) then
          end do
       end if
       call reset_time_mean(mean_data(4))
-      deallocate(varavgdt)
+      if (allocated(varavgdt)) deallocate(varavgdt)
 
       allocate(varavgdt(nxy,sdz))
       call get_time_mean(mean_data(5),  varavgdt)
@@ -1447,7 +1565,7 @@ if (hstavg) then
          end do
       end if
       call reset_time_mean(mean_data(5))
-      deallocate(varavgdt)
+      if (allocated(varavgdt)) deallocate(varavgdt)
 
       allocate(varavgdt(nxy,sdz))
       call get_time_mean(mean_data(6),  varavgdt)
@@ -1466,7 +1584,7 @@ if (hstavg) then
          end do
       end if
       call reset_time_mean(mean_data(6))
-      deallocate(varavgdt)
+      if (allocated(varavgdt)) deallocate(varavgdt)
 
       allocate(varavgdt(nxy,sdz))
       call get_time_mean(mean_data(7),  varavgdt)
@@ -1485,7 +1603,7 @@ if (hstavg) then
          end do
       end if
       call reset_time_mean(mean_data(7))
-      deallocate(varavgdt)
+      if (allocated(varavgdt)) deallocate(varavgdt)
 
       allocate(varavgdt(nxy,sdz))
       call get_time_mean(mean_data(8),  varavgdt)
@@ -1504,7 +1622,7 @@ if (hstavg) then
          end do
       end if
       call reset_time_mean(mean_data(8))
-      deallocate(varavgdt)
+      if (allocated(varavgdt)) deallocate(varavgdt)
 
       allocate(varavgdt(nxy,sdz))
       call get_time_mean(mean_data(9),  varavgdt)
@@ -1523,7 +1641,7 @@ if (hstavg) then
          end do
       end if
       call reset_time_mean(mean_data(9))
-      deallocate(varavgdt)
+      if (allocated(varavgdt)) deallocate(varavgdt)
 
       allocate(varavgdt(nxy,sdz))
       call get_time_mean(mean_data(10),  varavgdt)
@@ -1542,7 +1660,7 @@ if (hstavg) then
          end do
       end if
       call reset_time_mean(mean_data(10))
-      deallocate(varavgdt)
+      if (allocated(varavgdt)) deallocate(varavgdt)
 
       allocate(varavgdt(nxy,sdz))
       call get_time_mean(mean_data(27),  varavgdt)
@@ -1561,7 +1679,7 @@ if (hstavg) then
          end do
       end if
       call reset_time_mean(mean_data(27))
-      deallocate(varavgdt)
+      if (allocated(varavgdt)) deallocate(varavgdt)
 
       allocate(varavgdt(nxy,sdz))
       call get_time_mean(mean_data(28),  varavgdt)
@@ -1580,7 +1698,7 @@ if (hstavg) then
          end do
       end if
       call reset_time_mean(mean_data(28))
-      deallocate(varavgdt)
+      if (allocated(varavgdt)) deallocate(varavgdt)
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(29),  varavgdt)
@@ -1595,7 +1713,7 @@ if (hstavg) then
          end do
       end if
       call reset_time_mean(mean_data(29))
-      deallocate(varavgdt)
+      if (allocated(varavgdt)) deallocate(varavgdt)
 
       allocate(varavgdt(nxy,sdz+1))
       call get_time_mean(mean_data(30),  varavgdt)
@@ -1614,7 +1732,7 @@ if (hstavg) then
          end do
       end if
       call reset_time_mean(mean_data(30))
-      deallocate(varavgdt)
+      if (allocated(varavgdt)) deallocate(varavgdt)
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(11),  varavgdt)
@@ -1629,7 +1747,7 @@ if (hstavg) then
          end do
       end if
       call reset_time_mean(mean_data(11))
-      deallocate(varavgdt)
+      if (allocated(varavgdt)) deallocate(varavgdt)
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(12),  varavgdt)
@@ -1644,7 +1762,7 @@ if (hstavg) then
          end do
       end if
       call reset_time_mean(mean_data(12))
-      deallocate(varavgdt)
+      if (allocated(varavgdt)) deallocate(varavgdt)
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(13),  varavgdt)
@@ -1659,7 +1777,7 @@ if (hstavg) then
          end do
       end if
       call reset_time_mean(mean_data(13))
-      deallocate(varavgdt)
+      if (allocated(varavgdt)) deallocate(varavgdt)
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(14),  varavgdt)
@@ -1674,7 +1792,7 @@ if (hstavg) then
          end do
       end if
       call reset_time_mean(mean_data(14))
-      deallocate(varavgdt)
+      if (allocated(varavgdt)) deallocate(varavgdt)
 
  !!!! allocate(varavgdt(nxy,1))
  !!!! call get_time_mean(mean_data(15),  varavgdt)
@@ -1689,7 +1807,7 @@ if (hstavg) then
  !!!!    end do
  !!!! end if
  !!!! call reset_time_mean(mean_data(15))
- !!!! deallocate(varavgdt)
+ !!!! if (allocated(varavgdt)) deallocate(varavgdt)
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(16),  varavgdt)
@@ -1704,7 +1822,7 @@ if (hstavg) then
          end do
       end if
       call reset_time_mean(mean_data(16))
-      deallocate(varavgdt)
+      if (allocated(varavgdt)) deallocate(varavgdt)
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(17),  varavgdt)
@@ -1719,7 +1837,7 @@ if (hstavg) then
          end do
       end if
       call reset_time_mean(mean_data(17))
-      deallocate(varavgdt)
+      if (allocated(varavgdt)) deallocate(varavgdt)
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(18),  varavgdt)
@@ -1734,7 +1852,7 @@ if (hstavg) then
          end do
       end if
       call reset_time_mean(mean_data(18))
-      deallocate(varavgdt)
+      if (allocated(varavgdt)) deallocate(varavgdt)
 
  !!!! allocate(varavgdt(nxy,1))
  !!!! call get_time_mean(mean_data(19),  varavgdt)
@@ -1749,7 +1867,7 @@ if (hstavg) then
  !!!!    end do
  !!!! end if
  !!!! call reset_time_mean(mean_data(19))
- !!!! deallocate(varavgdt)
+ !!!! if (allocated(varavgdt)) deallocate(varavgdt)
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(20),  varavgdt)
@@ -1764,7 +1882,7 @@ if (hstavg) then
          end do
       end if
       call reset_time_mean(mean_data(20))
-      deallocate(varavgdt)
+      if (allocated(varavgdt)) deallocate(varavgdt)
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(21),  varavgdt)
@@ -1779,7 +1897,7 @@ if (hstavg) then
          end do
       end if
       call reset_time_mean(mean_data(21))
-      deallocate(varavgdt)
+      if (allocated(varavgdt)) deallocate(varavgdt)
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(22),  varavgdt)
@@ -1794,7 +1912,7 @@ if (hstavg) then
          end do
       end if
       call reset_time_mean(mean_data(22))
-      deallocate(varavgdt)
+      if (allocated(varavgdt)) deallocate(varavgdt)
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(23),  varavgdt)
@@ -1809,7 +1927,7 @@ if (hstavg) then
          end do
       end if
       call reset_time_mean(mean_data(23))
-      deallocate(varavgdt)
+      if (allocated(varavgdt)) deallocate(varavgdt)
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(24),  varavgdt)
@@ -1824,7 +1942,7 @@ if (hstavg) then
          end do
       end if
       call reset_time_mean(mean_data(24))
-      deallocate(varavgdt)
+      if (allocated(varavgdt)) deallocate(varavgdt)
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(25),  varavgdt)
@@ -1839,7 +1957,7 @@ if (hstavg) then
          end do
       end if
       call reset_time_mean(mean_data(25))
-      deallocate(varavgdt)
+      if (allocated(varavgdt)) deallocate(varavgdt)
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(26),  varavgdt)
@@ -1854,7 +1972,7 @@ if (hstavg) then
          end do
       end if
       call reset_time_mean(mean_data(26))
-      deallocate(varavgdt)
+      if (allocated(varavgdt)) deallocate(varavgdt)
 
       if ( calc13 ) then
 
@@ -1875,7 +1993,7 @@ if (hstavg) then
          end do
       end if
       call reset_time_mean(mean_data(31))
-      deallocate(varavgdt)
+      if (allocated(varavgdt)) deallocate(varavgdt)
 
       allocate(varavgdt(nxy,sdz))
       call get_time_mean(mean_data(32),  varavgdt)
@@ -1894,7 +2012,7 @@ if (hstavg) then
          end do
       end if
       call reset_time_mean(mean_data(32))
-      deallocate(varavgdt)
+      if (allocated(varavgdt)) deallocate(varavgdt)
 
       allocate(varavgdt(nxy,sdz))
       call get_time_mean(mean_data(33),  varavgdt)
@@ -1913,7 +2031,7 @@ if (hstavg) then
          end do
       end if
       call reset_time_mean(mean_data(33))
-      deallocate(varavgdt)
+      if (allocated(varavgdt)) deallocate(varavgdt)
 
       allocate(varavgdt(nxy,sdz))
       call get_time_mean(mean_data(34),  varavgdt)
@@ -1932,7 +2050,7 @@ if (hstavg) then
          end do
       end if
       call reset_time_mean(mean_data(34))
-      deallocate(varavgdt)
+      if (allocated(varavgdt)) deallocate(varavgdt)
 
  !!!! allocate(varavgdt(nxy,1))
  !!!! call get_time_mean(mean_data(35),  varavgdt)
@@ -1947,7 +2065,7 @@ if (hstavg) then
  !!!!    end do
  !!!! end if
  !!!! call reset_time_mean(mean_data(35))
- !!!! deallocate(varavgdt)
+ !!!! if (allocated(varavgdt)) deallocate(varavgdt)
 
  !!!! allocate(varavgdt(nxy,1))
  !!!! call get_time_mean(mean_data(36),  varavgdt)
@@ -1962,7 +2080,7 @@ if (hstavg) then
  !!!!    end do
  !!!! end if
  !!!! call reset_time_mean(mean_data(36))
- !!!! deallocate(varavgdt)
+ !!!! if (allocated(varavgdt)) deallocate(varavgdt)
 
  !!!! allocate(varavgdt(nxy,1))
  !!!! call get_time_mean(mean_data(37),  varavgdt)
@@ -1977,7 +2095,7 @@ if (hstavg) then
  !!!!    end do
  !!!! end if
  !!!! call reset_time_mean(mean_data(37))
- !!!! deallocate(varavgdt)
+ !!!! if (allocated(varavgdt)) deallocate(varavgdt)
 
  !!!! allocate(varavgdt(nxy,1))
  !!!! call get_time_mean(mean_data(38),  varavgdt)
@@ -1992,7 +2110,7 @@ if (hstavg) then
  !!!!    end do
  !!!! end if
  !!!! call reset_time_mean(mean_data(38))
- !!!! deallocate(varavgdt)
+ !!!! if (allocated(varavgdt)) deallocate(varavgdt)
 
  !!!! allocate(varavgdt(nxy,1))
  !!!! call get_time_mean(mean_data(39),  varavgdt)
@@ -2007,7 +2125,7 @@ if (hstavg) then
  !!!!    end do
  !!!! end if
  !!!! call reset_time_mean(mean_data(39))
- !!!! deallocate(varavgdt)
+ !!!! if (allocated(varavgdt)) deallocate(varavgdt)
 
  !!!! allocate(varavgdt(nxy,1))
  !!!! call get_time_mean(mean_data(40),  varavgdt)
@@ -2022,7 +2140,7 @@ if (hstavg) then
  !!!!    end do
  !!!! end if
  !!!! call reset_time_mean(mean_data(40))
- !!!! deallocate(varavgdt)
+ !!!! if (allocated(varavgdt)) deallocate(varavgdt)
 
       end if
 
@@ -2045,7 +2163,7 @@ if (hstavg) then
          end do
       end if
       call reset_time_mean(mean_data(41))
-      deallocate(varavgdt)
+      if (allocated(varavgdt)) deallocate(varavgdt)
 
       allocate(varavgdt(nxy,sdz))
       call get_time_mean(mean_data(42),  varavgdt)
@@ -2064,7 +2182,7 @@ if (hstavg) then
          end do
       end if
       call reset_time_mean(mean_data(42))
-      deallocate(varavgdt)
+      if (allocated(varavgdt)) deallocate(varavgdt)
 
       allocate(varavgdt(nxy,sdz))
       call get_time_mean(mean_data(43),  varavgdt)
@@ -2083,7 +2201,7 @@ if (hstavg) then
          end do
       end if
       call reset_time_mean(mean_data(43))
-      deallocate(varavgdt)
+      if (allocated(varavgdt)) deallocate(varavgdt)
 
       allocate(varavgdt(nxy,sdz))
       call get_time_mean(mean_data(44),  varavgdt)
@@ -2102,7 +2220,7 @@ if (hstavg) then
          end do
       end if
       call reset_time_mean(mean_data(44))
-      deallocate(varavgdt)
+      if (allocated(varavgdt)) deallocate(varavgdt)
 
  !!!! allocate(varavgdt(nxy,1))
  !!!! call get_time_mean(mean_data(45),  varavgdt)
@@ -2117,7 +2235,7 @@ if (hstavg) then
  !!!!    end do
  !!!! end if
  !!!! call reset_time_mean(mean_data(45))
- !!!! deallocate(varavgdt)
+ !!!! if (allocated(varavgdt)) deallocate(varavgdt)
 
  !!!! allocate(varavgdt(nxy,1))
  !!!! call get_time_mean(mean_data(46),  varavgdt)
@@ -2132,7 +2250,7 @@ if (hstavg) then
  !!!!    end do
  !!!! end if
  !!!! call reset_time_mean(mean_data(46))
- !!!! deallocate(varavgdt)
+ !!!! if (allocated(varavgdt)) deallocate(varavgdt)
 
  !!!! allocate(varavgdt(nxy,1))
  !!!! call get_time_mean(mean_data(47),  varavgdt)
@@ -2147,7 +2265,7 @@ if (hstavg) then
  !!!!    end do
  !!!! end if
  !!!! call reset_time_mean(mean_data(47))
- !!!! deallocate(varavgdt)
+ !!!! if (allocated(varavgdt)) deallocate(varavgdt)
 
  !!!! allocate(varavgdt(nxy,1))
  !!!! call get_time_mean(mean_data(48),  varavgdt)
@@ -2162,7 +2280,7 @@ if (hstavg) then
  !!!!    end do
  !!!! end if
  !!!! call reset_time_mean(mean_data(48))
- !!!! deallocate(varavgdt)
+ !!!! if (allocated(varavgdt)) deallocate(varavgdt)
 
  !!!! allocate(varavgdt(nxy,1))
  !!!! call get_time_mean(mean_data(49),  varavgdt)
@@ -2177,7 +2295,7 @@ if (hstavg) then
  !!!!    end do
  !!!! end if
  !!!! call reset_time_mean(mean_data(49))
- !!!! deallocate(varavgdt)
+ !!!! if (allocated(varavgdt)) deallocate(varavgdt)
 
  !!!! allocate(varavgdt(nxy,1))
  !!!! call get_time_mean(mean_data(50),  varavgdt)
@@ -2192,7 +2310,7 @@ if (hstavg) then
  !!!!    end do
  !!!! end if
  !!!! call reset_time_mean(mean_data(50))
- !!!! deallocate(varavgdt)
+ !!!! if (allocated(varavgdt)) deallocate(varavgdt)
 
       end if
 
@@ -3012,14 +3130,6 @@ end if ! -- End of use_mpi
 if (use_mpi) then
       if ( myrank .eq. iroot ) then
 
-         do i = 1, nxdim
-           lon_values(i) = ((i - 1) * 360.0 / nxdim) + (180.0 / nxdim)
-         end do
-
-         do i = 1, nydim
-           lat_values(i) = -90.0 + ((i - 1) * 180.0 / nydim) + (90.0 / nydim)
-         end do
-
          !-- NetCDF output --
          if (allocated(yy_array)) deallocate(yy_array)
          allocate(yy_array(1))
@@ -3044,7 +3154,7 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " g m-3"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value, " g"
          write(nfstdo, *) "'--------------------------------------------------'"
-         deallocate(var3d_values)
+         if (allocated(var3d_values)) deallocate(var3d_values)
 
          allocate(var3d_values(nxdim,nydim,sdzdim,1))
          filename = "spom.nc"
@@ -3065,7 +3175,7 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
          write(nfstdo, *) "'--------------------------------------------------'"
-         deallocate(var3d_values)
+         if (allocated(var3d_values)) deallocate(var3d_values)
 
          allocate(var3d_values(nxdim,nydim,sdzdim,1))
          filename = "scar.nc"
@@ -3086,7 +3196,7 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
          write(nfstdo, *) "'--------------------------------------------------'"
-         deallocate(var3d_values)
+         if (allocated(var3d_values)) deallocate(var3d_values)
 
          allocate(var3d_values(nxdim,nydim,sdzdim,1))
          filename = "sopa.nc"
@@ -3107,7 +3217,7 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
          write(nfstdo, *) "'--------------------------------------------------'"
-         deallocate(var3d_values)
+         if (allocated(var3d_values)) deallocate(var3d_values)
 
          allocate(var3d_values(nxdim,nydim,sdzdim,1))
          filename = "sage.nc"
@@ -3127,7 +3237,7 @@ if (use_mpi) then
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " yr"
          write(nfstdo, *) "'--------------------------------------------------'"
-         deallocate(var3d_values)
+         if (allocated(var3d_values)) deallocate(var3d_values)
 
          allocate(var3d_values(nxdim,nydim,sdzdim,1))
          filename = "cnit.nc"
@@ -3148,7 +3258,7 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
          write(nfstdo, *) "'--------------------------------------------------'"
-         deallocate(var3d_values)
+         if (allocated(var3d_values)) deallocate(var3d_values)
 
          allocate(var3d_values(nxdim,nydim,sdzdim,1))
          filename = "cdic.nc"
@@ -3169,7 +3279,7 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
          write(nfstdo, *) "'--------------------------------------------------'"
-         deallocate(var3d_values)
+         if (allocated(var3d_values)) deallocate(var3d_values)
 
          allocate(var3d_values(nxdim,nydim,sdzdim,1))
          filename = "calk.nc"
@@ -3190,7 +3300,7 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
          write(nfstdo, *) "'--------------------------------------------------'"
-         deallocate(var3d_values)
+         if (allocated(var3d_values)) deallocate(var3d_values)
 
          allocate(var3d_values(nxdim,nydim,sdzdim,1))
          filename = "cdo2.nc"
@@ -3211,7 +3321,7 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
          write(nfstdo, *) "'--------------------------------------------------'"
-         deallocate(var3d_values)
+         if (allocated(var3d_values)) deallocate(var3d_values)
 
          allocate(var3d_values(nxdim,nydim,sdzdim,1))
          filename = "csil.nc"
@@ -3232,7 +3342,7 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
          write(nfstdo, *) "'--------------------------------------------------'"
-         deallocate(var3d_values)
+         if (allocated(var3d_values)) deallocate(var3d_values)
 
          allocate(var2d_values(nxdim,nydim,1))
          filename = "ficla.nc"
@@ -3251,7 +3361,7 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " g m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+5, " g * yr-1"
          write(nfstdo, *) "'--------------------------------------------------'"
-         deallocate(var2d_values)
+         if (allocated(var2d_values)) deallocate(var2d_values)
 
          allocate(var2d_values(nxdim,nydim,1))
          filename = "fipom.nc"
@@ -3270,7 +3380,7 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
          write(nfstdo, *) "'--------------------------------------------------'"
-         deallocate(var2d_values)
+         if (allocated(var2d_values)) deallocate(var2d_values)
 
          allocate(var2d_values(nxdim,nydim,1))
          filename = "ficar.nc"
@@ -3289,7 +3399,7 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
          write(nfstdo, *) "'--------------------------------------------------'"
-         deallocate(var2d_values)
+         if (allocated(var2d_values)) deallocate(var2d_values)
 
          allocate(var2d_values(nxdim,nydim,1))
          filename = "fiopa.nc"
@@ -3308,7 +3418,7 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
          write(nfstdo, *) "'--------------------------------------------------'"
-         deallocate(var2d_values)
+         if (allocated(var2d_values)) deallocate(var2d_values)
 
          allocate(var2d_values(nxdim,nydim,1))
          filename = "focla.nc"
@@ -3327,7 +3437,7 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
          write(nfstdo, *) "'--------------------------------------------------'"
-         deallocate(var2d_values)
+         if (allocated(var2d_values)) deallocate(var2d_values)
 
          allocate(var2d_values(nxdim,nydim,1))
          filename = "fopom.nc"
@@ -3346,7 +3456,7 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
          write(nfstdo, *) "'--------------------------------------------------'"
-         deallocate(var2d_values)
+         if (allocated(var2d_values)) deallocate(var2d_values)
 
          allocate(var2d_values(nxdim,nydim,1))
          filename = "focar.nc"
@@ -3365,7 +3475,7 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
          write(nfstdo, *) "'--------------------------------------------------'"
-         deallocate(var2d_values)
+         if (allocated(var2d_values)) deallocate(var2d_values)
 
          allocate(var2d_values(nxdim,nydim,1))
          filename = "foopa.nc"
@@ -3384,7 +3494,7 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
          write(nfstdo, *) "'--------------------------------------------------'"
-         deallocate(var2d_values)
+         if (allocated(var2d_values)) deallocate(var2d_values)
 
          allocate(var2d_values(nxdim,nydim,1))
          filename = "fiocla.nc"
@@ -3403,7 +3513,7 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " g m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+5, " g * yr-1"
          write(nfstdo, *) "'--------------------------------------------------'"
-         deallocate(var2d_values)
+         if (allocated(var2d_values)) deallocate(var2d_values)
 
          allocate(var2d_values(nxdim,nydim,1))
          filename = "fiopom.nc"
@@ -3422,7 +3532,7 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
          write(nfstdo, *) "'--------------------------------------------------'"
-         deallocate(var2d_values)
+         if (allocated(var2d_values)) deallocate(var2d_values)
 
          allocate(var2d_values(nxdim,nydim,1))
          filename = "fiocar.nc"
@@ -3441,7 +3551,7 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
          write(nfstdo, *) "'--------------------------------------------------'"
-         deallocate(var2d_values)
+         if (allocated(var2d_values)) deallocate(var2d_values)
 
          allocate(var2d_values(nxdim,nydim,1))
          filename = "fioopa.nc"
@@ -3460,7 +3570,7 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
          write(nfstdo, *) "'--------------------------------------------------'"
-         deallocate(var2d_values)
+         if (allocated(var2d_values)) deallocate(var2d_values)
 
          allocate(var2d_values(nxdim,nydim,1))
          filename = "bfcla.nc"
@@ -3479,7 +3589,7 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
          write(nfstdo, *) "'--------------------------------------------------'"
-         deallocate(var2d_values)
+         if (allocated(var2d_values)) deallocate(var2d_values)
 
          allocate(var2d_values(nxdim,nydim,1))
          filename = "bfpom.nc"
@@ -3498,7 +3608,7 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
          write(nfstdo, *) "'--------------------------------------------------'"
-         deallocate(var2d_values)
+         if (allocated(var2d_values)) deallocate(var2d_values)
 
          allocate(var2d_values(nxdim,nydim,1))
          filename = "bfcar.nc"
@@ -3517,7 +3627,7 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
          write(nfstdo, *) "'--------------------------------------------------'"
-         deallocate(var2d_values)
+         if (allocated(var2d_values)) deallocate(var2d_values)
 
          allocate(var2d_values(nxdim,nydim,1))
          filename = "bfopa.nc"
@@ -3536,7 +3646,7 @@ if (use_mpi) then
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
          write(nfstdo, *) "'--------------------------------------------------'"
-         deallocate(var2d_values)
+         if (allocated(var2d_values)) deallocate(var2d_values)
 
          allocate(var3d_values(nxdim,nydim,sdzdim+1,1))
          filename = "w.nc"
@@ -3556,7 +3666,7 @@ if (use_mpi) then
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " cm s-1"
          write(nfstdo, *) "'--------------------------------------------------'"
-         deallocate(var3d_values)
+         if (allocated(var3d_values)) deallocate(var3d_values)
 
         !allocate(var3d_values(nxdim,nydim,sdzdim,1))
         !filename = "cdc13.nc"
@@ -3577,7 +3687,7 @@ if (use_mpi) then
         !write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
         !write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
         !write(nfstdo, *) "'--------------------------------------------------'"
-        !deallocate(var3d_values)
+        !if (allocated(var3d_values)) deallocate(var3d_values)
 
         !allocate(var3d_values(nxdim,nydim,sdzdim,1))
         !filename = "cdc14.nc"
@@ -3598,7 +3708,7 @@ if (use_mpi) then
         !write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
         !write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
         !write(nfstdo, *) "'--------------------------------------------------'"
-        !deallocate(var3d_values)
+        !if (allocated(var3d_values)) deallocate(var3d_values)
 
         !! -- Gtool output --
         !chead  = ''
@@ -3766,7 +3876,9 @@ end if ! -- End of use_mpi
 
       end do ! -- End of Time integration
 
-      deallocate(mean_data)
+      if (hstavg) then
+         if (allocated(mean_data)) deallocate(mean_data)
+      end if
 
       end subroutine digda_cprdc
 
