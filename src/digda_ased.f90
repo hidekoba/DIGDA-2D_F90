@@ -14,14 +14,6 @@ program digda_ased
   double precision, dimension(nxydim, benfdm) :: bfrc
   double precision, dimension(nxydim, sdzdim, sedtdm) :: sdtx
 
-! double precision, dimension(:), allocatable :: lon_values
-! double precision, dimension(:), allocatable :: lat_values
-! double precision, dimension(:), allocatable :: depth_values
-! integer(kind=4), dimension(:), allocatable :: time_values
-
-! double precision, dimension(:,:), allocatable :: vard2d
-! double precision, dimension(:,:,:,:), allocatable :: vard3d
-
   integer :: lenstd
   character :: crun*(ncf) = '(RUN NAME WAS NOT SET)'
   character :: cstdo*(ncf) = 'STDOUT'
@@ -81,7 +73,7 @@ program digda_ased
   call digda_read_bottom_forcing(bdep, bfrc)
 
   !-- Start time-stepping --
-  call digda_cprdc(bdep, bfrc, sdtx)
+  call digda_cprdc(bdep, bfrc, sdtx, lon_values, lat_values, depth_values)
 
   !-- Write the restart file --
   call digda_write_restart(sdtx, lon_values, lat_values, depth_values, time_values)
