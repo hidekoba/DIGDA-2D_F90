@@ -527,7 +527,7 @@ contains
 
 ! =====================================================================
 
-      subroutine calc_step_solid_clay( ff, rst, w, phi, phii, dbi, S, rhocla, &
+      subroutine calc_step_solid_clay( ff, rst, w, phi, phii, dbi, s, rhocla, &
                                      & sn, bfz                                )
 
       double precision, intent(in)  :: ff(nxy)
@@ -979,8 +979,8 @@ contains
 
 ! =====================================================================
       subroutine calc_step_solid_age( &
-     &      ff, w, phi, phii, dbi, S, &
-     &      SN )
+     &      ff, w, phi, phii, dbi, s, &
+     &      sn )
 
       double precision, intent(in)  :: ff(nxy)
       double precision, intent(in)  :: w(nxy,sdzdim+1)
