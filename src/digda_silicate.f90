@@ -14,7 +14,7 @@ module globals_digda_silicate
   use module_digda_grid
   implicit none
 
-  double precision :: rcopa = 5.00d-3 !! 5.0*10-3 [cm3/mol/s]
+  double precision :: rcopa = 5.00d-6 !! 5.0*10-6 [cm3/mol/s]
   logical :: roprid = .false. !! Ridgwell's DEI formulation ?
   logical :: roparc = .true.  !! Archer's DEI formulation ?
   namelist /nmsdop/ rcopa, roprid, roparc
