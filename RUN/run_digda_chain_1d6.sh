@@ -4,7 +4,8 @@ DIGDADIR=/work/gi55/c24116/digda/DIGDA-2D_F90
 BINARY=$DIGDADIR/bin/digda_21601080rst.par
 RUNDIR=$DIGDADIR/RUN
 #BNDDIR=$DIGDADIR/Bound/bound21601080
-BNDDIR=$DIGDADIR/Bound/data_digda21601080
+BNDDIR=$DIGDADIR/Bound/bound21601080gmd2019
+#BNDDIR=$DIGDADIR/Bound/data_digda21601080
 PARAMET=./PARAMET
 MPIRUN=mpiexec
 
@@ -13,8 +14,12 @@ SDYREND="10000"
 SDYRSTP="2000"
 SDYRHST="1000"
 
+#SDTSTEP="0.002739726027397260"
+#SDTSTEP="0.001369863013698630"
+
 #EXPDIR=$DIGDADIR/OUT/rccar_p3/1d6
- EXPDIR=$DIGDADIR/OUT/rccar_p3/1d6_fl150k
+#EXPDIR=$DIGDADIR/OUT/rccar-p5_rcopa-p3/1d6_fl150k
+ EXPDIR=$DIGDADIR/OUT/rccar-p5_rcopa-p3/1d6_bdep-130_fl150k
 
 for (( SDYR=$SDYRSTR; SDYR<$SDYREND; SDYR+=$SDYRSTP )); do
     INIDIR=$EXPDIR/$SDYR
@@ -38,16 +43,18 @@ cat << EOF >> $PARAMET
 &nmocbc bound_dir='$BNDDIR' &end
 &nmocrt init_dir='$INIDIR',
         rstt_dir='$OUTDIR' &end
-&nmsdtm sdyrstr=$SDYR,
+&nmsdtm sdtmstp=1, iutstp=3,
+        sdyrstr=$SDYR,
         sdyrend=$SDYRNXT,
-        sdyrhst=$SDYRHST &end
-&nmsdhi wotstp=t,
-        wohist=t &end
+        wotstp=t &end
+&nmsdhi sdyrhst=$SDYRHST,
+        wohist=t,
+        hstavg=t &end
 &nmsddear deiarc=t &end
 &nmsdiso calc13=f, calc14=f &end
 
 &nmsdpm kox=2.00e-9, kax=7.90e-11 &end
-&nmsdca rccar=365.d-3, ncar=4.50  &end
+&nmsdca rccar=365.d-5, ncar=4.50  &end
 &nmsdop rcopa=5.0d-3, roprid=f, roparc=t &end
 
 &nmsdchem alkerr=0.10d0, itrmax=10000, rocn=1.0245d0 &end

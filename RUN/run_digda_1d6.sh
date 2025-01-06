@@ -13,6 +13,9 @@ SDYRSTR="0"
 SDYREND="1000"
 SDYRHST="200"
 
+#SDTSTEP="0.002739726027397260"
+#SDTSTEP="0.001369863013698630"
+
 EXPDIR=$DIGDADIR/OUT/1d6
 
 INIDIR=$EXPDIR/$SDYRSTR
@@ -34,11 +37,13 @@ cat << EOF >> $PARAMET
 &nmocbc bound_dir='$BNDDIR' &end
 &nmocrt init_dir='$INIDIR',
         rstt_dir='$OUTDIR' &end
-&nmsdtm sdyrstr=$SDYRSTR,
+&nmsdtm sdtmstp=1, iutstp=3,
+        sdyrstr=$SDYR,
         sdyrend=$SDYREND,
-        sdyrhst=$SDYRHST &end
-&nmsdhi wotstp=t,
-        wohist=t &end
+        wotstp=t &end
+&nmsdhi sdyrhst=$SDYRHST,
+        wohist=t,
+        hstavg=t &end
 &nmsddear deiarc=t &end
 &nmsdiso calc13=f, calc14=f &end
 
