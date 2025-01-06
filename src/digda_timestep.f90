@@ -80,6 +80,7 @@ module module_digda_timestep
   subroutine initialize_timestep()
 
     integer :: ios
+    double precision :: temp1, temp2
 
     ! Open and read the namelist file
     rewind(nfparm)
@@ -89,7 +90,7 @@ module module_digda_timestep
     read(nfparm, NML=nmsdhi, IOSTAT=ios)
     write(nfstdo, nmsdhi)
 
-    ! Calculate derived values
+    ! Calculate the time step and the number of steps
     isecyr = isecmn * iminhr * ihrday * idaymo * imonyr
     if (iutstp == 6) then
       tssec = sdtmstp
@@ -104,8 +105,15 @@ module module_digda_timestep
     else if (iutstp == 1) then
       tssec = sdtmstp * isecmn * iminhr * ihrday * idaymo * imonyr
     end if
-    tend = (sdyrend - sdyrstr) * isecyr / tssec !! Converts years to time steps
-    thst = sdyrhst * isecyr / tssec !! Converts years to time steps
+
+    temp1 = dble(sdyrend - sdyrstr)
+    temp2 = temp1 * dble(isecyr)
+    tend = int(temp2 / tssec)
+
+    temp1 = dble(sdyrhst)
+    temp2 = temp1 * dble(isecyr)
+    thst = int(temp2 / tssec)
+
     sdtsyr = tssec / isecmn / iminhr / ihrday / idaymo / imonyr !! Converts seconds to years
 
     write(nfstdo, *) "'--------------------------------------------------'"
