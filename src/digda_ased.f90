@@ -30,7 +30,7 @@ program digda_ased
 
   !-- Initial setup --
   open( UNIT=nfparm, FILE='PARAMET', STATUS='OLD', &
-      & ACCESS='SeqUENTIAL', FORM='FORMATTED'      )
+      & ACCESS='SEQUENTIAL', FORM='FORMATTED'      )
   rewind(nfparm)
   read(nfparm, NML=nmstdo, IOSTAT=ios)
  !if (ios /= 0) then
@@ -39,8 +39,8 @@ program digda_ased
 
   lenstd = index(cstdo, ' ')
   write(cstdo(lenstd:lenstd+2), '(A1,I2.2)') '.', myrank
-  open( UNIT=nfstdo, FILE=cstdo, STATUS='NEW', &
-      & ACCESS='SeqUENTIAL', FORM='FORMATTED' )
+  open( UNIT=nfstdo, FILE=cstdo, STATUS='UNKNOWN', &
+      & ACCESS='SEQUENTIAL', FORM='FORMATTED' )
   write(nfstdo, *) "'--------------------------------------------------'"
   write(nfstdo, *) 'MESSAGE OUTPUT FOR RANK', myrank
   rewind(nfparm)

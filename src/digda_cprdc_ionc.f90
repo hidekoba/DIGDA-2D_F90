@@ -344,10 +344,6 @@ contains
     write(nfstdo, nmsdiso)
 
     call initialize_timestep()
-    write(nfstdo, *) "'--------------------------------------------------'"
-    write(nfstdo, *) " timestep (yr), start year, end year, history year  "
-    write(nfstdo, *)  sdtsyr, sdyrstr, sdyrend, sdyrhst
-    write(nfstdo, *) "'--------------------------------------------------'"
 
     sedtnm(1)  = 'scla'
     sedtnm(2)  = 'spom'

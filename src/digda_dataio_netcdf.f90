@@ -207,7 +207,7 @@ contains
 
     filename = trim(rstt_dir)//"/SEDTRR.nc"
     write(nfstdo, *) "'--------------------------------------------------'"
-    write(nfstdo, *) "  write restart file: ", filename
+    write(nfstdo, *) "  Write restart file: ", filename
     write(nfstdo, *) "'--------------------------------------------------'"
 
     if ( myrank == iroot ) then
