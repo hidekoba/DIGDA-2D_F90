@@ -65,7 +65,7 @@ contains
 
     if (ofirst) then
        ofirst = .false.
-       call yclocl
+       call yclocl()
     end if
 
     call yclock( cput, wclt )
