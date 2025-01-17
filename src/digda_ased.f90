@@ -77,9 +77,9 @@ program digda_ased
   call clcend('SETUP')
 
   !-- Start time-stepping --
-  call clcstr('MAIN')
+  call clcstr('PREDIC')
   call digda_cprdc(bdep, bfrc, sdtx, lon_values, lat_values, depth_values)
-  call clcend('MAIN')
+  call clcend('PREDIC')
 
   !-- Write the restart file --
   call clcstr('FINOUT')

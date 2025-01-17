@@ -13,6 +13,7 @@ module module_digda_cprdc
   use netcdf_utilities
   use gtool_utilities
   use module_zcfile
+  use module_ucloc
   use module_digda_grid
   use module_digda_mpi
   use module_digda_parameter
@@ -320,6 +321,8 @@ contains
 
     !-- SEDIMENT TRACERS : setup --
 
+    call clcstr('PRDC_INIT')
+
     if (use_mpi) then
       do irank = 0, nprocs-1
         call set_parallel_range( 1, nxydim, nprocs, irank,  & !! IN
@@ -448,231 +451,235 @@ contains
 
     ! -- Convert unit --
 
-      z0  = z0  * 1.0d+2                       !! [m] --> [cm]
+    z0  = z0  * 1.0d+2                       !! [m] --> [cm]
 
-      db0 = db0 * 1.0d+4 / 3.1536d+7           !! [m^2/yr] --> [cm^2/s]
-      zb  = zb  * 1.0d+2                       !! [m] --> [cm]
+    db0 = db0 * 1.0d+4 / 3.1536d+7           !! [m^2/yr] --> [cm^2/s]
+    zb  = zb  * 1.0d+2                       !! [m] --> [cm]
 
-      do k = skst, sken
-         lz(k)   = lz(k)   * 1.0d+2            !! [m] --> [cm]
-         dlz(k)  = dlz(k)  * 1.0d+2            !! [m] --> [cm]
-      end do
-      do k = skst, sken+1
-         lzi(k)  = lzi(k)  * 1.0d+2            !! [m] --> [cm]
-         dlzi(k) = dlzi(k) * 1.0d+2            !! [m] --> [cm]
-      end do
+    do k = skst, sken
+       lz(k)   = lz(k)   * 1.0d+2            !! [m] --> [cm]
+       dlz(k)  = dlz(k)  * 1.0d+2            !! [m] --> [cm]
+    end do
+    do k = skst, sken+1
+       lzi(k)  = lzi(k)  * 1.0d+2            !! [m] --> [cm]
+       dlzi(k) = dlzi(k) * 1.0d+2            !! [m] --> [cm]
+    end do
 
-      dswnit   = dswnit   * 1.0d+4             !! [m^2/s] --> [cm^2/s]
-      dswdic   = dswdic   * 1.0d+4             !! [m^2/s] --> [cm^2/s]
-      dswalk   = dswalk   * 1.0d+4             !! [m^2/s] --> [cm^2/s]
-      dswdo2   = dswdo2   * 1.0d+4             !! [m^2/s] --> [cm^2/s]
-      dswsil   = dswsil   * 1.0d+4             !! [m^2/s] --> [cm^2/s]
-      if ( calc13 ) then
-      dsw13dic = dsw13dic * 1.0d+4             !! [m^2/s] --> [cm^2/s]
-      end if
-      if ( calc14 ) then
-      dsw14dic = dsw14dic * 1.0d+4             !! [m^2/s] --> [cm^2/s]
-      end if
-      dsw    = dsw        * 1.0d+4             !! [m^2/s] --> [cm^2/s]
+    dswnit   = dswnit   * 1.0d+4             !! [m^2/s] --> [cm^2/s]
+    dswdic   = dswdic   * 1.0d+4             !! [m^2/s] --> [cm^2/s]
+    dswalk   = dswalk   * 1.0d+4             !! [m^2/s] --> [cm^2/s]
+    dswdo2   = dswdo2   * 1.0d+4             !! [m^2/s] --> [cm^2/s]
+    dswsil   = dswsil   * 1.0d+4             !! [m^2/s] --> [cm^2/s]
+    if ( calc13 ) then
+    dsw13dic = dsw13dic * 1.0d+4             !! [m^2/s] --> [cm^2/s]
+    end if
+    if ( calc14 ) then
+    dsw14dic = dsw14dic * 1.0d+4             !! [m^2/s] --> [cm^2/s]
+    end if
+    dsw    = dsw        * 1.0d+4             !! [m^2/s] --> [cm^2/s]
 
-      mcla   = 1.0d-6 /  rhocla                !! [m^3/g]
-      mpom   = 1.0d-9 / ( rhopom / molpom )    !! [m^3/mMol]
-      mcar   = 1.0d-9 / ( rhocar / molcar )    !! [m^3/mMol]
-      mopa   = 1.0d-9 / ( rhoopa / molopa )    !! [m^3/mMol]
-      if ( calc13 ) then
-      m13pom = 1.0d-9 / ( rhopom / mol13pom )  !! [m^3/mMol]
-      m13car = 1.0d-9 / ( rhocar / mol13car )  !! [m^3/mMol]
-      end if
-      if ( calc14 ) then
-      m14pom = 1.0d-9 / ( rhopom / mol14pom )  !! [m^3/mMol]
-      m14car = 1.0d-9 / ( rhocar / mol14car )  !! [m^3/mMol]
-      thalf  = thalfyr * 3.1536d+7             !! [yr] --> [s]
-      adcay  = log( 2.0d0 ) / thalf / 365.0d0 / 8.64d+4
-      end if
-      if ( calc13 .or. calc14 ) then
-      feoph  = 1.0d0 + eoph * 1.0d-3
-      feosh  = 1.0d0 + eosh * 1.0d-3
-      end if
+    mcla   = 1.0d-6 /  rhocla                !! [m^3/g]
+    mpom   = 1.0d-9 / ( rhopom / molpom )    !! [m^3/mMol]
+    mcar   = 1.0d-9 / ( rhocar / molcar )    !! [m^3/mMol]
+    mopa   = 1.0d-9 / ( rhoopa / molopa )    !! [m^3/mMol]
+    if ( calc13 ) then
+    m13pom = 1.0d-9 / ( rhopom / mol13pom )  !! [m^3/mMol]
+    m13car = 1.0d-9 / ( rhocar / mol13car )  !! [m^3/mMol]
+    end if
+    if ( calc14 ) then
+    m14pom = 1.0d-9 / ( rhopom / mol14pom )  !! [m^3/mMol]
+    m14car = 1.0d-9 / ( rhocar / mol14car )  !! [m^3/mMol]
+    thalf  = thalfyr * 3.1536d+7             !! [yr] --> [s]
+    adcay  = log( 2.0d0 ) / thalf / 365.0d0 / 8.64d+4
+    end if
+    if ( calc13 .or. calc14 ) then
+    feoph  = 1.0d0 + eoph * 1.0d-3
+    feosh  = 1.0d0 + eosh * 1.0d-3
+    end if
 
-      do ij = 1, nxy
-        bdep(ij) = bdep(ij) * 1.0d+2           !! [m] --> [cm]
-      end do
+    do ij = 1, nxy
+      bdep(ij) = bdep(ij) * 1.0d+2           !! [m] --> [cm]
+    end do
 
-!     -- Porosity, Diffusivity --
+!   -- Porosity, Diffusivity --
 
-      do k = skst, sken
-        phi(k) = phi0 * exp( - lz(k)  / z0 )
-      end do
+    do k = skst, sken
+      phi(k) = phi0 * exp( - lz(k)  / z0 )
+    end do
 
-      do k = skst, sken+1
-        phii(k) = phi0 * exp( - lzi(k) / z0 )
-        dbi(k)  = ( db0 / ( 1.0d0 + exp( 2.0d0 * ( lzi(k) - zb ) ) ) )
-      end do
+    do k = skst, sken+1
+      phii(k) = phi0 * exp( - lzi(k) / z0 )
+      dbi(k)  = ( db0 / ( 1.0d0 + exp( 2.0d0 * ( lzi(k) - zb ) ) ) )
+    end do
 
-      do k = skst, sken+1
-         if (deiarc) then
-            deinit(k)   = dswnit   * ( phii(k) ** 3.0d0 )
-            deidic(k)   = dswdic   * ( phii(k) ** 3.0d0 )
-            deialk(k)   = dswalk   * ( phii(k) ** 3.0d0 )
-            deido2(k)   = dswdo2   * ( phii(k) ** 3.0d0 )
-            deisil(k)   = dswsil   * ( phii(k) ** 3.0d0 )
-            if ( calc13 ) then
-            dei13dic(k) = dsw13dic * ( phii(k) ** 3.0d0 )
-            end if
-            if ( calc14 ) then
-            dei14dic(k) = dsw14dic * ( phii(k) ** 3.0d0 )
-            end if
-         else
-            deinit(k)   = ( phii(k) ** ( nopa - 1.0d0 ) ) * dsw
-            deidic(k)   = ( phii(k) ** ( nopa - 1.0d0 ) ) * dsw
-            deialk(k)   = ( phii(k) ** ( nopa - 1.0d0 ) ) * dsw
-            deido2(k)   = ( phii(k) ** ( nopa - 1.0d0 ) ) * dsw
-            deisil(k)   = ( phii(k) ** ( nopa - 1.0d0 ) ) * dsw
-            if ( calc13 ) then
-            dei13dic(k) = ( phii(k) ** ( nopa - 1.0d0 ) ) * dsw
-            end if
-            if ( calc14 ) then
-            dei14dic(k) = ( phii(k) ** ( nopa - 1.0d0 ) ) * dsw
-            end if
-         end if
-      end do
+    do k = skst, sken+1
+       if (deiarc) then
+          deinit(k)   = dswnit   * ( phii(k) ** 3.0d0 )
+          deidic(k)   = dswdic   * ( phii(k) ** 3.0d0 )
+          deialk(k)   = dswalk   * ( phii(k) ** 3.0d0 )
+          deido2(k)   = dswdo2   * ( phii(k) ** 3.0d0 )
+          deisil(k)   = dswsil   * ( phii(k) ** 3.0d0 )
+          if ( calc13 ) then
+          dei13dic(k) = dsw13dic * ( phii(k) ** 3.0d0 )
+          end if
+          if ( calc14 ) then
+          dei14dic(k) = dsw14dic * ( phii(k) ** 3.0d0 )
+          end if
+       else
+          deinit(k)   = ( phii(k) ** ( nopa - 1.0d0 ) ) * dsw
+          deidic(k)   = ( phii(k) ** ( nopa - 1.0d0 ) ) * dsw
+          deialk(k)   = ( phii(k) ** ( nopa - 1.0d0 ) ) * dsw
+          deido2(k)   = ( phii(k) ** ( nopa - 1.0d0 ) ) * dsw
+          deisil(k)   = ( phii(k) ** ( nopa - 1.0d0 ) ) * dsw
+          if ( calc13 ) then
+          dei13dic(k) = ( phii(k) ** ( nopa - 1.0d0 ) ) * dsw
+          end if
+          if ( calc14 ) then
+          dei14dic(k) = ( phii(k) ** ( nopa - 1.0d0 ) ) * dsw
+          end if
+       end if
+    end do
 
-!     -- Set boundary conditions --
+!   -- Set boundary conditions --
 
-      do i = 1, nxydim
-        ficlag(i) = bfrcg(i, 1)
-        fipomg(i) = bfrcg(i, 2)
-        ficarg(i) = bfrcg(i, 3)
-        fiopag(i) = bfrcg(i, 4)
-        fiageg(i) = bfrcg(i, 5)
-        bwtemg(i) = bfrcg(i, 6)
-        bwsalg(i) = bfrcg(i, 7)
-        bwnitg(i) = bfrcg(i, 8)
-        bwdicg(i) = bfrcg(i, 9)
-        bwalkg(i) = bfrcg(i, 10)
-        bwsilg(i) = bfrcg(i, 11)
-        bwdo2g(i) = bfrcg(i, 12)
-        bw13dicg(i) = bfrcg(i, 13)
-        bw14dicg(i) = bfrcg(i, 14)
-      end do
+    do i = 1, nxydim
+      ficlag(i) = bfrcg(i, 1)
+      fipomg(i) = bfrcg(i, 2)
+      ficarg(i) = bfrcg(i, 3)
+      fiopag(i) = bfrcg(i, 4)
+      fiageg(i) = bfrcg(i, 5)
+      bwtemg(i) = bfrcg(i, 6)
+      bwsalg(i) = bfrcg(i, 7)
+      bwnitg(i) = bfrcg(i, 8)
+      bwdicg(i) = bfrcg(i, 9)
+      bwalkg(i) = bfrcg(i, 10)
+      bwsilg(i) = bfrcg(i, 11)
+      bwdo2g(i) = bfrcg(i, 12)
+      bw13dicg(i) = bfrcg(i, 13)
+      bw14dicg(i) = bfrcg(i, 14)
+    end do
 
 if (use_mpi) then
-      do ij = 1, nxy
-         ficla(ij) = max( ficlag(myrank*nxy+ij), 0.0d0 )
-         fipom(ij) = max( fipomg(myrank*nxy+ij), 0.0d0 )
-         ficar(ij) = max( ficarg(myrank*nxy+ij), 0.0d0 )
-         fiopa(ij) = max( fiopag(myrank*nxy+ij), 0.0d0 )
-         fiage(ij) = 0.0d0
-      end do
+    do ij = 1, nxy
+       ficla(ij) = max( ficlag(myrank*nxy+ij), 0.0d0 )
+       fipom(ij) = max( fipomg(myrank*nxy+ij), 0.0d0 )
+       ficar(ij) = max( ficarg(myrank*nxy+ij), 0.0d0 )
+       fiopa(ij) = max( fiopag(myrank*nxy+ij), 0.0d0 )
+       fiage(ij) = 0.0d0
+    end do
 else
-      do ij = 1, nxy
-         ficla(ij) = max( ficlag(ij), 0.0d0 )
-         fipom(ij) = max( fipomg(ij), 0.0d0 )
-         ficar(ij) = max( ficarg(ij), 0.0d0 )
-         fiopa(ij) = max( fiopag(ij), 0.0d0 )
-         fiage(ij) = 0.0d0
-      end do
+    do ij = 1, nxy
+       ficla(ij) = max( ficlag(ij), 0.0d0 )
+       fipom(ij) = max( fipomg(ij), 0.0d0 )
+       ficar(ij) = max( ficarg(ij), 0.0d0 )
+       fiopa(ij) = max( fiopag(ij), 0.0d0 )
+       fiage(ij) = 0.0d0
+    end do
 end if
 if (use_mpi) then
-      do ij = 1, nxy
-         bwtem(ij)   = bwtemg(myrank*nxy+ij)
-         bwsal(ij)   = bwsalg(myrank*nxy+ij)
-         bwnit(ij)   = max( bwnitg(myrank*nxy+ij), 0.0d0 )
-         bwdic(ij)   = max( bwdicg(myrank*nxy+ij), 0.0d0 )
-         bwalk(ij)   = max( bwalkg(myrank*nxy+ij), 0.0d0 )
-         bwdo2(ij)   = max( bwdo2g(myrank*nxy+ij), 0.0d0 )
-         bwsil(ij)   = max( bwsilg(myrank*nxy+ij), 0.0d0 )
-      end do
+    do ij = 1, nxy
+       bwtem(ij)   = bwtemg(myrank*nxy+ij)
+       bwsal(ij)   = bwsalg(myrank*nxy+ij)
+       bwnit(ij)   = max( bwnitg(myrank*nxy+ij), 0.0d0 )
+       bwdic(ij)   = max( bwdicg(myrank*nxy+ij), 0.0d0 )
+       bwalk(ij)   = max( bwalkg(myrank*nxy+ij), 0.0d0 )
+       bwdo2(ij)   = max( bwdo2g(myrank*nxy+ij), 0.0d0 )
+       bwsil(ij)   = max( bwsilg(myrank*nxy+ij), 0.0d0 )
+    end do
 else
-      do ij = 1, nxy
-         bwtem(ij)   = bwtemg(ij)
-         bwsal(ij)   = bwsalg(ij)
-         bwnit(ij)   = max( bwnitg(ij), 0.0d0 )
-         bwdic(ij)   = max( bwdicg(ij), 0.0d0 )
-         bwalk(ij)   = max( bwalkg(ij), 0.0d0 )
-         bwdo2(ij)   = max( bwdo2g(ij), 0.0d0 )
-         bwsil(ij)   = max( bwsilg(ij), 0.0d0 )
-      end do
+    do ij = 1, nxy
+       bwtem(ij)   = bwtemg(ij)
+       bwsal(ij)   = bwsalg(ij)
+       bwnit(ij)   = max( bwnitg(ij), 0.0d0 )
+       bwdic(ij)   = max( bwdicg(ij), 0.0d0 )
+       bwalk(ij)   = max( bwalkg(ij), 0.0d0 )
+       bwdo2(ij)   = max( bwdo2g(ij), 0.0d0 )
+       bwsil(ij)   = max( bwsilg(ij), 0.0d0 )
+    end do
 end if
 
-      if ( calc13 ) then
-      do ij = ijtstr, ijtend
-         fi13pom(ij) = feoph * pdb  * fipom(ij)
-         fi13car(ij) = feosh * pdb  * ficar(ij)
-      end do
+    if ( calc13 ) then
+    do ij = ijtstr, ijtend
+       fi13pom(ij) = feoph * pdb  * fipom(ij)
+       fi13car(ij) = feosh * pdb  * ficar(ij)
+    end do
 if (use_mpi) then
-      do ij = 1, nxy
-         bw13dic(ij) = max( bw13dicg(myrank*nxy+ij), 0.0d0 )
-      end do
+    do ij = 1, nxy
+       bw13dic(ij) = max( bw13dicg(myrank*nxy+ij), 0.0d0 )
+    end do
 else
-      do ij = 1, nxy
-         bw13dic(ij) = max( bw13dicg(ij), 0.0d0 )
-      end do
+    do ij = 1, nxy
+       bw13dic(ij) = max( bw13dicg(ij), 0.0d0 )
+    end do
 end if
-      end if
+    end if
 
-      if ( calc14 ) then
-      do ij = ijtstr, ijtend
-         fi14pom(ij) = feoph * dstd * fipom(ij)
-         fi14car(ij) = feosh * dstd * ficar(ij)
-      end do
+    if ( calc14 ) then
+    do ij = ijtstr, ijtend
+       fi14pom(ij) = feoph * dstd * fipom(ij)
+       fi14car(ij) = feosh * dstd * ficar(ij)
+    end do
 if (use_mpi) then
-      do ij = 1, nxy
-         bw14dic(ij) = max( bw14dicg(myrank*nxy+ij), 0.0d0 )
-      end do
+    do ij = 1, nxy
+       bw14dic(ij) = max( bw14dicg(myrank*nxy+ij), 0.0d0 )
+    end do
 else
-      do ij = 1, nxy
-         bw14dic(ij) = max( bw14dicg(ij), 0.0d0 )
-      end do
+    do ij = 1, nxy
+       bw14dic(ij) = max( bw14dicg(ij), 0.0d0 )
+    end do
 end if
-      end if
+    end if
 
-      do ij = 1, nxy
-         sit(ij) = 0.51d0
-         pt(ij)  = 7.70d0
-      end do
+    do ij = 1, nxy
+       sit(ij) = 0.51d0
+       pt(ij)  = 7.70d0
+    end do
 
-!     do l = 1, sedtdm
-!        do k = 1, sdzdim
-!           do j = 1, nydim
-!              do i = 1, nxdim
-!                 ij = i + (j - 1) * nxdim
-!                 sdtxbuf(i, j, k, l) = sdtx(ij, k, l)
-!              end do
-!           end do
-!        end do
-!     end do
-!     do l = 1, sedtdm
-!        do k = skst, sken
-!           do j = jstr, jend
-!              do i = 1, istr-1
-!                 sdtxbuf(i, j, k, l) = sdtxbuf(iend-istr+1+i, j, k, l)
-!              end do
-!              do i = iend+1, nxdim
-!                 sdtxbuf(i, j, k, l) = sdtxbuf(istr-1+i-iend, j, k, l)
-!              end do
-!           end do
-!        end do
-!     end do
-!     do l = 1, sedtdm
-!        do k = 1, sdzdim
-!           do j = 1, nydim
-!              do i = 1, nxdim
-!                 ij = i + (j - 1) * nxdim
-!                 sdtx(ij, k, l) = sdtxbuf(i, j, k, l)
-!              end do
-!           end do
-!        end do
-!     end do
-!     do l = 1, sedtdm
-!        do k = 1, skst-1
-!           do ij = 1, nxy
-!              sdtx(ij, k, l) = sdtx(ij, skst, l)
-!           end do
-!        end do
-!     end do
+!   do l = 1, sedtdm
+!      do k = 1, sdzdim
+!         do j = 1, nydim
+!            do i = 1, nxdim
+!               ij = i + (j - 1) * nxdim
+!               sdtxbuf(i, j, k, l) = sdtx(ij, k, l)
+!            end do
+!         end do
+!      end do
+!   end do
+!   do l = 1, sedtdm
+!      do k = skst, sken
+!         do j = jstr, jend
+!            do i = 1, istr-1
+!               sdtxbuf(i, j, k, l) = sdtxbuf(iend-istr+1+i, j, k, l)
+!            end do
+!            do i = iend+1, nxdim
+!               sdtxbuf(i, j, k, l) = sdtxbuf(istr-1+i-iend, j, k, l)
+!            end do
+!         end do
+!      end do
+!   end do
+!   do l = 1, sedtdm
+!      do k = 1, sdzdim
+!         do j = 1, nydim
+!            do i = 1, nxdim
+!               ij = i + (j - 1) * nxdim
+!               sdtx(ij, k, l) = sdtxbuf(i, j, k, l)
+!            end do
+!         end do
+!      end do
+!   end do
+!   do l = 1, sedtdm
+!      do k = 1, skst-1
+!         do ij = 1, nxy
+!            sdtx(ij, k, l) = sdtx(ij, skst, l)
+!         end do
+!      end do
+!   end do
+
+      call clcend('PRDC_INIT')
 
 !     -- Time Integration --
+
+      call clcstr('PRDC_STEP')
 
       do tt = tstr, tend
 
@@ -1431,6 +1438,8 @@ end if
 !     else
 !       if ( tt == tend ) then
 !     end if
+
+      call clcstr('PRDC_HIST')
 
 if (use_mpi) then
 
@@ -3869,9 +3878,13 @@ if (use_mpi) then
 
 end if ! -- End of use_mpi
 
+      call clcend('PRDC_HIST')
+
       end if ! -- End of Output
 
       end do ! -- End of Time integration
+
+      call clcend('PRDC_STEP')
 
       if (hstavg) then
          if (allocated(mean_data)) deallocate(mean_data)
