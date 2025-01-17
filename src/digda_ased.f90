@@ -1,6 +1,7 @@
 program digda_ased
 
   use module_zcfile
+  use module_ucloc
   use module_digda_dataio_netcdf
   use module_digda_cprdc
   implicit none
@@ -29,6 +30,7 @@ program digda_ased
   end if
 
   !-- Initial setup --
+  call clcstr('SETUP')
   open( UNIT=nfparm, FILE='PARAMET', STATUS='OLD', &
       & ACCESS='SEQUENTIAL', FORM='FORMATTED'      )
   rewind(nfparm)
@@ -72,12 +74,19 @@ program digda_ased
   !-- Read the forcing --
   call digda_read_bottom_forcing(bdep, bfrc)
 
+  call clcend('SETUP')
+
   !-- Start time-stepping --
+  call clcstr('MAIN')
   call digda_cprdc(bdep, bfrc, sdtx, lon_values, lat_values, depth_values)
+  call clcend('MAIN')
 
   !-- Write the restart file --
+  call clcstr('FINOUT')
   call digda_write_restart(sdtx, lon_values, lat_values, depth_values, time_values)
   call digda_write_data()
+  call clcend('FINOUT')
+  call clcout
 
   !-- Finalize MPI
   if (use_mpi) then
