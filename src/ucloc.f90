@@ -1,4 +1,4 @@
-module ucloc
+module module_ucloc
 
 ! --- information -----------------------------------------------------
 !
@@ -36,7 +36,7 @@ module ucloc
 contains
 
   subroutine clcout
-    use ufile
+    use module_ufile
     implicit none
     integer(4)  ::  ic
 
@@ -132,4 +132,4 @@ contains
 
   end subroutine yclocl
 
-end module ucloc
+end module module_ucloc
