@@ -26,7 +26,9 @@ program digda_ased
 
   !-- Initialize MPI --
   if (use_mpi) then
-    call initialize_digda_mpi
+    call initialize_digda_mpi()
+  else
+    myrank = 0
   end if
 
   !-- Initial setup --
@@ -86,11 +88,11 @@ program digda_ased
   call digda_write_restart(sdtx, lon_values, lat_values, depth_values, time_values)
   call digda_write_data()
   call clcend('FINOUT')
-  call clcout
+  call clcout()
 
   !-- Finalize MPI
   if (use_mpi) then
-    call finalize_digda_mpi
+    call finalize_digda_mpi()
   end if
 
   write(nfstdo, *) "'--------------------------------------------------'"
