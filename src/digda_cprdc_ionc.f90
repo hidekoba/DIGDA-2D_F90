@@ -325,8 +325,8 @@ contains
 
     if (use_mpi) then
       do irank = 0, nprocs-1
-        call set_parallel_range( 1, nxydim, nprocs, irank,  & !! IN
-                               & jjstr(irank), jjend(irank) ) !! OUT
+        call set_parallel_range( 1, nxydim, nprocs, irank,  &
+                               & jjstr(irank), jjend(irank) )
       end do
     end if
 
@@ -365,13 +365,13 @@ contains
     sedtnm(15) = 's14car'
     sedtnm(16) = 'c14dic'
 
-    call set_digda_clay
-    call set_digda_pom
-    call set_digda_carbonate
-    call set_digda_silicate
-    call set_digda_chemeq
-    call set_digda_step_solid
-    call set_digda_step_liquid
+    call set_digda_clay()
+    call set_digda_pom()
+    call set_digda_carbonate()
+    call set_digda_silicate()
+    call set_digda_chemeq()
+    call set_digda_step_solid()
+    call set_digda_step_liquid()
 
     write(nfstdo, *) "'--------------------------------------------------'"
     write(nfstdo, *) "'-- Finished setting up model parameters         --'"
