@@ -1,9 +1,10 @@
 DIGDADIR	= /raid/hidekoba/digda/DIGDA-2D_F90
-RM	= rm -f
+RM	        = rm -f
 
-SYSTEM	= calamari
+SYSTEM	        = calamari
 
-#PARALLEL =
- PARALLEL = .par
+#PARALLEL       =
+ PARALLEL       = .par
 
-TARGET	= $(DIGDADIR)/bin/digda$(PARALLEL)
+#TARGET	        = $(DIGDADIR)/bin/digda$(PARALLEL)
+TARGET	        = $(DIGDADIR)/bin/digda_21601080$(PARALLEL)
