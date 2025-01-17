@@ -6,7 +6,7 @@ module module_zcfile
   integer, parameter :: nfmin = 21, nfmax = 82
 
   integer, parameter :: nfstdi = 5
-  integer, parameter :: nfstdo = 8
+  integer, parameter :: nfstdo = 6
   integer, parameter :: nfparm = 7
 
   integer, parameter :: nfsots = 999
