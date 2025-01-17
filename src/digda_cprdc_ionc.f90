@@ -1422,6 +1422,7 @@ end if
 !     -- Time step --
       if ( wotstp ) then
          write(nfsots, *), 'Time Step :', tt, 'step', yy, 'year'
+         call flush(nfsots)
       end if
 
 !     -- Write the output --
