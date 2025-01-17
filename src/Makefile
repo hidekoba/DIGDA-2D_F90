@@ -5,6 +5,7 @@ OBJS	= \
 	zcfile.o  \
 	zchem.o  \
 	zcphys.o  \
+	ucloc.o  \
 	digda_config.o  \
 	digda_mpi.o  \
 	digda_grid.o  \
