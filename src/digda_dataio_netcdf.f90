@@ -61,7 +61,8 @@ contains
     write(nfstdo, *) "  Read initial condition file: ", filename
     write(nfstdo, *) "'--------------------------------------------------'"
     varname = "Clay"
-    call read_netcdf_3dwt(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+    get_axis = .true.
+    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values, get_axis)
     do k = 1, sdzdim
       do j = 1, nydim
         do i = 1, nxdim
@@ -72,7 +73,8 @@ contains
     end do
 
     varname = "OrgM"
-    call read_netcdf_3dwt(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+    get_axis = .false.
+    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values, get_axis)
     do k = 1, sdzdim
       do j = 1, nydim
         do i = 1, nxdim
@@ -83,7 +85,8 @@ contains
     end do
 
     varname = "CaCO3"
-    call read_netcdf_3dwt(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+    get_axis = .false.
+    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values, get_axis)
     do k = 1, sdzdim
       do j = 1, nydim
         do i = 1, nxdim
@@ -94,7 +97,8 @@ contains
     end do
 
     varname = "SiO2"
-    call read_netcdf_3dwt(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+    get_axis = .false.
+    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values, get_axis)
     do k = 1, sdzdim
       do j = 1, nydim
         do i = 1, nxdim
@@ -105,7 +109,8 @@ contains
     end do
 
     varname = "Agetracer"
-    call read_netcdf_3dwt(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+    get_axis = .false.
+    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values, get_axis)
     do k = 1, sdzdim
       do j = 1, nydim
         do i = 1, nxdim
@@ -116,7 +121,8 @@ contains
     end do
 
     varname = "Phosphate"
-    call read_netcdf_3dwt(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+    get_axis = .false.
+    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values, get_axis)
     do k = 1, sdzdim
       do j = 1, nydim
         do i = 1, nxdim
@@ -127,7 +133,8 @@ contains
     end do
 
     varname = "DIC"
-    call read_netcdf_3dwt(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+    get_axis = .false.
+    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values, get_axis)
     do k = 1, sdzdim
       do j = 1, nydim
         do i = 1, nxdim
@@ -138,7 +145,8 @@ contains
     end do
 
     varname = "Alkalinity"
-    call read_netcdf_3dwt(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+    get_axis = .false.
+    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values, get_axis)
     do k = 1, sdzdim
       do j = 1, nydim
         do i = 1, nxdim
@@ -149,7 +157,8 @@ contains
     end do
 
     varname = "Silicate"
-    call read_netcdf_3dwt(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+    get_axis = .false.
+    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values, get_axis)
     do k = 1, sdzdim
       do j = 1, nydim
         do i = 1, nxdim
@@ -160,7 +169,8 @@ contains
     end do
 
     varname = "Oxygen"
-    call read_netcdf_3dwt(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+    get_axis = .false.
+    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values, get_axis)
     do k = 1, sdzdim
       do j = 1, nydim
         do i = 1, nxdim
@@ -413,8 +423,10 @@ contains
     !-- Ocean Depth
     filename = trim(bound_dir)//"/bdep.nc"
     varname = "DEPTH"
-   !call read_netcdf_2dwt(filename, varname, vard3d, lon_values, lat_values, time_values)
-    call read_netcdf_2dwot(filename, varname, vard2d, lon_values, lat_values)
+    get_axis = .false.
+ !!!call read_netcdf_2dwt(filename, varname, vard3d, lon_values, lat_values, time_values)
+   !call read_netcdf_2dwot(filename, varname, vard2d, lon_values, lat_values)
+    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values, get_axis)
     do j = 1, nydim
       do i = 1, nxdim
         ij = i + (j - 1) * nxdim
@@ -424,7 +436,8 @@ contains
        !else
        !  omask(i, j) = 1.d0
        !end if
-        bdep(ij) = vard2d(i, j)
+       !bdep(ij) = vard2d(i, j)
+        bdep(ij) = vard4d(i, j, 1, 1)
         if (vard2d(i, j) == rmiss) then
           omask(i, j) = 0.d0
         else
@@ -436,169 +449,208 @@ contains
     !-- Temperature
     filename = trim(bound_dir)//"/btem.nc"
     varname = "TEM"
-    call read_netcdf_2dwt(filename, varname, vard3d, lon_values, lat_values, time_values)
-   !call read_netcdf_2dwot(filename, varname, vard2d, lon_values, lat_values)
+    get_axis = .false.
+   !call read_netcdf_2dwt(filename, varname, vard3d, lon_values, lat_values, time_values)
+ !!!call read_netcdf_2dwot(filename, varname, vard2d, lon_values, lat_values)
+    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values, get_axis)
     do j = 1, nydim
       do i = 1, nxdim
         ij = i + (j - 1) * nxdim
-        bfrc(ij, 6) = vard3d(i, j, 1)
-       !bfrc(ij, 6) = vard2d(i, j)
+       !bfrc(ij, 6) = vard3d(i, j, 1)
+     !!!bfrc(ij, 6) = vard2d(i, j)
+        bfrc(ij, 6) = vard4d(i, j, 1, 1)
       end do
     end do
 
     !-- Salinity
     filename = trim(bound_dir)//"/bsal.nc"
     varname = "SAL"
-    call read_netcdf_2dwt(filename, varname, vard3d, lon_values, lat_values, time_values)
-   !call read_netcdf_2dwot(filename, varname, vard2d, lon_values, lat_values)
+    get_axis = .false.
+   !call read_netcdf_2dwt(filename, varname, vard3d, lon_values, lat_values, time_values)
+ !!!call read_netcdf_2dwot(filename, varname, vard2d, lon_values, lat_values)
+    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values, get_axis)
     do j = 1, nydim
       do i = 1, nxdim
         ij = i + (j - 1) * nxdim
-        bfrc(ij, 7) = vard3d(i, j, 1)
-       !bfrc(ij, 7) = vard2d(i, j)
+       !bfrc(ij, 7) = vard3d(i, j, 1)
+     !!!bfrc(ij, 7) = vard2d(i, j)
+        bfrc(ij, 7) = vard4d(i, j, 1, 1)
       end do
     end do
 
     !-- Phosphate
     filename = trim(bound_dir)//"/bnit.nc"
     varname = "NIT"
-    call read_netcdf_2dwt(filename, varname, vard3d, lon_values, lat_values, time_values)
-   !call read_netcdf_2dwot(filename, varname, vard2d, lon_values, lat_values)
+    get_axis = .false.
+   !call read_netcdf_2dwt(filename, varname, vard3d, lon_values, lat_values, time_values)
+ !!!call read_netcdf_2dwot(filename, varname, vard2d, lon_values, lat_values)
+    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values, get_axis)
     do j = 1, nydim
       do i = 1, nxdim
         ij = i + (j - 1) * nxdim
-        bfrc(ij, 8) = vard3d(i, j, 1)
-       !bfrc(ij, 8) = vard2d(i, j)
+       !bfrc(ij, 8) = vard3d(i, j, 1)
+     !!!bfrc(ij, 8) = vard2d(i, j)
+        bfrc(ij, 8) = vard4d(i, j, 1, 1)
       end do
     end do
 
     !-- DIC
     filename = trim(bound_dir)//"/bdic.nc"
     varname = "DIC"
-    call read_netcdf_2dwt(filename, varname, vard3d, lon_values, lat_values, time_values)
-   !call read_netcdf_2dwot(filename, varname, vard2d, lon_values, lat_values)
+    get_axis = .false.
+   !call read_netcdf_2dwt(filename, varname, vard3d, lon_values, lat_values, time_values)
+ !!!call read_netcdf_2dwot(filename, varname, vard2d, lon_values, lat_values)
+    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values, get_axis)
     do j = 1, nydim
       do i = 1, nxdim
         ij = i + (j - 1) * nxdim
-        bfrc(ij, 9) = vard3d(i, j, 1)
-       !bfrc(ij, 9) = vard2d(i, j)
+       !bfrc(ij, 9) = vard3d(i, j, 1)
+     !!!bfrc(ij, 9) = vard2d(i, j)
+        bfrc(ij, 9) = vard4d(i, j, 1, 1)
       end do
     end do
 
     !-- Alkalinity
     filename = trim(bound_dir)//"/balk.nc"
     varname = "ALK"
-    call read_netcdf_2dwt(filename, varname, vard3d, lon_values, lat_values, time_values)
-   !call read_netcdf_2dwot(filename, varname, vard2d, lon_values, lat_values)
+    get_axis = .false.
+   !call read_netcdf_2dwt(filename, varname, vard3d, lon_values, lat_values, time_values)
+ !!!call read_netcdf_2dwot(filename, varname, vard2d, lon_values, lat_values)
+    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values, get_axis)
     do j = 1, nydim
       do i = 1, nxdim
         ij = i + (j - 1) * nxdim
-        bfrc(ij, 10) = vard3d(i, j, 1)
-       !bfrc(ij, 10) = vard2d(i, j)
+       !bfrc(ij, 10) = vard3d(i, j, 1)
+     !!!bfrc(ij, 10) = vard2d(i, j)
+        bfrc(ij, 10) = vard4d(i, j, 1, 1)
       end do
     end do
 
     !-- Silicate
     filename = trim(bound_dir)//"/bsil.nc"
     varname = "SIL"
-    call read_netcdf_2dwt(filename, varname, vard3d, lon_values, lat_values, time_values)
-   !call read_netcdf_2dwot(filename, varname, vard2d, lon_values, lat_values)
+    get_axis = .false.
+   !call read_netcdf_2dwt(filename, varname, vard3d, lon_values, lat_values, time_values)
+ !!!call read_netcdf_2dwot(filename, varname, vard2d, lon_values, lat_values)
+    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values, get_axis)
     do j = 1, nydim
       do i = 1, nxdim
         ij = i + (j - 1) * nxdim
-        bfrc(ij, 11) = vard3d(i, j, 1)
-       !bfrc(ij, 11) = vard2d(i, j)
+       !bfrc(ij, 11) = vard3d(i, j, 1)
+     !!!bfrc(ij, 11) = vard2d(i, j)
+        bfrc(ij, 11) = vard4d(i, j, 1, 1)
       end do
     end do
 
     !-- Oxygen
     filename = trim(bound_dir)//"/bdo2.nc"
     varname = "DO2"
-    call read_netcdf_2dwt(filename, varname, vard3d, lon_values, lat_values, time_values)
-   !call read_netcdf_2dwot(filename, varname, vard2d, lon_values, lat_values)
+    get_axis = .false.
+   !call read_netcdf_2dwt(filename, varname, vard3d, lon_values, lat_values, time_values)
+ !!!call read_netcdf_2dwot(filename, varname, vard2d, lon_values, lat_values)
+    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values, get_axis)
     do j = 1, nydim
       do i = 1, nxdim
         ij = i + (j - 1) * nxdim
-        bfrc(ij, 12) = vard3d(i, j, 1)
-       !bfrc(ij, 12) = vard2d(i, j)
+       !bfrc(ij, 12) = vard3d(i, j, 1)
+     !!!bfrc(ij, 12) = vard2d(i, j)
+        bfrc(ij, 12) = vard4d(i, j, 1, 1)
       end do
     end do
 
     !-- 13C-DIC
     filename = trim(bound_dir)//"/bc13.nc"
     varname = "C13"
-    call read_netcdf_2dwt(filename, varname, vard3d, lon_values, lat_values, time_values)
-   !call read_netcdf_2dwot(filename, varname, vard2d, lon_values, lat_values)
+    get_axis = .false.
+   !call read_netcdf_2dwt(filename, varname, vard3d, lon_values, lat_values, time_values)
+ !!!call read_netcdf_2dwot(filename, varname, vard2d, lon_values, lat_values)
+    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values, get_axis)
     do j = 1, nydim
       do i = 1, nxdim
         ij = i + (j - 1) * nxdim
-        bfrc(ij, 13) = vard3d(i, j, 1)
-       !bfrc(ij, 13) = vard2d(i, j)
+       !bfrc(ij, 13) = vard3d(i, j, 1)
+     !!!bfrc(ij, 13) = vard2d(i, j)
+        bfrc(ij, 13) = vard4d(i, j, 1, 1)
       end do
     end do
 
     !-- 14C-DIC
     filename = trim(bound_dir)//"/bc14.nc"
     varname = "C14"
-    call read_netcdf_2dwt(filename, varname, vard3d, lon_values, lat_values, time_values)
-   !call read_netcdf_2dwot(filename, varname, vard2d, lon_values, lat_values)
+    get_axis = .false.
+   !call read_netcdf_2dwt(filename, varname, vard3d, lon_values, lat_values, time_values)
+ !!!call read_netcdf_2dwot(filename, varname, vard2d, lon_values, lat_values)
+    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values, get_axis)
     do j = 1, nydim
       do i = 1, nxdim
         ij = i + (j - 1) * nxdim
-        bfrc(ij, 14) = vard3d(i, j, 1)
-       !bfrc(ij, 14) = vard2d(i, j)
+       !bfrc(ij, 14) = vard3d(i, j, 1)
+     !!!bfrc(ij, 14) = vard2d(i, j)
+        bfrc(ij, 14) = vard4d(i, j, 1, 1)
       end do
     end do
 
     !-- Clay
     filename = trim(bound_dir)//"/ficla.nc"
     varname = "FICLA"
-    call read_netcdf_2dwt(filename, varname, vard3d, lon_values, lat_values, time_values)
-   !call read_netcdf_2dwot(filename, varname, vard2d, lon_values, lat_values)
+    get_axis = .false.
+   !call read_netcdf_2dwt(filename, varname, vard3d, lon_values, lat_values, time_values)
+ !!!call read_netcdf_2dwot(filename, varname, vard2d, lon_values, lat_values)
+    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values, get_axis)
     do j = 1, nydim
       do i = 1, nxdim
         ij = i + (j - 1) * nxdim
-        bfrc(ij, 1) = vard3d(i, j, 1) * omask(i, j)
-       !bfrc(ij, 1) = vard2d(i, j) * omask(i, j)
+       !bfrc(ij, 1) = vard3d(i, j, 1) * omask(i, j)
+     !!!bfrc(ij, 1) = vard2d(i, j) * omask(i, j)
+        bfrc(ij, 1) = vard4d(i, j, 1, 1) * omask(i, j)
       end do
     end do
 
     !-- POM
     filename = trim(bound_dir)//"/fipom.nc"
     varname = "FIPOM"
-    call read_netcdf_2dwt(filename, varname, vard3d, lon_values, lat_values, time_values)
-   !call read_netcdf_2dwot(filename, varname, vard2d, lon_values, lat_values)
+    get_axis = .false.
+   !call read_netcdf_2dwt(filename, varname, vard3d, lon_values, lat_values, time_values)
+ !!!call read_netcdf_2dwot(filename, varname, vard2d, lon_values, lat_values)
+    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values, get_axis)
     do j = 1, nydim
       do i = 1, nxdim
         ij = i + (j - 1) * nxdim
-        bfrc(ij, 2) = vard3d(i, j, 1) * omask(i, j)
-       !bfrc(ij, 2) = vard2d(i, j) * omask(i, j)
+       !bfrc(ij, 2) = vard3d(i, j, 1) * omask(i, j)
+     !!!bfrc(ij, 2) = vard2d(i, j) * omask(i, j)
+        bfrc(ij, 2) = vard4d(i, j, 1, 1) * omask(i, j)
       end do
     end do
 
     !-- CaCO3
     filename = trim(bound_dir)//"/ficar.nc"
     varname = "FICAR"
-    call read_netcdf_2dwt(filename, varname, vard3d, lon_values, lat_values, time_values)
-   !call read_netcdf_2dwot(filename, varname, vard2d, lon_values, lat_values)
+    get_axis = .false.
+   !call read_netcdf_2dwt(filename, varname, vard3d, lon_values, lat_values, time_values)
+ !!!call read_netcdf_2dwot(filename, varname, vard2d, lon_values, lat_values)
+    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values, get_axis)
     do j = 1, nydim
       do i = 1, nxdim
         ij = i + (j - 1) * nxdim
-        bfrc(ij, 3) = vard3d(i, j, 1) * omask(i, j)
-       !bfrc(ij, 3) = vard2d(i, j) * omask(i, j)
+       !bfrc(ij, 3) = vard3d(i, j, 1) * omask(i, j)
+     !!!bfrc(ij, 3) = vard2d(i, j) * omask(i, j)
+        bfrc(ij, 3) = vard4d(i, j, 1, 1) * omask(i, j)
       end do
     end do
 
     !-- SiO2
     filename = trim(bound_dir)//"/fiopa.nc"
     varname = "FIOPA"
-    call read_netcdf_2dwt(filename, varname, vard3d, lon_values, lat_values, time_values)
-   !call read_netcdf_2dwot(filename, varname, vard2d, lon_values, lat_values)
+    get_axis = .false.
+   !call read_netcdf_2dwt(filename, varname, vard3d, lon_values, lat_values, time_values)
+ !1!call read_netcdf_2dwot(filename, varname, vard2d, lon_values, lat_values)
+    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values, get_axis)
     do j = 1, nydim
       do i = 1, nxdim
         ij = i + (j - 1) * nxdim
-        bfrc(ij, 4) = vard3d(i, j, 1) * omask(i, j)
-       !bfrc(ij, 4) = vard2d(i, j) * omask(i, j)
+       !bfrc(ij, 4) = vard3d(i, j, 1) * omask(i, j)
+     !!!bfrc(ij, 4) = vard2d(i, j) * omask(i, j)
+        bfrc(ij, 4) = vard4d(i, j, 1, 1) * omask(i, j)
       end do
     end do
 
@@ -606,8 +658,8 @@ contains
     do j = 1, nydim
       do i = 1, nxdim
         ij = i + (j - 1) * nxdim
-        vard2d(i, j) = 0.d0
-        bfrc(ij, 5) = vard2d(i, j) * omask(i, j)
+        vard4d(i, j, 1, 1) = 0.d0
+        bfrc(ij, 5) = vard4d(i, j, 1, 1) * omask(i, j)
       end do
     end do
 
@@ -617,6 +669,7 @@ contains
     !-- Free memory for variables --
     if (allocated(vard2d)) deallocate(vard2d)
     if (allocated(vard3d)) deallocate(vard3d)
+    if (allocated(vard4d)) deallocate(vard4d)
 
     write(nfstdo, *) "'--------------------------------------------------'"
     write(nfstdo, *) "'-- Finished reading Sed-Water boundary forcing  --'"
