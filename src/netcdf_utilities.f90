@@ -580,7 +580,7 @@ contains
 
   end subroutine read_netcdf_3dwt
 
-  subroutine read_netcdf_auto(filename, varname, var, xvalues, yvalues, zvalues, tvalues, get_axis)
+  subroutine read_netcdf_auto(filename, varname, var, xvalues, yvalues, zvalues, tvalues)
   use netcdf
   implicit none
 
@@ -588,7 +588,6 @@ contains
   double precision, allocatable, intent(out) :: var(:,:,:,:)
   double precision, allocatable, intent(out) :: xvalues(:), yvalues(:), zvalues(:)
   integer(kind=4), allocatable, intent(out) :: tvalues(:)
-  logical, intent(in) :: get_axis
 
   integer(kind=4) :: ncid, varid, retval
  !integer(kind=4) :: dimids(nf90_max_var_dims)
@@ -606,8 +605,8 @@ contains
   character(len=*), parameter :: zname = "depth"
   character(len=*), parameter :: tname = "time"
 
-  integer(kind=4) :: nvars, nattrs, unldimid
-  character(len=256) :: varname_tmp
+  integer(kind=4) :: nvars
+  character(len=256) :: varname_file
 
   ! Initialize variables
   has_lon = .false.
@@ -690,34 +689,33 @@ contains
   allocate(var(max(1, xsize), max(1, ysize), max(1, zsize), max(1, tsize)))
 
   ! Get dimension IDs to read the dimension values
-  retval = nf90_inquire(ncid, ndims, nvars, nattrs, unldimid)
+  retval = nf90_inquire(ncid, ndims, nvars)
   if (retval /= nf90_noerr) then
     print *, "Error inquiring file: ", nf90_strerror(retval)
     stop
   endif
 
   do i = 1, nvars
-    retval = nf90_inquire_variable(ncid, i, varname_tmp)
+    retval = nf90_inquire_variable(ncid, i, varname_file)
     if (retval /= nf90_noerr) then
       print *, "Error reading variable name at index ", i, nf90_strerror(retval)
       cycle
     endif
-    if (trim(varname_tmp) == trim(xname)) then
+    if (trim(varname_file) == trim(xname)) then
       xid = i
     endif
-    if (trim(varname_tmp) == trim(yname)) then
+    if (trim(varname_file) == trim(yname)) then
       yid = i
     endif
-    if (trim(varname_tmp) == trim(zname)) then
+    if (trim(varname_file) == trim(zname)) then
       zid = i
     endif
-    if (trim(varname_tmp) == trim(tname)) then
+    if (trim(varname_file) == trim(tname)) then
       tid = i
     endif
   end do
 
   ! Read longitude values if available
-  if (get_axis) then
   if (has_lon) then
     start_axis = (/ 1 /)
     count_axis = (/ xsize /)
@@ -725,14 +723,11 @@ contains
     if (retval /= nf90_noerr) then
       print *, 'Failed to read longitude values.'
       print *, nf90_strerror(retval)
-      print *, 'Longitude information: ', xid, start_axis, count_axis, xsize
-     !stop
+      stop
     endif
-  endif
   endif
 
   ! Read latitude values if available
-  if (get_axis) then
   if (has_lat) then
     start_axis = (/ 1 /)
     count_axis = (/ ysize /)
@@ -740,14 +735,11 @@ contains
     if (retval /= nf90_noerr) then
       print *, 'Failed to read latitude values.'
       print *, nf90_strerror(retval)
-      print *, 'Latitude information: ', yid, start_axis, count_axis, ysize
-     !stop
+      stop
     endif
-  endif
   endif
 
   ! Read depth values if available
-  if (get_axis) then
   if (has_depth) then
     start_axis = (/ 1 /)
     count_axis = (/ zsize /)
@@ -755,14 +747,11 @@ contains
     if (retval /= nf90_noerr) then
       print *, 'Failed to read depth values.'
       print *, nf90_strerror(retval)
-      print *, 'Depth information: ', zid, start_axis, count_axis, zsize
-     !stop
+      stop
     endif
-  endif
   endif
 
   ! Read time values if available
-  if (get_axis) then
   if (has_time) then
     start_axis = (/ 1 /)
     count_axis = (/ tsize /)
@@ -770,10 +759,8 @@ contains
     if (retval /= nf90_noerr) then
       print *, 'Failed to read time values.'
       print *, nf90_strerror(retval)
-      print *, 'Time information: ', tid, start_axis, count_axis, tsize
       stop
     endif
-  endif
   endif
 
   ! Read variable data
