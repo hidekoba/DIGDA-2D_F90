@@ -1812,7 +1812,7 @@ contains
   subroutine combine_netcdf_files(infile1, infile2, outfile)
     implicit none
     character(len=*), intent(in) :: infile1, infile2
-    character(len=*), intent(out) :: outfile
+    character(len=*), intent(in) :: outfile
     integer(kind=4) :: ncid1, ncid2, ncid_out
     integer(kind=4) :: varid1, varid2, varid_out
     integer(kind=4) :: dimid1, dimid2, dimid_out
