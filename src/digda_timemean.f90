@@ -40,7 +40,8 @@ contains
             allocate(mean_data%sum(nxy * nz))
             allocate(mean_data%count(nxy * nz))
         end if
-        call reset_time_mean(mean_data)  ! Reset the accumulated data
+        ! Reset the accumulated data
+        call reset_time_mean(mean_data)
     end subroutine initialize_time_mean
 
     subroutine update_time_mean(mean_data, data)

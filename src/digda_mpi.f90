@@ -2,7 +2,6 @@
 module module_digda_mpi
   use mpi
   implicit none
-#include "mpif.h"
 
   ! Declaration of parameters and variables
   integer, parameter :: iroot = 0
@@ -12,9 +11,9 @@ module module_digda_mpi
  !integer, parameter :: ncpu = 16
  !integer, parameter :: ncpu = 24
  !integer, parameter :: ncpu = 45
-  integer, parameter :: ncpu = 48 !! 256x192
-  integer, parameter :: ncpu = 64
- !integer, parameter :: ncpu = 90 !! 2160x1080
+ !integer, parameter :: ncpu = 48 !! 256x192
+ !integer, parameter :: ncpu = 64
+  integer, parameter :: ncpu = 90 !! 2160x1080
  !integer, parameter :: ncpu = 96
  !integer, parameter :: ncpu = 180
  !integer, parameter :: ncpu = 192
@@ -26,6 +25,7 @@ module module_digda_mpi
 
   ! Parallel digda_configuration
   logical, parameter :: use_mpi = .true.
+  logical, parameter :: use_mpiio = .false.
 
 contains
 
