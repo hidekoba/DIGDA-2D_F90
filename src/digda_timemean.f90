@@ -47,7 +47,6 @@ contains
         ! Update the time mean with new data
         type(time_mean_type), intent(inout) :: mean_data
         double precision, intent(in) :: data(:,:)
-        real, allocatable :: data_3d(:,:)
 
         mean_data%sum = mean_data%sum + reshape(data, shape(mean_data%sum))
         mean_data%count = mean_data%count + 1

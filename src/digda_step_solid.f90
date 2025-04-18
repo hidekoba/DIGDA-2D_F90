@@ -51,8 +51,6 @@ contains
 
   subroutine set_digda_step_solid
 
-    integer :: ij, k
-
     write(nfstdo, *) '*** Sediment : set_digda_step_solid ***'
     rewind(nfparm)
     read(nfparm, nmsdso, end=99)
