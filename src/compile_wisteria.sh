@@ -43,7 +43,12 @@
  module list
 
  make clean
- make
+ make > make.log 2>&1 &
+ MAKE_PID=$!
+ tail -f make.log &
+ TAIL_PID=$!
+ wait $MAKE_PID
+ kill $TAIL_PID
 
 #module unload fj
 #module unload fjmpi
