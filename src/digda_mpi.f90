@@ -38,6 +38,8 @@ contains
     if ( nprocs /= ncpu ) then
       if ( myrank == iroot ) then
         write(*, *) "***** MPI ERROR *****"
+        write(*, *) "   nprocs = ", nprocs
+        write(*, *) "     ncpu = ", ncpu
         call mpi_finalize(ierr)
         stop
       end if

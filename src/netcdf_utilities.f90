@@ -581,211 +581,219 @@ contains
   end subroutine read_netcdf_3dwt
 
   subroutine read_netcdf_auto(filename, varname, var, xvalues, yvalues, zvalues, tvalues)
-  use netcdf
-  implicit none
+    use netcdf
+    implicit none
 
-  character(len=*), intent(in) :: filename, varname
-  double precision, allocatable, intent(out) :: var(:,:,:,:)
-  double precision, allocatable, intent(out) :: xvalues(:), yvalues(:), zvalues(:)
-  integer(kind=4), allocatable, intent(out) :: tvalues(:)
+    character(len=*), intent(in) :: filename, varname
+    double precision, allocatable, intent(out) :: var(:,:,:,:)
+    double precision, allocatable, intent(out) :: xvalues(:), yvalues(:), zvalues(:)
+    integer(kind=4),  allocatable, intent(out) :: tvalues(:)
 
-  integer(kind=4) :: ncid, varid, retval
- !integer(kind=4) :: dimids(nf90_max_var_dims)
-  integer(kind=4), allocatable :: dimids(:)
-  integer(kind=4) :: ndims
-  integer(kind=4) :: xid, yid, zid, tid
-  integer(kind=4) :: xsize, ysize, zsize, tsize
+    integer(kind=4) :: ncid, varid, retval
+   !integer(kind=4) :: dimids(nf90_max_var_dims)
+    integer(kind=4), allocatable :: dimids(:)
+    integer(kind=4) :: ndims
+    integer(kind=4) :: xid, yid, zid, tid
+    integer(kind=4) :: xsize, ysize, zsize, tsize
     integer(kind=4), dimension(1) :: start_axis, count_axis
     integer(kind=4), dimension(4) :: start_var, count_var
-  integer(kind=4) :: i
-  logical :: has_lon, has_lat, has_depth, has_time
+    integer(kind=4) :: i
+    logical :: has_lon, has_lat, has_depth, has_time
 
-  character(len=*), parameter :: xname = "lon"
-  character(len=*), parameter :: yname = "lat"
-  character(len=*), parameter :: zname = "depth"
-  character(len=*), parameter :: tname = "time"
+    character(len=*), parameter :: xname = "lon"
+    character(len=*), parameter :: yname = "lat"
+    character(len=*), parameter :: zname = "depth"
+    character(len=*), parameter :: tname = "time"
 
-  integer(kind=4) :: nvars
-  character(len=256) :: varname_file
+    integer(kind=4) :: nvars
+    character(len=256) :: varname_file
 
-  ! Initialize variables
-  has_lon = .false.
-  has_lat = .false.
-  has_depth = .false.
-  has_time = .false.
-  xsize = 1
-  ysize = 1
-  zsize = 1
-  tsize = 1
-  ndims = 0
-  nvars = 0
+    ! Initialize variables
+    has_lon = .false.
+    has_lat = .false.
+    has_depth = .false.
+    has_time = .false.
+    xsize = 1
+    ysize = 1
+    zsize = 1
+    tsize = 1
+    ndims = 0
+    nvars = 0
 
-  ! Open the NetCDF file
-  retval = nf90_open(filename, nf90_nowrite, ncid)
-  if (retval /= nf90_noerr) then
-    print *, 'Failed to open file: ', trim(filename)
-    print *, 'Error: ', nf90_strerror(retval)
-    stop
-  endif
+    ! Deallocate arrays if they are already allocated
+    if (allocated(dimids)) deallocate(dimids)
+    if (allocated(xvalues)) deallocate(xvalues)
+    if (allocated(yvalues)) deallocate(yvalues)
+    if (allocated(zvalues)) deallocate(zvalues)
+    if (allocated(tvalues)) deallocate(tvalues)
+    if (allocated(var)) deallocate(var)
 
-  ! Retrieve the variable ID and read the data into the allocated array
-  retval = nf90_inq_varid(ncid, varname, varid)
-  if (retval /= nf90_noerr) then
-    print *, 'Failed to retrieve variable ID: ', varname
-    print *, 'Error: ', nf90_strerror(retval)
-    stop
-  endif
+    ! Open the NetCDF file
+    retval = nf90_open(filename, nf90_nowrite, ncid)
+    if (retval /= nf90_noerr) then
+      print *, 'Failed to open file: ', trim(filename)
+      print *, 'Error: ', nf90_strerror(retval)
+      stop
+    endif
 
-  ! Inquire the dimensions of the variable
-  allocate(dimids(nf90_max_var_dims))  ! Allocate enough space for dimids
-  retval = nf90_inquire_variable(ncid, varid, ndims=ndims, dimids=dimids)
-  if (retval /= nf90_noerr) then
-    print *, 'Failed to inquire variable: ', varname
-    print *, 'Error: ', nf90_strerror(retval)
-    stop
-  endif
+    ! Retrieve the variable ID and read the data into the allocated array
+    retval = nf90_inq_varid(ncid, varname, varid)
+    if (retval /= nf90_noerr) then
+      print *, 'Failed to retrieve variable ID: ', varname
+      print *, 'Error: ', nf90_strerror(retval)
+      stop
+    endif
 
-  ! Check each dimension and determine its size
-  do i = 1, ndims
-    select case (i)
-      case (1)  ! Longitude (x)
-        retval = nf90_inq_dimid(ncid, xname, xid)
-        if (retval == nf90_noerr) then
-          retval = nf90_inquire_dimension(ncid, xid, len=xsize)
-          has_lon = .true.
-        endif
-      case (2)  ! Latitude (y)
-        retval = nf90_inq_dimid(ncid, yname, yid)
-        if (retval == nf90_noerr) then
-          retval = nf90_inquire_dimension(ncid, yid, len=ysize)
-          has_lat = .true.
-        endif
-      case (3)  ! Depth or Time
-        retval = nf90_inq_dimid(ncid, zname, zid)
-        if (retval == nf90_noerr) then
-          retval = nf90_inquire_dimension(ncid, zid, len=zsize)
-          has_depth = .true.
-        else
+    ! Inquire the dimensions of the variable
+    allocate(dimids(nf90_max_var_dims))  ! Allocate enough space for dimids
+    retval = nf90_inquire_variable(ncid, varid, ndims=ndims, dimids=dimids)
+    if (retval /= nf90_noerr) then
+      print *, 'Failed to inquire variable: ', varname
+      print *, 'Error: ', nf90_strerror(retval)
+      stop
+    endif
+
+    ! Check each dimension and determine its size
+    do i = 1, ndims
+      select case (i)
+        case (1)  ! Longitude (x)
+          retval = nf90_inq_dimid(ncid, xname, xid)
+          if (retval == nf90_noerr) then
+            retval = nf90_inquire_dimension(ncid, xid, len=xsize)
+            has_lon = .true.
+          endif
+        case (2)  ! Latitude (y)
+          retval = nf90_inq_dimid(ncid, yname, yid)
+          if (retval == nf90_noerr) then
+            retval = nf90_inquire_dimension(ncid, yid, len=ysize)
+            has_lat = .true.
+          endif
+        case (3)  ! Depth or Time
+          retval = nf90_inq_dimid(ncid, zname, zid)
+          if (retval == nf90_noerr) then
+            retval = nf90_inquire_dimension(ncid, zid, len=zsize)
+            has_depth = .true.
+          else
+            retval = nf90_inq_dimid(ncid, tname, tid)
+            if (retval == nf90_noerr) then
+              retval = nf90_inquire_dimension(ncid, tid, len=tsize)
+              has_time = .true.
+            endif
+          endif
+        case (4)  ! Time (if it's the fourth dimension)
           retval = nf90_inq_dimid(ncid, tname, tid)
           if (retval == nf90_noerr) then
             retval = nf90_inquire_dimension(ncid, tid, len=tsize)
             has_time = .true.
           endif
-        endif
-      case (4)  ! Time (if it's the fourth dimension)
-        retval = nf90_inq_dimid(ncid, tname, tid)
-        if (retval == nf90_noerr) then
-          retval = nf90_inquire_dimension(ncid, tid, len=tsize)
-          has_time = .true.
-        endif
-    end select
-  end do
+      end select
+    end do
 
-  ! Allocate arrays based on the dimensions
-  if (has_lon) allocate(xvalues(xsize))
-  if (has_lat) allocate(yvalues(ysize))
-  if (has_depth) allocate(zvalues(zsize))
-  if (has_time) allocate(tvalues(tsize))
-  allocate(var(max(1, xsize), max(1, ysize), max(1, zsize), max(1, tsize)))
+    ! Allocate arrays based on the dimensions
+    if (has_lon) allocate(xvalues(xsize))
+    if (has_lat) allocate(yvalues(ysize))
+    if (has_depth) allocate(zvalues(zsize))
+    if (has_time) allocate(tvalues(tsize))
+    allocate(var(max(1, xsize), max(1, ysize), max(1, zsize), max(1, tsize)))
 
-  ! Get dimension IDs to read the dimension values
-  retval = nf90_inquire(ncid, ndims, nvars)
-  if (retval /= nf90_noerr) then
-    print *, "Error inquiring file: ", nf90_strerror(retval)
-    stop
-  endif
-
-  do i = 1, nvars
-    retval = nf90_inquire_variable(ncid, i, varname_file)
+    ! Get dimension IDs to read the dimension values
+    retval = nf90_inquire(ncid, ndims, nvars)
     if (retval /= nf90_noerr) then
-      print *, "Error reading variable name at index ", i, nf90_strerror(retval)
-      cycle
+      print *, "Error inquiring file: ", nf90_strerror(retval)
+      stop
     endif
-    if (trim(varname_file) == trim(xname)) then
-      xid = i
-    endif
-    if (trim(varname_file) == trim(yname)) then
-      yid = i
-    endif
-    if (trim(varname_file) == trim(zname)) then
-      zid = i
-    endif
-    if (trim(varname_file) == trim(tname)) then
-      tid = i
-    endif
-  end do
 
-  ! Read longitude values if available
-  if (has_lon) then
-    start_axis = (/ 1 /)
-    count_axis = (/ xsize /)
-    retval = nf90_get_var(ncid, xid, xvalues, start=start_axis, count=count_axis)
+    do i = 1, nvars
+      retval = nf90_inquire_variable(ncid, i, varname_file)
+      if (retval /= nf90_noerr) then
+        print *, "Error reading variable name at index ", i, nf90_strerror(retval)
+        cycle
+      endif
+      if (trim(varname_file) == trim(xname)) then
+        xid = i
+      endif
+      if (trim(varname_file) == trim(yname)) then
+        yid = i
+      endif
+      if (trim(varname_file) == trim(zname)) then
+        zid = i
+      endif
+      if (trim(varname_file) == trim(tname)) then
+        tid = i
+      endif
+    end do
+
+    ! Read longitude values if available
+    if (has_lon) then
+      start_axis = (/ 1 /)
+      count_axis = (/ xsize /)
+      retval = nf90_get_var(ncid, xid, xvalues, start=start_axis, count=count_axis)
+      if (retval /= nf90_noerr) then
+        print *, 'Failed to read longitude values.'
+        print *, nf90_strerror(retval)
+        stop
+      endif
+    endif
+
+    ! Read latitude values if available
+    if (has_lat) then
+      start_axis = (/ 1 /)
+      count_axis = (/ ysize /)
+      retval = nf90_get_var(ncid, yid, yvalues, start=start_axis, count=count_axis)
+      if (retval /= nf90_noerr) then
+        print *, 'Failed to read latitude values.'
+        print *, nf90_strerror(retval)
+        stop
+      endif
+    endif
+
+    ! Read depth values if available
+    if (has_depth) then
+      start_axis = (/ 1 /)
+      count_axis = (/ zsize /)
+      retval = nf90_get_var(ncid, zid, zvalues, start=start_axis, count=count_axis)
+      if (retval /= nf90_noerr) then
+        print *, 'Failed to read depth values.'
+        print *, nf90_strerror(retval)
+        stop
+      endif
+    endif
+
+    ! Read time values if available
+    if (has_time) then
+      start_axis = (/ 1 /)
+      count_axis = (/ tsize /)
+      retval = nf90_get_var(ncid, tid, tvalues, start=start_axis, count=count_axis)
+      if (retval /= nf90_noerr) then
+        print *, 'Failed to read time values.'
+        print *, nf90_strerror(retval)
+        stop
+      endif
+    endif
+
+    ! Read variable data
+    retval = nf90_inq_varid(ncid, varname, varid)
     if (retval /= nf90_noerr) then
-      print *, 'Failed to read longitude values.'
+      print *, 'Failed to retrieve variable ID: ', varname
       print *, nf90_strerror(retval)
       stop
     endif
-  endif
-
-  ! Read latitude values if available
-  if (has_lat) then
-    start_axis = (/ 1 /)
-    count_axis = (/ ysize /)
-    retval = nf90_get_var(ncid, yid, yvalues, start=start_axis, count=count_axis)
+    start_var = (/ 1, 1, 1, 1 /)
+    count_var = (/ xsize, ysize, zsize, tsize /)
+    retval = nf90_get_var(ncid, varid, var, start=start_var, count=count_var)
     if (retval /= nf90_noerr) then
-      print *, 'Failed to read latitude values.'
+      print *, 'Failed to read variable data.'
       print *, nf90_strerror(retval)
       stop
     endif
-  endif
 
-  ! Read depth values if available
-  if (has_depth) then
-    start_axis = (/ 1 /)
-    count_axis = (/ zsize /)
-    retval = nf90_get_var(ncid, zid, zvalues, start=start_axis, count=count_axis)
+    ! Close the NetCDF file
+    retval = nf90_close(ncid)
     if (retval /= nf90_noerr) then
-      print *, 'Failed to read depth values.'
+      print *, 'Failed to close file: ', trim(filename)
       print *, nf90_strerror(retval)
       stop
     endif
-  endif
-
-  ! Read time values if available
-  if (has_time) then
-    start_axis = (/ 1 /)
-    count_axis = (/ tsize /)
-    retval = nf90_get_var(ncid, tid, tvalues, start=start_axis, count=count_axis)
-    if (retval /= nf90_noerr) then
-      print *, 'Failed to read time values.'
-      print *, nf90_strerror(retval)
-      stop
-    endif
-  endif
-
-  ! Read variable data
-  retval = nf90_inq_varid(ncid, varname, varid)
-  if (retval /= nf90_noerr) then
-    print *, 'Failed to retrieve variable ID: ', varname
-    print *, nf90_strerror(retval)
-    stop
-  endif
-  start_var = (/ 1, 1, 1, 1 /)
-  count_var = (/ xsize, ysize, zsize, tsize /)
-  retval = nf90_get_var(ncid, varid, var, start=start_var, count=count_var)
-  if (retval /= nf90_noerr) then
-    print *, 'Failed to read variable data.'
-    print *, nf90_strerror(retval)
-    stop
-  endif
-
-  ! Close the NetCDF file
-  retval = nf90_close(ncid)
-  if (retval /= nf90_noerr) then
-    print *, 'Failed to close file: ', trim(filename)
-    print *, nf90_strerror(retval)
-    stop
-  endif
 
   end subroutine read_netcdf_auto
 
@@ -920,7 +928,7 @@ contains
     character(len=*), intent(in) :: filename, varname, varunit
     double precision, dimension(:,:,:), intent(in) :: var
     double precision, dimension(:), intent(in) :: xvalues, yvalues
-    integer(kind=4), dimension(:), intent(in) :: tvalues
+    integer(kind=4),  dimension(:), intent(in) :: tvalues
     double precision, dimension(:), allocatable :: tvalues_real
     integer(kind=4) :: ncid, varid, retval
     integer(kind=4) :: xid, xsize
@@ -935,6 +943,9 @@ contains
     double precision, parameter :: fill_value = 999.0
     integer(kind=4), dimension(1) :: start_time, count_time
     integer(kind=4), dimension(3) :: start_var, count_var
+
+    ! Deallocate arrays if they are already allocated
+    if (allocated(tvalues_real)) deallocate(tvalues_real)
 
     ! Determine the size of each dimension from the input arrays
     xsize = size(xvalues)
@@ -1310,7 +1321,7 @@ contains
     character(len=*), intent(in) :: filename, varname, varunit
     double precision, dimension(:,:,:,:), intent(in) :: var
     double precision, dimension(:), intent(in) :: xvalues, yvalues, zvalues
-    integer(kind=4), dimension(:), intent(in) :: tvalues
+    integer(kind=4),  dimension(:), intent(in) :: tvalues
     double precision, dimension(:), allocatable :: tvalues_real
     integer(kind=4) :: ncid, varid, retval
     integer(kind=4) :: xid, xsize
@@ -1327,6 +1338,9 @@ contains
     double precision, parameter :: fill_value = 999.0
     integer(kind=4), dimension(1) :: start_time, count_time
     integer(kind=4), dimension(4) :: start_var, count_var
+
+    ! Deallocate arrays if they are already allocated
+    if (allocated(tvalues_real)) deallocate(tvalues_real)
 
     ! Determine the size of each dimension from the input arrays
     xsize = size(xvalues)
@@ -1576,7 +1590,7 @@ contains
 !!  character(len=*), intent(in) :: filename, varname, varunit
 !!  double precision, dimension(:,:,:,:), intent(in) :: var
 !!  double precision, dimension(:), intent(in) :: xvalues, yvalues, zvalues
-!!  integer(kind=4), dimension(:), intent(in) :: tvalues
+!!  integer(kind=4),  dimension(:), intent(in) :: tvalues
 
 !!  double precision, dimension(:), allocatable :: tvalues_real
 !!  integer(kind=4) :: ncid, varid, retval
@@ -1592,6 +1606,9 @@ contains
 !!  character(len=*), parameter :: tname = 'time'
 !!  double precision, parameter :: fill_value = 999.0
 !!  integer(kind=4), dimension(4) :: start_var, count_var
+
+!!  ! Deallocate arrays if they are already allocated
+!!  if (allocated(tvalues_real)) deallocate(tvalues_real)
 
 !!  ! Determine the size of each dimension from the input arrays
 !!  xsize = size(xvalues)
@@ -1832,6 +1849,10 @@ contains
     character(len=*), parameter :: tname = 'time'
 
     integer(kind=4) :: retval
+
+    ! Deallocate arrays if they are already allocated
+    if (allocated(data1)) deallocate(data1)
+    if (allocated(data2)) deallocate(data2)
 
     ! Open the first NetCDF file
     retval = nf90_open(infile1, nf90_nowrite, ncid1)

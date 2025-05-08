@@ -6,23 +6,25 @@ program digda_ased
   use module_digda_cprdc
   implicit none
 
-! character(len=100) :: filename, varname, varunit
-
-! integer :: i, j, k, l
-
   double precision, dimension(nxydim) :: bdep !! ocean depth [m]
 
   double precision, dimension(nxydim, benfdm) :: bfrc
   double precision, dimension(nxydim, sdzdim, sedtdm) :: sdtx
 
+  double precision, dimension(:), allocatable :: lon_values
+  double precision, dimension(:), allocatable :: lat_values
+  double precision, dimension(:), allocatable :: depth_values
+  integer(kind=4),  dimension(:), allocatable :: time_values
+
   integer :: lenstd
   character :: crun*(ncf) = '(RUN NAME WAS NOT SET)'
-  character :: cstdo*(ncf) = 'STDOUT'
+  character :: cstdo*(ncf) = 'STDOUT_DIGDA'
 
   namelist /nmrun/ crun
   namelist /nmstdo/ cstdo
 
   integer :: ios
+  integer :: dt(8)
 
   !-- Initialize MPI --
   if (use_mpi) then
@@ -33,13 +35,10 @@ program digda_ased
 
   !-- Initial setup --
   call clcstr('SETUP')
-  open( UNIT=nfparm, FILE='PARAMET', STATUS='OLD', &
+  open( UNIT=nfparm, FILE='PARAMET_DIGDA', STATUS='OLD', &
       & ACCESS='SEQUENTIAL', FORM='FORMATTED'      )
   rewind(nfparm)
   read(nfparm, NML=nmstdo, IOSTAT=ios)
- !if (ios /= 0) then
- !  write(*, *) 'End of file or error reading NAMELIST file 01'
- !end if
 
   lenstd = index(cstdo, ' ')
   write(cstdo(lenstd:lenstd+2), '(A1,I2.2)') '.', myrank
@@ -50,21 +49,18 @@ program digda_ased
   rewind(nfparm)
   read(nfparm, NML=nmrun, IOSTAT=ios)
   write(nfstdo, *) 'Run name :'//trim(crun)
- !if (ios /= 0) then
- !  write(*, *) 'End of file or error reading NAMELIST file 02'
- !else
- !  write(nfstdo, *) 'Run name :'//trim(crun)
- !end if
   write(nfstdo, *) "'--------------------------------------------------'"
 
+  call date_and_time(values=dt)
   write(nfstdo, *) "'--------------------------------------------------'"
+  write(nfstdo,'(A,I4.4,"-",I2.2,"-",I2.2," ",I2.2,":",I2.2,":",I2.2)') &
+      &            "'-- DIGDA MAIN: Started at ", &
+      &              dt(1), dt(2), dt(3), dt(5), dt(6), dt(7)
   write(nfstdo, *) "'-- DIGDA MAIN: Started                          --'"
   write(nfstdo, *) "'--------------------------------------------------'"
 
-! open(nfparm, FILE="PARAMET", STATUS="UNKNOWN")
-! open(nfstdo, FILE="STDOUT",  STATUS="UNKNOWN")
 ! if ( myrank == iroot ) then
-  open(UNIT=nfsots, FILE="TSTEP", STATUS="UNKNOWN")
+  open(UNIT=nfsots, FILE="TSTEP_DIGDA", STATUS="UNKNOWN")
 ! end if
 
  !!-- Read the namelist --
@@ -95,30 +91,13 @@ program digda_ased
     call finalize_digda_mpi()
   end if
 
+  call date_and_time(values=dt)
   write(nfstdo, *) "'--------------------------------------------------'"
+  write(nfstdo, *) "'--------------------------------------------------'"
+  write(nfstdo,'(A,I4.4,"-",I2.2,"-",I2.2," ",I2.2,":",I2.2,":",I2.2)') &
+      &            "'-- DIGDA MAIN: Finished at ", &
+      &              dt(1), dt(2), dt(3), dt(5), dt(6), dt(7)
   write(nfstdo, *) "'-- DIGDA MAIN: Finished                         --'"
   write(nfstdo, *) "'--------------------------------------------------'"
-
-contains
-
-! subroutine read_namelist()
-!   integer :: ios
-!   character(len=100) :: namelist_file
-
-!   namelist_file = "PARAMET"
-!   open(UNIT=nfparm, FILE=namelist_file, STATUS="old", iostat=ios)
-
-!   if (ios /= 0) then
-!     write(*, *) "Error opening namelist file: ", trim(namelist_file)
-!   else
-!     read(nfparm, NML=nmocbc, IOSTAT=ios)
-!     if (ios /= 0) then
-!       write(*, *) "Error reading namelist file: ", trim(namelist_file)
-!     else
-!     !!write(*, *) "Namelist read successfully: ", trim(bound_dir)
-!     end if
-!   !!close(nfparm)
-!   end if
-! end subroutine read_namelist
 
 end program digda_ased
