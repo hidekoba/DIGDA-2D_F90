@@ -66,6 +66,9 @@ program digda_ased
  !!-- Read the namelist --
  !call read_namelist()
 
+  !-- Initialize the name of tracer, forcing
+  call init_digda_grid()
+
   !-- Read RESTART file --
   call digda_read_restart(sdtx, lon_values, lat_values, depth_values, time_values)
 

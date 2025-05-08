@@ -23,8 +23,8 @@ module module_digda_grid
   integer, parameter :: nts14car = 15 !! 14C Calcium carbonate
   integer, parameter :: ntc14dic = 16 !! 14C DIC
 
-  character(len=100) :: dtrcnm(sedtdm) !! Name of tracers
-  character(len=100) :: dtrcun(sedtdm) !! Unit of tracers
+  character(len=100) :: dtrcnm(sedtdm) !! Name of tracer
+  character(len=100) :: dtrcun(sedtdm) !! Unit of tracer
 
   integer, parameter :: benfdm   = 14
   integer, parameter :: nbfdep   =  0 !! DEPTH
@@ -42,6 +42,8 @@ module module_digda_grid
   integer, parameter :: nbfdo2   = 12 !! Oxygen
   integer, parameter :: nbf13dic = 13 !! 13C DIC
   integer, parameter :: nbf14dic = 14 !! 14C DIC
+
+  character(len=100) :: bfrcnm(sedtdm) !! Name of forcing
 
   ! Vertical grid settings
   !-- ZGRID_CONSTANT --
@@ -98,7 +100,7 @@ module module_digda_grid
  !     4.500d-2, 4.500d-2, 4.500d-2, 1.250d-1, 2.250d-1, &
  !     2.500d-1, 2.500d-1 /)
 
-  !-- ZGRID_HEInzE --
+  !-- ZGRID_HEINZE --
   integer, parameter :: sdzdim = 10
   integer, parameter :: skst = 1
   integer, parameter :: sken = 10
@@ -152,9 +154,7 @@ module module_digda_grid
     'btem.nc', 'bsal.nc',                                       &
     'bnit.nc', 'bdic.nc', 'balk.nc', 'bsil.nc', 'bdo2.nc',      &
     'b13c.nc', 'b14c.nc' /
-  namelist /nmocbc/ cfbfdep, bcfilnm
-
-  namelist /nmocbc/ bound_dir
+  namelist /nmocbc/ bound_dir, bcfilnm
   character(len=100) :: init_dir = 'not-specified/'
   character(len=100) :: rstt_dir = 'not-specified/'
   namelist /nmocrt/ init_dir, rstt_dir
@@ -197,55 +197,61 @@ module module_digda_grid
   double precision, parameter :: rmiss = 999.00d0
  !double precision, parameter :: rmiss = 0.0000d0
 
-  ! Define variable nam for each tracer component
-  dtrcnm(ntscla)   = "Clay"
-  dtrcnm(ntspom)   = "OrgM"
-  dtrcnm(ntscar)   = "CaCO3"
-  dtrcnm(ntsopa)   = "SiO2"
-  dtrcnm(ntsage)   = "Agetracer"
-  dtrcnm(ntcnit)   = "Phosphate"
-  dtrcnm(ntcdic)   = "DIC"
-  dtrcnm(ntcalk)   = "Alkalinity"
-  dtrcnm(ntcsil)   = "Silicate"
-  dtrcnm(ntcdo2)   = "Oxygen"
-  dtrcnm(nts13pom) = "13C Organic carbon"
-  dtrcnm(nts13car) = "13C Calcium carbonate"
-  dtrcnm(ntc13dic) = "13C DIC"
-  dtrcnm(nts14pom) = "14C Organic carbon"
-  dtrcnm(nts14car) = "14C Calcium carbonate"
-  dtrcnm(ntc14dic) = "14C DIC"
+  contains
 
-  dtrcun(ntscla)   = "g m-3"
-  dtrcun(ntspom)   = "mmol m-3"
-  dtrcun(ntscar)   = "mmol m-3"
-  dtrcun(ntsopa)   = "mmol m-3"
-  dtrcun(ntsage)   = "mmol m-3"
-  dtrcun(ntcnit)   = "mmol m-3"
-  dtrcun(ntcdic)   = "mmol m-3"
-  dtrcun(ntcalk)   = "mmol m-3"
-  dtrcun(ntcsil)   = "mmol m-3"
-  dtrcun(ntcdo2)   = "mmol m-3"
-  dtrcun(nts13pom) = "mmol m-3"
-  dtrcun(nts13car) = "mmol m-3"
-  dtrcun(ntc13dic) = "mmol m-3"
-  dtrcun(nts14pom) = "mmol m-3"
-  dtrcun(nts14car) = "mmol m-3"
-  dtrcun(ntc14dic) = "mmol m-3"
+  subroutine init_digda_grid
 
-  bfrcnm(nbfdep)   = "DEPTH"
-  bfrcnm(nbfcla)   = "FICLA"
-  bfrcnm(nbfpom)   = "FIPOM"
-  bfrcnm(nbfcar)   = "FICAR"
-  bfrcnm(nbfopa)   = "FIOPA"
-  bfrcnm(nbfage)   = "FIAGE"
-  bfrcnm(nbftem)   = "TEM"
-  bfrcnm(nbfsal)   = "SAL"
-  bfrcnm(nbfnit)   = "NIT"
-  bfrcnm(nbfdic)   = "DIC"
-  bfrcnm(nbfalk)   = "ALK"
-  bfrcnm(nbfsil)   = "SIL"
-  bfrcnm(nbfdo2)   = "DO2"
-  bfrcnm(nbf13dic) = "C13"
-  bfrcnm(nbf14dic) = "C14"
+    ! Define variable nam for each tracer component
+    dtrcnm(ntscla)   = "Clay"
+    dtrcnm(ntspom)   = "OrgM"
+    dtrcnm(ntscar)   = "CaCO3"
+    dtrcnm(ntsopa)   = "SiO2"
+    dtrcnm(ntsage)   = "Agetracer"
+    dtrcnm(ntcnit)   = "Phosphate"
+    dtrcnm(ntcdic)   = "DIC"
+    dtrcnm(ntcalk)   = "Alkalinity"
+    dtrcnm(ntcsil)   = "Silicate"
+    dtrcnm(ntcdo2)   = "Oxygen"
+    dtrcnm(nts13pom) = "13C-OrgM"
+    dtrcnm(nts13car) = "13C-CaCO3"
+    dtrcnm(ntc13dic) = "13C-DIC"
+    dtrcnm(nts14pom) = "14C-OrgM"
+    dtrcnm(nts14car) = "14C-CaCO3"
+    dtrcnm(ntc14dic) = "14C-DIC"
+
+    dtrcun(ntscla)   = "g m-3"
+    dtrcun(ntspom)   = "mmol m-3"
+    dtrcun(ntscar)   = "mmol m-3"
+    dtrcun(ntsopa)   = "mmol m-3"
+    dtrcun(ntsage)   = "mmol m-3"
+    dtrcun(ntcnit)   = "mmol m-3"
+    dtrcun(ntcdic)   = "mmol m-3"
+    dtrcun(ntcalk)   = "mmol m-3"
+    dtrcun(ntcsil)   = "mmol m-3"
+    dtrcun(ntcdo2)   = "mmol m-3"
+    dtrcun(nts13pom) = "mmol m-3"
+    dtrcun(nts13car) = "mmol m-3"
+    dtrcun(ntc13dic) = "mmol m-3"
+    dtrcun(nts14pom) = "mmol m-3"
+    dtrcun(nts14car) = "mmol m-3"
+    dtrcun(ntc14dic) = "mmol m-3"
+
+    bfrcnm(nbfdep)   = "DEPTH"
+    bfrcnm(nbfcla)   = "FICLA"
+    bfrcnm(nbfpom)   = "FIPOM"
+    bfrcnm(nbfcar)   = "FICAR"
+    bfrcnm(nbfopa)   = "FIOPA"
+    bfrcnm(nbfage)   = "FIAGE"
+    bfrcnm(nbftem)   = "TEM"
+    bfrcnm(nbfsal)   = "SAL"
+    bfrcnm(nbfnit)   = "NIT"
+    bfrcnm(nbfdic)   = "DIC"
+    bfrcnm(nbfalk)   = "ALK"
+    bfrcnm(nbfsil)   = "SIL"
+    bfrcnm(nbfdo2)   = "DO2"
+    bfrcnm(nbf13dic) = "C13"
+    bfrcnm(nbf14dic) = "C14"
+
+  end subroutine init_digda_grid
 
 end module module_digda_grid

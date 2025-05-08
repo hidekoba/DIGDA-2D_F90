@@ -507,7 +507,7 @@ contains
    !    do i = 1, nxdim
    !      ij = i + (j - 1) * nxdim
    !      bdep(ij) = vard4d(i, j, 1, 1)
-   !      if (vard4d(i, j) == rmiss .or. vard4d(i, j) == 0.0) then
+   !      if (vard4d(i, j, 1, 1) == rmiss .or. vard4d(i, j, 1, 1) == 0.0) then
    !        omask(i, j) = 0.d0
    !      else
    !        omask(i, j) = 1.d0
@@ -550,7 +550,7 @@ contains
       do i = 1, nxdim
         ij = i + (j - 1) * nxdim
         bdep(ij) = vard4d(i, j, 1, 1)
-        if (vard4d(i, j) == rmiss .or. vard4d(i, j) == 0.0) then
+        if (vard4d(i, j, 1, 1) == rmiss .or. vard4d(i, j, 1, 1) == 0.0) then
           omask(i, j) = 0.d0
         else
           omask(i, j) = 1.d0
