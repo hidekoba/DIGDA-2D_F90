@@ -331,6 +331,7 @@ contains
     end if
 
     write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "'-- DIGDA Prediction:                            --'"
     write(nfstdo, *) "'-- Started setting up model parameters          --'"
     write(nfstdo, *) "'--------------------------------------------------'"
     rewind(nfparm)
@@ -376,8 +377,10 @@ contains
     call set_digda_step_liquid()
 
     write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "'-- DIGDA Prediction:                            --'"
     write(nfstdo, *) "'-- Finished setting up model parameters         --'"
     write(nfstdo, *) "'--------------------------------------------------'"
+    call flush(nfstdo)
 
     if (hstavg) then
       !-- Initialize time_mean --
@@ -680,6 +683,11 @@ end if
       call clcend('PRDC_INIT')
 
 !     -- Time Integration --
+
+      write(nfstdo, *) "'--------------------------------------------------'"
+      write(nfstdo, *) "'-- DIGDA Prediction:                            --'"
+      write(nfstdo, *) "'-- Started time integration                     --'"
+      write(nfstdo, *) "'--------------------------------------------------'"
 
       call clcstr('PRDC_STEP')
 
@@ -3887,6 +3895,11 @@ end if ! -- End of use_mpi
       end do ! -- End of Time integration
 
       call clcend('PRDC_STEP')
+
+      write(nfstdo, *) "'--------------------------------------------------'"
+      write(nfstdo, *) "'-- DIGDA Prediction:                            --'"
+      write(nfstdo, *) "'-- Finished time integration                    --'"
+      write(nfstdo, *) "'--------------------------------------------------'"
 
       if (hstavg) then
          if (allocated(mean_data)) deallocate(mean_data)

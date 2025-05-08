@@ -25,6 +25,7 @@ program digda_ased
 
   integer :: ios
   integer :: dt(8)
+  integer :: n
 
   !-- Initialize MPI --
   if (use_mpi) then
@@ -45,19 +46,19 @@ program digda_ased
   open( UNIT=nfstdo, FILE=cstdo, STATUS='UNKNOWN', &
       & ACCESS='SEQUENTIAL', FORM='FORMATTED' )
   write(nfstdo, *) "'--------------------------------------------------'"
-  write(nfstdo, *) 'MESSAGE OUTPUT FOR RANK', myrank
+  write(nfstdo, *) ' MESSAGE OUTPUT FOR RANK', myrank
   rewind(nfparm)
   read(nfparm, NML=nmrun, IOSTAT=ios)
-  write(nfstdo, *) 'Run name :'//trim(crun)
+  write(nfstdo, *) ' Run name :'//trim(crun)
   write(nfstdo, *) "'--------------------------------------------------'"
 
   call date_and_time(values=dt)
   write(nfstdo, *) "'--------------------------------------------------'"
   write(nfstdo,'(A,I4.4,"-",I2.2,"-",I2.2," ",I2.2,":",I2.2,":",I2.2)') &
-      &            "'-- DIGDA MAIN: Started at ", &
+      &            " '-- DIGDA MAIN: Started at ", &
       &              dt(1), dt(2), dt(3), dt(5), dt(6), dt(7)
-  write(nfstdo, *) "'-- DIGDA MAIN: Started                          --'"
   write(nfstdo, *) "'--------------------------------------------------'"
+  call flush(nfstdo)
 
 ! if ( myrank == iroot ) then
   open(UNIT=nfsots, FILE="TSTEP_DIGDA", STATUS="UNKNOWN")
@@ -67,7 +68,23 @@ program digda_ased
  !call read_namelist()
 
   !-- Initialize the name of tracer, forcing
-  call init_digda_grid()
+ !call init_digda_grid()
+
+  write(nfstdo, *) "'--------------------------------------------------'"
+  write(nfstdo, *) "'-- DIGDA MAIN: Tracer names                     --'"
+  write(nfstdo, *) "'--------------------------------------------------'"
+  write(nfstdo, *) "'--------------------------------------------------'"
+  do n = 1, sedtdm
+    write(nfstdo,'(A,I2.2,A,A16,A,A,A)') &
+    "   DIGDA Tracer No.", n, " = ", trim(dtrcnm(n)), " (", trim(dtrcun(n)), ")"
+  end do
+  write(nfstdo, *) "'--------------------------------------------------'"
+  write(nfstdo, *) "'-- DIGDA MAIN: Forcing names                    --'"
+  write(nfstdo, *) "'--------------------------------------------------'"
+  do n = 1, benfdm
+    write(nfstdo,'(A,I2.2,A,A16)') &
+    "   DIGDA Forcing No.", n, " = ", trim(bfrcnm(n))
+  end do
 
   !-- Read RESTART file --
   call digda_read_restart(sdtx, lon_values, lat_values, depth_values, time_values)
@@ -96,11 +113,10 @@ program digda_ased
 
   call date_and_time(values=dt)
   write(nfstdo, *) "'--------------------------------------------------'"
-  write(nfstdo, *) "'--------------------------------------------------'"
   write(nfstdo,'(A,I4.4,"-",I2.2,"-",I2.2," ",I2.2,":",I2.2,":",I2.2)') &
-      &            "'-- DIGDA MAIN: Finished at ", &
+      &            " '-- DIGDA MAIN: Finished at ", &
       &              dt(1), dt(2), dt(3), dt(5), dt(6), dt(7)
-  write(nfstdo, *) "'-- DIGDA MAIN: Finished                         --'"
   write(nfstdo, *) "'--------------------------------------------------'"
+  call flush(nfstdo)
 
 end program digda_ased

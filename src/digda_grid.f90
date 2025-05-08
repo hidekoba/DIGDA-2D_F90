@@ -23,8 +23,28 @@ module module_digda_grid
   integer, parameter :: nts14car = 15 !! 14C Calcium carbonate
   integer, parameter :: ntc14dic = 16 !! 14C DIC
 
-  character(len=100) :: dtrcnm(sedtdm) !! Name of tracer
-  character(len=100) :: dtrcun(sedtdm) !! Unit of tracer
+ !character(len=16) :: dtrcnm(sedtdm) !! Name of tracer
+ !character(len=16) :: dtrcun(sedtdm) !! Unit of tracer
+
+  character(len=16) :: dtrcnm(sedtdm) = [character(len=16) ::   &
+    "Clay", "OrgM", "CaCO3", "SiO2", "Agetracer",               &
+    "Phosphate", "DIC", "Alkalinity", "Silicate", "Oxygen" ]
+
+ !character(len=16) :: dtrcnm(sedtdm) = [character(len=16) ::   &
+ !  "Clay", "OrgM", "CaCO3", "SiO2", "Agetracer",               &
+ !  "Phosphate", "DIC", "Alkalinity", "Silicate", "Oxygen",     &
+ !  "13C-OrgM", "13C-CaCO3", "13C-DIC",                         &
+ !  "14C-OrgM", "14C-CaCO3", "14C-DIC" ]
+
+  character(len=16) :: dtrcun(sedtdm) = [character(len=16) ::   &
+    "g m-3", "mmol m-3", "mmol m-3", "mmol m-3", "year",        &
+    "mmol m-3", "mmol m-3", "mmol m-3", "mmol m-3", "mmol m-3" ]
+
+ !character(len=16) :: dtrcun(sedtdm) = [character(len=16) ::   &
+ !  "g m-3", "mmol m-3", "mmol m-3", "mmol m-3", "year",        &
+ !  "mmol m-3", "mmol m-3", "mmol m-3", "mmol m-3", "mmol m-3", &
+ !  "mmol m-3", "mmol m-3", "mmol m-3",                         &
+ !  "mmol m-3", "mmol m-3", "mmol m-3" ]
 
   integer, parameter :: benfdm   = 14
   integer, parameter :: nbfdep   =  0 !! DEPTH
@@ -43,7 +63,14 @@ module module_digda_grid
   integer, parameter :: nbf13dic = 13 !! 13C DIC
   integer, parameter :: nbf14dic = 14 !! 14C DIC
 
-  character(len=100) :: bfrcnm(sedtdm) !! Name of forcing
+ !character(len=16) :: bfrcnm(benfdm) !! Name of forcing
+
+  character(len=16) :: bfrcnm(0:benfdm) = [character(len=16) ::  &
+    "DEPTH",                                                     &
+    "FICLA", "FIPOM", "FICAR", "FIOPA", "FIAGE",                 &
+    "TEM", "SAL",                                                &
+    "NIT", "DIC", "ALK", "SIL", "DO2",                           &
+    "C13", "C14" ]
 
   ! Vertical grid settings
   !-- ZGRID_CONSTANT --
@@ -223,7 +250,7 @@ module module_digda_grid
     dtrcun(ntspom)   = "mmol m-3"
     dtrcun(ntscar)   = "mmol m-3"
     dtrcun(ntsopa)   = "mmol m-3"
-    dtrcun(ntsage)   = "mmol m-3"
+    dtrcun(ntsage)   = "year"
     dtrcun(ntcnit)   = "mmol m-3"
     dtrcun(ntcdic)   = "mmol m-3"
     dtrcun(ntcalk)   = "mmol m-3"

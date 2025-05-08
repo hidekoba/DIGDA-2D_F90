@@ -33,28 +33,8 @@ contains
     integer :: n
 
     write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "'-- DIGDA DATA I/O:                              --'"
     write(nfstdo, *) "'-- Started reading Sediment RESTART file        --'"
-    write(nfstdo, *) "'--------------------------------------------------'"
-    write(nfstdo, *) "  DIGDA TRACER No.01 = scla"
-    write(nfstdo, *) "  DIGDA TRACER No.02 = spom"
-    write(nfstdo, *) "  DIGDA TRACER No.03 = scar"
-    write(nfstdo, *) "  DIGDA TRACER No.04 = sopa"
-    write(nfstdo, *) "  DIGDA TRACER No.05 = sage"
-    write(nfstdo, *) "  DIGDA TRACER No.06 = cnit"
-    write(nfstdo, *) "  DIGDA TRACER No.07 = cdic"
-    write(nfstdo, *) "  DIGDA TRACER No.08 = calk"
-    write(nfstdo, *) "  DIGDA TRACER No.09 = csil"
-    write(nfstdo, *) "  DIGDA TRACER No.10 = cdo2"
-    write(nfstdo, *) "  DIGDA TRACER No.11 = s13pom"
-    write(nfstdo, *) "  DIGDA TRACER No.12 = s13car"
-    write(nfstdo, *) "  DIGDA TRACER No.13 = c13dic"
-    write(nfstdo, *) "  DIGDA TRACER No.14 = s14pom"
-    write(nfstdo, *) "  DIGDA TRACER No.15 = s14car"
-    write(nfstdo, *) "  DIGDA TRACER No.16 = c14dic"
-    write(nfstdo, *) "'--------------------------------------------------'"
-    do n = 1, sedtdm
-      write(nfstdo,'(A,I2.2,A,A)') "  DIGDA TRACER No.", n, " = ", trim(dtrcnm(n))
-    end do
     write(nfstdo, *) "'--------------------------------------------------'"
     rewind(nfparm)
     read(nfparm, NML=nmocrt, IOSTAT=ios)
@@ -64,7 +44,7 @@ contains
 
     filename = trim(init_dir)//"/SEDTRR.nc"
     write(nfstdo, *) "'--------------------------------------------------'"
-    write(nfstdo, *) "  Read initial condition file: ", filename
+    write(nfstdo, *) "'-- Read initial condition file: ", filename
     write(nfstdo, *) "'--------------------------------------------------'"
 
    !do n = 1, sedtdm
@@ -94,6 +74,7 @@ contains
     !-- Read: Clay
     varname = "Clay"
     call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+    if ( myrank == iroot ) then
     do i = 1, nxdim
        print *, i, lon_values(i)
     end do
@@ -103,6 +84,7 @@ contains
     do k = 1, sdzdim
        print *, k, depth_values(k)
     end do
+    end if
     do k = 1, sdzdim
       do j = 1, nydim
         do i = 1, nxdim
@@ -238,8 +220,10 @@ contains
     time      = time_values
 
     write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "'-- DIGDA DATA I/O:                              --'"
     write(nfstdo, *) "'-- Finised reading Sediment RESTART file        --'"
     write(nfstdo, *) "'--------------------------------------------------'"
+    call flush(nfstdo)
 
   end subroutine digda_read_restart
 
@@ -263,6 +247,7 @@ contains
     allocate(vard4d(nxdim, nydim, sdzdim, 1))
 
     write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "'-- DIGDA DATA I/O:                              --'"
     write(nfstdo, *) "'-- Started writing Sediment RESTART file        --'"
     write(nfstdo, *) "'--------------------------------------------------'"
 
@@ -270,7 +255,8 @@ contains
 
     filename = trim(rstt_dir)//"/SEDTRR.nc"
     write(nfstdo, *) "'--------------------------------------------------'"
-    write(nfstdo, *) "  Write restart file: ", filename
+    write(nfstdo, *) "'-- DIGDA DATA I/O:                              --'"
+    write(nfstdo, *) "'-- Write restart file: ", filename
     write(nfstdo, *) "'--------------------------------------------------'"
 
     if ( myrank == iroot ) then
@@ -280,7 +266,7 @@ contains
    !  filenames(n) = trim(rstt_dir) // "/SEDTRR" // nstr // ".nc"
 
    !  write(nfstdo, *) "'--------------------------------------------------'"
-   !  write(nfstdo, *) "  write restart file: ", filenames(n)
+   !  write(nfstdo, *) "'-- Write restart file: ", filenames(n)
    !  write(nfstdo, *) "'--------------------------------------------------'"
    !  varname = dtrcnm(n)
    !  varunit = dtrcun(n)
@@ -467,6 +453,7 @@ contains
     if (allocated(vard4d)) deallocate(vard4d)
 
     write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "'-- DIGDA DATA I/O:                              --'"
     write(nfstdo, *) "'-- Finised writing Sediment RESTART file        --'"
     write(nfstdo, *) "'--------------------------------------------------'"
 
@@ -488,6 +475,7 @@ contains
     integer :: n
 
     write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "'-- DIGDA DATA I/O:                              --'"
     write(nfstdo, *) "'-- Started reading Sed-Water boundary forcing   --'"
     write(nfstdo, *) "'--------------------------------------------------'"
     rewind(nfparm)
@@ -502,6 +490,9 @@ contains
    !  n = 0
    !  filename = trim(bound_dir)//"/"bcfilnm(n)
    !  varname = bfrcnm(n)
+   !  write(nfstdo, *) "'--------------------------------------------------'"
+   !  write(nfstdo, *) "'-- Read forcing file: ", filename, varname
+   !  write(nfstdo, *) "'--------------------------------------------------'"
    !  call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
    !  do j = 1, nydim
    !    do i = 1, nxdim
@@ -519,6 +510,9 @@ contains
    !do n = 1, 5
    !  filename = trim(bound_dir)//"/"bcfilnm(n)
    !  varname = bfrcnm(n)
+   !  write(nfstdo, *) "'--------------------------------------------------'"
+   !  write(nfstdo, *) "'-- Read forcing file: ", filename, varname
+   !  write(nfstdo, *) "'--------------------------------------------------'"
    !  call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
    !  do j = 1, nydim
    !    do i = 1, nxdim
@@ -529,9 +523,12 @@ contains
    !end do
 
     !-- Read forcing: Bottom-water properties
-   !do n = 6, sedtdm
+   !do n = 6, benfdm
    !  filename = trim(bound_dir)//"/"bcfilnm(n)
    !  varname = bfrcnm(n)
+   !  write(nfstdo, *) "'--------------------------------------------------'"
+   !  write(nfstdo, *) "'-- Read forcing file: ", filename, varname
+   !  write(nfstdo, *) "'--------------------------------------------------'"
    !  call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
    !  do j = 1, nydim
    !    do i = 1, nxdim
@@ -545,6 +542,9 @@ contains
     !-- Ocean Depth
     filename = trim(bound_dir)//"/bdep.nc"
     varname = "DEPTH"
+    write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "'-- Read forcing file: ", filename, varname
+    write(nfstdo, *) "'--------------------------------------------------'"
     call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
     do j = 1, nydim
       do i = 1, nxdim
@@ -561,6 +561,9 @@ contains
     !-- Temperature
     filename = trim(bound_dir)//"/btem.nc"
     varname = "TEM"
+    write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "'-- Read forcing file: ", filename, varname
+    write(nfstdo, *) "'--------------------------------------------------'"
     call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
     do j = 1, nydim
       do i = 1, nxdim
@@ -572,6 +575,9 @@ contains
     !-- Salinity
     filename = trim(bound_dir)//"/bsal.nc"
     varname = "SAL"
+    write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "'-- Read forcing file: ", filename, varname
+    write(nfstdo, *) "'--------------------------------------------------'"
     call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
     do j = 1, nydim
       do i = 1, nxdim
@@ -583,6 +589,9 @@ contains
     !-- Phosphate
     filename = trim(bound_dir)//"/bnit.nc"
     varname = "NIT"
+    write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "'-- Read forcing file: ", filename, varname
+    write(nfstdo, *) "'--------------------------------------------------'"
     call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
     do j = 1, nydim
       do i = 1, nxdim
@@ -594,6 +603,9 @@ contains
     !-- DIC
     filename = trim(bound_dir)//"/bdic.nc"
     varname = "DIC"
+    write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "'-- Read forcing file: ", filename, varname
+    write(nfstdo, *) "'--------------------------------------------------'"
     call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
     do j = 1, nydim
       do i = 1, nxdim
@@ -605,6 +617,9 @@ contains
     !-- Alkalinity
     filename = trim(bound_dir)//"/balk.nc"
     varname = "ALK"
+    write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "'-- Read forcing file: ", filename, varname
+    write(nfstdo, *) "'--------------------------------------------------'"
     call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
     do j = 1, nydim
       do i = 1, nxdim
@@ -616,6 +631,9 @@ contains
     !-- Silicate
     filename = trim(bound_dir)//"/bsil.nc"
     varname = "SIL"
+    write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "'-- Read forcing file: ", filename, varname
+    write(nfstdo, *) "'--------------------------------------------------'"
     call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
     do j = 1, nydim
       do i = 1, nxdim
@@ -627,6 +645,9 @@ contains
     !-- Oxygen
     filename = trim(bound_dir)//"/bdo2.nc"
     varname = "DO2"
+    write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "'-- Read forcing file: ", filename, varname
+    write(nfstdo, *) "'--------------------------------------------------'"
     call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
     do j = 1, nydim
       do i = 1, nxdim
@@ -638,6 +659,9 @@ contains
     !-- 13C-DIC
     filename = trim(bound_dir)//"/bc13.nc"
     varname = "C13"
+    write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "'-- Read forcing file: ", filename, varname
+    write(nfstdo, *) "'--------------------------------------------------'"
     call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
     do j = 1, nydim
       do i = 1, nxdim
@@ -649,6 +673,9 @@ contains
     !-- 14C-DIC
     filename = trim(bound_dir)//"/bc14.nc"
     varname = "C14"
+    write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "'-- Read forcing file: ", filename, varname
+    write(nfstdo, *) "'--------------------------------------------------'"
     call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
     do j = 1, nydim
       do i = 1, nxdim
@@ -660,6 +687,9 @@ contains
     !-- Clay
     filename = trim(bound_dir)//"/ficla.nc"
     varname = "FICLA"
+    write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "'-- Read forcing file: ", filename, varname
+    write(nfstdo, *) "'--------------------------------------------------'"
     call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
     do j = 1, nydim
       do i = 1, nxdim
@@ -671,6 +701,9 @@ contains
     !-- POM
     filename = trim(bound_dir)//"/fipom.nc"
     varname = "FIPOM"
+    write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "'-- Read forcing file: ", filename, varname
+    write(nfstdo, *) "'--------------------------------------------------'"
     call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
     do j = 1, nydim
       do i = 1, nxdim
@@ -682,6 +715,9 @@ contains
     !-- CaCO3
     filename = trim(bound_dir)//"/ficar.nc"
     varname = "FICAR"
+    write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "'-- Read forcing file: ", filename, varname
+    write(nfstdo, *) "'--------------------------------------------------'"
     call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
     do j = 1, nydim
       do i = 1, nxdim
@@ -693,6 +729,9 @@ contains
     !-- SiO2
     filename = trim(bound_dir)//"/fiopa.nc"
     varname = "FIOPA"
+    write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "'-- Read forcing file: ", filename, varname
+    write(nfstdo, *) "'--------------------------------------------------'"
     call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
     do j = 1, nydim
       do i = 1, nxdim
@@ -719,8 +758,10 @@ contains
     if (allocated(vard4d)) deallocate(vard4d)
 
     write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "'-- DIGDA DATA I/O:                              --'"
     write(nfstdo, *) "'-- Finished reading Sed-Water boundary forcing  --'"
     write(nfstdo, *) "'--------------------------------------------------'"
+    call flush(nfstdo)
 
   end subroutine digda_read_bottom_forcing
 
@@ -729,6 +770,7 @@ contains
     if ( myrank == iroot ) then
 
     write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "'-- DIGDA DATA I/O:                              --'"
     write(nfstdo, *) "'-- Started writing NetCDF file                  --'"
     write(nfstdo, *) "'--------------------------------------------------'"
 
@@ -871,8 +913,10 @@ contains
     if (allocated(vard4d)) deallocate(vard4d)
 
     write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "'-- DIGDA DATA I/O:                              --'"
     write(nfstdo, *) "'-- Finished writing NetCDF file                 --'"
     write(nfstdo, *) "'--------------------------------------------------'"
+    call flush(nfstdo)
 
     end if
 
