@@ -48,165 +48,172 @@ contains
     write(nfstdo, *) "'-- Read initial condition file: ", filename
     write(nfstdo, *) "'--------------------------------------------------'"
 
-   !do n = 1, sedtdm
-   !  varname = dtrcnm(n)
-   !  call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
-   !  do k = 1, sdzdim
-   !    do j = 1, nydim
-   !      do i = 1, nxdim
-   !        ij = i + (j - 1) * nxdim
-   !        sdtx(ij, k, n) = vard4d(i, j, k, 1)
-   !      end do
+    do n = 1, sedtdm
+      varname = dtrcnm(n)
+      call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+      do k = 1, sdzdim
+        do j = 1, nydim
+          do i = 1, nxdim
+            ij = i + (j - 1) * nxdim
+            sdtx(ij, k, n) = vard4d(i, j, k, 1)
+          end do
+        end do
+      end do
+      if ( n == 1 .and. myrank == iroot ) then
+        write(nfstdo, *) "'-- DIGDA DATA I/O:                              --'"
+        write(nfstdo, *) "'--   Grid information (Longitude)               --'"
+        do i = 1, nxdim
+           write(nftsto, *), i, lon_values(i)
+        end do
+        write(nfstdo, *) "'--   Grid information (Latitude)                --'"
+        do j = 1, nydim
+           write(nftsto, *), j, lat_values(j)
+        end do
+        write(nfstdo, *) "'--   Grid information (Depth)                   --'"
+        do k = 1, sdzdim
+           write(nftsto, *), k, depth_values(k)
+        end do
+        write(nfstdo, *) "'--   Grid information (Time)                    --'"
+           write(nftsto, *), 1, time_values
+      end if
+      write(nfstdo, '(A,A)') "                  variable name: ", trim(varname)
+    end do
+
+   !!-- Read: Clay
+   !varname = "Clay"
+   !call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+   !if ( myrank == iroot ) then
+   !write(nfstdo, *) "'-- DIGDA DATA I/O:                              --'"
+   !write(nfstdo, *) "'--   Grid information (Longitude)               --'"
+   !do i = 1, nxdim
+   !   write(nftsto, *), i, lon_values(i)
+   !end do
+   !write(nfstdo, *) "'--   Grid information (Latitude)                --'"
+   !do j = 1, nydim
+   !   write(nftsto, *), j, lat_values(j)
+   !end do
+   !write(nfstdo, *) "'--   Grid information (Depth)                   --'"
+   !do k = 1, sdzdim
+   !   write(nftsto, *), k, depth_values(k)
+   !end do
+   !write(nfstdo, *) "'--   Grid information (Time)                    --'"
+   !   write(nftsto, *), 1, time_values
+   !do k = 1, sdzdim
+   !  do j = 1, nydim
+   !    do i = 1, nxdim
+   !      ij = i + (j - 1) * nxdim
+   !      sdtx(ij, k, 1) = vard4d(i, j, k, 1)
    !    end do
    !  end do
-   !  if ( n == 1 ) then
-   !    do i = 1, nxdim
-   !      print *, i, lon_values(i)
-   !    end do
-   !    do j = 1, nydim
-   !      print *, j, lat_values(j)
-   !    end do
-   !    do k = 1, sdzdim
-   !      print *, k, depth_values(k)
-   !    end do
-   !  end if
    !end do
 
-    !-- Read: Clay
-    varname = "Clay"
-    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
-    if ( myrank == iroot ) then
-    write(nfstdo, *) "'-- DIGDA DATA I/O:                              --'"
-    write(nfstdo, *) "'--   Grid information (Longitude)               --'"
-    do i = 1, nxdim
-       write(nftsto, *), i, lon_values(i)
-    end do
-    write(nfstdo, *) "'--   Grid information (Latitude)                --'"
-    do j = 1, nydim
-       write(nftsto, *), j, lat_values(j)
-    end do
-    write(nfstdo, *) "'--   Grid information (Depth)                   --'"
-    do k = 1, sdzdim
-       write(nftsto, *), k, depth_values(k)
-    end do
-    write(nfstdo, *) "'--   Grid information (Time)                    --'"
-       write(nftsto, *), 1, time_values
-    do k = 1, sdzdim
-      do j = 1, nydim
-        do i = 1, nxdim
-          ij = i + (j - 1) * nxdim
-          sdtx(ij, k, 1) = vard4d(i, j, k, 1)
-        end do
-      end do
-    end do
+   !!-- Read: OrgM
+   !varname = "OrgM"
+   !call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+   !do k = 1, sdzdim
+   !  do j = 1, nydim
+   !    do i = 1, nxdim
+   !      ij = i + (j - 1) * nxdim
+   !      sdtx(ij, k, 2) = vard4d(i, j, k, 1)
+   !    end do
+   !  end do
+   !end do
 
-    !-- Read: OrgM
-    varname = "OrgM"
-    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
-    do k = 1, sdzdim
-      do j = 1, nydim
-        do i = 1, nxdim
-          ij = i + (j - 1) * nxdim
-          sdtx(ij, k, 2) = vard4d(i, j, k, 1)
-        end do
-      end do
-    end do
+   !!-- Read: CaCO3
+   !varname = "CaCO3"
+   !call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+   !do k = 1, sdzdim
+   !  do j = 1, nydim
+   !    do i = 1, nxdim
+   !      ij = i + (j - 1) * nxdim
+   !      sdtx(ij, k, 3) = vard4d(i, j, k, 1)
+   !    end do
+   !  end do
+   !end do
 
-    !-- Read: CaCO3
-    varname = "CaCO3"
-    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
-    do k = 1, sdzdim
-      do j = 1, nydim
-        do i = 1, nxdim
-          ij = i + (j - 1) * nxdim
-          sdtx(ij, k, 3) = vard4d(i, j, k, 1)
-        end do
-      end do
-    end do
+   !!-- Read: SiO2
+   !varname = "SiO2"
+   !call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+   !do k = 1, sdzdim
+   !  do j = 1, nydim
+   !    do i = 1, nxdim
+   !      ij = i + (j - 1) * nxdim
+   !      sdtx(ij, k, 4) = vard4d(i, j, k, 1)
+   !    end do
+   !  end do
+   !end do
 
-    !-- Read: SiO2
-    varname = "SiO2"
-    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
-    do k = 1, sdzdim
-      do j = 1, nydim
-        do i = 1, nxdim
-          ij = i + (j - 1) * nxdim
-          sdtx(ij, k, 4) = vard4d(i, j, k, 1)
-        end do
-      end do
-    end do
+   !!-- Read: Agetracer
+   !varname = "Agetracer"
+   !call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+   !do k = 1, sdzdim
+   !  do j = 1, nydim
+   !    do i = 1, nxdim
+   !      ij = i + (j - 1) * nxdim
+   !      sdtx(ij, k, 5) = vard4d(i, j, k, 1)
+   !    end do
+   !  end do
+   !end do
 
-    !-- Read: Agetracer
-    varname = "Agetracer"
-    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
-    do k = 1, sdzdim
-      do j = 1, nydim
-        do i = 1, nxdim
-          ij = i + (j - 1) * nxdim
-          sdtx(ij, k, 5) = vard4d(i, j, k, 1)
-        end do
-      end do
-    end do
+   !!-- Read: Phosphate
+   !varname = "Phosphate"
+   !call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+   !do k = 1, sdzdim
+   !  do j = 1, nydim
+   !    do i = 1, nxdim
+   !      ij = i + (j - 1) * nxdim
+   !      sdtx(ij, k, 6) = vard4d(i, j, k, 1)
+   !    end do
+   !  end do
+   !end do
 
-    !-- Read: Phosphate
-    varname = "Phosphate"
-    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
-    do k = 1, sdzdim
-      do j = 1, nydim
-        do i = 1, nxdim
-          ij = i + (j - 1) * nxdim
-          sdtx(ij, k, 6) = vard4d(i, j, k, 1)
-        end do
-      end do
-    end do
+   !!-- Read: DIC
+   !varname = "DIC"
+   !call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+   !do k = 1, sdzdim
+   !  do j = 1, nydim
+   !    do i = 1, nxdim
+   !      ij = i + (j - 1) * nxdim
+   !      sdtx(ij, k, 7) = vard4d(i, j, k, 1)
+   !    end do
+   !  end do
+   !end do
 
-    !-- Read: DIC
-    varname = "DIC"
-    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
-    do k = 1, sdzdim
-      do j = 1, nydim
-        do i = 1, nxdim
-          ij = i + (j - 1) * nxdim
-          sdtx(ij, k, 7) = vard4d(i, j, k, 1)
-        end do
-      end do
-    end do
+   !!-- Read: Alkalinity
+   !varname = "Alkalinity"
+   !call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+   !do k = 1, sdzdim
+   !  do j = 1, nydim
+   !    do i = 1, nxdim
+   !      ij = i + (j - 1) * nxdim
+   !      sdtx(ij, k, 8) = vard4d(i, j, k, 1)
+   !    end do
+   !  end do
+   !end do
 
-    !-- Read: Alkalinity
-    varname = "Alkalinity"
-    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
-    do k = 1, sdzdim
-      do j = 1, nydim
-        do i = 1, nxdim
-          ij = i + (j - 1) * nxdim
-          sdtx(ij, k, 8) = vard4d(i, j, k, 1)
-        end do
-      end do
-    end do
+   !!-- Read: Silicate
+   !varname = "Silicate"
+   !call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+   !do k = 1, sdzdim
+   !  do j = 1, nydim
+   !    do i = 1, nxdim
+   !      ij = i + (j - 1) * nxdim
+   !      sdtx(ij, k, 9) = vard4d(i, j, k, 1)
+   !    end do
+   !  end do
+   !end do
 
-    !-- Read: Silicate
-    varname = "Silicate"
-    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
-    do k = 1, sdzdim
-      do j = 1, nydim
-        do i = 1, nxdim
-          ij = i + (j - 1) * nxdim
-          sdtx(ij, k, 9) = vard4d(i, j, k, 1)
-        end do
-      end do
-    end do
-
-    !-- Read: Oxygen
-    varname = "Oxygen"
-    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
-    do k = 1, sdzdim
-      do j = 1, nydim
-        do i = 1, nxdim
-          ij = i + (j - 1) * nxdim
-          sdtx(ij, k, 10) = vard4d(i, j, k, 1)
-        end do
-      end do
-    end do
+   !!-- Read: Oxygen
+   !varname = "Oxygen"
+   !call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+   !do k = 1, sdzdim
+   !  do j = 1, nydim
+   !    do i = 1, nxdim
+   !      ij = i + (j - 1) * nxdim
+   !      sdtx(ij, k, 10) = vard4d(i, j, k, 1)
+   !    end do
+   !  end do
+   !end do
 
     !-- Synchronize all processes --
     call mpi_barrier(mpi_comm_world, ierr)
@@ -498,7 +505,7 @@ contains
       varname = bfrcnm(n)
       write(nfstdo, *) "'--------------------------------------------------'"
       write(nfstdo, '(A,A)') "'-- Read forcing file: ", trim(filename)
-      write(nfstdo, '(A,A)') "                       ", trim(varname)
+      write(nfstdo, '(A,A)') "      variable name  : ", trim(varname)
       write(nfstdo, *) "'--------------------------------------------------'"
       call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
       do j = 1, nydim
@@ -519,7 +526,7 @@ contains
       varname = bfrcnm(n)
       write(nfstdo, *) "'--------------------------------------------------'"
       write(nfstdo, '(A,A)') "'-- Read forcing file: ", trim(filename)
-      write(nfstdo, '(A,A)') "                       ", trim(varname)
+      write(nfstdo, '(A,A)') "      variable name  : ", trim(varname)
       write(nfstdo, *) "'--------------------------------------------------'"
       call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
       do j = 1, nydim
@@ -532,6 +539,10 @@ contains
 
     !-- Read forcing: Age tracer
     n = 5
+      varname = bfrcnm(n)
+      write(nfstdo, *) "'--------------------------------------------------'"
+      write(nfstdo, '(A,A)') "      variable name  : ", trim(varname)
+      write(nfstdo, *) "'--------------------------------------------------'"
       do j = 1, nydim
         do i = 1, nxdim
           ij = i + (j - 1) * nxdim
@@ -546,7 +557,7 @@ contains
       varname = bfrcnm(n)
       write(nfstdo, *) "'--------------------------------------------------'"
       write(nfstdo, '(A,A)') "'-- Read forcing file: ", trim(filename)
-      write(nfstdo, '(A,A)') "                       ", trim(varname)
+      write(nfstdo, '(A,A)') "      variable name  : ", trim(varname)
       write(nfstdo, *) "'--------------------------------------------------'"
       call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
       do j = 1, nydim
