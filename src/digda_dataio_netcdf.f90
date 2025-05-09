@@ -76,16 +76,21 @@ contains
     varname = "Clay"
     call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
     if ( myrank == iroot ) then
+    write(nfstdo, *) "'-- DIGDA DATA I/O:                              --'"
+    write(nfstdo, *) "'--   Grid information (Longitude)               --'"
     do i = 1, nxdim
-       print *, i, lon_values(i)
+       write(nftsto, *), i, lon_values(i)
     end do
+    write(nfstdo, *) "'--   Grid information (Latitude)                --'"
     do j = 1, nydim
-       print *, j, lat_values(j)
+       write(nftsto, *), j, lat_values(j)
     end do
+    write(nfstdo, *) "'--   Grid information (Depth)                   --'"
     do k = 1, sdzdim
-       print *, k, depth_values(k)
+       write(nftsto, *), k, depth_values(k)
     end do
-    end if
+    write(nfstdo, *) "'--   Grid information (Time)                    --'"
+       write(nftsto, *), 1, time_values
     do k = 1, sdzdim
       do j = 1, nydim
         do i = 1, nxdim
@@ -492,8 +497,8 @@ contains
       filename = trim(bound_dir)//"/"trim(bcfilnm(n))
       varname = bfrcnm(n)
       write(nfstdo, *) "'--------------------------------------------------'"
-      write(nfstdo, *) "'-- Read forcing file: ", filename
-      write(nfstdo, *) "                       ", varname
+      write(nfstdo, '(A,A)') "'-- Read forcing file: ", trim(filename)
+      write(nfstdo, '(A,A)') "                       ", trim(varname)
       write(nfstdo, *) "'--------------------------------------------------'"
       call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
       do j = 1, nydim
@@ -513,8 +518,8 @@ contains
       filename = trim(bound_dir)//"/"trim(bcfilnm(n))
       varname = bfrcnm(n)
       write(nfstdo, *) "'--------------------------------------------------'"
-      write(nfstdo, *) "'-- Read forcing file: ", filename
-      write(nfstdo, *) "                       ", varname
+      write(nfstdo, '(A,A)') "'-- Read forcing file: ", trim(filename)
+      write(nfstdo, '(A,A)') "                       ", trim(varname)
       write(nfstdo, *) "'--------------------------------------------------'"
       call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
       do j = 1, nydim
@@ -540,8 +545,8 @@ contains
       filename = trim(bound_dir)//"/"trim(bcfilnm(n))
       varname = bfrcnm(n)
       write(nfstdo, *) "'--------------------------------------------------'"
-      write(nfstdo, *) "'-- Read forcing file: ", filename
-      write(nfstdo, *) "                       ", varname
+      write(nfstdo, '(A,A)') "'-- Read forcing file: ", trim(filename)
+      write(nfstdo, '(A,A)') "                       ", trim(varname)
       write(nfstdo, *) "'--------------------------------------------------'"
       call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
       do j = 1, nydim
