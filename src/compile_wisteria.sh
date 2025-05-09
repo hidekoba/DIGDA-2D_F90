@@ -7,8 +7,8 @@
 #sed -i -e "14s/!integer/ integer/g" digda_mpi.f90
 #sed -i -e "16s/ integer/!integer/g" digda_mpi.f90
 
-#sed -i -e "162,164s/!integer/ integer/g" digda_grid.f90
-#sed -i -e "172,174s/ integer/!integer/g" digda_grid.f90
+#sed -i -e "169,171s/!integer/ integer/g" digda_grid.f90
+#sed -i -e "179,181s/ integer/!integer/g" digda_grid.f90
 
 #sed -i -e "s/digda_21601080/digda_256192/g" Mkinclude
 
@@ -19,8 +19,8 @@
  sed -i -e "14s/ integer/!integer/g" digda_mpi.f90
  sed -i -e "16s/!integer/ integer/g" digda_mpi.f90
 
- sed -i -e "162,164s/ integer/!integer/g" digda_grid.f90
- sed -i -e "172,174s/!integer/ integer/g" digda_grid.f90
+ sed -i -e "169,171s/ integer/!integer/g" digda_grid.f90
+ sed -i -e "179,181s/!integer/ integer/g" digda_grid.f90
 
  sed -i -e "s/digda_256192/digda_21601080/g" Mkinclude
 

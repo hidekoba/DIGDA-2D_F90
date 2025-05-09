@@ -46,7 +46,8 @@ module module_digda_grid
  !  "mmol m-3", "mmol m-3", "mmol m-3",                         &
  !  "mmol m-3", "mmol m-3", "mmol m-3" ]
 
-  integer, parameter :: benfdm   = 14
+  integer, parameter :: benfdm   = 12
+ !integer, parameter :: benfdm   = 14
   integer, parameter :: nbfdep   =  0 !! DEPTH
   integer, parameter :: nbfcla   =  1 !! Clay
   integer, parameter :: nbfpom   =  2 !! Organic Carbon
@@ -69,8 +70,14 @@ module module_digda_grid
     "DEPTH",                                                     &
     "FICLA", "FIPOM", "FICAR", "FIOPA", "FIAGE",                 &
     "TEM", "SAL",                                                &
-    "NIT", "DIC", "ALK", "SIL", "DO2",                           &
-    "C13", "C14" ]
+    "NIT", "DIC", "ALK", "SIL", "DO2" ]
+
+ !character(len=16) :: bfrcnm(0:benfdm) = [character(len=16) ::  &
+ !  "DEPTH",                                                     &
+ !  "FICLA", "FIPOM", "FICAR", "FIOPA", "FIAGE",                 &
+ !  "TEM", "SAL",                                                &
+ !  "NIT", "DIC", "ALK", "SIL", "DO2",                           &
+ !  "C13", "C14" ]
 
   ! Vertical grid settings
   !-- ZGRID_CONSTANT --
@@ -173,18 +180,25 @@ module module_digda_grid
   integer, parameter :: nydim = 1080
   integer, parameter :: nzdim = 44
 
-  character(len=64) :: bound_dir = 'not-specified/'
+  character(len=128) :: bound_dir = 'not-specified/'
   character(len=64) :: bcfilnm(0:benfdm)
   data bcfilnm /                                                &
     'bdep.nc',                                                  &
     'ficla.nc', 'fipom.nc', 'ficar.nc', 'fiopa.nc', 'fiage.nc', &
     'btem.nc', 'bsal.nc',                                       &
-    'bnit.nc', 'bdic.nc', 'balk.nc', 'bsil.nc', 'bdo2.nc',      &
-    'b13c.nc', 'b14c.nc' /
+    'bnit.nc', 'bdic.nc', 'balk.nc', 'bsil.nc', 'bdo2.nc' /
+ !data bcfilnm /                                                &
+ !  'bdep.nc',                                                  &
+ !  'ficla.nc', 'fipom.nc', 'ficar.nc', 'fiopa.nc', 'fiage.nc', &
+ !  'btem.nc', 'bsal.nc',                                       &
+ !  'bnit.nc', 'bdic.nc', 'balk.nc', 'bsil.nc', 'bdo2.nc',      &
+ !  'b13c.nc', 'b14c.nc' /
   namelist /nmocbc/ bound_dir, bcfilnm
-  character(len=64) :: init_dir = 'not-specified/'
-  character(len=64) :: rstt_dir = 'not-specified/'
-  namelist /nmocrt/ init_dir, rstt_dir
+  character(len=128) :: init_dir = 'not-specified/'
+  character(len=128) :: rstt_dir = 'not-specified/'
+  character(len=64) :: rsfilnm
+  data rsfilnm / 'SEDTRR.nc' /
+  namelist /nmocrt/ init_dir, rstt_dir, rsfilnm
 
   integer, parameter :: nxydim = nxdim * nydim
   integer, parameter :: nx = nxdim

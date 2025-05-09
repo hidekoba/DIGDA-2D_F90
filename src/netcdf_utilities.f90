@@ -606,7 +606,7 @@ contains
     character(len=*), parameter :: tname = "time"
 
     integer(kind=4) :: nvars
-    character(len=256) :: varname_file
+    character(len=128) :: varname_file
 
     ! Initialize variables
     has_lon = .false.
@@ -1840,7 +1840,7 @@ contains
     integer(kind=4) :: xvarid, yvarid, zvarid, tvarid
     integer, dimension(4) :: dimids
 
-    character(len=64) :: varname1, varname2
+    character(len=32) :: varname1, varname2
     double precision, dimension(:,:,:,:), allocatable :: data1, data2
 
     character(len=*), parameter :: xname = 'lon'
@@ -2113,7 +2113,7 @@ contains
 !!    integer(kind=4) :: lon_size, lat_size, depth_size, time_size
 !!    integer(kind=4) :: retval
 !!    integer, dimension(4) :: dimids
-!!    character(len=64) :: varname
+!!    character(len=32) :: varname
 !!    double precision, dimension(:,:,:,:), allocatable :: data
 !!    character(len=*), parameter :: lon_name = 'lon', lat_name = 'lat', depth_name = 'depth', time_name = 'time'
 !!    integer :: i, nfiles
@@ -2209,7 +2209,7 @@ contains
 !!    subroutine get_variable_name(ncid, varname)
 !!        implicit none
 !!        integer, intent(in) :: ncid
-!!        character(len=64), intent(out) :: varname
+!!        character(len=32), intent(out) :: varname
 !!        integer :: nvars, retval
 !!
 !!        retval = nf90_inq_nvars(ncid, nvars)

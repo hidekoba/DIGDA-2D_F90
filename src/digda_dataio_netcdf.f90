@@ -1,11 +1,11 @@
-! module module_digda_dataio_netcdf
+module module_digda_dataio_netcdf
   use netcdf_utilities
   use module_zcfile
   use module_digda_grid
   use module_digda_mpi
   implicit none
 
-  character(len=64) :: filename
+  character(len=128) :: filename
   character(len=16) :: varname, varunit
   integer :: i, j, k, t, ij
 
@@ -41,9 +41,7 @@ contains
     read(nfparm, NML=nmocrt, IOSTAT=ios)
     write(nfstdo, nmocrt)
 
-    !-- Call the read_netcdf subroutine --
-
-    filename = trim(init_dir)//"/SEDTRR.nc"
+    filename = trim(init_dir) // "/" // trim(rsfilnm)
     write(nfstdo, *) "'--------------------------------------------------'"
     write(nfstdo, *) "'-- Read initial condition file: ", filename
     write(nfstdo, *) "'--------------------------------------------------'"
@@ -60,21 +58,21 @@ contains
         end do
       end do
       if ( n == 1 .and. myrank == iroot ) then
-        write(nfstdo, *) "'-- DIGDA DATA I/O:                              --'"
-        write(nfstdo, *) "'--   Grid information (Longitude)               --'"
+        write(*, *) "'-- DIGDA DATA I/O:                              --'"
+        write(*, *) "'--   Grid information (Longitude)               --'"
         do i = 1, nxdim
-           write(nftsto, *), i, lon_values(i)
+           write(*, *), i, lon_values(i)
         end do
-        write(nfstdo, *) "'--   Grid information (Latitude)                --'"
+        write(*, *) "'--   Grid information (Latitude)                --'"
         do j = 1, nydim
-           write(nftsto, *), j, lat_values(j)
+           write(*, *), j, lat_values(j)
         end do
-        write(nfstdo, *) "'--   Grid information (Depth)                   --'"
+        write(*, *) "'--   Grid information (Depth)                   --'"
         do k = 1, sdzdim
-           write(nftsto, *), k, depth_values(k)
+           write(*, *), k, depth_values(k)
         end do
-        write(nfstdo, *) "'--   Grid information (Time)                    --'"
-           write(nftsto, *), 1, time_values
+        write(*, *) "'--   Grid information (Time)                    --'"
+           write(*, *), 1, time_values
       end if
       write(nfstdo, '(A,A)') "                  variable name: ", trim(varname)
     end do
@@ -86,18 +84,18 @@ contains
    !write(nfstdo, *) "'-- DIGDA DATA I/O:                              --'"
    !write(nfstdo, *) "'--   Grid information (Longitude)               --'"
    !do i = 1, nxdim
-   !   write(nftsto, *), i, lon_values(i)
+   !   write(nfstdo, *), i, lon_values(i)
    !end do
    !write(nfstdo, *) "'--   Grid information (Latitude)                --'"
    !do j = 1, nydim
-   !   write(nftsto, *), j, lat_values(j)
+   !   write(nfstdo, *), j, lat_values(j)
    !end do
    !write(nfstdo, *) "'--   Grid information (Depth)                   --'"
    !do k = 1, sdzdim
-   !   write(nftsto, *), k, depth_values(k)
+   !   write(nfstdo, *), k, depth_values(k)
    !end do
    !write(nfstdo, *) "'--   Grid information (Time)                    --'"
-   !   write(nftsto, *), 1, time_values
+   !   write(nfstdo, *), 1, time_values
    !do k = 1, sdzdim
    !  do j = 1, nydim
    !    do i = 1, nxdim
@@ -240,7 +238,6 @@ contains
 
   end subroutine digda_read_restart
 
-
   subroutine digda_write_restart(sdtx, lon_values, lat_values, depth_values, time_values)
 
     double precision, dimension(nxydim, sdzdim, sedtdm), intent(in) :: sdtx
@@ -263,8 +260,6 @@ contains
     write(nfstdo, *) "'-- DIGDA DATA I/O:                              --'"
     write(nfstdo, *) "'-- Started writing Sediment RESTART file        --'"
     write(nfstdo, *) "'--------------------------------------------------'"
-
-    !-- Call the write_netcdf subroutine --
 
     filename = trim(rstt_dir)//"/SEDTRR.nc"
     write(nfstdo, *) "'--------------------------------------------------'"
@@ -501,11 +496,11 @@ contains
 
     !-- Read forcing: Ocean depth
     n = 0
-      filename = trim(bound_dir)//"/"trim(bcfilnm(n))
+      filename = trim(bound_dir) // "/" // trim(bcfilnm(n))
       varname = bfrcnm(n)
       write(nfstdo, *) "'--------------------------------------------------'"
       write(nfstdo, '(A,A)') "'-- Read forcing file: ", trim(filename)
-      write(nfstdo, '(A,A)') "      variable name  : ", trim(varname)
+      write(nfstdo, '(A,A)') "        variable name: ", trim(varname)
       write(nfstdo, *) "'--------------------------------------------------'"
       call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
       do j = 1, nydim
@@ -522,11 +517,11 @@ contains
 
     !-- Read forcing: Benthic particle flux
     do n = 1, 4
-      filename = trim(bound_dir)//"/"trim(bcfilnm(n))
+      filename = trim(bound_dir) // "/" // trim(bcfilnm(n))
       varname = bfrcnm(n)
       write(nfstdo, *) "'--------------------------------------------------'"
       write(nfstdo, '(A,A)') "'-- Read forcing file: ", trim(filename)
-      write(nfstdo, '(A,A)') "      variable name  : ", trim(varname)
+      write(nfstdo, '(A,A)') "        variable name: ", trim(varname)
       write(nfstdo, *) "'--------------------------------------------------'"
       call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
       do j = 1, nydim
@@ -539,9 +534,11 @@ contains
 
     !-- Read forcing: Age tracer
     n = 5
+      filename = "not-specified"
       varname = bfrcnm(n)
       write(nfstdo, *) "'--------------------------------------------------'"
-      write(nfstdo, '(A,A)') "      variable name  : ", trim(varname)
+      write(nfstdo, '(A,A)') "'-- Read forcing file: ", trim(filename)
+      write(nfstdo, '(A,A)') "        variable name: ", trim(varname)
       write(nfstdo, *) "'--------------------------------------------------'"
       do j = 1, nydim
         do i = 1, nxdim
@@ -553,11 +550,11 @@ contains
 
     !-- Read forcing: Bottom-water properties
     do n = 6, benfdm
-      filename = trim(bound_dir)//"/"trim(bcfilnm(n))
+      filename = trim(bound_dir) // "/" // trim(bcfilnm(n))
       varname = bfrcnm(n)
       write(nfstdo, *) "'--------------------------------------------------'"
       write(nfstdo, '(A,A)') "'-- Read forcing file: ", trim(filename)
-      write(nfstdo, '(A,A)') "      variable name  : ", trim(varname)
+      write(nfstdo, '(A,A)') "        variable name: ", trim(varname)
       write(nfstdo, *) "'--------------------------------------------------'"
       call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
       do j = 1, nydim
@@ -568,7 +565,6 @@ contains
       end do
     end do
 
-   !!-- Call the read_netcdf subroutine --
    !!-- Ocean Depth
    !filename = trim(bound_dir)//"/bdep.nc"
    !varname = "DEPTH"
