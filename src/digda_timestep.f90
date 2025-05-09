@@ -117,6 +117,7 @@ module module_digda_timestep
     sdtsyr = tssec / isecmn / iminhr / ihrday / idaymo / imonyr !! Converts seconds to years
 
     write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "'-- DIGDA Timestep:                              --'"
     write(nfstdo, *) "'-- Time Control Parameters                      --'"
     write(nfstdo, *)
     write(nfstdo, *) '        Start year :', sdyrstr

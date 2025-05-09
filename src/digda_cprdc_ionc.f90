@@ -304,7 +304,8 @@ contains
     double precision, allocatable :: varavgdt(:,:)
 
     ! etc
-    character(len=100) :: filename, varname, varunit
+    character(len=64) :: filename
+    character(len=16) :: varname, varunit
     double precision :: lon_values(nxdim)
     double precision :: lat_values(nydim)
     double precision :: depth_values(sdzdim)

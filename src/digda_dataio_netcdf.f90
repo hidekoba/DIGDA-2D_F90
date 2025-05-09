@@ -1,11 +1,12 @@
-module module_digda_dataio_netcdf
+! module module_digda_dataio_netcdf
   use netcdf_utilities
   use module_zcfile
   use module_digda_grid
   use module_digda_mpi
   implicit none
 
-  character(len=100) :: filename, varname, varunit
+  character(len=64) :: filename
+  character(len=16) :: varname, varunit
   integer :: i, j, k, t, ij
 
   double precision, dimension(:),       allocatable :: longitude
@@ -487,267 +488,294 @@ contains
     allocate(vard3d(nxdim, nydim, 1))
 
     !-- Read forcing: Ocean depth
-   !  n = 0
-   !  filename = trim(bound_dir)//"/"bcfilnm(n)
-   !  varname = bfrcnm(n)
-   !  write(nfstdo, *) "'--------------------------------------------------'"
-   !  write(nfstdo, *) "'-- Read forcing file: ", filename, varname
-   !  write(nfstdo, *) "'--------------------------------------------------'"
-   !  call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
-   !  do j = 1, nydim
-   !    do i = 1, nxdim
-   !      ij = i + (j - 1) * nxdim
-   !      bdep(ij) = vard4d(i, j, 1, 1)
-   !      if (vard4d(i, j, 1, 1) == rmiss .or. vard4d(i, j, 1, 1) == 0.0) then
-   !        omask(i, j) = 0.d0
-   !      else
-   !        omask(i, j) = 1.d0
-   !      end if
-   !    end do
-   !  end do
+    n = 0
+      filename = trim(bound_dir)//"/"trim(bcfilnm(n))
+      varname = bfrcnm(n)
+      write(nfstdo, *) "'--------------------------------------------------'"
+      write(nfstdo, *) "'-- Read forcing file: ", filename
+      write(nfstdo, *) "                       ", varname
+      write(nfstdo, *) "'--------------------------------------------------'"
+      call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+      do j = 1, nydim
+        do i = 1, nxdim
+          ij = i + (j - 1) * nxdim
+          bdep(ij) = vard4d(i, j, 1, 1)
+          if (vard4d(i, j, 1, 1) == rmiss .or. vard4d(i, j, 1, 1) == 0.0) then
+            omask(i, j) = 0.d0
+          else
+            omask(i, j) = 1.d0
+          end if
+        end do
+      end do
 
     !-- Read forcing: Benthic particle flux
-   !do n = 1, 5
-   !  filename = trim(bound_dir)//"/"bcfilnm(n)
-   !  varname = bfrcnm(n)
-   !  write(nfstdo, *) "'--------------------------------------------------'"
-   !  write(nfstdo, *) "'-- Read forcing file: ", filename, varname
-   !  write(nfstdo, *) "'--------------------------------------------------'"
-   !  call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
-   !  do j = 1, nydim
-   !    do i = 1, nxdim
-   !      ij = i + (j - 1) * nxdim
-   !      bfrc(ij, n) = vard4d(i, j, 1, 1) * omask(i, j)
-   !    end do
-   !  end do
-   !end do
+    do n = 1, 4
+      filename = trim(bound_dir)//"/"trim(bcfilnm(n))
+      varname = bfrcnm(n)
+      write(nfstdo, *) "'--------------------------------------------------'"
+      write(nfstdo, *) "'-- Read forcing file: ", filename
+      write(nfstdo, *) "                       ", varname
+      write(nfstdo, *) "'--------------------------------------------------'"
+      call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+      do j = 1, nydim
+        do i = 1, nxdim
+          ij = i + (j - 1) * nxdim
+          bfrc(ij, n) = vard4d(i, j, 1, 1) * omask(i, j)
+        end do
+      end do
+    end do
+
+    !-- Read forcing: Age tracer
+    n = 5
+      do j = 1, nydim
+        do i = 1, nxdim
+          ij = i + (j - 1) * nxdim
+          vard4d(i, j, 1, 1) = 0.d0
+          bfrc(ij, n) = vard4d(i, j, 1, 1) * omask(i, j)
+        end do
+      end do
 
     !-- Read forcing: Bottom-water properties
-   !do n = 6, benfdm
-   !  filename = trim(bound_dir)//"/"bcfilnm(n)
-   !  varname = bfrcnm(n)
-   !  write(nfstdo, *) "'--------------------------------------------------'"
-   !  write(nfstdo, *) "'-- Read forcing file: ", filename, varname
-   !  write(nfstdo, *) "'--------------------------------------------------'"
-   !  call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
-   !  do j = 1, nydim
-   !    do i = 1, nxdim
-   !      ij = i + (j - 1) * nxdim
-   !      bfrc(ij, n) = vard4d(i, j, 1, 1)
-   !    end do
+    do n = 6, benfdm
+      filename = trim(bound_dir)//"/"trim(bcfilnm(n))
+      varname = bfrcnm(n)
+      write(nfstdo, *) "'--------------------------------------------------'"
+      write(nfstdo, *) "'-- Read forcing file: ", filename
+      write(nfstdo, *) "                       ", varname
+      write(nfstdo, *) "'--------------------------------------------------'"
+      call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+      do j = 1, nydim
+        do i = 1, nxdim
+          ij = i + (j - 1) * nxdim
+          bfrc(ij, n) = vard4d(i, j, 1, 1)
+        end do
+      end do
+    end do
+
+   !!-- Call the read_netcdf subroutine --
+   !!-- Ocean Depth
+   !filename = trim(bound_dir)//"/bdep.nc"
+   !varname = "DEPTH"
+   !write(nfstdo, *) "'--------------------------------------------------'"
+   !write(nfstdo, *) "'-- Read forcing file: ", filename
+   !write(nfstdo, *) "                       ", varname
+   !write(nfstdo, *) "'--------------------------------------------------'"
+   !call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+   !do j = 1, nydim
+   !  do i = 1, nxdim
+   !    ij = i + (j - 1) * nxdim
+   !    bdep(ij) = vard4d(i, j, 1, 1)
+   !    if (vard4d(i, j, 1, 1) == rmiss .or. vard4d(i, j, 1, 1) == 0.0) then
+   !      omask(i, j) = 0.d0
+   !    else
+   !      omask(i, j) = 1.d0
+   !    end if
    !  end do
    !end do
 
-    !-- Call the read_netcdf subroutine --
-    !-- Ocean Depth
-    filename = trim(bound_dir)//"/bdep.nc"
-    varname = "DEPTH"
-    write(nfstdo, *) "'--------------------------------------------------'"
-    write(nfstdo, *) "'-- Read forcing file: ", filename, varname
-    write(nfstdo, *) "'--------------------------------------------------'"
-    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
-    do j = 1, nydim
-      do i = 1, nxdim
-        ij = i + (j - 1) * nxdim
-        bdep(ij) = vard4d(i, j, 1, 1)
-        if (vard4d(i, j, 1, 1) == rmiss .or. vard4d(i, j, 1, 1) == 0.0) then
-          omask(i, j) = 0.d0
-        else
-          omask(i, j) = 1.d0
-        end if
-      end do
-    end do
+   !!-- Temperature
+   !filename = trim(bound_dir)//"/btem.nc"
+   !varname = "TEM"
+   !write(nfstdo, *) "'--------------------------------------------------'"
+   !write(nfstdo, *) "'-- Read forcing file: ", filename
+   !write(nfstdo, *) "                       ", varname
+   !write(nfstdo, *) "'--------------------------------------------------'"
+   !call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+   !do j = 1, nydim
+   !  do i = 1, nxdim
+   !    ij = i + (j - 1) * nxdim
+   !    bfrc(ij, 6) = vard4d(i, j, 1, 1)
+   !  end do
+   !end do
 
-    !-- Temperature
-    filename = trim(bound_dir)//"/btem.nc"
-    varname = "TEM"
-    write(nfstdo, *) "'--------------------------------------------------'"
-    write(nfstdo, *) "'-- Read forcing file: ", filename, varname
-    write(nfstdo, *) "'--------------------------------------------------'"
-    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
-    do j = 1, nydim
-      do i = 1, nxdim
-        ij = i + (j - 1) * nxdim
-        bfrc(ij, 6) = vard4d(i, j, 1, 1)
-      end do
-    end do
+   !!-- Salinity
+   !filename = trim(bound_dir)//"/bsal.nc"
+   !varname = "SAL"
+   !write(nfstdo, *) "'--------------------------------------------------'"
+   !write(nfstdo, *) "'-- Read forcing file: ", filename
+   !write(nfstdo, *) "                       ", varname
+   !write(nfstdo, *) "'--------------------------------------------------'"
+   !call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+   !do j = 1, nydim
+   !  do i = 1, nxdim
+   !    ij = i + (j - 1) * nxdim
+   !    bfrc(ij, 7) = vard4d(i, j, 1, 1)
+   !  end do
+   !end do
 
-    !-- Salinity
-    filename = trim(bound_dir)//"/bsal.nc"
-    varname = "SAL"
-    write(nfstdo, *) "'--------------------------------------------------'"
-    write(nfstdo, *) "'-- Read forcing file: ", filename, varname
-    write(nfstdo, *) "'--------------------------------------------------'"
-    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
-    do j = 1, nydim
-      do i = 1, nxdim
-        ij = i + (j - 1) * nxdim
-        bfrc(ij, 7) = vard4d(i, j, 1, 1)
-      end do
-    end do
+   !!-- Phosphate
+   !filename = trim(bound_dir)//"/bnit.nc"
+   !varname = "NIT"
+   !write(nfstdo, *) "'--------------------------------------------------'"
+   !write(nfstdo, *) "'-- Read forcing file: ", filename
+   !write(nfstdo, *) "                       ", varname
+   !write(nfstdo, *) "'--------------------------------------------------'"
+   !call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+   !do j = 1, nydim
+   !  do i = 1, nxdim
+   !    ij = i + (j - 1) * nxdim
+   !    bfrc(ij, 8) = vard4d(i, j, 1, 1)
+   !  end do
+   !end do
 
-    !-- Phosphate
-    filename = trim(bound_dir)//"/bnit.nc"
-    varname = "NIT"
-    write(nfstdo, *) "'--------------------------------------------------'"
-    write(nfstdo, *) "'-- Read forcing file: ", filename, varname
-    write(nfstdo, *) "'--------------------------------------------------'"
-    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
-    do j = 1, nydim
-      do i = 1, nxdim
-        ij = i + (j - 1) * nxdim
-        bfrc(ij, 8) = vard4d(i, j, 1, 1)
-      end do
-    end do
+   !!-- DIC
+   !filename = trim(bound_dir)//"/bdic.nc"
+   !varname = "DIC"
+   !write(nfstdo, *) "'--------------------------------------------------'"
+   !write(nfstdo, *) "'-- Read forcing file: ", filename
+   !write(nfstdo, *) "                       ", varname
+   !write(nfstdo, *) "'--------------------------------------------------'"
+   !call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+   !do j = 1, nydim
+   !  do i = 1, nxdim
+   !    ij = i + (j - 1) * nxdim
+   !    bfrc(ij, 9) = vard4d(i, j, 1, 1)
+   !  end do
+   !end do
 
-    !-- DIC
-    filename = trim(bound_dir)//"/bdic.nc"
-    varname = "DIC"
-    write(nfstdo, *) "'--------------------------------------------------'"
-    write(nfstdo, *) "'-- Read forcing file: ", filename, varname
-    write(nfstdo, *) "'--------------------------------------------------'"
-    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
-    do j = 1, nydim
-      do i = 1, nxdim
-        ij = i + (j - 1) * nxdim
-        bfrc(ij, 9) = vard4d(i, j, 1, 1)
-      end do
-    end do
+   !!-- Alkalinity
+   !filename = trim(bound_dir)//"/balk.nc"
+   !varname = "ALK"
+   !write(nfstdo, *) "'--------------------------------------------------'"
+   !write(nfstdo, *) "'-- Read forcing file: ", filename
+   !write(nfstdo, *) "                       ", varname
+   !write(nfstdo, *) "'--------------------------------------------------'"
+   !call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+   !do j = 1, nydim
+   !  do i = 1, nxdim
+   !    ij = i + (j - 1) * nxdim
+   !    bfrc(ij, 10) = vard4d(i, j, 1, 1)
+   !  end do
+   !end do
 
-    !-- Alkalinity
-    filename = trim(bound_dir)//"/balk.nc"
-    varname = "ALK"
-    write(nfstdo, *) "'--------------------------------------------------'"
-    write(nfstdo, *) "'-- Read forcing file: ", filename, varname
-    write(nfstdo, *) "'--------------------------------------------------'"
-    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
-    do j = 1, nydim
-      do i = 1, nxdim
-        ij = i + (j - 1) * nxdim
-        bfrc(ij, 10) = vard4d(i, j, 1, 1)
-      end do
-    end do
+   !!-- Silicate
+   !filename = trim(bound_dir)//"/bsil.nc"
+   !varname = "SIL"
+   !write(nfstdo, *) "'--------------------------------------------------'"
+   !write(nfstdo, *) "'-- Read forcing file: ", filename
+   !write(nfstdo, *) "                       ", varname
+   !write(nfstdo, *) "'--------------------------------------------------'"
+   !call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+   !do j = 1, nydim
+   !  do i = 1, nxdim
+   !    ij = i + (j - 1) * nxdim
+   !    bfrc(ij, 11) = vard4d(i, j, 1, 1)
+   !  end do
+   !end do
 
-    !-- Silicate
-    filename = trim(bound_dir)//"/bsil.nc"
-    varname = "SIL"
-    write(nfstdo, *) "'--------------------------------------------------'"
-    write(nfstdo, *) "'-- Read forcing file: ", filename, varname
-    write(nfstdo, *) "'--------------------------------------------------'"
-    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
-    do j = 1, nydim
-      do i = 1, nxdim
-        ij = i + (j - 1) * nxdim
-        bfrc(ij, 11) = vard4d(i, j, 1, 1)
-      end do
-    end do
+   !!-- Oxygen
+   !filename = trim(bound_dir)//"/bdo2.nc"
+   !varname = "DO2"
+   !write(nfstdo, *) "'--------------------------------------------------'"
+   !write(nfstdo, *) "'-- Read forcing file: ", filename
+   !write(nfstdo, *) "                       ", varname
+   !write(nfstdo, *) "'--------------------------------------------------'"
+   !call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+   !do j = 1, nydim
+   !  do i = 1, nxdim
+   !    ij = i + (j - 1) * nxdim
+   !    bfrc(ij, 12) = vard4d(i, j, 1, 1)
+   !  end do
+   !end do
 
-    !-- Oxygen
-    filename = trim(bound_dir)//"/bdo2.nc"
-    varname = "DO2"
-    write(nfstdo, *) "'--------------------------------------------------'"
-    write(nfstdo, *) "'-- Read forcing file: ", filename, varname
-    write(nfstdo, *) "'--------------------------------------------------'"
-    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
-    do j = 1, nydim
-      do i = 1, nxdim
-        ij = i + (j - 1) * nxdim
-        bfrc(ij, 12) = vard4d(i, j, 1, 1)
-      end do
-    end do
+   !!-- 13C-DIC
+   !filename = trim(bound_dir)//"/bc13.nc"
+   !varname = "C13"
+   !write(nfstdo, *) "'--------------------------------------------------'"
+   !write(nfstdo, *) "'-- Read forcing file: ", filename
+   !write(nfstdo, *) "                       ", varname
+   !write(nfstdo, *) "'--------------------------------------------------'"
+   !call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+   !do j = 1, nydim
+   !  do i = 1, nxdim
+   !    ij = i + (j - 1) * nxdim
+   !    bfrc(ij, 13) = vard4d(i, j, 1, 1)
+   !  end do
+   !end do
 
-    !-- 13C-DIC
-    filename = trim(bound_dir)//"/bc13.nc"
-    varname = "C13"
-    write(nfstdo, *) "'--------------------------------------------------'"
-    write(nfstdo, *) "'-- Read forcing file: ", filename, varname
-    write(nfstdo, *) "'--------------------------------------------------'"
-    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
-    do j = 1, nydim
-      do i = 1, nxdim
-        ij = i + (j - 1) * nxdim
-        bfrc(ij, 13) = vard4d(i, j, 1, 1)
-      end do
-    end do
+   !!-- 14C-DIC
+   !filename = trim(bound_dir)//"/bc14.nc"
+   !varname = "C14"
+   !write(nfstdo, *) "'--------------------------------------------------'"
+   !write(nfstdo, *) "'-- Read forcing file: ", filename
+   !write(nfstdo, *) "                       ", varname
+   !write(nfstdo, *) "'--------------------------------------------------'"
+   !call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+   !do j = 1, nydim
+   !  do i = 1, nxdim
+   !    ij = i + (j - 1) * nxdim
+   !    bfrc(ij, 14) = vard4d(i, j, 1, 1)
+   !  end do
+   !end do
 
-    !-- 14C-DIC
-    filename = trim(bound_dir)//"/bc14.nc"
-    varname = "C14"
-    write(nfstdo, *) "'--------------------------------------------------'"
-    write(nfstdo, *) "'-- Read forcing file: ", filename, varname
-    write(nfstdo, *) "'--------------------------------------------------'"
-    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
-    do j = 1, nydim
-      do i = 1, nxdim
-        ij = i + (j - 1) * nxdim
-        bfrc(ij, 14) = vard4d(i, j, 1, 1)
-      end do
-    end do
+   !!-- Clay
+   !filename = trim(bound_dir)//"/ficla.nc"
+   !varname = "FICLA"
+   !write(nfstdo, *) "'--------------------------------------------------'"
+   !write(nfstdo, *) "'-- Read forcing file: ", filename
+   !write(nfstdo, *) "                       ", varname
+   !write(nfstdo, *) "'--------------------------------------------------'"
+   !call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+   !do j = 1, nydim
+   !  do i = 1, nxdim
+   !    ij = i + (j - 1) * nxdim
+   !    bfrc(ij, 1) = vard4d(i, j, 1, 1) * omask(i, j)
+   !  end do
+   !end do
 
-    !-- Clay
-    filename = trim(bound_dir)//"/ficla.nc"
-    varname = "FICLA"
-    write(nfstdo, *) "'--------------------------------------------------'"
-    write(nfstdo, *) "'-- Read forcing file: ", filename, varname
-    write(nfstdo, *) "'--------------------------------------------------'"
-    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
-    do j = 1, nydim
-      do i = 1, nxdim
-        ij = i + (j - 1) * nxdim
-        bfrc(ij, 1) = vard4d(i, j, 1, 1) * omask(i, j)
-      end do
-    end do
+   !!-- POM
+   !filename = trim(bound_dir)//"/fipom.nc"
+   !varname = "FIPOM"
+   !write(nfstdo, *) "'--------------------------------------------------'"
+   !write(nfstdo, *) "'-- Read forcing file: ", filename
+   !write(nfstdo, *) "                       ", varname
+   !write(nfstdo, *) "'--------------------------------------------------'"
+   !call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+   !do j = 1, nydim
+   !  do i = 1, nxdim
+   !    ij = i + (j - 1) * nxdim
+   !    bfrc(ij, 2) = vard4d(i, j, 1, 1) * omask(i, j)
+   !  end do
+   !end do
 
-    !-- POM
-    filename = trim(bound_dir)//"/fipom.nc"
-    varname = "FIPOM"
-    write(nfstdo, *) "'--------------------------------------------------'"
-    write(nfstdo, *) "'-- Read forcing file: ", filename, varname
-    write(nfstdo, *) "'--------------------------------------------------'"
-    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
-    do j = 1, nydim
-      do i = 1, nxdim
-        ij = i + (j - 1) * nxdim
-        bfrc(ij, 2) = vard4d(i, j, 1, 1) * omask(i, j)
-      end do
-    end do
+   !!-- CaCO3
+   !filename = trim(bound_dir)//"/ficar.nc"
+   !varname = "FICAR"
+   !write(nfstdo, *) "'--------------------------------------------------'"
+   !write(nfstdo, *) "'-- Read forcing file: ", filename
+   !write(nfstdo, *) "                       ", varname
+   !write(nfstdo, *) "'--------------------------------------------------'"
+   !call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+   !do j = 1, nydim
+   !  do i = 1, nxdim
+   !    ij = i + (j - 1) * nxdim
+   !    bfrc(ij, 3) = vard4d(i, j, 1, 1) * omask(i, j)
+   !  end do
+   !end do
 
-    !-- CaCO3
-    filename = trim(bound_dir)//"/ficar.nc"
-    varname = "FICAR"
-    write(nfstdo, *) "'--------------------------------------------------'"
-    write(nfstdo, *) "'-- Read forcing file: ", filename, varname
-    write(nfstdo, *) "'--------------------------------------------------'"
-    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
-    do j = 1, nydim
-      do i = 1, nxdim
-        ij = i + (j - 1) * nxdim
-        bfrc(ij, 3) = vard4d(i, j, 1, 1) * omask(i, j)
-      end do
-    end do
+   !!-- SiO2
+   !filename = trim(bound_dir)//"/fiopa.nc"
+   !varname = "FIOPA"
+   !write(nfstdo, *) "'--------------------------------------------------'"
+   !write(nfstdo, *) "'-- Read forcing file: ", filename
+   !write(nfstdo, *) "                       ", varname
+   !write(nfstdo, *) "'--------------------------------------------------'"
+   !call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
+   !do j = 1, nydim
+   !  do i = 1, nxdim
+   !    ij = i + (j - 1) * nxdim
+   !    bfrc(ij, 4) = vard4d(i, j, 1, 1) * omask(i, j)
+   !  end do
+   !end do
 
-    !-- SiO2
-    filename = trim(bound_dir)//"/fiopa.nc"
-    varname = "FIOPA"
-    write(nfstdo, *) "'--------------------------------------------------'"
-    write(nfstdo, *) "'-- Read forcing file: ", filename, varname
-    write(nfstdo, *) "'--------------------------------------------------'"
-    call read_netcdf_auto(filename, varname, vard4d, lon_values, lat_values, depth_values, time_values)
-    do j = 1, nydim
-      do i = 1, nxdim
-        ij = i + (j - 1) * nxdim
-        bfrc(ij, 4) = vard4d(i, j, 1, 1) * omask(i, j)
-      end do
-    end do
-
-    !-- Age tracer
-    do j = 1, nydim
-      do i = 1, nxdim
-        ij = i + (j - 1) * nxdim
-        vard4d(i, j, 1, 1) = 0.d0
-        bfrc(ij, 5) = vard4d(i, j, 1, 1) * omask(i, j)
-      end do
-    end do
+   !!-- Age tracer
+   !do j = 1, nydim
+   !  do i = 1, nxdim
+   !    ij = i + (j - 1) * nxdim
+   !    vard4d(i, j, 1, 1) = 0.d0
+   !    bfrc(ij, 5) = vard4d(i, j, 1, 1) * omask(i, j)
+   !  end do
+   !end do
 
     !-- Synchronize all processes --
     call mpi_barrier(mpi_comm_world, ierr)
@@ -924,7 +952,7 @@ contains
 
 ! subroutine read_namelist()
 !   integer :: ios
-!   character(len=100) :: namelist_file
+!   character(len=64) :: namelist_file
 
 !   namelist_file = "PARAMET"
 !   open(UNIT=nfparm, FILE=namelist_file, STATUS="old", iostat=ios)

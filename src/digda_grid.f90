@@ -173,8 +173,8 @@ module module_digda_grid
   integer, parameter :: nydim = 1080
   integer, parameter :: nzdim = 44
 
-  character(len=100) :: bound_dir = 'not-specified/'
-  character(len=100) :: bcfilnm(0:benfdm)
+  character(len=64) :: bound_dir = 'not-specified/'
+  character(len=64) :: bcfilnm(0:benfdm)
   data bcfilnm /                                                &
     'bdep.nc',                                                  &
     'ficla.nc', 'fipom.nc', 'ficar.nc', 'fiopa.nc', 'fiage.nc', &
@@ -182,8 +182,8 @@ module module_digda_grid
     'bnit.nc', 'bdic.nc', 'balk.nc', 'bsil.nc', 'bdo2.nc',      &
     'b13c.nc', 'b14c.nc' /
   namelist /nmocbc/ bound_dir, bcfilnm
-  character(len=100) :: init_dir = 'not-specified/'
-  character(len=100) :: rstt_dir = 'not-specified/'
+  character(len=64) :: init_dir = 'not-specified/'
+  character(len=64) :: rstt_dir = 'not-specified/'
   namelist /nmocrt/ init_dir, rstt_dir
 
   integer, parameter :: nxydim = nxdim * nydim
