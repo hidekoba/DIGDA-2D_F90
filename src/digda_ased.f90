@@ -6,10 +6,11 @@ program digda_ased
   use module_digda_cprdc
   implicit none
 
-  double precision, dimension(nxydim) :: bdep !! ocean depth [m]
+  double precision, dimension(nxydim) :: bdep
 
   double precision, dimension(nxydim, benfdm) :: bfrc
   double precision, dimension(nxydim, sdzdim, sedtdm) :: sdtx
+!!double precision, dimension(nxydim) :: omask
 
   double precision, dimension(:), allocatable :: lon_values
   double precision, dimension(:), allocatable :: lat_values
@@ -64,7 +65,7 @@ program digda_ased
   open(UNIT=nfsots, FILE="TSTEP_DIGDA", STATUS="UNKNOWN")
 ! end if
 
- !!-- Read the namelist --
+  !-- Read the namelist --
  !call read_namelist()
 
   !-- Initialize the name of tracer, forcing
@@ -91,12 +92,14 @@ program digda_ased
 
   !-- Read the forcing --
   call digda_read_bottom_forcing(bdep, bfrc)
+!!call digda_read_bottom_forcing(bdep, bfrc, omask)
 
   call clcend('SETUP')
 
   !-- Start time-stepping --
   call clcstr('PREDIC')
   call digda_cprdc(bdep, bfrc, sdtx, lon_values, lat_values, depth_values)
+!!call digda_cprdc(bdep, bfrc, omask, sdtx, lon_values, lat_values, depth_values)
   call clcend('PREDIC')
 
   !-- Write the restart file --

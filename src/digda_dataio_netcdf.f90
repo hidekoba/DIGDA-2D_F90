@@ -468,11 +468,14 @@ contains
   end subroutine digda_write_restart
 
   subroutine digda_read_bottom_forcing(bdep, bfrc)
+!!subroutine digda_read_bottom_forcing(bdep, bfrc, omask)
 
     double precision, dimension(nxydim), intent(out) :: bdep
     double precision, dimension(nxydim, benfdm), intent(out) :: bfrc
+!!  double precision, dimension(nxydim), intent(out) :: omask
 
-    double precision, dimension(nxdim, nydim) :: omask
+    double precision, dimension(nxydim) :: omask
+
     double precision, dimension(:), allocatable :: lon_values
     double precision, dimension(:), allocatable :: lat_values
     double precision, dimension(:), allocatable :: depth_values
@@ -507,10 +510,10 @@ contains
         do i = 1, nxdim
           ij = i + (j - 1) * nxdim
           bdep(ij) = vard4d(i, j, 1, 1)
-          if (vard4d(i, j, 1, 1) == rmiss .or. vard4d(i, j, 1, 1) == 0.0) then
-            omask(i, j) = 0.d0
+          if (vard4d(i, j, 1, 1) == rmiss .or. vard4d(i, j, 1, 1) == 0.d0) then
+            omask(ij) = 0.d0
           else
-            omask(i, j) = 1.d0
+            omask(ij) = 1.d0
           end if
         end do
       end do
@@ -527,7 +530,7 @@ contains
       do j = 1, nydim
         do i = 1, nxdim
           ij = i + (j - 1) * nxdim
-          bfrc(ij, n) = vard4d(i, j, 1, 1) * omask(i, j)
+          bfrc(ij, n) = vard4d(i, j, 1, 1) * omask(ij)
         end do
       end do
     end do
@@ -544,7 +547,7 @@ contains
         do i = 1, nxdim
           ij = i + (j - 1) * nxdim
           vard4d(i, j, 1, 1) = 0.d0
-          bfrc(ij, n) = vard4d(i, j, 1, 1) * omask(i, j)
+          bfrc(ij, n) = vard4d(i, j, 1, 1) * omask(ij)
         end do
       end do
 
@@ -578,9 +581,9 @@ contains
    !    ij = i + (j - 1) * nxdim
    !    bdep(ij) = vard4d(i, j, 1, 1)
    !    if (vard4d(i, j, 1, 1) == rmiss .or. vard4d(i, j, 1, 1) == 0.0) then
-   !      omask(i, j) = 0.d0
+   !      omask(ij) = 0.d0
    !    else
-   !      omask(i, j) = 1.d0
+   !      omask(ij) = 1.d0
    !    end if
    !  end do
    !end do
@@ -731,7 +734,7 @@ contains
    !do j = 1, nydim
    !  do i = 1, nxdim
    !    ij = i + (j - 1) * nxdim
-   !    bfrc(ij, 1) = vard4d(i, j, 1, 1) * omask(i, j)
+   !    bfrc(ij, 1) = vard4d(i, j, 1, 1) * omask(ij)
    !  end do
    !end do
 
@@ -746,7 +749,7 @@ contains
    !do j = 1, nydim
    !  do i = 1, nxdim
    !    ij = i + (j - 1) * nxdim
-   !    bfrc(ij, 2) = vard4d(i, j, 1, 1) * omask(i, j)
+   !    bfrc(ij, 2) = vard4d(i, j, 1, 1) * omask(ij)
    !  end do
    !end do
 
@@ -761,7 +764,7 @@ contains
    !do j = 1, nydim
    !  do i = 1, nxdim
    !    ij = i + (j - 1) * nxdim
-   !    bfrc(ij, 3) = vard4d(i, j, 1, 1) * omask(i, j)
+   !    bfrc(ij, 3) = vard4d(i, j, 1, 1) * omask(ij)
    !  end do
    !end do
 
@@ -776,7 +779,7 @@ contains
    !do j = 1, nydim
    !  do i = 1, nxdim
    !    ij = i + (j - 1) * nxdim
-   !    bfrc(ij, 4) = vard4d(i, j, 1, 1) * omask(i, j)
+   !    bfrc(ij, 4) = vard4d(i, j, 1, 1) * omask(ij)
    !  end do
    !end do
 
@@ -785,7 +788,7 @@ contains
    !  do i = 1, nxdim
    !    ij = i + (j - 1) * nxdim
    !    vard4d(i, j, 1, 1) = 0.d0
-   !    bfrc(ij, 5) = vard4d(i, j, 1, 1) * omask(i, j)
+   !    bfrc(ij, 5) = vard4d(i, j, 1, 1) * omask(ij)
    !  end do
    !end do
 

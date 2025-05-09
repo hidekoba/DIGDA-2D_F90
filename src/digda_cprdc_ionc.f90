@@ -49,6 +49,7 @@ contains
   subroutine digda_cprdc( &
  &  bdepg, &
  &  bfrcg, &
+ &  omaskg, &
  &  sdtx, &
  &  lon_values, &
  &  lat_values, &
@@ -63,6 +64,7 @@ contains
 
     double precision, intent(in) :: bdepg(nxydim)
     double precision, intent(in) :: bfrcg(nxydim, benfdm)
+    double precision, intent(in) :: omaskg(nxdim, nydim)
 
     double precision, intent(inout) :: sdtx(nxydim, sdzdim, sedtdm)
     double precision :: sdtxbuf(nxdim, nydim, sdzdim, sedtdm)
@@ -549,20 +551,24 @@ contains
 !   -- Set boundary conditions --
 
     do i = 1, nxydim
-      ficlag(i) = bfrcg(i, 1)
-      fipomg(i) = bfrcg(i, 2)
-      ficarg(i) = bfrcg(i, 3)
-      fiopag(i) = bfrcg(i, 4)
-      fiageg(i) = bfrcg(i, 5)
-      bwtemg(i) = bfrcg(i, 6)
-      bwsalg(i) = bfrcg(i, 7)
-      bwnitg(i) = bfrcg(i, 8)
-      bwdicg(i) = bfrcg(i, 9)
-      bwalkg(i) = bfrcg(i, 10)
-      bwsilg(i) = bfrcg(i, 11)
-      bwdo2g(i) = bfrcg(i, 12)
-      bw13dicg(i) = bfrcg(i, 13)
-      bw14dicg(i) = bfrcg(i, 14)
+      ficlag(i) = bfrcg(i, nbfcla)
+      fipomg(i) = bfrcg(i, nbfpom)
+      ficarg(i) = bfrcg(i, nbfcar)
+      fiopag(i) = bfrcg(i, nbfopa)
+      fiageg(i) = bfrcg(i, nbfage)
+      bwtemg(i) = bfrcg(i, nbftem)
+      bwsalg(i) = bfrcg(i, nbfsal)
+      bwnitg(i) = bfrcg(i, nbfnit)
+      bwdicg(i) = bfrcg(i, nbfdic)
+      bwalkg(i) = bfrcg(i, nbfalk)
+      bwsilg(i) = bfrcg(i, nbfsil)
+      bwdo2g(i) = bfrcg(i, nbfdo2)
+      if ( calc13 .and. sedtdm == 16 ) then
+      bw13dicg(i) = bfrcg(i, nbf13dic)
+      end if
+      if ( calc14 .and. sedtdm == 16 ) then
+      bw14dicg(i) = bfrcg(i, nbf14dic)
+      end if
     end do
 
 if (use_mpi) then
