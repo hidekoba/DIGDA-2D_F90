@@ -3900,6 +3900,7 @@ end if ! -- End of use_mpi
       write(nfstdo, *) "'-- DIGDA Prediction:                            --'"
       write(nfstdo, *) "'-- Finished time integration                    --'"
       write(nfstdo, *) "'--------------------------------------------------'"
+      call flush(nfstdo)
 
       if (hstavg) then
          if (allocated(mean_data)) deallocate(mean_data)
