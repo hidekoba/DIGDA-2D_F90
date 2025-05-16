@@ -15,10 +15,10 @@
  fi
 
  # Load the conda initialization script
- source /home/c24116/anaconda3/etc/profile.d/conda.sh
+ source /common1/work/gi55/c24116/anaconda3/etc/profile.d/conda.sh
 
  # Activate an Anaconda environment
- conda activate /home/c24116/anaconda3/
+ conda activate /common1/work/gi55/c24116/anaconda3/
 
  # Extract relevant variables from each file and combine into a single file for calculation
  rm combined.nc
