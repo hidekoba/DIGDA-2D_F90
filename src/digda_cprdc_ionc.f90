@@ -49,7 +49,6 @@ contains
   subroutine digda_cprdc( &
  &  bdepg, &
  &  bfrcg, &
- &  omaskg, &
  &  sdtx, &
  &  lon_values, &
  &  lat_values, &
@@ -64,7 +63,7 @@ contains
 
     double precision, intent(in) :: bdepg(nxydim)
     double precision, intent(in) :: bfrcg(nxydim, benfdm)
-    double precision, intent(in) :: omaskg(nxdim, nydim)
+   !double precision, intent(in) :: omaskg(nxdim, nydim)
 
     double precision, intent(inout) :: sdtx(nxydim, sdzdim, sedtdm)
     double precision :: sdtxbuf(nxdim, nydim, sdzdim, sedtdm)
