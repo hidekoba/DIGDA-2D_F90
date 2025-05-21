@@ -6,7 +6,7 @@ module module_digda_dataio_netcdf
   implicit none
 
   character(len=128) :: filename
-  character(len=16) :: varname, varunit
+  character(len=32) :: varname, varunit
   integer :: i, j, k, t, ij
 
   double precision, dimension(:),       allocatable :: longitude

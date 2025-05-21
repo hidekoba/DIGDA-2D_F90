@@ -42,7 +42,7 @@ module module_digda_cprdc
   ! etc
   character(16) :: sedtnm(sedtdm)
   character(128) :: cfile, citem, ctitle, cunit
-  character(len=16) :: chead(64)
+  character(len=32) :: chead(64)
 
 contains
 
@@ -306,7 +306,7 @@ contains
 
     ! etc
     character(len=64) :: filename
-    character(len=16) :: varname, varunit
+    character(len=32) :: varname, varunit
     double precision :: lon_values(nxdim)
     double precision :: lat_values(nydim)
     double precision :: depth_values(sdzdim)

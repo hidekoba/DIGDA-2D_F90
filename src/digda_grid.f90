@@ -23,24 +23,24 @@ module module_digda_grid
   integer, parameter :: nts14car = 15 !! 14C Calcium carbonate
   integer, parameter :: ntc14dic = 16 !! 14C DIC
 
- !character(len=16) :: dtrcnm(sedtdm) !! Name of tracer
- !character(len=16) :: dtrcun(sedtdm) !! Unit of tracer
+ !character(len=32) :: dtrcnm(sedtdm) !! Name of tracer
+ !character(len=32) :: dtrcun(sedtdm) !! Unit of tracer
 
-  character(len=16) :: dtrcnm(sedtdm) = [character(len=16) ::   &
+  character(len=32) :: dtrcnm(sedtdm) = [character(len=32) ::   &
     "Clay", "OrgM", "CaCO3", "SiO2", "Agetracer",               &
     "Phosphate", "DIC", "Alkalinity", "Silicate", "Oxygen" ]
 
- !character(len=16) :: dtrcnm(sedtdm) = [character(len=16) ::   &
+ !character(len=32) :: dtrcnm(sedtdm) = [character(len=32) ::   &
  !  "Clay", "OrgM", "CaCO3", "SiO2", "Agetracer",               &
  !  "Phosphate", "DIC", "Alkalinity", "Silicate", "Oxygen",     &
  !  "13C-OrgM", "13C-CaCO3", "13C-DIC",                         &
  !  "14C-OrgM", "14C-CaCO3", "14C-DIC" ]
 
-  character(len=16) :: dtrcun(sedtdm) = [character(len=16) ::   &
+  character(len=32) :: dtrcun(sedtdm) = [character(len=32) ::   &
     "g m-3", "mmol m-3", "mmol m-3", "mmol m-3", "year",        &
     "mmol m-3", "mmol m-3", "mmol m-3", "mmol m-3", "mmol m-3" ]
 
- !character(len=16) :: dtrcun(sedtdm) = [character(len=16) ::   &
+ !character(len=32) :: dtrcun(sedtdm) = [character(len=32) ::   &
  !  "g m-3", "mmol m-3", "mmol m-3", "mmol m-3", "year",        &
  !  "mmol m-3", "mmol m-3", "mmol m-3", "mmol m-3", "mmol m-3", &
  !  "mmol m-3", "mmol m-3", "mmol m-3",                         &
@@ -64,15 +64,15 @@ module module_digda_grid
   integer, parameter :: nbf13dic = 13 !! 13C DIC
   integer, parameter :: nbf14dic = 14 !! 14C DIC
 
- !character(len=16) :: bfrcnm(benfdm) !! Name of forcing
+ !character(len=32) :: bfrcnm(benfdm) !! Name of forcing
 
-  character(len=16) :: bfrcnm(0:benfdm) = [character(len=16) ::  &
+  character(len=32) :: bfrcnm(0:benfdm) = [character(len=32) ::  &
     "DEPTH",                                                     &
     "FICLA", "FIPOM", "FICAR", "FIOPA", "FIAGE",                 &
     "TEM", "SAL",                                                &
     "NIT", "DIC", "ALK", "SIL", "DO2" ]
 
- !character(len=16) :: bfrcnm(0:benfdm) = [character(len=16) ::  &
+ !character(len=32) :: bfrcnm(0:benfdm) = [character(len=32) ::  &
  !  "DEPTH",                                                     &
  !  "FICLA", "FIPOM", "FICAR", "FIOPA", "FIAGE",                 &
  !  "TEM", "SAL",                                                &
@@ -161,9 +161,9 @@ module module_digda_grid
  !integer, parameter :: nzdim = 44
 
   !-- Grid_128x64 --
- !integer, parameter :: nxdim = 128
- !integer, parameter :: nydim = 64
- !integer, parameter :: nzdim = 44
+  integer, parameter :: nxdim = 128
+  integer, parameter :: nydim = 64
+  integer, parameter :: nzdim = 44
 
   !-- Grid_256x192 --
  !integer, parameter :: nxdim = 256
@@ -176,9 +176,9 @@ module module_digda_grid
  !integer, parameter :: nzdim = 44
 
   !-- Grid_2160x1080 --
-  integer, parameter :: nxdim = 2160
-  integer, parameter :: nydim = 1080
-  integer, parameter :: nzdim = 44
+ !integer, parameter :: nxdim = 2160
+ !integer, parameter :: nydim = 1080
+ !integer, parameter :: nzdim = 44
 
   character(len=128) :: bound_dir = 'not-specified/'
   character(len=64) :: bcfilnm(0:benfdm)

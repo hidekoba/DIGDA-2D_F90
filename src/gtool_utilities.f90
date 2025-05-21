@@ -9,7 +9,7 @@ contains
     character(len=*), intent(in) :: filename
     integer,intent(in) :: nsize, ntsize
     double precision, allocatable, intent(out) :: var(:,:)
-    character(len=16), intent(out) :: chead(64, ntsize)
+    character(len=32), intent(out) :: chead(64, ntsize)
     integer :: unit, iostat
     integer :: t
 
@@ -52,14 +52,14 @@ contains
     character(len=*), intent(in) :: filename
     integer, intent(in) :: nx, ny, nz, nt
     double precision, intent(in) :: var(nx*ny*nz, nt)
-    character(len=16), intent(in) :: chead_orig(64, nt)
-    character(len=16) :: chead(64)
-    character(len=16), intent(in) :: citem
-    character(len=16), intent(in) :: ctitle
-    character(len=16), intent(in) :: cunit
+    character(len=32), intent(in) :: chead_orig(64, nt)
+    character(len=32) :: chead(64)
+    character(len=32), intent(in) :: citem
+    character(len=32), intent(in) :: ctitle
+    character(len=32), intent(in) :: cunit
     integer :: unit, i, j, k, t
     double precision :: missing_value
-    character(len=16) :: tmpstr
+    character(len=32) :: tmpstr
     logical :: file_first
 
     file_first = .true.
@@ -132,11 +132,11 @@ contains
     integer, intent(in) :: nx, ny, nz, nt
     double precision, intent(in) :: var(nx*ny, nz, nt)
     double precision :: vartmp(nx*ny*nz, nt)
-    character(len=16), intent(in) :: chead_orig(64, nt)
-    character(len=16) :: chead(64)
-    character(len=16), intent(in) :: citem
-    character(len=16), intent(in) :: ctitle
-    character(len=16), intent(in) :: cunit
+    character(len=32), intent(in) :: chead_orig(64, nt)
+    character(len=32) :: chead(64)
+    character(len=32), intent(in) :: citem
+    character(len=32), intent(in) :: ctitle
+    character(len=32), intent(in) :: cunit
     integer :: unit, i, j, k, t, ij, ijk
     logical :: file_first
 
