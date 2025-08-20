@@ -5,7 +5,7 @@ module module_digda_dataio_netcdf
   use module_digda_mpi
   implicit none
 
-  character(len=128) :: filename
+  character(len=192) :: filename
   character(len=32) :: varname, varunit
   integer :: i, j, k, t, ij
 
@@ -246,7 +246,7 @@ contains
     double precision, dimension(:), allocatable, intent(in) :: depth_values
     integer(kind=4), dimension(:), allocatable, intent(in) :: time_values
 
-    character(len=100)            :: filenames(sedtdm)
+    character(len=192)            :: filenames(sedtdm)
 
     integer :: ios
 

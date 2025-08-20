@@ -41,7 +41,7 @@ module module_digda_cprdc
 
   ! etc
   character(16) :: sedtnm(sedtdm)
-  character(128) :: cfile, citem, ctitle, cunit
+  character(len=192) :: cfile, citem, ctitle, cunit
   character(len=32) :: chead(64)
 
 contains

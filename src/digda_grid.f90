@@ -161,9 +161,9 @@ module module_digda_grid
  !integer, parameter :: nzdim = 44
 
   !-- Grid_128x64 --
-  integer, parameter :: nxdim = 128
-  integer, parameter :: nydim = 64
-  integer, parameter :: nzdim = 44
+ !integer, parameter :: nxdim = 128
+ !integer, parameter :: nydim = 64
+ !integer, parameter :: nzdim = 44
 
   !-- Grid_256x192 --
  !integer, parameter :: nxdim = 256
@@ -176,11 +176,11 @@ module module_digda_grid
  !integer, parameter :: nzdim = 44
 
   !-- Grid_2160x1080 --
- !integer, parameter :: nxdim = 2160
- !integer, parameter :: nydim = 1080
- !integer, parameter :: nzdim = 44
+  integer, parameter :: nxdim = 2160
+  integer, parameter :: nydim = 1080
+  integer, parameter :: nzdim = 44
 
-  character(len=128) :: bound_dir = 'not-specified/'
+  character(len=192) :: bound_dir = 'not-specified/'
   character(len=64) :: bcfilnm(0:benfdm)
   data bcfilnm /                                                &
     'bdep.nc',                                                  &
@@ -194,8 +194,8 @@ module module_digda_grid
  !  'bnit.nc', 'bdic.nc', 'balk.nc', 'bsil.nc', 'bdo2.nc',      &
  !  'b13c.nc', 'b14c.nc' /
   namelist /nmocbc/ bound_dir, bcfilnm
-  character(len=128) :: init_dir = 'not-specified/'
-  character(len=128) :: rstt_dir = 'not-specified/'
+  character(len=192) :: init_dir = 'not-specified/'
+  character(len=192) :: rstt_dir = 'not-specified/'
   character(len=64) :: rsfilnm
   data rsfilnm / 'SEDTRR.nc' /
   namelist /nmocrt/ init_dir, rstt_dir, rsfilnm

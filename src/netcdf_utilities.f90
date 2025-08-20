@@ -606,7 +606,7 @@ contains
     character(len=*), parameter :: tname = "time"
 
     integer(kind=4) :: nvars
-    character(len=128) :: varname_file
+    character(len=192) :: varname_file
 
     ! Initialize variables
     has_lon = .false.
