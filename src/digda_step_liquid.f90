@@ -77,7 +77,9 @@ contains
          ea(k)         = - ebe(k)
          ec(k)         = - ega(k)
       do ij = ijtstr, ijtend
+         if ( bw(ij) /= rmiss ) then
          eb(ij, k)     = eal(k) + ebe(k) + ega(k)
+         end if
       end do
       end do
 
@@ -86,37 +88,45 @@ contains
          ea(sken)      = - ebe(sken)
          ec(sken)      = - ega(sken)
       do ij = ijtstr, ijtend
+         if ( bw(ij) /= rmiss ) then
          eb(ij, skst)  = eal(skst) + ega(skst) &
      &   + ( phii(skst) * dei(skst) / dlzi(skst) / dlzi(skst) )
          eb(ij, sken)  = eal(sken) + ebe(sken)
+         end if
       end do
 
       do ij = ijtstr, ijtend
+         if ( bw(ij) /= rmiss ) then
          ed(ij, skst) = &
      &      + ( eal(skst) - ega(skst) ) * c(ij, skst) &
      &      + ega(skst) * c(ij, skst+1) &
      &      + rlt(ij, skst) &
      &   + ( phii(skst) * dei(skst) * bw(ij) / dlzi(skst) / dlzi(skst) )
+         end if
       end do
 
       do k = skst+1, sken-1
       do ij = ijtstr, ijtend
+         if ( bw(ij) /= rmiss ) then
          ed(ij, k) = &
      &      + ebe(k) * c(ij, k-1) &
      &      + ( eal(k) - ebe(k) - ega(k) ) * c(ij, k) &
      &      + ega(k) * c(ij, k+1) &
      &      + rlt(ij, k)
+         end if
       end do
       end do
 
       do ij = ijtstr, ijtend
+         if ( bw(ij) /= rmiss ) then
          ed(ij, sken) = &
      &      + ebe(sken) * c(ij, sken-1) &
      &      + ( eal(sken) - ega(sken) ) * c(ij, sken) &
      &      + rlt(ij, sken)
+         end if
       end do
 
-      call calc_tridiagonal_liquid( ea, eb, ec, ed, ex )
+      call calc_tridiagonal_liquid( bw, ea, eb, ec, ed, ex )
 
       end if
 
@@ -136,7 +146,9 @@ contains
          ea(k)         = - ebe(k)
          ec(k)         = - ega(k)
       do ij = ijtstr, ijtend
+         if ( bw(ij) /= rmiss ) then
          eb(ij, k)     = eal(k) + ebe(k) + ega(k)
+         end if
       end do
       end do
 
@@ -145,25 +157,31 @@ contains
          ea(sken)      = - ebe(sken)
          ec(sken)      = - ega(sken)
       do ij = ijtstr, ijtend
+         if ( bw(ij) /= rmiss ) then
          eb(ij, skst)  = eal(skst) + ega(skst) &
      &   + ( phii(skst) * dei(skst) / dlzi(skst) / dlzi(skst) )
          eb(ij, sken)  = eal(sken) + ebe(sken)
+         end if
       end do
 
       do k = skst, sken
       do ij = ijtstr, ijtend
+         if ( bw(ij) /= rmiss ) then
          ed(ij, k) = &
      &      + eal(k) * c(ij, k) &
      &      + rlt(ij, k)
+         end if
       end do
       end do
 
       do ij = ijtstr, ijtend
+         if ( bw(ij) /= rmiss ) then
          ed(ij, skst) = ed(ij, skst) &
      &   + ( phii(skst) * dei(skst) * bw(ij) / dlzi(skst) / dlzi(skst) )
+         end if
       end do
 
-      call calc_tridiagonal_liquid( ea, eb, ec, ed, ex )
+      call calc_tridiagonal_liquid( bw, ea, eb, ec, ed, ex )
 
       end if
 
@@ -171,8 +189,13 @@ contains
 
       do k = skst, sken
       do ij = ijtstr, ijtend
-         cn(ij, k) = max( ex(ij, k), 0.0d0 )
-         ex(ij, k) = 0.0d0
+         if ( bw(ij) /= rmiss ) then
+            cn(ij, k) = max( ex(ij, k), 0.0d0 )
+            ex(ij, k) = 0.0d0
+         else
+            cn(ij, k) = rmiss
+            ex(ij, k) = 0.0d0
+         end if
       end do
       end do
 
@@ -214,7 +237,9 @@ contains
          ega(k) = ( ( phii(k+1) * dei(k+1) ) &
      &            / ( 2.0d0 * dlz(k) * dlzi(k+1) ) )
       do ij = ijtstr, ijtend
+         if ( bw(ij) /= rmiss ) then
          eep(ij, k) = - 0.50d0 * rlt(ij, k)
+         end if
       end do
       end do
 
@@ -222,7 +247,9 @@ contains
          ea(k)         = - ebe(k)
          ec(k)         = - ega(k)
       do ij = ijtstr, ijtend
+         if ( bw(ij) /= rmiss ) then
          eb(ij, k)     = eal(k) + ebe(k) + ega(k) + eep(ij, k)
+         end if
       end do
       end do
 
@@ -231,37 +258,45 @@ contains
          ea(sken)      = - ebe(sken)
          ec(sken)      = - ega(sken)
       do ij = ijtstr, ijtend
+         if ( bw(ij) /= rmiss ) then
          eb(ij, skst)  = eal(skst) + ega(skst) + eep(ij, skst) &
      &   + ( phii(skst) * dei(skst) / dlzi(skst) / dlzi(skst) )
          eb(ij, sken)  = eal(sken) + ebe(sken) + eep(ij, sken)
+         end if
       end do
 
       do ij = ijtstr, ijtend
+         if ( bw(ij) /= rmiss ) then
          ed(ij, skst) = &
      &      + ( eal(skst) - ega(skst) ) * c(ij, skst) &
      &      + ega(skst) * c(ij, skst+1) &
      &      + 0.50d0 * rlt(ij, skst) * c(ij, skst) &
      &   + ( phii(skst) * dei(skst) * bw(ij) / dlzi(skst) / dlzi(skst) )
+         end if
       end do
 
       do k = skst+1, sken-1
       do ij = ijtstr, ijtend
+         if ( bw(ij) /= rmiss ) then
          ed(ij, k) = &
      &      + ebe(k) * c(ij, k-1) &
      &      + ( eal(k) - ebe(k) - ega(k) ) * c(ij, k) &
      &      + ega(k) * c(ij, k+1) &
      &      + 0.50d0 * rlt(ij, k) * c(ij, k)
+         end if
       end do
       end do
 
       do ij = ijtstr, ijtend
+         if ( bw(ij) /= rmiss ) then
          ed(ij, sken) = &
      &      + ebe(sken) * c(ij, sken-1) &
      &      + ( eal(sken) - ega(sken) ) * c(ij, sken) &
      &      + 0.50d0 * rlt(ij, sken) * c(ij, sken)
+         end if
       end do
 
-      call calc_tridiagonal_liquid( ea, eb, ec, ed, ex )
+      call calc_tridiagonal_liquid( bw, ea, eb, ec, ed, ex )
 
       end if
 
@@ -276,7 +311,9 @@ contains
          ega(k) = ( ( phii(k+1) * dei(k+1) ) &
      &            / ( dlz(k) * dlzi(k+1) ) )
       do ij = ijtstr, ijtend
+         if ( bw(ij) /= rmiss ) then
          eep(ij, k) = - rlt(ij, k)
+         end if
       end do
       end do
 
@@ -284,7 +321,9 @@ contains
          ea(k)         = - ebe(k)
          ec(k)         = - ega(k)
       do ij = ijtstr, ijtend
+         if ( bw(ij) /= rmiss ) then
          eb(ij, k)     = eal(k) + ebe(k) + ega(k) + eep(ij, k)
+         end if
       end do
       end do
 
@@ -293,24 +332,30 @@ contains
          ea(sken)      = - ebe(sken)
          ec(sken)      = - ega(sken)
       do ij = ijtstr, ijtend
+         if ( bw(ij) /= rmiss ) then
          eb(ij, skst)  = eal(skst) + ega(skst) + eep(ij, skst) &
      &   + ( phii(skst) * dei(skst) / dlzi(skst) / dlzi(skst) )
          eb(ij, sken)  = eal(sken) + ebe(sken) + eep(ij, sken)
+         end if
       end do
 
       do k = skst, sken
       do ij = ijtstr, ijtend
+         if ( bw(ij) /= rmiss ) then
          ed(ij, k) = &
      &      + eal(k) * c(ij, k)
+         end if
       end do
       end do
 
       do ij = ijtstr, ijtend
+         if ( bw(ij) /= rmiss ) then
          ed(ij, skst) = ed(ij, skst) &
      &   + ( phii(skst) * dei(skst) * bw(ij) / dlzi(skst) / dlzi(skst) )
+         end if
       end do
 
-      call calc_tridiagonal_liquid( ea, eb, ec, ed, ex )
+      call calc_tridiagonal_liquid( bw, ea, eb, ec, ed, ex )
 
       end if
 
@@ -318,8 +363,13 @@ contains
 
       do k = skst, sken
       do ij = ijtstr, ijtend
-         cn(ij, k) = max( ex(ij, k), 0.0d0 )
-         ex(ij, k) = 0.0d0
+         if ( bw(ij) /= rmiss ) then
+            cn(ij, k) = max( ex(ij, k), 0.0d0 )
+            ex(ij, k) = 0.0d0
+         else
+            cn(ij, k) = rmiss
+            ex(ij, k) = 0.0d0
+         end if
       end do
       end do
 
@@ -327,10 +377,11 @@ contains
 
 ! =====================================================================
 
-      subroutine calc_tridiagonal_liquid( ea, eb, ec, ed, ex )
+      subroutine calc_tridiagonal_liquid( bw, ea, eb, ec, ed, ex )
 
       double precision, intent(in)  :: ea(sdzdim), eb(nxy,sdzdim), ec(sdzdim)
       double precision, intent(in)  :: ed(nxy,sdzdim)
+      double precision, intent(in)  :: bw(nxy)
       double precision, intent(out) :: ex(nxy,sdzdim)
 
       double precision :: ew(nxy,sdzdim)
@@ -339,21 +390,31 @@ contains
       integer :: ij, k
 
       do ij = ijtstr, ijtend
-         bet(ij)      = eb(ij, skst)
-         ex(ij, skst) = ed(ij, skst) / bet(ij)
+         if ( bw(ij) /= rmiss ) then
+            bet(ij)      = eb(ij, skst)
+            ex(ij, skst) = ed(ij, skst) / bet(ij)
+         end if
       end do
 
       do k = skst+1, sken
       do ij = ijtstr, ijtend
-         ew(ij, k) = ec(k-1) / bet(ij)
-         bet(ij)   = eb(ij, k) - ea(k) * ew(ij, k)
-         ex(ij, k) = (ed(ij, k) - ea(k) * ex(ij, k-1) ) / bet(ij)
+         if ( bw(ij) /= rmiss ) then
+            ew(ij, k) = ec(k-1) / bet(ij)
+            bet(ij)   = eb(ij, k) - ea(k) * ew(ij, k)
+            ex(ij, k) = (ed(ij, k) - ea(k) * ex(ij, k-1) ) / bet(ij)
+         else
+            ex(ij, k) = rmiss
+         end if
       end do
       end do
 
       do k = sken-1, skst, -1
       do ij = ijtstr, ijtend
-         ex(ij, k) = ex(ij, k) - ew(ij, k+1) * ex(ij, k+1)
+         if ( bw(ij) /= rmiss ) then
+            ex(ij, k) = ex(ij, k) - ew(ij, k+1) * ex(ij, k+1)
+         else
+            ex(ij, k) = rmiss
+         end if
       end do
       end do
 

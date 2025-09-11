@@ -40,14 +40,14 @@ contains
             allocate(mean_data%sum(nxy * nz))
             allocate(mean_data%count(nxy * nz))
         end if
-        call reset_time_mean(mean_data)  ! Reset the accumulated data
+        ! Reset the accumulated data
+        call reset_time_mean(mean_data)
     end subroutine initialize_time_mean
 
     subroutine update_time_mean(mean_data, data)
         ! Update the time mean with new data
         type(time_mean_type), intent(inout) :: mean_data
         double precision, intent(in) :: data(:,:)
-        real, allocatable :: data_3d(:,:)
 
         mean_data%sum = mean_data%sum + reshape(data, shape(mean_data%sum))
         mean_data%count = mean_data%count + 1

@@ -7,16 +7,20 @@ module module_digda_mpi
   integer, parameter :: iroot = 0
   integer :: ierr, nprocs, myrank
   integer :: ireq, istatus
+ !integer, parameter :: ncpu =  8 !! 128x64 (wisteria, node=1)
  !integer, parameter :: ncpu = 12
  !integer, parameter :: ncpu = 16
  !integer, parameter :: ncpu = 24
+ !integer, parameter :: ncpu = 32
  !integer, parameter :: ncpu = 45
-  integer, parameter :: ncpu = 48 !! 256x192
- !integer, parameter :: ncpu = 64
- !integer, parameter :: ncpu = 90 !! 2160x1080
+ !integer, parameter :: ncpu = 48 !! 256x192 (wisteria, node=1)
+ !integer, parameter :: ncpu = 64 !! 256x192 (es4ifort, node=1)
+  integer, parameter :: ncpu = 90 !! 2160x1080 (wisteria, node=15)
  !integer, parameter :: ncpu = 96
+ !integer, parameter :: ncpu = 120 !! 2160x1080 (es4ifort, node=3)
  !integer, parameter :: ncpu = 180
  !integer, parameter :: ncpu = 192
+ !integer, parameter :: ncpu = 360
   integer :: nsndct2d, nsndct3d, nsndcw3d
   integer :: irank, isize1, isize2, isize3, ijkg
   integer :: isend1, isend2, isend3
@@ -25,6 +29,7 @@ module module_digda_mpi
 
   ! Parallel digda_configuration
   logical, parameter :: use_mpi = .true.
+  logical, parameter :: use_mpiio = .false.
 
 contains
 
@@ -37,6 +42,8 @@ contains
     if ( nprocs /= ncpu ) then
       if ( myrank == iroot ) then
         write(*, *) "***** MPI ERROR *****"
+        write(*, *) "   nprocs = ", nprocs
+        write(*, *) "     ncpu = ", ncpu
         call mpi_finalize(ierr)
         stop
       end if

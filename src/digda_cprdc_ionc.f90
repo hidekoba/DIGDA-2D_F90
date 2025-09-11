@@ -41,8 +41,8 @@ module module_digda_cprdc
 
   ! etc
   character(16) :: sedtnm(sedtdm)
-  character(128) :: cfile, citem, ctitle, cunit
-  character(len=16) :: chead(64)
+  character(len=192) :: cfile, citem, ctitle, cunit
+  character(len=32) :: chead(64)
 
 contains
 
@@ -63,6 +63,7 @@ contains
 
     double precision, intent(in) :: bdepg(nxydim)
     double precision, intent(in) :: bfrcg(nxydim, benfdm)
+   !double precision, intent(in) :: omaskg(nxdim, nydim)
 
     double precision, intent(inout) :: sdtx(nxydim, sdzdim, sedtdm)
     double precision :: sdtxbuf(nxdim, nydim, sdzdim, sedtdm)
@@ -304,7 +305,8 @@ contains
     double precision, allocatable :: varavgdt(:,:)
 
     ! etc
-    character(len=100) :: filename, varname, varunit
+    character(len=64) :: filename
+    character(len=32) :: varname, varunit
     double precision :: lon_values(nxdim)
     double precision :: lat_values(nydim)
     double precision :: depth_values(sdzdim)
@@ -331,6 +333,7 @@ contains
     end if
 
     write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "'-- DIGDA Prediction:                            --'"
     write(nfstdo, *) "'-- Started setting up model parameters          --'"
     write(nfstdo, *) "'--------------------------------------------------'"
     rewind(nfparm)
@@ -358,12 +361,14 @@ contains
     sedtnm(8)  = 'calk'
     sedtnm(9)  = 'csil'
     sedtnm(10) = 'cdo2'
+    if ( sedtdm == 16 ) then
     sedtnm(11) = 's13pom'
     sedtnm(12) = 's13car'
     sedtnm(13) = 'c13dic'
     sedtnm(14) = 's14pom'
     sedtnm(15) = 's14car'
     sedtnm(16) = 'c14dic'
+    endif
 
     call set_digda_clay()
     call set_digda_pom()
@@ -374,8 +379,10 @@ contains
     call set_digda_step_liquid()
 
     write(nfstdo, *) "'--------------------------------------------------'"
+    write(nfstdo, *) "'-- DIGDA Prediction:                            --'"
     write(nfstdo, *) "'-- Finished setting up model parameters         --'"
     write(nfstdo, *) "'--------------------------------------------------'"
+    call flush(nfstdo)
 
     if (hstavg) then
       !-- Initialize time_mean --
@@ -410,7 +417,7 @@ contains
       do i = 30, 30
          call initialize_time_mean(mean_data(i), nxy, sdz+1, 3)
       end do
-      if ( calc13 ) then
+      if ( calc13 .and. sedtdm == 16 ) then
       ! Variable 31--34: 3D grid
       ! s13pom, s13car, c13dic, cdc13
       do i = 31, 34
@@ -422,7 +429,7 @@ contains
          call initialize_time_mean(mean_data(i), nxy, 1, 2)
       end do
       end if
-      if ( calc14 ) then
+      if ( calc14 .and. sedtdm == 16 ) then
       ! Variable 41--44: 3D grid
       ! s14pom, s14car, c14dic, cdc14
       do i = 41, 44
@@ -470,10 +477,10 @@ contains
     dswalk   = dswalk   * 1.0d+4             !! [m^2/s] --> [cm^2/s]
     dswdo2   = dswdo2   * 1.0d+4             !! [m^2/s] --> [cm^2/s]
     dswsil   = dswsil   * 1.0d+4             !! [m^2/s] --> [cm^2/s]
-    if ( calc13 ) then
+    if ( calc13 .and. sedtdm == 16 ) then
     dsw13dic = dsw13dic * 1.0d+4             !! [m^2/s] --> [cm^2/s]
     end if
-    if ( calc14 ) then
+    if ( calc14 .and. sedtdm == 16 ) then
     dsw14dic = dsw14dic * 1.0d+4             !! [m^2/s] --> [cm^2/s]
     end if
     dsw    = dsw        * 1.0d+4             !! [m^2/s] --> [cm^2/s]
@@ -482,11 +489,11 @@ contains
     mpom   = 1.0d-9 / ( rhopom / molpom )    !! [m^3/mMol]
     mcar   = 1.0d-9 / ( rhocar / molcar )    !! [m^3/mMol]
     mopa   = 1.0d-9 / ( rhoopa / molopa )    !! [m^3/mMol]
-    if ( calc13 ) then
+    if ( calc13 .and. sedtdm == 16 ) then
     m13pom = 1.0d-9 / ( rhopom / mol13pom )  !! [m^3/mMol]
     m13car = 1.0d-9 / ( rhocar / mol13car )  !! [m^3/mMol]
     end if
-    if ( calc14 ) then
+    if ( calc14 .and. sedtdm == 16 ) then
     m14pom = 1.0d-9 / ( rhopom / mol14pom )  !! [m^3/mMol]
     m14car = 1.0d-9 / ( rhocar / mol14car )  !! [m^3/mMol]
     thalf  = thalfyr * 3.1536d+7             !! [yr] --> [s]
@@ -519,10 +526,10 @@ contains
           deialk(k)   = dswalk   * ( phii(k) ** 3.0d0 )
           deido2(k)   = dswdo2   * ( phii(k) ** 3.0d0 )
           deisil(k)   = dswsil   * ( phii(k) ** 3.0d0 )
-          if ( calc13 ) then
+          if ( calc13 .and. sedtdm == 16 ) then
           dei13dic(k) = dsw13dic * ( phii(k) ** 3.0d0 )
           end if
-          if ( calc14 ) then
+          if ( calc14 .and. sedtdm == 16 ) then
           dei14dic(k) = dsw14dic * ( phii(k) ** 3.0d0 )
           end if
        else
@@ -531,10 +538,10 @@ contains
           deialk(k)   = ( phii(k) ** ( nopa - 1.0d0 ) ) * dsw
           deido2(k)   = ( phii(k) ** ( nopa - 1.0d0 ) ) * dsw
           deisil(k)   = ( phii(k) ** ( nopa - 1.0d0 ) ) * dsw
-          if ( calc13 ) then
+          if ( calc13 .and. sedtdm == 16 ) then
           dei13dic(k) = ( phii(k) ** ( nopa - 1.0d0 ) ) * dsw
           end if
-          if ( calc14 ) then
+          if ( calc14 .and. sedtdm == 16 ) then
           dei14dic(k) = ( phii(k) ** ( nopa - 1.0d0 ) ) * dsw
           end if
        end if
@@ -543,20 +550,24 @@ contains
 !   -- Set boundary conditions --
 
     do i = 1, nxydim
-      ficlag(i) = bfrcg(i, 1)
-      fipomg(i) = bfrcg(i, 2)
-      ficarg(i) = bfrcg(i, 3)
-      fiopag(i) = bfrcg(i, 4)
-      fiageg(i) = bfrcg(i, 5)
-      bwtemg(i) = bfrcg(i, 6)
-      bwsalg(i) = bfrcg(i, 7)
-      bwnitg(i) = bfrcg(i, 8)
-      bwdicg(i) = bfrcg(i, 9)
-      bwalkg(i) = bfrcg(i, 10)
-      bwsilg(i) = bfrcg(i, 11)
-      bwdo2g(i) = bfrcg(i, 12)
-      bw13dicg(i) = bfrcg(i, 13)
-      bw14dicg(i) = bfrcg(i, 14)
+      ficlag(i) = bfrcg(i, nbfcla)
+      fipomg(i) = bfrcg(i, nbfpom)
+      ficarg(i) = bfrcg(i, nbfcar)
+      fiopag(i) = bfrcg(i, nbfopa)
+      fiageg(i) = bfrcg(i, nbfage)
+      bwtemg(i) = bfrcg(i, nbftem)
+      bwsalg(i) = bfrcg(i, nbfsal)
+      bwnitg(i) = bfrcg(i, nbfnit)
+      bwdicg(i) = bfrcg(i, nbfdic)
+      bwalkg(i) = bfrcg(i, nbfalk)
+      bwsilg(i) = bfrcg(i, nbfsil)
+      bwdo2g(i) = bfrcg(i, nbfdo2)
+      if ( calc13 .and. sedtdm == 16 ) then
+      bw13dicg(i) = bfrcg(i, nbf13dic)
+      end if
+      if ( calc14 .and. sedtdm == 16 ) then
+      bw14dicg(i) = bfrcg(i, nbf14dic)
+      end if
     end do
 
 if (use_mpi) then
@@ -598,7 +609,7 @@ else
     end do
 end if
 
-    if ( calc13 ) then
+    if ( calc13 .and. sedtdm == 16 ) then
     do ij = ijtstr, ijtend
        fi13pom(ij) = feoph * pdb  * fipom(ij)
        fi13car(ij) = feosh * pdb  * ficar(ij)
@@ -614,7 +625,7 @@ else
 end if
     end if
 
-    if ( calc14 ) then
+    if ( calc14 .and. sedtdm == 16 ) then
     do ij = ijtstr, ijtend
        fi14pom(ij) = feoph * dstd * fipom(ij)
        fi14car(ij) = feosh * dstd * ficar(ij)
@@ -679,6 +690,11 @@ end if
 
 !     -- Time Integration --
 
+      write(nfstdo, *) "'--------------------------------------------------'"
+      write(nfstdo, *) "'-- DIGDA Prediction:                            --'"
+      write(nfstdo, *) "'-- Started time integration                     --'"
+      write(nfstdo, *) "'--------------------------------------------------'"
+
       call clcstr('PRDC_STEP')
 
       do tt = tstr, tend
@@ -698,12 +714,12 @@ end if
                calk(ij, k) = bwalk(ij)
                cdo2(ij, k) = bwdo2(ij)
                csil(ij, k) = bwsil(ij)
-               if ( calc13 ) then
+               if ( calc13 .and. sedtdm == 16 ) then
                s13pom(ij, k) = 0.0d0
                s13car(ij, k) = 0.0d0
                c13dic(ij, k) = bw13dic(ij)
                end if
-               if ( calc14 ) then
+               if ( calc14 .and. sedtdm == 16 ) then
                s14pom(ij, k) = 0.0d0
                s14car(ij, k) = 0.0d0
                c14dic(ij, k) = bw14dic(ij)
@@ -731,7 +747,7 @@ if (use_mpi) then
                cdo2(ij, k) = sdtx(myrank*nxy+ij, k, 10)
             end do
          end do
-         if ( calc13 ) then
+         if ( calc13 .and. sedtdm == 16 ) then
          do k = skst, sken
             do ij = 1, nxy
                s13pom(ij, k) = sdtx(myrank*nxy+ij, k, 11)
@@ -740,7 +756,7 @@ if (use_mpi) then
             end do
          end do
          end if
-         if ( calc14 ) then
+         if ( calc14 .and. sedtdm == 16 ) then
          do k = skst, sken
             do ij = 1, nxy
                s14pom(ij, k) = sdtx(myrank*nxy+ij, k, 14)
@@ -764,7 +780,7 @@ else
                cdo2(ij, k) = sdtx(ij, k, 10)
             end do
          end do
-         if ( calc13 ) then
+         if ( calc13 .and. sedtdm == 16 ) then
          do k = skst, sken
             do ij = 1, nxy
                s13pom(ij, k) = sdtx(ij, k, 11)
@@ -773,7 +789,7 @@ else
             end do
          end do
          end if
-         if ( calc14 ) then
+         if ( calc14 .and. sedtdm == 16 ) then
          do k = skst, sken
             do ij = 1, nxy
                s14pom(ij, k) = sdtx(ij, k, 14)
@@ -830,7 +846,7 @@ end if
          end do
       end do
 
-      if ( calc13 ) then
+      if ( calc13 .and. sedtdm == 16 ) then
       do k = skst, sken
          do ij = ijtstr, ijtend
             tr13pom(ij, k) = ( 1.0d0 - phi(k) ) * rpom(ij, k) &
@@ -841,7 +857,7 @@ end if
       end do
       end if
 
-      if ( calc14 ) then
+      if ( calc14 .and. sedtdm == 16 ) then
       do k = skst, sken
          do ij = ijtstr, ijtend
             tr14pom(ij, k) = ( 1.0d0 - phi(k) ) * rpom(ij, k) &
@@ -893,7 +909,7 @@ end if
      &    fiage, w, phi, phii, dbi, sage, &
      &    snage )
 
-      if ( calc13 ) then
+      if ( calc13 .and. sedtdm == 16 ) then
       call calc_step_solid( &
      &    fi13pom, tr13pom, w, phi, phii, dbi, s13pom, &
      &    sn13pom, bf13pom )
@@ -903,7 +919,7 @@ end if
      &    sn13car, bf13car )
       end if
 
-      if ( calc14 ) then
+      if ( calc14 .and. sedtdm == 16 ) then
       call calc_step_solid( &
      &    fi14pom, tr14pom, w, phi, phii, dbi, s14pom, &
      &    sn14pom, bf14pom )
@@ -938,7 +954,7 @@ end if
          end do
       end do
 
-      if ( calc13 ) then
+      if ( calc13 .and. sedtdm == 16 ) then
       do k = skst, sken
          do ij = ijtstr, ijtend
             tr13dic(ij, k) = ( tr13pom(ij, k) + tr13car(ij, k) )
@@ -946,7 +962,7 @@ end if
       end do
       end if
 
-      if ( calc14 ) then
+      if ( calc14 .and. sedtdm == 16 ) then
       do k = skst, sken
          do ij = ijtstr, ijtend
             tr14dic(ij, k) = ( tr14pom(ij, k) + tr14car(ij, k) )
@@ -977,13 +993,13 @@ end if
      &    bwsil, trsil, phi, phii, deisil, csil, &
      &    cnsil )
 
-      if ( calc13 ) then
+      if ( calc13 .and. sedtdm == 16 ) then
       call calc_step_liquid( &
      &    bw13dic, tr13dic, phi, phii, dei13dic, c13dic, &
      &    cn13dic )
       end if
 
-      if ( calc14 ) then
+      if ( calc14 .and. sedtdm == 16 ) then
       call calc_step_liquid( &
      &    bw14dic, tr14dic, phi, phii, dei14dic, c14dic, &
      &    cn14dic )
@@ -1027,7 +1043,7 @@ end if
 
 !     -- Isotopic fractionation --
 
-      if ( calc13 ) then
+      if ( calc13 .and. sedtdm == 16 ) then
       do k = skst, sken
          do ij = ijtstr, ijtend
             if ( cndic(ij, k) /= 0.0d0 ) then
@@ -1042,7 +1058,7 @@ end if
       end do
       end if
 
-      if ( calc14 ) then
+      if ( calc14 .and. sedtdm == 16 ) then
       do k = skst, sken
          do ij = ijtstr, ijtend
             if ( cndic(ij, k) /= 0.0d0 ) then
@@ -1085,12 +1101,12 @@ end if
          fialk(ij)  = - fipom(ij) * ( np / cp ) + 2.0d0 * ficar(ij)
          fido2(ij)  = fipom(ij) * ( op / cp )
          fisil(ij)  = fiopa(ij)
-         if ( calc13 ) then
+         if ( calc13 .and. sedtdm == 16 ) then
          fo13dic(ij) = - ( phii(skst) * dei13dic(skst) &
      &      * ( bw13dic(ij) - cn13dic(ij, skst) ) / dlzi(skst) )
          fi13dic(ij)  = fi13pom(ij) + fi13car(ij)
          end if
-         if ( calc14 ) then
+         if ( calc14 .and. sedtdm == 16 ) then
          fo14dic(ij) = - ( phii(skst) * dei14dic(skst) &
      &      * ( bw14dic(ij) - cn14dic(ij, skst) ) / dlzi(skst) )
          fi14dic(ij)  = fi14pom(ij) + fi14car(ij)
@@ -1130,7 +1146,7 @@ if (use_mpi) then
             sdtx(myrank*nxy+ij, k, 10) = cndo2(ij, k)
          end do
       end do
-      if ( calc13 ) then
+      if ( calc13 .and. sedtdm == 16 ) then
       do k = skst, sken
          do ij = 1, nxy
             sdtx(myrank*nxy+ij, k, 11) = sn13pom(ij, k)
@@ -1139,7 +1155,7 @@ if (use_mpi) then
          end do
       end do
       end if
-      if ( calc14 ) then
+      if ( calc14 .and. sedtdm == 16 ) then
       do k = skst, sken
          do ij = 1, nxy
             sdtx(myrank*nxy+ij, k, 14) = sn14pom(ij, k)
@@ -1163,7 +1179,7 @@ else
             sdtx(ij, k, 10) = cndo2(ij, k)
          end do
       end do
-      if ( calc13 ) then
+      if ( calc13 .and. sedtdm == 16 ) then
       do k = skst, sken
          do ij = 1, nxy
             sdtx(ij, k, 11) = sn13pom(ij, k)
@@ -1172,7 +1188,7 @@ else
          end do
       end do
       end if
-      if ( calc14 ) then
+      if ( calc14 .and. sedtdm == 16 ) then
       do k = skst, sken
          do ij = 1, nxy
             sdtx(ij, k, 14) = sn14pom(ij, k)
@@ -1322,7 +1338,7 @@ end if
 
         call update_time_mean(mean_data(30), w)
 
-        if ( calc13 ) then
+        if ( calc13 .and. sedtdm == 16 ) then
 
         call update_time_mean(mean_data(31), s13pom)
         call update_time_mean(mean_data(32), s13car)
@@ -1373,7 +1389,7 @@ end if
 
         end if
 
-        if ( calc14 ) then
+        if ( calc14 .and. sedtdm == 16 ) then
 
         call update_time_mean(mean_data(31), s14pom)
         call update_time_mean(mean_data(32), s14car)
@@ -1980,7 +1996,7 @@ if (hstavg) then
       call reset_time_mean(mean_data(26))
       if (allocated(varavgdt)) deallocate(varavgdt)
 
-      if ( calc13 ) then
+      if ( calc13 .and. sedtdm == 16 ) then
 
       allocate(varavgdt(nxy,sdz))
       call get_time_mean(mean_data(31),  varavgdt)
@@ -2150,7 +2166,7 @@ if (hstavg) then
 
       end if
 
-      if ( calc14 ) then
+      if ( calc14 .and. sedtdm == 16 ) then
 
       allocate(varavgdt(nxy,sdz))
       call get_time_mean(mean_data(41),  varavgdt)
@@ -2725,7 +2741,7 @@ else
          end do
       end if
 
-      if ( calc13 ) then
+      if ( calc13 .and. sedtdm == 16 ) then
 
       call mpi_gatherv( s13pom,  nsndct3d, mpi_real8, &
      &                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
@@ -2855,7 +2871,7 @@ else
 
       end if
 
-      if ( calc14 ) then
+      if ( calc14 .and. sedtdm == 16 ) then
 
       call mpi_gatherv( s14pom,  nsndct3d, mpi_real8, &
      &                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
@@ -3068,7 +3084,7 @@ else
             end do
          end do
 
-         if ( calc13 ) then
+         if ( calc13 .and. sedtdm == 16 ) then
          do k = skst, sken
             do ij = 1, nxydim
                 s13pomg(ij, k) = s13pom(ij, k)
@@ -3079,7 +3095,7 @@ else
          end do
          end if
 
-         if ( calc14 ) then
+         if ( calc14 .and. sedtdm == 16 ) then
          do k = skst, sken
             do ij = 1, nxydim
                 s14pomg(ij, k) = s14pom(ij, k)
@@ -3109,7 +3125,7 @@ else
             bfopag(ij)     = bfopa(ij)
          end do
 
-         if ( calc13 ) then
+         if ( calc13 .and. sedtdm == 16 ) then
          do ij = 1, nxydim
             fi13pomg(ij)   = fi13pom(ij)
             fi13carg(ij)   = fi13car(ij)
@@ -3120,7 +3136,7 @@ else
          end do
          end if
 
-         if ( calc14 ) then
+         if ( calc14 .and. sedtdm == 16 ) then
          do ij = 1, nxydim
             fi14pomg(ij)   = fi14pom(ij)
             fi14carg(ij)   = fi14car(ij)
@@ -3156,6 +3172,7 @@ if (use_mpi) then
          call write_netcdf_3dwt(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
          call calc_integral_and_mean_3d(sclag, lon_values, lat_values, lz, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A)') " Filename: ", trim(filename)
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " g m-3"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value, " g"
@@ -3177,6 +3194,7 @@ if (use_mpi) then
          call write_netcdf_3dwt(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
          call calc_integral_and_mean_3d(spomg, lon_values, lat_values, lz, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A)') " Filename: ", trim(filename)
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
@@ -3198,6 +3216,7 @@ if (use_mpi) then
          call write_netcdf_3dwt(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
          call calc_integral_and_mean_3d(scarg, lon_values, lat_values, lz, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A)') " Filename: ", trim(filename)
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
@@ -3219,6 +3238,7 @@ if (use_mpi) then
          call write_netcdf_3dwt(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
          call calc_integral_and_mean_3d(sopag, lon_values, lat_values, lz, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A)') " Filename: ", trim(filename)
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
@@ -3240,6 +3260,7 @@ if (use_mpi) then
          call write_netcdf_3dwt(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
          call calc_integral_and_mean_3d(sageg, lon_values, lat_values, lz, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A)') " Filename: ", trim(filename)
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " yr"
          write(nfstdo, *) "'--------------------------------------------------'"
@@ -3260,6 +3281,7 @@ if (use_mpi) then
          call write_netcdf_3dwt(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
          call calc_integral_and_mean_3d(cnitg, lon_values, lat_values, lz, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A)') " Filename: ", trim(filename)
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
@@ -3281,6 +3303,7 @@ if (use_mpi) then
          call write_netcdf_3dwt(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
          call calc_integral_and_mean_3d(cdicg, lon_values, lat_values, lz, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A)') " Filename: ", trim(filename)
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
@@ -3302,6 +3325,7 @@ if (use_mpi) then
          call write_netcdf_3dwt(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
          call calc_integral_and_mean_3d(calkg, lon_values, lat_values, lz, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A)') " Filename: ", trim(filename)
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
@@ -3323,6 +3347,7 @@ if (use_mpi) then
          call write_netcdf_3dwt(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
          call calc_integral_and_mean_3d(cdo2g, lon_values, lat_values, lz, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A)') " Filename: ", trim(filename)
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
@@ -3344,6 +3369,7 @@ if (use_mpi) then
          call write_netcdf_3dwt(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
          call calc_integral_and_mean_3d(csilg, lon_values, lat_values, lz, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A)') " Filename: ", trim(filename)
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
@@ -3363,6 +3389,7 @@ if (use_mpi) then
         !call write_netcdf_2dwt(filename, varname, varunit, var2d_values, lon_values, lat_values, yy_array)
          call calc_integral_and_mean_2d(ficlag, lon_values, lat_values, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A)') " Filename: ", trim(filename)
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " g m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+5, " g * yr-1"
@@ -3382,6 +3409,7 @@ if (use_mpi) then
         !call write_netcdf_2dwt(filename, varname, varunit, var2d_values, lon_values, lat_values, yy_array)
          call calc_integral_and_mean_2d(fipomg, lon_values, lat_values, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A)') " Filename: ", trim(filename)
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
@@ -3401,6 +3429,7 @@ if (use_mpi) then
         !call write_netcdf_2dwt(filename, varname, varunit, var2d_values, lon_values, lat_values, yy_array)
          call calc_integral_and_mean_2d(ficarg, lon_values, lat_values, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A)') " Filename: ", trim(filename)
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
@@ -3420,6 +3449,7 @@ if (use_mpi) then
         !call write_netcdf_2dwt(filename, varname, varunit, var2d_values, lon_values, lat_values, yy_array)
          call calc_integral_and_mean_2d(fiopag, lon_values, lat_values, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A)') " Filename: ", trim(filename)
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
@@ -3439,6 +3469,7 @@ if (use_mpi) then
         !call write_netcdf_2dwt(filename, varname, varunit, var2d_values, lon_values, lat_values, yy_array)
          call calc_integral_and_mean_2d(foclag, lon_values, lat_values, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A)') " Filename: ", trim(filename)
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
@@ -3458,6 +3489,7 @@ if (use_mpi) then
         !call write_netcdf_2dwt(filename, varname, varunit, var2d_values, lon_values, lat_values, yy_array)
          call calc_integral_and_mean_2d(fopomg, lon_values, lat_values, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A)') " Filename: ", trim(filename)
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
@@ -3477,6 +3509,7 @@ if (use_mpi) then
         !call write_netcdf_2dwt(filename, varname, varunit, var2d_values, lon_values, lat_values, yy_array)
          call calc_integral_and_mean_2d(focarg, lon_values, lat_values, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A)') " Filename: ", trim(filename)
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
@@ -3496,6 +3529,7 @@ if (use_mpi) then
         !call write_netcdf_2dwt(filename, varname, varunit, var2d_values, lon_values, lat_values, yy_array)
          call calc_integral_and_mean_2d(foopag, lon_values, lat_values, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A)') " Filename: ", trim(filename)
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
@@ -3515,6 +3549,7 @@ if (use_mpi) then
         !call write_netcdf_2dwt(filename, varname, varunit, var2d_values, lon_values, lat_values, yy_array)
          call calc_integral_and_mean_2d(fioclag, lon_values, lat_values, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A)') " Filename: ", trim(filename)
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " g m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+5, " g * yr-1"
@@ -3534,6 +3569,7 @@ if (use_mpi) then
          call write_netcdf_2dwt(filename, varname, varunit, var2d_values, lon_values, lat_values, yy_array)
          call calc_integral_and_mean_2d(fiopomg, lon_values, lat_values, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A)') " Filename: ", trim(filename)
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
@@ -3553,6 +3589,7 @@ if (use_mpi) then
          call write_netcdf_2dwt(filename, varname, varunit, var2d_values, lon_values, lat_values, yy_array)
          call calc_integral_and_mean_2d(fiocarg, lon_values, lat_values, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A)') " Filename: ", trim(filename)
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
@@ -3572,6 +3609,7 @@ if (use_mpi) then
          call write_netcdf_2dwt(filename, varname, varunit, var2d_values, lon_values, lat_values, yy_array)
          call calc_integral_and_mean_2d(fioopag, lon_values, lat_values, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A)') " Filename: ", trim(filename)
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
@@ -3591,6 +3629,7 @@ if (use_mpi) then
         !call write_netcdf_2dwt(filename, varname, varunit, var2d_values, lon_values, lat_values, yy_array)
          call calc_integral_and_mean_2d(bfclag, lon_values, lat_values, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A)') " Filename: ", trim(filename)
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
@@ -3610,6 +3649,7 @@ if (use_mpi) then
         !call write_netcdf_2dwt(filename, varname, varunit, var2d_values, lon_values, lat_values, yy_array)
          call calc_integral_and_mean_2d(bfpomg, lon_values, lat_values, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A)') " Filename: ", trim(filename)
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
@@ -3629,6 +3669,7 @@ if (use_mpi) then
         !call write_netcdf_2dwt(filename, varname, varunit, var2d_values, lon_values, lat_values, yy_array)
          call calc_integral_and_mean_2d(bfcarg, lon_values, lat_values, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A)') " Filename: ", trim(filename)
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
@@ -3648,6 +3689,7 @@ if (use_mpi) then
         !call write_netcdf_2dwt(filename, varname, varunit, var2d_values, lon_values, lat_values, yy_array)
          call calc_integral_and_mean_2d(bfopag, lon_values, lat_values, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A)') " Filename: ", trim(filename)
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3 * cm s-1"
          write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 3.1536d+2, " mol * yr-1"
@@ -3669,6 +3711,7 @@ if (use_mpi) then
          call write_netcdf_3dwt(filename, varname, varunit, var3d_values, lon_values, lat_values, lz+1, yy_array)
          call calc_integral_and_mean_3d(wg, lon_values, lat_values, lz+1, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
+         write(nfstdo,'(A, A)') " Filename: ", trim(filename)
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
          write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " cm s-1"
          write(nfstdo, *) "'--------------------------------------------------'"
@@ -3689,6 +3732,7 @@ if (use_mpi) then
         !call write_netcdf_3dwt(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
         !call calc_integral_and_mean_3d(cdc13g, lon_values, lat_values, lz, integral_value, mean_value)
         !write(nfstdo, *) "'--------------------------------------------------'"
+        !write(nfstdo,'(A, A)') " Filename: ", trim(filename)
         !write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
         !write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
         !write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
@@ -3710,6 +3754,7 @@ if (use_mpi) then
         !call write_netcdf_3dwt(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
         !call calc_integral_and_mean_3d(cdc14g, lon_values, lat_values, lz, integral_value, mean_value)
         !write(nfstdo, *) "'--------------------------------------------------'"
+        !write(nfstdo,'(A, A)') " Filename: ", trim(filename)
         !write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
         !write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
         !write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
@@ -3858,12 +3903,12 @@ if (use_mpi) then
                sdtx(ij, k, 8) = calkg(ij, k)
                sdtx(ij, k, 9) = csilg(ij, k)
                sdtx(ij, k, 10) = cdo2g(ij, k)
-            if ( calc13 ) then
+            if ( calc13 .and. sedtdm == 16 ) then
                sdtx(ij, k, 11) = s13pomg(ij, k)
                sdtx(ij, k, 12) = s13carg(ij, k)
                sdtx(ij, k, 13) = c13dicg(ij, k)
             end if
-            if ( calc14 ) then
+            if ( calc14 .and. sedtdm == 16 ) then
                sdtx(ij, k, 14) = s14pomg(ij, k)
                sdtx(ij, k, 15) = s14carg(ij, k)
                sdtx(ij, k, 16) = c14dicg(ij, k)
@@ -3885,6 +3930,12 @@ end if ! -- End of use_mpi
       end do ! -- End of Time integration
 
       call clcend('PRDC_STEP')
+
+      write(nfstdo, *) "'--------------------------------------------------'"
+      write(nfstdo, *) "'-- DIGDA Prediction:                            --'"
+      write(nfstdo, *) "'-- Finished time integration                    --'"
+      write(nfstdo, *) "'--------------------------------------------------'"
+      call flush(nfstdo)
 
       if (hstavg) then
          if (allocated(mean_data)) deallocate(mean_data)
