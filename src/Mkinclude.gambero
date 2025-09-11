@@ -1,0 +1,9 @@
+DIGDADIR	= /data01/hidekoba/digda/DIGDA-2D_F90
+RM	        = rm -f
+
+SYSTEM	        = calamari
+
+#PARALLEL       =
+ PARALLEL       = .par
+
+TARGET	        = $(DIGDADIR)/bin/digda$(PARALLEL)
