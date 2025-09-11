@@ -1,7 +1,7 @@
 DIGDADIR	= /data01/hidekoba/digda/DIGDA-2D_F90
 RM	        = rm -f
 
-SYSTEM	        = calamari
+SYSTEM	        = gambero
 
 #PARALLEL       =
  PARALLEL       = .par
