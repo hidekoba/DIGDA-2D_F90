@@ -1391,51 +1391,51 @@ end if
 
         if ( calc14 .and. sedtdm == 16 ) then
 
-        call update_time_mean(mean_data(31), s14pom)
-        call update_time_mean(mean_data(32), s14car)
-        call update_time_mean(mean_data(33), c14dic)
-        call update_time_mean(mean_data(34), cdc14)
+        call update_time_mean(mean_data(41), s14pom)
+        call update_time_mean(mean_data(42), s14car)
+        call update_time_mean(mean_data(43), c14dic)
+        call update_time_mean(mean_data(44), cdc14)
 
         allocate(varavgdt(nxy,1))
         do ij = 1, nxy
            varavgdt(ij, 1) = fi14pom(ij)
         end do
-        call update_time_mean(mean_data(35),  varavgdt)
+        call update_time_mean(mean_data(45),  varavgdt)
         if (allocated(varavgdt)) deallocate(varavgdt)
 
         allocate(varavgdt(nxy,1))
         do ij = 1, nxy
            varavgdt(ij, 1) = fi14car(ij)
         end do
-        call update_time_mean(mean_data(36),  varavgdt)
+        call update_time_mean(mean_data(46),  varavgdt)
         if (allocated(varavgdt)) deallocate(varavgdt)
 
         allocate(varavgdt(nxy,1))
         do ij = 1, nxy
            varavgdt(ij, 1) = fo14pom(ij)
         end do
-        call update_time_mean(mean_data(37),  varavgdt)
+        call update_time_mean(mean_data(47),  varavgdt)
         if (allocated(varavgdt)) deallocate(varavgdt)
 
         allocate(varavgdt(nxy,1))
         do ij = 1, nxy
            varavgdt(ij, 1) = fo14car(ij)
         end do
-        call update_time_mean(mean_data(38),  varavgdt)
+        call update_time_mean(mean_data(48),  varavgdt)
         if (allocated(varavgdt)) deallocate(varavgdt)
 
         allocate(varavgdt(nxy,1))
         do ij = 1, nxy
            varavgdt(ij, 1) = bf14pom(ij)
         end do
-        call update_time_mean(mean_data(39),  varavgdt)
+        call update_time_mean(mean_data(49),  varavgdt)
         if (allocated(varavgdt)) deallocate(varavgdt)
 
         allocate(varavgdt(nxy,1))
         do ij = 1, nxy
            varavgdt(ij, 1) = bf14car(ij)
         end do
-        call update_time_mean(mean_data(40),  varavgdt)
+        call update_time_mean(mean_data(50),  varavgdt)
         if (allocated(varavgdt)) deallocate(varavgdt)
 
         end if
