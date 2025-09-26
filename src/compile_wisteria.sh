@@ -1,9 +1,12 @@
 #!/bin/bash
  set -euo pipefail
 
- #resolution="128x64"
+  resolution="128x64"
  #resolution="256x192"
-  resolution="2160x1080"
+ #resolution="2160x1080"
+
+ #ciso=""
+  ciso="_ciso"
 
  # ---------------------------------------------------------
  # Utility functions
@@ -103,19 +106,19 @@
 
  # Update Mkinclude line with resolution and ncpu
  basemk=$(anchor_line Mkinclude "$ANCH_MK")
- sed -i -e "${basemk}s/digda/digda_${resolution}.${ncpu}/g" Mkinclude
+ sed -i -e "${basemk}s/digda/digda_${resolution}.${ncpu}${ciso}/g" Mkinclude
 
  echo "done: resolution=$resolution ncpu=$ncpu"
 
  ##############################
 
- make clean
- make > make.log 2>&1 &
- MAKE_PID=$!
- tail -f make.log &
- TAIL_PID=$!
- wait $MAKE_PID
- kill $TAIL_PID
+#make clean
+#make > make.log 2>&1 &
+#MAKE_PID=$!
+#tail -f make.log &
+#TAIL_PID=$!
+#wait $MAKE_PID
+#kill $TAIL_PID
 
  ##############################
 
@@ -152,6 +155,6 @@
 
  ##############################
 
- sed -i -e "${basemk}s/digda_${resolution}.${ncpu}/digda/g" Mkinclude
+ sed -i -e "${basemk}s/digda_${resolution}.${ncpu}${ciso}/digda/g" Mkinclude
 
  ##############################
