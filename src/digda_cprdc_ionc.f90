@@ -372,7 +372,7 @@ contains
     sedtnm(14) = 's14pom'
     sedtnm(15) = 's14car'
     sedtnm(16) = 'c14dic'
-    endif
+    end if
 
     call set_digda_clay()
     call set_digda_pom()
@@ -2951,6 +2951,28 @@ else
          end do
       end if
 
+      call mpi_gatherv( fio13pom, nsndct2d, mpi_real8, &
+     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            do ij = jjstr(irank), jjend(irank)
+               fio13pomg(ij) = vardt2d(ij)
+            end do
+         end do
+      end if
+
+      call mpi_gatherv( fio13car, nsndct2d, mpi_real8, &
+     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            do ij = jjstr(irank), jjend(irank)
+               fio13carg(ij) = vardt2d(ij)
+            end do
+         end do
+      end if
+
       call mpi_gatherv( bf13pom, nsndct2d, mpi_real8, &
      &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
@@ -3077,6 +3099,28 @@ else
          do irank = 0, nprocs-1
             do ij = jjstr(irank), jjend(irank)
                fo14carg(ij) = vardt2d(ij)
+            end do
+         end do
+      end if
+
+      call mpi_gatherv( fio14pom, nsndct2d, mpi_real8, &
+     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            do ij = jjstr(irank), jjend(irank)
+               fio14pomg(ij) = vardt2d(ij)
+            end do
+         end do
+      end if
+
+      call mpi_gatherv( fio14car, nsndct2d, mpi_real8, &
+     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+     &                  iroot,   mpi_comm_world, ierr )
+      if ( myrank .eq. iroot ) then
+         do irank = 0, nprocs-1
+            do ij = jjstr(irank), jjend(irank)
+               fio14carg(ij) = vardt2d(ij)
             end do
          end do
       end if
@@ -3840,7 +3884,7 @@ if (use_mpi) then
              end do
            end do
          end do
-         call write_netcdf_3dwt(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
+      !!!call write_netcdf_3dwt(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
          call calc_integral_and_mean_3d(s13pomg, lon_values, lat_values, lz, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
          write(nfstdo,'(A, A)') " Filename: ", trim(filename)
@@ -3862,7 +3906,7 @@ if (use_mpi) then
              end do
            end do
          end do
-         call write_netcdf_3dwt(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
+      !!!call write_netcdf_3dwt(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
          call calc_integral_and_mean_3d(s13carg, lon_values, lat_values, lz, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
          write(nfstdo,'(A, A)') " Filename: ", trim(filename)
@@ -3884,7 +3928,7 @@ if (use_mpi) then
              end do
            end do
          end do
-         call write_netcdf_3dwt(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
+      !!!call write_netcdf_3dwt(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
          call calc_integral_and_mean_3d(c13dicg, lon_values, lat_values, lz, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
          write(nfstdo,'(A, A)') " Filename: ", trim(filename)
@@ -4092,7 +4136,7 @@ if (use_mpi) then
              end do
            end do
          end do
-         call write_netcdf_3dwt(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
+      !!!call write_netcdf_3dwt(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
          call calc_integral_and_mean_3d(s14pomg, lon_values, lat_values, lz, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
          write(nfstdo,'(A, A)') " Filename: ", trim(filename)
@@ -4114,7 +4158,7 @@ if (use_mpi) then
              end do
            end do
          end do
-         call write_netcdf_3dwt(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
+      !!!call write_netcdf_3dwt(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
          call calc_integral_and_mean_3d(s14carg, lon_values, lat_values, lz, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
          write(nfstdo,'(A, A)') " Filename: ", trim(filename)
@@ -4136,7 +4180,7 @@ if (use_mpi) then
              end do
            end do
          end do
-         call write_netcdf_3dwt(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
+      !!!call write_netcdf_3dwt(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
          call calc_integral_and_mean_3d(c14dicg, lon_values, lat_values, lz, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
          write(nfstdo,'(A, A)') " Filename: ", trim(filename)
@@ -4150,7 +4194,7 @@ if (use_mpi) then
          filename = "cdc14.nc"
          varname = "Delta_carbon-14"
          varunit = "permil"
-         do k = 1, sdzdim+1
+         do k = 1, sdzdim
            do j = 1, nydim
              do i = 1, nxdim
                ij = i + (j - 1) * nxdim
@@ -4158,7 +4202,7 @@ if (use_mpi) then
              end do
            end do
          end do
-      !!!call write_netcdf_3dwt(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
+         call write_netcdf_3dwt(filename, varname, varunit, var3d_values, lon_values, lat_values, lz, yy_array)
          call calc_integral_and_mean_3d(cdc14g, lon_values, lat_values, lz, integral_value, mean_value)
          write(nfstdo, *) "'--------------------------------------------------'"
          write(nfstdo,'(A, A)') " Filename: ", trim(filename)
