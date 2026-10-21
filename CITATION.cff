@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: >-
+  If you use DIGDA-2D in your research, please cite the software using
+  the citation information provided here. Please also cite the associated
+  scientific paper once it has been published.
+title: "DIGDA-2D"
+abstract: >-
+  DIGDA-2D applies independent, vertically resolved one-dimensional
+  sediment diagenesis columns across a two-dimensional horizontal ocean grid.
+  The 2D designation describes the horizontal distribution of columns and
+  boundary conditions, not two-dimensional transport within sediments.
+  The software simulates sediment composition and burial fluxes and provides
+  optional carbon-isotope configurations.
+type: software
+authors:
+  - family-names: Kobayashi
+    given-names: Hidetaka
+repository-code: "https://github.com/hidekoba/DIGDA-2D_F90"
+license: BSD-3-Clause
+keywords:
+  - sediment diagenesis
+  - ocean biogeochemistry
+  - marine sediments
+  - Fortran
+  - MPI
+  - carbon isotopes

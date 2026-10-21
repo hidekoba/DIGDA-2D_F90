@@ -4,7 +4,9 @@
 
 The model is designed to investigate early diagenetic processes in marine sediments and their roles in long-term ocean biogeochemical and carbon cycling.
 
-DIGDA-2D represents independent, vertically resolved sediment columns distributed across a two-dimensional horizontal ocean grid. This configuration enables computationally efficient simulations of sediment composition, biogeochemical reactions, and burial fluxes at the global scale.
+DIGDA-2D applies a **one-dimensional, vertically resolved sediment diagenesis model** independently at each grid cell of a **two-dimensional horizontal ocean grid**. Each sediment column simulates vertical transport and biogeochemical reactions; horizontal transport between sediment columns is not represented. This configuration enables computationally efficient global simulations of sediment composition, biogeochemical reactions, and burial fluxes.
+
+The name **DIGDA-2D** refers to the horizontal, two-dimensional distribution of independently simulated sediment columns and their spatially varying boundary conditions. It does **not** mean that sediment transport or reactions are solved in two spatial dimensions within each column.
 
 The model includes four solid components (clay, particulate organic carbon, calcium carbonate, and biogenic silica) and five dissolved pore-water components (phosphate, dissolved inorganic carbon, alkalinity, oxygen, and silicate).
 
@@ -39,7 +41,7 @@ DIGDA-2D/
 
 Contains boundary forcing data used to prescribe conditions at the sediment–water interface.
 
-DIGDA-2D requires two categories of boundary conditions.
+DIGDA-2D requires two categories of spatially varying boundary conditions, prescribed separately at each horizontal grid cell.
 
 **1. Particulate fluxes reaching the seafloor**
 
@@ -409,14 +411,16 @@ Detailed descriptions of the input and output variables, file formats, and namin
 
 ## References and Citation
 
-DIGDA-2D is based on the model described in the following manuscript:
+The one-dimensional sediment column formulation used in DIGDA-2D is described in the following manuscript:
 
 Kobayashi, H., and Oka, A., *Global simulation of early diagenesis in marine sediments using the Diagenesis and Geochemistry of Deep-sea sediments for climate–carbon cycle assessment (DIGDA) model*. Manuscript in preparation.
 
 The manuscript describes the model formulation, numerical configuration, evaluation against observational constraints, and applications to global sediment biogeochemical simulations.
 
-Users of DIGDA-2D are encouraged to acknowledge the model and cite the associated scientific publication once it becomes available.
+For software citation, use the metadata in [`CITATION.cff`](CITATION.cff). Users of DIGDA-2D are encouraged to acknowledge the model and cite the associated scientific publication once it becomes available.
 
 ## License
 
-License information will be provided separately.
+DIGDA-2D is distributed under the **BSD 3-Clause License**. See the [LICENSE](LICENSE) file for the complete license terms.
+
+The software license applies to the code in this repository. External boundary forcing datasets may be subject to separate data-use and redistribution conditions.
