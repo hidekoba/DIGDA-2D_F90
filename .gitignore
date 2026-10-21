@@ -1,9 +1,26 @@
-# Machine-specific settings
-Mkinclude.*
-!Mkinclude.dummy
+# ==========================================
+# Machine-specific compilation settings
+# ==========================================
 
-Sysdep.*.par
-!Sysdep.dummy.par
+# Mkinclude
+/src/Mkinclude.*
+!/src/Mkinclude.dummy
 
-compile_*.sh
-!compile_dummy.sh
+# System-dependent compiler settings
+/src/Sysdep.*.par
+!/src/Sysdep.dummy.par
+
+# Compilation scripts
+/src/compile_*.sh
+!/src/compile_dummy.sh
+
+
+# ==========================================
+# Machine-specific execution scripts
+# ==========================================
+
+# Ignore execution scripts
+/RUN/*.sh
+
+# Keep public example scripts
+!/RUN/*_dummy.sh

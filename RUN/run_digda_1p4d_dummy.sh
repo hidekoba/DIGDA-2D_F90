@@ -1,9 +1,12 @@
+# PJM-SPECIFIC EXAMPLE. Edit paths, modules, queue, ranks, and scheduler commands before use.
 #!/bin/bash
 
-DIGDADIR=/work/gi55/c24116/digda/DIGDA-2D_F90
-BINARY=$DIGDADIR/bin/digda_128x64.par
+DIGDADIR=/path/to/DIGDA-2D_F90  # EDIT: absolute path to the repository
+BINARY=$DIGDADIR/bin/digda_256x192.8.par  # EDIT to match compiled executable
 RUNDIR=$DIGDADIR/RUN
-BNDDIR=$DIGDADIR/Bound/data_digda128064
+#BNDDIR=$DIGDADIR/Bound/bound256192
+#BNDDIR=$DIGDADIR/Bound/bound21601080
+BNDDIR=$DIGDADIR/Bound/data_digda256192
 PARAMET=./PARAMET_DIGDA
 MPIRUN=mpiexec
 
@@ -14,7 +17,7 @@ SDYRHST="2000"
 #SDTSTEP="0.002739726027397260"
 #SDTSTEP="0.001369863013698630"
 
-EXPDIR=$DIGDADIR/OUT/3d
+EXPDIR=$DIGDADIR/OUT/1p4d
 
 INIDIR=$EXPDIR/$SDYRSTR
 OUTDIR=$EXPDIR/$SDYREND
@@ -25,7 +28,9 @@ mkdir -p $OUTDIR
 #mv digda.[0-9]*.out digda.[0-9]*.stats exp
 
 cd $OUTDIR
-/bin/rm -f $PARAMET ; /bin/rm -rf *
+# SAFETY: Do not wipe an existing output directory automatically.
+# Inspect or move existing output files before running.
+/bin/rm -f "$PARAMET"
 
 JOB_NAME=`basename $0`
 /bin/rm -rf ${JOB_NAME}.y${SDYREND}*
@@ -36,7 +41,7 @@ cat << EOF >> $PARAMET
 &nmocrt init_dir='$INIDIR',
         rstt_dir='$OUTDIR' &end
 &nmsdtm sdtmstp=1, iutstp=3,
-        sdyrstr=$SDYR,
+        sdyrstr=$SDYRSTR,
         sdyrend=$SDYREND,
         wotstp=t &end
 &nmsdhi sdyrhst=$SDYRHST,
@@ -59,18 +64,18 @@ EOF
 cat << EOF > ${JOB_NAME}.y${SDYREND}
 #!/bin/tcsh
 
-#PJM -g gi55o
-#PJM --fs /work
+#PJM -g YOUR_PROJECT_GROUP
+#PJM --fs /YOUR_FILESYSTEM  # EDIT or remove as appropriate
 #PJM -j
 #PJM -N digda
 #PJM -s
 
-#PJM -L rscgrp=regular-o
+#PJM -L rscgrp=YOUR_RESOURCE_GROUP
 #PJM -L elapse=48:00:00
 #PJM -L node=1
 #PJM -L node-mem=28GiB
-#PJM --mpi proc=16
-#PJM --mpi "max-proc-per-node=16"
+#PJM --mpi proc=8  # EDIT to match compiled MPI configuration
+#PJM --mpi "max-proc-per-node=8"  # EDIT for your cluster
 #PJM --omp thread=1
 
 EOF
@@ -78,6 +83,7 @@ EOF
 cat << EOF >> ${JOB_NAME}.y${SDYREND}
 umask 002
 
+# EDIT: The following module names are site-specific.
 module unload intel
 module unload impi
 module load fj
@@ -97,7 +103,7 @@ EOF
 cat << EOF >> ${JOB_NAME}.y${SDYREND}
 setenv BINARY    $BINARY
 setenv RUNDIR    $RUNDIR
-setenv BNDDIR    $BNDDIR
+setenv BNDDIR  $BNDDIR
 setenv PARAMET   $PARAMET
 setenv MPIRUN    $MPIRUN
 

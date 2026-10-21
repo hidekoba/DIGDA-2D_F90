@@ -1,25 +1,29 @@
+# PJM-SPECIFIC EXAMPLE. Edit paths, modules, queue, ranks, and scheduler commands before use.
 #!/bin/bash
 
-DIGDADIR=/work/gi55/c24116/digda/DIGDA-2D_F90
-BINARY=$DIGDADIR/bin/digda_2160x1080.90.par
+DIGDADIR=/path/to/DIGDA-2D_F90  # EDIT: absolute path to the repository
+BINARY=$DIGDADIR/bin/digda_256x192.8.par  # EDIT: match MPI ranks and build
 RUNDIR=$DIGDADIR/RUN
-#BNDDIR=$DIGDADIR/Bound/bound21601080
-BNDDIR=$DIGDADIR/Bound/bound21601080gmd2019
-#BNDDIR=$DIGDADIR/Bound/data_digda21601080
+#BNDDIR=$DIGDADIR/Bound/bound256192gmd2019
+BNDDIR=$DIGDADIR/Bound/data_digda256192
+#BNDDIR=$DIGDADIR/Bound/data_digda256192_bdep-130
 PARAMET=./PARAMET_DIGDA
 MPIRUN=mpiexec
 
 SDYRSTR="0"
-SDYREND="10000"
-SDYRSTP="2000"
-SDYRHST="1000"
+SDYREND="150000"
+SDYRSTP="30000"
+SDYRHST="10000"
 
 #SDTSTEP="0.002739726027397260"
 #SDTSTEP="0.001369863013698630"
 
-#EXPDIR=$DIGDADIR/OUT/rccar_p3/1d6
-#EXPDIR=$DIGDADIR/OUT/rccar-p5_rcopa-p3/1d6_fl150k
- EXPDIR=$DIGDADIR/OUT/rccar-p5_rcopa-p3/1d6_bdep-130_fl150k
+#EXPDIR=$DIGDADIR/OUT/rccar_p5/1p4d_gmd2019
+#EXPDIR=$DIGDADIR/OUT/rccar_p5/1p4d
+#EXPDIR=$DIGDADIR/OUT/rccar_p5_rcopa_p2/1p4d_gmd2019
+#EXPDIR=$DIGDADIR/OUT/rccar-p5_rcopa-p3/1p4d
+#EXPDIR=$DIGDADIR/OUT/rccar-p5_rcopa-p3/1p4d_bdep-130
+EXPDIR=$DIGDADIR/OUT/testrun/1p4d
 
 for (( SDYR=$SDYRSTR; SDYR<$SDYREND; SDYR+=$SDYRSTP )); do
     INIDIR=$EXPDIR/$SDYR
@@ -32,7 +36,9 @@ for (( SDYR=$SDYRSTR; SDYR<$SDYREND; SDYR+=$SDYRSTP )); do
     mkdir -p $OUTDIR
 
     cd $OUTDIR
-    /bin/rm -f $PARAMET ; /bin/rm -rf *
+    # SAFETY: Do not wipe an existing output directory automatically.
+# Inspect or move existing output files before running.
+/bin/rm -f "$PARAMET"
 
     JOB_NAME=`basename $0`
     /bin/rm -rf ${JOB_NAME}.y${SDYRNXT}*
@@ -67,18 +73,18 @@ EOF
 cat << EOF > ${JOB_NAME}.y${SDYRNXT}
 #!/bin/tcsh
 
-#PJM -g gi55o
-#PJM --fs /work
+#PJM -g YOUR_PROJECT_GROUP
+#PJM --fs /YOUR_FILESYSTEM  # EDIT or remove as appropriate
 #PJM -j
 #PJM -N digda
 #PJM -s
 
-#PJM -L rscgrp=regular-o
+#PJM -L rscgrp=YOUR_RESOURCE_GROUP
 #PJM -L elapse=48:00:00
-#PJM -L node=15
+#PJM -L node=1
 #PJM -L node-mem=28GiB
-#PJM --mpi proc=90
-#PJM --mpi "max-proc-per-node=6"
+#PJM --mpi proc=8  # EDIT to match compiled MPI configuration
+#PJM --mpi "max-proc-per-node=8"  # EDIT for your cluster
 #PJM --omp thread=1
 
 EOF
@@ -86,6 +92,7 @@ EOF
 cat << EOF >> ${JOB_NAME}.y${SDYRNXT}
 umask 002
 
+# EDIT: The following module names are site-specific.
 module unload intel
 module unload impi
 module load fj

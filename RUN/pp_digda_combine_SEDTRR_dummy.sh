@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ncks=/home/c24116/local/nco-5.0.4/bin/ncks
+ncks=${NCKS:-ncks}  # Install NCO and ensure ncks is in PATH, or set NCKS
 
 # Check if the directory is passed as an argument
 if [ "$#" -ne 1 ]; then
@@ -17,7 +17,8 @@ if [ ! -d "$dir" ]; then
 fi
 
 # Create an array of files
-file_list=($(ls "$dir"/SEDTRR[0-1]*.nc))
+shopt -s nullglob
+file_list=("$dir"/SEDTRR[0-1]*.nc)
 
 # Check if there are any files to process
 if [ "${#file_list[@]}" -eq 0 ]; then
@@ -40,4 +41,5 @@ for file in "${file_list[@]:1}"; do
 done
 
 echo "NetCDF files combined successfully into $output_file"
-if [ $? -eq 0 ]; then rm "$dir"/SEDTRR[0-1]*.nc; fi
+# The original script deleted its input files after combination.
+# Keep inputs in the public example; remove them manually after validation.

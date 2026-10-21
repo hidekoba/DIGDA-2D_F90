@@ -15,13 +15,12 @@
  fi
 
  # Load the conda initialization script
- source /common1/work/gi55/c24116/anaconda3/etc/profile.d/conda.sh
-
- # Activate an Anaconda environment
- conda activate /common1/work/gi55/c24116/anaconda3/
+ # Optional: activate an environment containing NCO (ncks, ncap2, ncatted).
+ # source /path/to/miniconda3/etc/profile.d/conda.sh
+ # conda activate YOUR_NCO_ENV
 
  # Extract relevant variables from each file and combine into a single file for calculation
- rm combined.nc
+ rm -f combined.nc
  ###ncks -A -v Clay  $dir/scla.nc combined.nc
  ###ncks -A -v OrgM  $dir/spom.nc combined.nc
  ###ncks -A -v CaCO3 $dir/scar.nc combined.nc
@@ -160,9 +159,9 @@
  echo "Global Average of POPA: $POPA_avg" >> $output_file
 
  # Move the generated files to that directory
- rm combined.nc wt.nc
- mv pcla.nc ppom.nc pcar.nc popa.nc $dir
- mv $output_file $dir
+ rm -f combined.nc wt.nc
+ mv pcla.nc ppom.nc pcar.nc popa.nc "$dir"
+ mv "$output_file" "$dir"
 
  # Deactivate the conda environment after execution
- conda deactivate
+ # conda deactivate  # Only if you activated an environment above
