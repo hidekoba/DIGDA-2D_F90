@@ -336,7 +336,26 @@ The `init/` directory provides Python scripts and coordinate tables to create a 
 | 256 × 192 | 10 | `mkinit_template_256192.py` |
 | 2160 × 1080 | 10 | `mkinit_template_21601080.py` |
 
-The template scripts use the corresponding `lon_values_*`, `lat_values_*`, and `dep_values_*` coordinate files. The original template scripts initialize clay to 2,600,000 g m⁻³ and other solid components to zero. The initialization workflow then assigns the dissolved pore-water components from bottom-water conditions.
+The template scripts use the corresponding `lon_values_*`, `lat_values_*`, and `dep_values_*` coordinate files to construct a ten-layer NetCDF restart template. Both `standard` and `ciso` modes include the same ten standard fields. The `ciso` mode additionally includes six carbon-isotope variables.
+
+**Standard initial conditions (both `standard` and `ciso` modes)**
+
+| NetCDF variable | Sediment component | Template initial value | Unit |
+|---|---|---:|---|
+| `Clay` | Clay | 2,600,000 | g m⁻³ |
+| `OrgM` | Particulate organic matter | 0 | mmol m⁻³ |
+| `CaCO3` | Calcium carbonate | 0 | mmol m⁻³ |
+| `SiO2` | Biogenic silica | 0 | mmol m⁻³ |
+| `Agetracer` | Age tracer | 0 | mmol m⁻³ (template attribute) |
+| `Phosphate` | Dissolved phosphate | 0 | mmol m⁻³ |
+| `DIC` | Dissolved inorganic carbon | 0 | mmol m⁻³ |
+| `Alkalinity` | Alkalinity | 0 | mmol m⁻³ |
+| `Silicate` | Dissolved silicate | 0 | mmol m⁻³ |
+| `Oxygen` | Dissolved oxygen | 0 | mmol m⁻³ |
+
+These are **template values**, not necessarily the final values used to start the simulation. The example `mkinit_template_dummy.sh` workflow replaces the five dissolved fields (`Phosphate`, `DIC`, `Alkalinity`, `Silicate`, and `Oxygen`) with the corresponding bottom-water forcing fields. The solid-component initial values remain as specified above.
+
+A separate 128 × 64 isotope-inclusive example supplied during development initializes these five dissolved fields to 2.5, 2300, 2300, 150, and 150 mmol m⁻³, respectively. Those values belong to that example and are **not** the fixed defaults of the published dummy workflow, which uses bottom-water forcing.
 
 **Standard and carbon-isotope (`ciso`) configurations**
 

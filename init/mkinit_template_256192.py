@@ -1,6 +1,11 @@
+import argparse
 import netCDF4 as nc
 import numpy as np
 from datetime import datetime
+
+parser = argparse.ArgumentParser(description="Create a DIGDA initial NetCDF template")
+parser.add_argument("--ciso", action="store_true", help="Include carbon isotope tracers")
+args = parser.parse_args()
 
 # Path for the output NetCDF file
 output_file = 'template.nc'
@@ -46,6 +51,18 @@ with nc.Dataset(output_file, 'w', format='NETCDF4') as ds:
     calk = ds.createVariable('Alkalinity', 'f8', ('time', 'depth', 'lat', 'lon'), fill_value=-9999.0)
     csil = ds.createVariable('Silicate', 'f8', ('time', 'depth', 'lat', 'lon'), fill_value=-9999.0)
     cdo2 = ds.createVariable('Oxygen', 'f8', ('time', 'depth', 'lat', 'lon'), fill_value=-9999.0)
+
+    if args.ciso:
+        isotope_names = ('C13-OrgM', 'C13-CaCO3', 'C13-DIC',
+                         'C14-OrgM', 'C14-CaCO3', 'C14-DIC')
+        isotopes = {}
+        for name in isotope_names:
+            variable = ds.createVariable(name, 'f8',
+                                         ('time', 'depth', 'lat', 'lon'),
+                                         fill_value=-9999.0)
+            variable.units = 'mmol m-3'
+            variable.long_name = name
+            isotopes[name] = variable
 
     # Set attributes for the variables
     time.units = 'year'
@@ -95,6 +112,20 @@ with nc.Dataset(output_file, 'w', format='NETCDF4') as ds:
     calk[0, :, :, :] = 0.0
     csil[0, :, :, :] = 0.0
     cdo2[0, :, :, :] = 0.0
+
+    if args.ciso:
+        # Example carbon isotope initial concentrations, as supplied in
+        # the ciso initialization template. Adjust for your experiment.
+        initial_isotopes = {
+            'C13-OrgM': 0.0,
+            'C13-CaCO3': 0.0,
+            'C13-DIC': 25.0,
+            'C14-OrgM': 0.0,
+            'C14-CaCO3': 0.0,
+            'C14-DIC': 2.6e-9,
+        }
+        for name, value in initial_isotopes.items():
+            isotopes[name][0, :, :, :] = value
 
     # Set global attributes for the NetCDF file
     ds.description = 'NetCDF example created with Python'

@@ -24,3 +24,15 @@
 
 # Keep public example scripts
 !/RUN/*_dummy.sh
+
+
+# ==========================================
+# Machine-specific initial file scripts
+# ==========================================
+
+# Initial-condition scripts
+/init/mkinit*.sh
+!/init/*_dummy.sh
+
+# Generated initial conditions
+/init/*.nc
