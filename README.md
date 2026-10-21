@@ -424,3 +424,7 @@ For software citation, use the metadata in [`CITATION.cff`](CITATION.cff). Users
 DIGDA-2D is distributed under the **BSD 3-Clause License**. See the [LICENSE](LICENSE) file for the complete license terms.
 
 The software license applies to the code in this repository. External boundary forcing datasets may be subject to separate data-use and redistribution conditions.
+
+DIGDA-2D includes a utility routine derived in part from the COCO Ocean Model, which is also distributed under the BSD 3-Clause License.
+
+See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and [licenses/COCO-LICENSE](licenses/COCO-LICENSE) for attribution and license information concerning the COCO-derived code.
