@@ -1,9 +1,0 @@
-DIGDADIR	= /work/gi55/c24116/digda/DIGDA-2D_F90
-RM	        = rm -f
-
-SYSTEM	        = wisteria
-
-#PARALLEL       =
- PARALLEL       = .par
-
-TARGET	        = $(DIGDADIR)/bin/digda$(PARALLEL)
