@@ -1,0 +1,9 @@
+# Machine-specific settings
+Mkinclude.*
+!Mkinclude.dummy
+
+Sysdep.*.par
+!Sysdep.dummy.par
+
+compile_*.sh
+!compile_dummy.sh
