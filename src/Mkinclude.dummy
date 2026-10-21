@@ -1,0 +1,12 @@
+# Example configuration (dummy values)
+# Replace these values according to your environment.
+
+DIGDADIR = /path/to/your/DIGDA-2D_F90
+RM       = rm -f
+
+SYSTEM   = example_system
+
+#PARALLEL       =
+ PARALLEL       = .par
+
+TARGET	        = $(DIGDADIR)/bin/digda$(PARALLEL)
