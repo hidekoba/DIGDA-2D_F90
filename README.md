@@ -47,17 +47,17 @@ DIGDA-2D requires two categories of spatially varying boundary conditions, presc
 
 - Clay (lithogenic particles)
 - Particulate organic carbon (POC)
-- Calcium carbonate (CaCO₃)
-- Biogenic silica (SiO₂)
+- Calcium carbonate (CaCO3)
+- Biogenic silica (SiO2)
 
 These fluxes determine the supply of solid material to the sediment surface.
 
 **2. Bottom-water biogeochemical properties**
 
-- Phosphate (PO₄)
+- Phosphate (PO4)
 - Dissolved inorganic carbon (DIC)
 - Alkalinity
-- Dissolved oxygen (O₂)
+- Dissolved oxygen (O2)
 - Dissolved silicate
 
 Bottom-water concentrations prescribe the upper boundary conditions for dissolved constituents in sediment pore water.
@@ -164,8 +164,8 @@ Three grid resolutions are available in the example compilation script:
 | Grid resolution | Example MPI processes |
 |---|---|
 | 128 × 64 | 8 |
-| 256 × 192 | 8 |
-| 2160 × 1080 | 8 |
+| 256 × 192 | 48 |
+| 2160 × 1080 | 90 |
 
 Edit `compile.sh` and activate the desired resolution:
 
