@@ -25,6 +25,16 @@ module globals_digda_step_liquid
   logical :: cdii = .true.  !! Implicit ?
   namelist /nmsdli/ cdcn, cdii
 
+contains
+
+  logical function is_missing_value(val)
+    double precision, intent(in) :: val
+    is_missing_value = (abs(val - rmiss) < 1.0d-6) .or. &
+     &                 (abs(val - 998.9999d0) < 1.0d-6) .or. &
+     &                 (.not. (val == val)) .or. &
+     &                 (abs(val) > 1.0d30)
+  end function is_missing_value
+
 end module globals_digda_step_liquid
 
 ! =====================================================================
@@ -77,8 +87,8 @@ contains
          ea(k)         = - ebe(k)
          ec(k)         = - ega(k)
       do ij = ijtstr, ijtend
-         if ( bw(ij) /= rmiss ) then
-         eb(ij, k)     = eal(k) + ebe(k) + ega(k)
+         if ( .not. is_missing_value(bw(ij)) ) then
+            eb(ij, k) = eal(k) + ebe(k) + ega(k)
          end if
       end do
       end do
@@ -88,15 +98,15 @@ contains
          ea(sken)      = - ebe(sken)
          ec(sken)      = - ega(sken)
       do ij = ijtstr, ijtend
-         if ( bw(ij) /= rmiss ) then
-         eb(ij, skst)  = eal(skst) + ega(skst) &
-     &   + ( phii(skst) * dei(skst) / dlzi(skst) / dlzi(skst) )
-         eb(ij, sken)  = eal(sken) + ebe(sken)
+         if ( .not. is_missing_value(bw(ij)) ) then
+            eb(ij, skst) = eal(skst) + ega(skst) &
+     &         + ( phii(skst) * dei(skst) / dlzi(skst) / dlzi(skst) )
+            eb(ij, sken) = eal(sken) + ebe(sken)
          end if
       end do
 
       do ij = ijtstr, ijtend
-         if ( bw(ij) /= rmiss ) then
+         if ( .not. is_missing_value(bw(ij)) ) then
          ed(ij, skst) = &
      &      + ( eal(skst) - ega(skst) ) * c(ij, skst) &
      &      + ega(skst) * c(ij, skst+1) &
@@ -107,7 +117,7 @@ contains
 
       do k = skst+1, sken-1
       do ij = ijtstr, ijtend
-         if ( bw(ij) /= rmiss ) then
+         if ( .not. is_missing_value(bw(ij)) ) then
          ed(ij, k) = &
      &      + ebe(k) * c(ij, k-1) &
      &      + ( eal(k) - ebe(k) - ega(k) ) * c(ij, k) &
@@ -118,7 +128,7 @@ contains
       end do
 
       do ij = ijtstr, ijtend
-         if ( bw(ij) /= rmiss ) then
+         if ( .not. is_missing_value(bw(ij)) ) then
          ed(ij, sken) = &
      &      + ebe(sken) * c(ij, sken-1) &
      &      + ( eal(sken) - ega(sken) ) * c(ij, sken) &
@@ -146,7 +156,7 @@ contains
          ea(k)         = - ebe(k)
          ec(k)         = - ega(k)
       do ij = ijtstr, ijtend
-         if ( bw(ij) /= rmiss ) then
+         if ( .not. is_missing_value(bw(ij)) ) then
          eb(ij, k)     = eal(k) + ebe(k) + ega(k)
          end if
       end do
@@ -157,7 +167,7 @@ contains
          ea(sken)      = - ebe(sken)
          ec(sken)      = - ega(sken)
       do ij = ijtstr, ijtend
-         if ( bw(ij) /= rmiss ) then
+         if ( .not. is_missing_value(bw(ij)) ) then
          eb(ij, skst)  = eal(skst) + ega(skst) &
      &   + ( phii(skst) * dei(skst) / dlzi(skst) / dlzi(skst) )
          eb(ij, sken)  = eal(sken) + ebe(sken)
@@ -166,7 +176,7 @@ contains
 
       do k = skst, sken
       do ij = ijtstr, ijtend
-         if ( bw(ij) /= rmiss ) then
+         if ( .not. is_missing_value(bw(ij)) ) then
          ed(ij, k) = &
      &      + eal(k) * c(ij, k) &
      &      + rlt(ij, k)
@@ -175,7 +185,7 @@ contains
       end do
 
       do ij = ijtstr, ijtend
-         if ( bw(ij) /= rmiss ) then
+         if ( .not. is_missing_value(bw(ij)) ) then
          ed(ij, skst) = ed(ij, skst) &
      &   + ( phii(skst) * dei(skst) * bw(ij) / dlzi(skst) / dlzi(skst) )
          end if
@@ -189,7 +199,7 @@ contains
 
       do k = skst, sken
       do ij = ijtstr, ijtend
-         if ( bw(ij) /= rmiss ) then
+         if ( .not. is_missing_value(bw(ij)) ) then
             cn(ij, k) = max( ex(ij, k), 0.0d0 )
             ex(ij, k) = 0.0d0
          else
@@ -218,7 +228,9 @@ contains
 
       do k = skst, sken
       do ij = ijtstr, ijtend
-         if ( c(ij, k) /= 0.0d0 ) then
+         if ( .not. (c(ij, k) == 0.0d0) .and. &
+     &       (c(ij, k) == c(ij, k)) .and. &
+     &       (abs(c(ij, k)) < 1.0d30) ) then
             rlt(ij, k) = rlt(ij, k) / c(ij, k)
          else
             rlt(ij, k) = 0.0d0
@@ -237,8 +249,8 @@ contains
          ega(k) = ( ( phii(k+1) * dei(k+1) ) &
      &            / ( 2.0d0 * dlz(k) * dlzi(k+1) ) )
       do ij = ijtstr, ijtend
-         if ( bw(ij) /= rmiss ) then
-         eep(ij, k) = - 0.50d0 * rlt(ij, k)
+         if ( .not. is_missing_value(bw(ij)) ) then
+            eep(ij, k) = - 0.50d0 * rlt(ij, k)
          end if
       end do
       end do
@@ -247,8 +259,8 @@ contains
          ea(k)         = - ebe(k)
          ec(k)         = - ega(k)
       do ij = ijtstr, ijtend
-         if ( bw(ij) /= rmiss ) then
-         eb(ij, k)     = eal(k) + ebe(k) + ega(k) + eep(ij, k)
+         if ( .not. is_missing_value(bw(ij)) ) then
+            eb(ij, k) = eal(k) + ebe(k) + ega(k) + eep(ij, k)
          end if
       end do
       end do
@@ -258,41 +270,41 @@ contains
          ea(sken)      = - ebe(sken)
          ec(sken)      = - ega(sken)
       do ij = ijtstr, ijtend
-         if ( bw(ij) /= rmiss ) then
-         eb(ij, skst)  = eal(skst) + ega(skst) + eep(ij, skst) &
-     &   + ( phii(skst) * dei(skst) / dlzi(skst) / dlzi(skst) )
-         eb(ij, sken)  = eal(sken) + ebe(sken) + eep(ij, sken)
+         if ( .not. is_missing_value(bw(ij)) ) then
+            eb(ij, skst) = eal(skst) + ega(skst) + eep(ij, skst) &
+     &         + ( phii(skst) * dei(skst) / dlzi(skst) / dlzi(skst) )
+            eb(ij, sken) = eal(sken) + ebe(sken) + eep(ij, sken)
          end if
       end do
 
       do ij = ijtstr, ijtend
-         if ( bw(ij) /= rmiss ) then
-         ed(ij, skst) = &
-     &      + ( eal(skst) - ega(skst) ) * c(ij, skst) &
-     &      + ega(skst) * c(ij, skst+1) &
-     &      + 0.50d0 * rlt(ij, skst) * c(ij, skst) &
-     &   + ( phii(skst) * dei(skst) * bw(ij) / dlzi(skst) / dlzi(skst) )
+         if ( .not. is_missing_value(bw(ij)) ) then
+            ed(ij, skst) = &
+     &         + ( eal(skst) - ega(skst) ) * c(ij, skst) &
+     &         + ega(skst) * c(ij, skst+1) &
+     &         + 0.50d0 * rlt(ij, skst) * c(ij, skst) &
+     &         + ( phii(skst) * dei(skst) * bw(ij) / dlzi(skst) / dlzi(skst) )
          end if
       end do
 
       do k = skst+1, sken-1
       do ij = ijtstr, ijtend
-         if ( bw(ij) /= rmiss ) then
-         ed(ij, k) = &
-     &      + ebe(k) * c(ij, k-1) &
-     &      + ( eal(k) - ebe(k) - ega(k) ) * c(ij, k) &
-     &      + ega(k) * c(ij, k+1) &
-     &      + 0.50d0 * rlt(ij, k) * c(ij, k)
+         if ( .not. is_missing_value(bw(ij)) ) then
+            ed(ij, k) = &
+     &         + ebe(k) * c(ij, k-1) &
+     &         + ( eal(k) - ebe(k) - ega(k) ) * c(ij, k) &
+     &         + ega(k) * c(ij, k+1) &
+     &         + 0.50d0 * rlt(ij, k) * c(ij, k)
          end if
       end do
       end do
 
       do ij = ijtstr, ijtend
-         if ( bw(ij) /= rmiss ) then
-         ed(ij, sken) = &
-     &      + ebe(sken) * c(ij, sken-1) &
-     &      + ( eal(sken) - ega(sken) ) * c(ij, sken) &
-     &      + 0.50d0 * rlt(ij, sken) * c(ij, sken)
+         if ( .not. is_missing_value(bw(ij)) ) then
+            ed(ij, sken) = &
+     &         + ebe(sken) * c(ij, sken-1) &
+     &         + ( eal(sken) - ega(sken) ) * c(ij, sken) &
+     &         + 0.50d0 * rlt(ij, sken) * c(ij, sken)
          end if
       end do
 
@@ -311,8 +323,8 @@ contains
          ega(k) = ( ( phii(k+1) * dei(k+1) ) &
      &            / ( dlz(k) * dlzi(k+1) ) )
       do ij = ijtstr, ijtend
-         if ( bw(ij) /= rmiss ) then
-         eep(ij, k) = - rlt(ij, k)
+         if ( .not. is_missing_value(bw(ij)) ) then
+            eep(ij, k) = - rlt(ij, k)
          end if
       end do
       end do
@@ -321,8 +333,8 @@ contains
          ea(k)         = - ebe(k)
          ec(k)         = - ega(k)
       do ij = ijtstr, ijtend
-         if ( bw(ij) /= rmiss ) then
-         eb(ij, k)     = eal(k) + ebe(k) + ega(k) + eep(ij, k)
+         if ( .not. is_missing_value(bw(ij)) ) then
+            eb(ij, k) = eal(k) + ebe(k) + ega(k) + eep(ij, k)
          end if
       end do
       end do
@@ -332,26 +344,26 @@ contains
          ea(sken)      = - ebe(sken)
          ec(sken)      = - ega(sken)
       do ij = ijtstr, ijtend
-         if ( bw(ij) /= rmiss ) then
-         eb(ij, skst)  = eal(skst) + ega(skst) + eep(ij, skst) &
-     &   + ( phii(skst) * dei(skst) / dlzi(skst) / dlzi(skst) )
-         eb(ij, sken)  = eal(sken) + ebe(sken) + eep(ij, sken)
+         if ( .not. is_missing_value(bw(ij)) ) then
+            eb(ij, skst) = eal(skst) + ega(skst) + eep(ij, skst) &
+     &         + ( phii(skst) * dei(skst) / dlzi(skst) / dlzi(skst) )
+            eb(ij, sken) = eal(sken) + ebe(sken) + eep(ij, sken)
          end if
       end do
 
       do k = skst, sken
       do ij = ijtstr, ijtend
-         if ( bw(ij) /= rmiss ) then
-         ed(ij, k) = &
-     &      + eal(k) * c(ij, k)
+         if ( .not. is_missing_value(bw(ij)) ) then
+            ed(ij, k) = &
+     &         + eal(k) * c(ij, k)
          end if
       end do
       end do
 
       do ij = ijtstr, ijtend
-         if ( bw(ij) /= rmiss ) then
-         ed(ij, skst) = ed(ij, skst) &
-     &   + ( phii(skst) * dei(skst) * bw(ij) / dlzi(skst) / dlzi(skst) )
+         if ( .not. is_missing_value(bw(ij)) ) then
+            ed(ij, skst) = ed(ij, skst) &
+     &         + ( phii(skst) * dei(skst) * bw(ij) / dlzi(skst) / dlzi(skst) )
          end if
       end do
 
@@ -363,7 +375,7 @@ contains
 
       do k = skst, sken
       do ij = ijtstr, ijtend
-         if ( bw(ij) /= rmiss ) then
+         if ( .not. is_missing_value(bw(ij)) ) then
             cn(ij, k) = max( ex(ij, k), 0.0d0 )
             ex(ij, k) = 0.0d0
          else
@@ -390,18 +402,30 @@ contains
       integer :: ij, k
 
       do ij = ijtstr, ijtend
-         if ( bw(ij) /= rmiss ) then
-            bet(ij)      = eb(ij, skst)
-            ex(ij, skst) = ed(ij, skst) / bet(ij)
+         if ( .not. is_missing_value(bw(ij)) ) then
+            bet(ij) = eb(ij, skst)
+            if ( (bet(ij) == bet(ij)) .and. (abs(bet(ij)) > 1.0d-30) ) then
+               ex(ij, skst) = ed(ij, skst) / bet(ij)
+            else
+               ex(ij, skst) = rmiss
+            end if
          end if
       end do
 
       do k = skst+1, sken
       do ij = ijtstr, ijtend
-         if ( bw(ij) /= rmiss ) then
-            ew(ij, k) = ec(k-1) / bet(ij)
-            bet(ij)   = eb(ij, k) - ea(k) * ew(ij, k)
-            ex(ij, k) = (ed(ij, k) - ea(k) * ex(ij, k-1) ) / bet(ij)
+         if ( .not. is_missing_value(bw(ij)) ) then
+            if ( (bet(ij) == bet(ij)) .and. (abs(bet(ij)) > 1.0d-30) ) then
+               ew(ij, k) = ec(k-1) / bet(ij)
+               bet(ij)   = eb(ij, k) - ea(k) * ew(ij, k)
+               if ( (bet(ij) == bet(ij)) .and. (abs(bet(ij)) > 1.0d-30) ) then
+                  ex(ij, k) = (ed(ij, k) - ea(k) * ex(ij, k-1) ) / bet(ij)
+               else
+                  ex(ij, k) = rmiss
+               end if
+            else
+               ex(ij, k) = rmiss
+            end if
          else
             ex(ij, k) = rmiss
          end if
@@ -410,7 +434,7 @@ contains
 
       do k = sken-1, skst, -1
       do ij = ijtstr, ijtend
-         if ( bw(ij) /= rmiss ) then
+         if ( .not. is_missing_value(bw(ij)) ) then
             ex(ij, k) = ex(ij, k) - ew(ij, k+1) * ex(ij, k+1)
          else
             ex(ij, k) = rmiss
