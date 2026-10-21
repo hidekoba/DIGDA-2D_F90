@@ -1,11 +1,14 @@
 FC = mpiifort
 
+NETCDF_FORTRAN = /path/to/netcdf4-intel-fortran/4.6.0
+NETCDF_C       = /path/to/netcdf4-intel/4.9.2
+
 FFLAGS = -O3 -u -convert big_endian -traceback -mcmodel=large \
-         -I/path/to/netcdf4-intel-fortran/4.6.0/include
+         -I$(NETCDF_FORTRAN)/include
 
 FOPTION = $(FFLAGS) \
-          -L/path/to/netcdf4-intel-fortran/4.6.0/lib \
-          -L/path/to/netcdf4-intel/4.9.2/lib \
+          -L$(NETCDF_FORTRAN)/lib \
+          -L$(NETCDF_C)/lib \
           -lnetcdff -lnetcdf -lm
 
 .f90.o:
@@ -13,3 +16,4 @@ FOPTION = $(FFLAGS) \
 
 %.o: %.f90
 	$(FC) $(FFLAGS) -c $< -o $@
+
