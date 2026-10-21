@@ -16,6 +16,7 @@ authors:
   - family-names: Kobayashi
     given-names: Hidetaka
 repository-code: "https://github.com/hidekoba/DIGDA-2D_F90"
+doi: "10.5281/zenodo.23528450" 
 license: BSD-3-Clause
 keywords:
   - sediment diagenesis

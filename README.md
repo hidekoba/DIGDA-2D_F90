@@ -411,11 +411,19 @@ Detailed descriptions of the input and output variables, file formats, and namin
 
 ## References and Citation
 
-The one-dimensional sediment column formulation used in DIGDA-2D is described in the following manuscript:
+### Software
+
+Kobayashi, H. DIGDA-2D: A global sediment diagenesis model. Zenodo. https://doi.org/10.5281/zenodo.23528450
+
+When using DIGDA-2D in scientific research, please cite the software DOI corresponding to the version used.
+
+### Associated Manuscript
 
 Kobayashi, H., and Oka, A., *Global simulation of early diagenesis in marine sediments using the Diagenesis and Geochemistry of Deep-sea sediments for climate–carbon cycle assessment (DIGDA) model*. Manuscript in preparation.
 
 The manuscript describes the model formulation, numerical configuration, evaluation against observational constraints, and applications to global sediment biogeochemical simulations.
+
+Users are encouraged to cite both the software and the associated scientific publication once the manuscript becomes available.
 
 For software citation, use the metadata in [`CITATION.cff`](CITATION.cff). Users of DIGDA-2D are encouraged to acknowledge the model and cite the associated scientific publication once it becomes available.
 
