@@ -2,10 +2,8 @@
 #!/bin/bash
 
 DIGDADIR=/path/to/DIGDA-2D_F90  # EDIT: absolute path to the repository
-BINARY=$DIGDADIR/bin/digda_256x192.8.par  # EDIT to match compiled executable
+BINARY=$DIGDADIR/bin/digda_256x192.48.par  # EDIT to match compiled executable
 RUNDIR=$DIGDADIR/RUN
-#BNDDIR=$DIGDADIR/Bound/bound256192
-#BNDDIR=$DIGDADIR/Bound/bound21601080
 BNDDIR=$DIGDADIR/Bound/data_digda256192
 PARAMET=./PARAMET_DIGDA
 MPIRUN=mpiexec
@@ -13,9 +11,6 @@ MPIRUN=mpiexec
 SDYRSTR="0"
 SDYREND="10000"
 SDYRHST="2000"
-
-#SDTSTEP="0.002739726027397260"
-#SDTSTEP="0.001369863013698630"
 
 EXPDIR=$DIGDADIR/OUT/1p4d
 
@@ -103,7 +98,7 @@ EOF
 cat << EOF >> ${JOB_NAME}.y${SDYREND}
 setenv BINARY    $BINARY
 setenv RUNDIR    $RUNDIR
-setenv BNDDIR  $BNDDIR
+setenv BNDDIR    $BNDDIR
 setenv PARAMET   $PARAMET
 setenv MPIRUN    $MPIRUN
 

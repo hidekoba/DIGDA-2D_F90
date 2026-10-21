@@ -2,7 +2,7 @@
 #!/bin/bash
 
 DIGDADIR=/path/to/DIGDA-2D_F90  # EDIT: absolute path to the repository
-BINARY=$DIGDADIR/bin/digda_256x192.8.par  # EDIT: match MPI ranks and build
+BINARY=$DIGDADIR/bin/digda_256x192.48.par  # EDIT: match MPI ranks and build
 RUNDIR=$DIGDADIR/RUN
 #BNDDIR=$DIGDADIR/Bound/bound256192gmd2019
 BNDDIR=$DIGDADIR/Bound/data_digda256192
@@ -18,11 +18,6 @@ SDYRHST="10000"
 #SDTSTEP="0.002739726027397260"
 #SDTSTEP="0.001369863013698630"
 
-#EXPDIR=$DIGDADIR/OUT/rccar_p5/1p4d_gmd2019
-#EXPDIR=$DIGDADIR/OUT/rccar_p5/1p4d
-#EXPDIR=$DIGDADIR/OUT/rccar_p5_rcopa_p2/1p4d_gmd2019
-#EXPDIR=$DIGDADIR/OUT/rccar-p5_rcopa-p3/1p4d
-#EXPDIR=$DIGDADIR/OUT/rccar-p5_rcopa-p3/1p4d_bdep-130
 EXPDIR=$DIGDADIR/OUT/testrun/1p4d
 
 for (( SDYR=$SDYRSTR; SDYR<$SDYREND; SDYR+=$SDYRSTP )); do
@@ -112,7 +107,7 @@ EOF
 cat << EOF >> ${JOB_NAME}.y${SDYRNXT}
 setenv BINARY    $BINARY
 setenv RUNDIR    $RUNDIR
-setenv BNDDIR  $BNDDIR
+setenv BNDDIR    $BNDDIR
 setenv PARAMET   $PARAMET
 setenv MPIRUN    $MPIRUN
 
