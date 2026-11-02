@@ -304,6 +304,7 @@ contains
 
     ! Carbon isotope metrics
     double precision :: feoph, feosh, r13, r14, adcay, thalf, dltc13, dltc14
+    double precision :: r13pom, r13car, r14pom, r14car
 
     ! Parallel computing
     integer, allocatable :: nrcvct2d(:),  ndispt2d(:)
@@ -619,8 +620,12 @@ end if
 
     if ( calc13 .and. sedtdm == 16 ) then
     do ij = ijtstr, ijtend
-       fi13pom(ij) = feoph * pdb  * fipom(ij)
-       fi13car(ij) = feosh * pdb  * ficar(ij)
+       r13pom = feoph * pdb
+       r13car = feosh * pdb
+    !!!fi13pom(ij) = feoph * pdb  * fipom(ij)
+    !!!fi13car(ij) = feosh * pdb  * ficar(ij)
+       fi13pom(ij) = (r13pom / (1.d0 + r13pom)) * fipom(ij)
+       fi13car(ij) = (r13car / (1.d0 + r13car)) * ficar(ij)
     end do
 if (use_mpi) then
     do ij = 1, nxy
@@ -635,8 +640,12 @@ end if
 
     if ( calc14 .and. sedtdm == 16 ) then
     do ij = ijtstr, ijtend
-       fi14pom(ij) = feoph * dstd * fipom(ij)
-       fi14car(ij) = feosh * dstd * ficar(ij)
+       r14pom = feoph * dstd
+       r14car = feosh * dstd
+    !!!fi14pom(ij) = feoph * dstd * fipom(ij)
+    !!!fi14car(ij) = feosh * dstd * ficar(ij)
+       fi14pom(ij) = (r14pom / (1.d0 + r14pom)) * fipom(ij)
+       fi14car(ij) = (r14car / (1.d0 + r14car)) * ficar(ij)
     end do
 if (use_mpi) then
     do ij = 1, nxy
