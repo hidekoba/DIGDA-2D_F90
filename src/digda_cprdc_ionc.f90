@@ -254,6 +254,10 @@ contains
     double precision :: bf13carg(nxydim)
     double precision :: bf14carg(nxydim)
 
+    ! Sea-bottom Flux (carbon isotopes)
+    double precision :: fotot, wpom
+    double precision, parameter :: epsflux = 1.0d-30
+
     ! --------------------------------------------------
     !   Output
     ! --------------------------------------------------
@@ -1050,13 +1054,14 @@ end if
       if ( calc13 .and. sedtdm == 16 ) then
       do k = skst, sken
          do ij = ijtstr, ijtend
-            if ( cndic(ij, k) /= 0.0d0 ) then
-               r13 = cn13dic(ij, k) / max( cndic(ij, k), eps )
+            if ( cndic(ij, k) /= 0.0d0 .and. cndic(ij, k) /= rmiss ) then
+               cn13dic(ij, k) = max( cn13dic(ij, k), 1.d-20 )
+               r13 = cn13dic(ij, k) / max( cndic(ij, k), epsciso )
                cdc13(ij, k) = &
      &            ( 1.0d0 / 0.0112372d0 &
      &              * r13 / ( 1.0d0 - r13 ) - 1.0d0 ) * 1.0d+3
             else
-               cdc13(ij, k) = 0.0d0
+               cdc13(ij, k) = rmiss
             end if
          end do
       end do
@@ -1065,24 +1070,29 @@ end if
       if ( calc14 .and. sedtdm == 16 ) then
       do k = skst, sken
          do ij = ijtstr, ijtend
-            if ( cndic(ij, k) /= 0.0d0 ) then
-               r14 = cn14dic(ij, k) / max( cndic(ij, k), eps )
+            if ( cndic(ij, k) /= 0.0d0 .and. cndic(ij, k) /= rmiss ) then
+               cn14dic(ij, k) = max( cn14dic(ij, k), 1.d-20 )
+               r14 = cn14dic(ij, k) / max( cndic(ij, k), epsciso )
                cdc14(ij, k) = &
      &            ( 1.0d0 / 1.1892d-12 &
      &              * r14 / ( 1.0d0 - r14 ) - 1.0d0 ) * 1.0d+3
             else
-               cdc14(ij, k) = 0.0d0
+               cdc14(ij, k) = rmiss
             end if
          end do
       end do
       do k = skst, sken
          do ij = ijtstr, ijtend
-            dltc13 = cdc13(ij, k) * 1.0d-3  !! [permil]
-            dltc14 = cdc14(ij, k) * 1.0d-3  !! [permil]
-            cdc14(ij, k) = &
-     &         ( dltc14 - 2.0d0 * ( dltc13 + 0.025d0 ) &
-     &                          * ( 1.0d0 + dltc14 ) &
-     &         ) * 1.0d+3   !! [permil]
+            if ( cndic(ij, k) /= 0.0d0 .and. cndic(ij, k) /= rmiss ) then
+               dltc13 = cdc13(ij, k) * 1.0d-3  !! [permil]
+               dltc14 = cdc14(ij, k) * 1.0d-3  !! [permil]
+               cdc14(ij, k) = &
+     &            ( dltc14 - 2.0d0 * ( dltc13 + 0.025d0 ) &
+     &                             * ( 1.0d0 + dltc14 ) &
+     &            ) * 1.0d+3   !! [permil]
+            else
+               cdc14(ij, k) = rmiss
+            end if
          end do
       end do
       end if
@@ -1117,6 +1127,24 @@ end if
          end if
       end do
 
+!      do ij = ijtstr, ijtend
+!         fopom(ij) = cp * fonit(ij)
+!         focar(ij) = 0.5d0 * ( + np * fonit(ij) + foalk(ij) )
+!!         fopom(ij) = ( cp / ( np + 2.0d0 * cp ) ) &
+!!     &      * ( 2.0d0 * fodic(ij) - foalk(ij) )
+!!         focar(ij) = ( cp / ( np + 2.0d0 * cp ) ) &
+!!     &      * ( ( np / cp ) * fodic(ij) + foalk(ij) )
+!         foopa(ij) = fosil(ij)
+!      if ( calc13 .and. sedtdm == 16 ) then
+!         fo13pom(ij) = 0.d0 !! Bug fixed 26/11/02
+!         fo13car(ij) = 0.d0 !! Bug fixed 26/11/02
+!      end if
+!      if ( calc14 .and. sedtdm == 16 ) then
+!         fo14pom(ij) = 0.d0 !! Bug fixed 26/11/02
+!         fo14car(ij) = 0.d0 !! Bug fixed 26/11/02
+!      end if
+!      end do
+
       do ij = ijtstr, ijtend
          fopom(ij) = cp * fonit(ij)
          focar(ij) = 0.5d0 * ( + np * fonit(ij) + foalk(ij) )
@@ -1125,25 +1153,41 @@ end if
 !         focar(ij) = ( cp / ( np + 2.0d0 * cp ) ) &
 !     &      * ( ( np / cp ) * fodic(ij) + foalk(ij) )
          foopa(ij) = fosil(ij)
+         fotot = fopom(ij) + focar(ij)
+         if (abs(fotot) > epsflux) then
+            wpom = fopom(ij) / fotot
+            if ( calc13 .and. sedtdm == 16 ) then
+               fo13pom(ij) = wpom * fo13dic(ij)
+               fo13car(ij) = fo13dic(ij) - fo13pom(ij)
+            end if
+            if ( calc14 .and. sedtdm == 16 ) then
+               fo14pom(ij) = wpom * fo14dic(ij)
+               fo14car(ij) = fo14dic(ij) - fo14pom(ij)
+            end if
+         else
+            if ( calc13 .and. sedtdm == 16 ) then
+               fo13pom(ij) = 0.d0
+               fo13car(ij) = 0.d0
+            end if
+            if ( calc14 .and. sedtdm == 16 ) then
+               fo14pom(ij) = 0.d0
+               fo14car(ij) = 0.d0
+            end if
       end do
 
       do ij = ijtstr, ijtend
          fiopom(ij) = fipom(ij) - fopom(ij)
          fiocar(ij) = ficar(ij) - focar(ij)
          fioopa(ij) = fiopa(ij) - foopa(ij)
-      end do
       if ( calc13 .and. sedtdm == 16 ) then
-      do ij = ijtstr, ijtend
          fio13pom(ij) = fi13pom(ij) - fo13pom(ij)
          fio13car(ij) = fi13car(ij) - fo13car(ij)
-      end do
       end if
       if ( calc14 .and. sedtdm == 16 ) then
-      do ij = ijtstr, ijtend
          fio14pom(ij) = fi14pom(ij) - fo14pom(ij)
          fio14car(ij) = fi14car(ij) - fo14car(ij)
-      end do
       end if
+      end do
 
 !     -- Copy the array for the next time step --
 
@@ -1802,8 +1846,8 @@ if (hstavg) then
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(11),  varavgdt)
-      call mpi_gatherv( ficla,   nsndct2d, mpi_real8, &
-     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+      call mpi_gatherv( varavgdt, nsndct2d, mpi_real8, &
+     &                  vardt2d,  nrcvct2d, ndispt2d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
       if ( myrank .eq. iroot ) then
          do irank = 0, nprocs-1
@@ -1817,8 +1861,8 @@ if (hstavg) then
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(12),  varavgdt)
-      call mpi_gatherv( fipom,   nsndct2d, mpi_real8, &
-     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+      call mpi_gatherv( varavgdt, nsndct2d, mpi_real8, &
+     &                  vardt2d,  nrcvct2d, ndispt2d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
       if ( myrank .eq. iroot ) then
          do irank = 0, nprocs-1
@@ -1832,8 +1876,8 @@ if (hstavg) then
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(13),  varavgdt)
-      call mpi_gatherv( ficar,   nsndct2d, mpi_real8, &
-     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+      call mpi_gatherv( varavgdt, nsndct2d, mpi_real8, &
+     &                  vardt2d,  nrcvct2d, ndispt2d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
       if ( myrank .eq. iroot ) then
          do irank = 0, nprocs-1
@@ -1847,8 +1891,8 @@ if (hstavg) then
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(14),  varavgdt)
-      call mpi_gatherv( fiopa,   nsndct2d, mpi_real8, &
-     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+      call mpi_gatherv( varavgdt, nsndct2d, mpi_real8, &
+     &                  vardt2d,  nrcvct2d, ndispt2d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
       if ( myrank .eq. iroot ) then
          do irank = 0, nprocs-1
@@ -1862,8 +1906,8 @@ if (hstavg) then
 
  !!!! allocate(varavgdt(nxy,1))
  !!!! call get_time_mean(mean_data(15),  varavgdt)
- !!!! call mpi_gatherv( focla,   nsndct2d, mpi_real8, &
- !!!!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+ !!!! call mpi_gatherv( varavgdt, nsndct2d, mpi_real8, &
+ !!!!&                  vardt2d,  nrcvct2d, ndispt2d, mpi_real8, &
  !!!!&                  iroot,   mpi_comm_world, ierr )
  !!!! if ( myrank .eq. iroot ) then
  !!!!    do irank = 0, nprocs-1
@@ -1877,8 +1921,8 @@ if (hstavg) then
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(16),  varavgdt)
-      call mpi_gatherv( fopom,   nsndct2d, mpi_real8, &
-     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+      call mpi_gatherv( varavgdt, nsndct2d, mpi_real8, &
+     &                  vardt2d,  nrcvct2d, ndispt2d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
       if ( myrank .eq. iroot ) then
          do irank = 0, nprocs-1
@@ -1892,8 +1936,8 @@ if (hstavg) then
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(17),  varavgdt)
-      call mpi_gatherv( focar,   nsndct2d, mpi_real8, &
-     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+      call mpi_gatherv( varavgdt, nsndct2d, mpi_real8, &
+     &                  vardt2d,  nrcvct2d, ndispt2d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
       if ( myrank .eq. iroot ) then
          do irank = 0, nprocs-1
@@ -1907,8 +1951,8 @@ if (hstavg) then
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(18),  varavgdt)
-      call mpi_gatherv( foopa,   nsndct2d, mpi_real8, &
-     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+      call mpi_gatherv( varavgdt, nsndct2d, mpi_real8, &
+     &                  vardt2d,  nrcvct2d, ndispt2d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
       if ( myrank .eq. iroot ) then
          do irank = 0, nprocs-1
@@ -1922,8 +1966,8 @@ if (hstavg) then
 
  !!!! allocate(varavgdt(nxy,1))
  !!!! call get_time_mean(mean_data(19),  varavgdt)
- !!!! call mpi_gatherv( fiocla,  nsndct2d, mpi_real8, &
- !!!!&                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+ !!!! call mpi_gatherv( varavgdt, nsndct2d, mpi_real8, &
+ !!!!&                  vardt2d,  nrcvct2d, ndispt2d, mpi_real8, &
  !!!!&                  iroot,   mpi_comm_world, ierr )
  !!!! if ( myrank .eq. iroot ) then
  !!!!    do irank = 0, nprocs-1
@@ -1937,8 +1981,8 @@ if (hstavg) then
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(20),  varavgdt)
-      call mpi_gatherv( fiopom,  nsndct2d, mpi_real8, &
-     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+      call mpi_gatherv( varavgdt, nsndct2d, mpi_real8, &
+     &                  vardt2d,  nrcvct2d, ndispt2d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
       if ( myrank .eq. iroot ) then
          do irank = 0, nprocs-1
@@ -1952,8 +1996,8 @@ if (hstavg) then
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(21),  varavgdt)
-      call mpi_gatherv( fiocar,  nsndct2d, mpi_real8, &
-     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+      call mpi_gatherv( varavgdt, nsndct2d, mpi_real8, &
+     &                  vardt2d,  nrcvct2d, ndispt2d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
       if ( myrank .eq. iroot ) then
          do irank = 0, nprocs-1
@@ -1967,8 +2011,8 @@ if (hstavg) then
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(22),  varavgdt)
-      call mpi_gatherv( fioopa,  nsndct2d, mpi_real8, &
-     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+      call mpi_gatherv( varavgdt, nsndct2d, mpi_real8, &
+     &                  vardt2d,  nrcvct2d, ndispt2d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
       if ( myrank .eq. iroot ) then
          do irank = 0, nprocs-1
@@ -1982,8 +2026,8 @@ if (hstavg) then
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(23),  varavgdt)
-      call mpi_gatherv( bfcla,   nsndct2d, mpi_real8, &
-     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+      call mpi_gatherv( varavgdt, nsndct2d, mpi_real8, &
+     &                  vardt2d,  nrcvct2d, ndispt2d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
       if ( myrank .eq. iroot ) then
          do irank = 0, nprocs-1
@@ -1997,8 +2041,8 @@ if (hstavg) then
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(24),  varavgdt)
-      call mpi_gatherv( bfpom,   nsndct2d, mpi_real8, &
-     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+      call mpi_gatherv( varavgdt, nsndct2d, mpi_real8, &
+     &                  vardt2d,  nrcvct2d, ndispt2d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
       if ( myrank .eq. iroot ) then
          do irank = 0, nprocs-1
@@ -2012,8 +2056,8 @@ if (hstavg) then
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(25),  varavgdt)
-      call mpi_gatherv( bfcar,   nsndct2d, mpi_real8, &
-     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+      call mpi_gatherv( varavgdt, nsndct2d, mpi_real8, &
+     &                  vardt2d,  nrcvct2d, ndispt2d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
       if ( myrank .eq. iroot ) then
          do irank = 0, nprocs-1
@@ -2027,8 +2071,8 @@ if (hstavg) then
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(26),  varavgdt)
-      call mpi_gatherv( bfopa,   nsndct2d, mpi_real8, &
-     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+      call mpi_gatherv( varavgdt, nsndct2d, mpi_real8, &
+     &                  vardt2d,  nrcvct2d, ndispt2d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
       if ( myrank .eq. iroot ) then
          do irank = 0, nprocs-1
@@ -2044,8 +2088,8 @@ if (hstavg) then
 
       allocate(varavgdt(nxy,sdz))
       call get_time_mean(mean_data(31),  varavgdt)
-      call mpi_gatherv( s13pom,  nsndct3d, mpi_real8, &
-     &                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
+      call mpi_gatherv( varavgdt, nsndct3d, mpi_real8, &
+     &                  vardt3d,  nrcvct3d, ndispt3d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
       if ( myrank .eq. iroot ) then
          do irank = 0, nprocs-1
@@ -2063,8 +2107,8 @@ if (hstavg) then
 
       allocate(varavgdt(nxy,sdz))
       call get_time_mean(mean_data(32),  varavgdt)
-      call mpi_gatherv( s13car,  nsndct3d, mpi_real8, &
-     &                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
+      call mpi_gatherv( varavgdt, nsndct3d, mpi_real8, &
+     &                  vardt3d,  nrcvct3d, ndispt3d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
       if ( myrank .eq. iroot ) then
          do irank = 0, nprocs-1
@@ -2082,8 +2126,8 @@ if (hstavg) then
 
       allocate(varavgdt(nxy,sdz))
       call get_time_mean(mean_data(33),  varavgdt)
-      call mpi_gatherv( c13dic,  nsndct3d, mpi_real8, &
-     &                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
+      call mpi_gatherv( varavgdt, nsndct3d, mpi_real8, &
+     &                  vardt3d,  nrcvct3d, ndispt3d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
       if ( myrank .eq. iroot ) then
          do irank = 0, nprocs-1
@@ -2101,8 +2145,8 @@ if (hstavg) then
 
       allocate(varavgdt(nxy,sdz))
       call get_time_mean(mean_data(34),  varavgdt)
-      call mpi_gatherv( cdc13,   nsndct3d, mpi_real8, &
-     &                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
+      call mpi_gatherv( varavgdt, nsndct3d, mpi_real8, &
+     &                  vardt3d,  nrcvct3d, ndispt3d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
       if ( myrank .eq. iroot ) then
          do irank = 0, nprocs-1
@@ -2120,8 +2164,8 @@ if (hstavg) then
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(35),  varavgdt)
-      call mpi_gatherv( fi13pom, nsndct2d, mpi_real8, &
-     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+      call mpi_gatherv( varavgdt, nsndct2d, mpi_real8, &
+     &                  vardt2d,  nrcvct2d, ndispt2d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
       if ( myrank .eq. iroot ) then
          do irank = 0, nprocs-1
@@ -2135,8 +2179,8 @@ if (hstavg) then
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(36),  varavgdt)
-      call mpi_gatherv( fi13car, nsndct2d, mpi_real8, &
-     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+      call mpi_gatherv( varavgdt, nsndct2d, mpi_real8, &
+     &                  vardt2d,  nrcvct2d, ndispt2d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
       if ( myrank .eq. iroot ) then
          do irank = 0, nprocs-1
@@ -2150,8 +2194,8 @@ if (hstavg) then
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(37),  varavgdt)
-      call mpi_gatherv( fo13pom, nsndct2d, mpi_real8, &
-     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+      call mpi_gatherv( varavgdt, nsndct2d, mpi_real8, &
+     &                  vardt2d,  nrcvct2d, ndispt2d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
       if ( myrank .eq. iroot ) then
          do irank = 0, nprocs-1
@@ -2165,8 +2209,8 @@ if (hstavg) then
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(38),  varavgdt)
-      call mpi_gatherv( fo13car, nsndct2d, mpi_real8, &
-     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+      call mpi_gatherv( varavgdt, nsndct2d, mpi_real8, &
+     &                  vardt2d,  nrcvct2d, ndispt2d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
       if ( myrank .eq. iroot ) then
          do irank = 0, nprocs-1
@@ -2180,8 +2224,8 @@ if (hstavg) then
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(39),  varavgdt)
-      call mpi_gatherv( fio13pom, nsndct2d, mpi_real8, &
-     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+      call mpi_gatherv( varavgdt, nsndct2d, mpi_real8, &
+     &                  vardt2d,  nrcvct2d, ndispt2d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
       if ( myrank .eq. iroot ) then
          do irank = 0, nprocs-1
@@ -2195,8 +2239,8 @@ if (hstavg) then
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(40),  varavgdt)
-      call mpi_gatherv( fio13car, nsndct2d, mpi_real8, &
-     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+      call mpi_gatherv( varavgdt, nsndct2d, mpi_real8, &
+     &                  vardt2d,  nrcvct2d, ndispt2d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
       if ( myrank .eq. iroot ) then
          do irank = 0, nprocs-1
@@ -2210,8 +2254,8 @@ if (hstavg) then
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(41),  varavgdt)
-      call mpi_gatherv( bf13pom, nsndct2d, mpi_real8, &
-     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+      call mpi_gatherv( varavgdt, nsndct2d, mpi_real8, &
+     &                  vardt2d,  nrcvct2d, ndispt2d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
       if ( myrank .eq. iroot ) then
          do irank = 0, nprocs-1
@@ -2225,8 +2269,8 @@ if (hstavg) then
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(42),  varavgdt)
-      call mpi_gatherv( bf13car, nsndct2d, mpi_real8, &
-     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+      call mpi_gatherv( varavgdt, nsndct2d, mpi_real8, &
+     &                  vardt2d,  nrcvct2d, ndispt2d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
       if ( myrank .eq. iroot ) then
          do irank = 0, nprocs-1
@@ -2244,8 +2288,8 @@ if (hstavg) then
 
       allocate(varavgdt(nxy,sdz))
       call get_time_mean(mean_data(43),  varavgdt)
-      call mpi_gatherv( s14pom,  nsndct3d, mpi_real8, &
-     &                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
+      call mpi_gatherv( varavgdt, nsndct3d, mpi_real8, &
+     &                  vardt3d,  nrcvct3d, ndispt3d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
       if ( myrank .eq. iroot ) then
          do irank = 0, nprocs-1
@@ -2263,8 +2307,8 @@ if (hstavg) then
 
       allocate(varavgdt(nxy,sdz))
       call get_time_mean(mean_data(44),  varavgdt)
-      call mpi_gatherv( s14car,  nsndct3d, mpi_real8, &
-     &                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
+      call mpi_gatherv( varavgdt, nsndct3d, mpi_real8, &
+     &                  vardt3d,  nrcvct3d, ndispt3d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
       if ( myrank .eq. iroot ) then
          do irank = 0, nprocs-1
@@ -2282,8 +2326,8 @@ if (hstavg) then
 
       allocate(varavgdt(nxy,sdz))
       call get_time_mean(mean_data(45),  varavgdt)
-      call mpi_gatherv( c14dic,  nsndct3d, mpi_real8, &
-     &                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
+      call mpi_gatherv( varavgdt, nsndct3d, mpi_real8, &
+     &                  vardt3d,  nrcvct3d, ndispt3d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
       if ( myrank .eq. iroot ) then
          do irank = 0, nprocs-1
@@ -2301,8 +2345,8 @@ if (hstavg) then
 
       allocate(varavgdt(nxy,sdz))
       call get_time_mean(mean_data(46),  varavgdt)
-      call mpi_gatherv( cdc14,   nsndct3d, mpi_real8, &
-     &                  vardt3d, nrcvct3d, ndispt3d, mpi_real8, &
+      call mpi_gatherv( varavgdt, nsndct3d, mpi_real8, &
+     &                  vardt3d,  nrcvct3d, ndispt3d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
       if ( myrank .eq. iroot ) then
          do irank = 0, nprocs-1
@@ -2320,8 +2364,8 @@ if (hstavg) then
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(47),  varavgdt)
-      call mpi_gatherv( fi14pom, nsndct2d, mpi_real8, &
-     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+      call mpi_gatherv( varavgdt, nsndct2d, mpi_real8, &
+     &                  vardt2d,  nrcvct2d, ndispt2d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
       if ( myrank .eq. iroot ) then
          do irank = 0, nprocs-1
@@ -2335,8 +2379,8 @@ if (hstavg) then
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(48),  varavgdt)
-      call mpi_gatherv( fi14car, nsndct2d, mpi_real8, &
-     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+      call mpi_gatherv( varavgdt, nsndct2d, mpi_real8, &
+     &                  vardt2d,  nrcvct2d, ndispt2d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
       if ( myrank .eq. iroot ) then
          do irank = 0, nprocs-1
@@ -2350,8 +2394,8 @@ if (hstavg) then
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(49),  varavgdt)
-      call mpi_gatherv( fo14pom, nsndct2d, mpi_real8, &
-     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+      call mpi_gatherv( varavgdt, nsndct2d, mpi_real8, &
+     &                  vardt2d,  nrcvct2d, ndispt2d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
       if ( myrank .eq. iroot ) then
          do irank = 0, nprocs-1
@@ -2365,8 +2409,8 @@ if (hstavg) then
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(50),  varavgdt)
-      call mpi_gatherv( fo14car, nsndct2d, mpi_real8, &
-     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+      call mpi_gatherv( varavgdt, nsndct2d, mpi_real8, &
+     &                  vardt2d,  nrcvct2d, ndispt2d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
       if ( myrank .eq. iroot ) then
          do irank = 0, nprocs-1
@@ -2380,8 +2424,8 @@ if (hstavg) then
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(51),  varavgdt)
-      call mpi_gatherv( fio14pom, nsndct2d, mpi_real8, &
-     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+      call mpi_gatherv( varavgdt, nsndct2d, mpi_real8, &
+     &                  vardt2d,  nrcvct2d, ndispt2d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
       if ( myrank .eq. iroot ) then
          do irank = 0, nprocs-1
@@ -2395,8 +2439,8 @@ if (hstavg) then
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(52),  varavgdt)
-      call mpi_gatherv( fio14car, nsndct2d, mpi_real8, &
-     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+      call mpi_gatherv( varavgdt, nsndct2d, mpi_real8, &
+     &                  vardt2d,  nrcvct2d, ndispt2d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
       if ( myrank .eq. iroot ) then
          do irank = 0, nprocs-1
@@ -2410,8 +2454,8 @@ if (hstavg) then
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(53),  varavgdt)
-      call mpi_gatherv( bf14pom, nsndct2d, mpi_real8, &
-     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+      call mpi_gatherv( varavgdt, nsndct2d, mpi_real8, &
+     &                  vardt2d,  nrcvct2d, ndispt2d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
       if ( myrank .eq. iroot ) then
          do irank = 0, nprocs-1
@@ -2425,8 +2469,8 @@ if (hstavg) then
 
       allocate(varavgdt(nxy,1))
       call get_time_mean(mean_data(54),  varavgdt)
-      call mpi_gatherv( bf14car, nsndct2d, mpi_real8, &
-     &                  vardt2d, nrcvct2d, ndispt2d, mpi_real8, &
+      call mpi_gatherv( varavgdt, nsndct2d, mpi_real8, &
+     &                  vardt2d,  nrcvct2d, ndispt2d, mpi_real8, &
      &                  iroot,   mpi_comm_world, ierr )
       if ( myrank .eq. iroot ) then
          do irank = 0, nprocs-1
@@ -3955,8 +3999,7 @@ if (use_mpi) then
          write(nfstdo, *) "'--------------------------------------------------'"
          write(nfstdo,'(A, A)') " Filename: ", trim(filename)
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
-         write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
-         write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
+         write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " permil"
          write(nfstdo, *) "'--------------------------------------------------'"
          if (allocated(var3d_values)) deallocate(var3d_values)
 
@@ -4207,8 +4250,7 @@ if (use_mpi) then
          write(nfstdo, *) "'--------------------------------------------------'"
          write(nfstdo,'(A, A)') " Filename: ", trim(filename)
          write(nfstdo,'(A, A, A, I6)') " Variable: ", trim(varname), ", Year: ", YY
-         write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " mmol m-3"
-         write(nfstdo,'(A, E12.5, A)') " Global Integrated: ", integral_value * 1.d-3, " mol"
+         write(nfstdo,'(A, E12.5, A)') " Global Averaged: ", mean_value, " permil"
          write(nfstdo, *) "'--------------------------------------------------'"
          if (allocated(var3d_values)) deallocate(var3d_values)
 
@@ -4603,13 +4645,15 @@ end if ! -- End of use_mpi
         do j = 1, ny
           do i = 1, nx
             ij = i + (j-1)*nx
-            grid_volume = grid_volume &
-              + lon_grid_size_m(ij) &
-              * lat_grid_size_m(ij)
-            integral_value = integral_value &
-              + var_values(ij) &
-              * lon_grid_size_m(ij) &
-              * lat_grid_size_m(ij)
+            if ( var_values(ij) /= rmiss ) then
+              grid_volume = grid_volume &
+                + lon_grid_size_m(ij) &
+                * lat_grid_size_m(ij)
+              integral_value = integral_value &
+                + var_values(ij) &
+                * lon_grid_size_m(ij) &
+                * lat_grid_size_m(ij)
+            end if
           end do
         end do
         mean_value = integral_value / grid_volume
@@ -4681,15 +4725,17 @@ end if ! -- End of use_mpi
           do j = 1, ny
             do i = 1, nx
               ij = i + (j-1)*nx
-              grid_volume = grid_volume &
-                + lon_grid_size_m(ij) &
-                * lat_grid_size_m(ij) &
-                * dep_grid_size_m(k)
-              integral_value = integral_value &
-                + var_values(ij, k) &
-                * lon_grid_size_m(ij) &
-                * lat_grid_size_m(ij) &
-                * dep_grid_size_m(k)
+              if ( var_values(ij, k) /= rmiss ) then
+                grid_volume = grid_volume &
+                  + lon_grid_size_m(ij) &
+                  * lat_grid_size_m(ij) &
+                  * dep_grid_size_m(k)
+                integral_value = integral_value &
+                  + var_values(ij, k) &
+                  * lon_grid_size_m(ij) &
+                  * lat_grid_size_m(ij) &
+                  * dep_grid_size_m(k)
+              end if
             end do
           end do
         end do
