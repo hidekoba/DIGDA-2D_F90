@@ -1173,6 +1173,7 @@ end if
                fo14pom(ij) = 0.d0
                fo14car(ij) = 0.d0
             end if
+         end if
       end do
 
       do ij = ijtstr, ijtend
